@@ -18,3 +18,13 @@ x64/release/
 x64/release/*.*
 x64/debug/
 x64/debug/*.*
+
+blackbox.exe
+
+blackbox.iobj
+
+blackbox_debug.ilk
+
+blackbox.ipdb
+
+blackbox_debug.exe
