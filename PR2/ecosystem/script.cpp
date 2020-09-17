@@ -72,6 +72,7 @@ bool Script::load() {
 		return false;
 	}
 	this->loaded = true;
+	return true;
 }
 
 bool Script::call(std::string function_name){
