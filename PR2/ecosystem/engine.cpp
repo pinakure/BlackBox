@@ -1,5 +1,6 @@
 #include "engine.hpp"
 
+bool Engine::run = true;
 bool Engine::redraw = true;
 ALLEGRO_TIMER *Engine::timer;
 ALLEGRO_EVENT_QUEUE *Engine::queue;
@@ -34,20 +35,33 @@ void Engine::deinitialize() {
 	al_destroy_event_queue(queue);
 }
 
-void Engine::loop() {
-	while (1){
-		al_wait_for_event(queue, &event);
-		if (event.type == ALLEGRO_EVENT_TIMER)
+void Engine::handleEvents() {
+	al_wait_for_event(queue, &event);
+	switch (event.type) {
+		case ALLEGRO_EVENT_TIMER:
 			redraw = true;
-		else if ((event.type == ALLEGRO_EVENT_KEY_DOWN) || (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE))
 			break;
+		case ALLEGRO_EVENT_KEY_DOWN:
+		case ALLEGRO_EVENT_DISPLAY_CLOSE:
+			run = false;
+			break;
+		default:
+			break;
+	}		
+}
 
-		if (redraw && al_is_event_queue_empty(queue))
-		{
-			al_clear_to_color(al_map_rgb(0, 0, 0));
-			al_draw_text(font, al_map_rgb(255, 255, 255), 0, 0, 0, "Hello world!");
-			al_flip_display();
-			redraw = false;
-		}
+void Engine::render() {
+	if (redraw && al_is_event_queue_empty(queue)) {
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_draw_text(font, al_map_rgb(255, 255, 255), 0, 0, 0, "Hello world!");
+		al_flip_display();
+		redraw = false;
+	}
+}
+
+void Engine::loop() {
+	while(run){
+		handleEvents();
+		render();
 	}	
 }
