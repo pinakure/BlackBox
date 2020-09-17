@@ -12,10 +12,13 @@ public:
 	static ALLEGRO_DISPLAY *display;
 	static ALLEGRO_FONT *font;
 	static ALLEGRO_EVENT event;
+	static bool run;
 	static bool redraw;
 	static bool initialize();
 	static void deinitialize();
 	static void loop();
+	static void render();
+	static void handleEvents();
 };
 
 #endif
