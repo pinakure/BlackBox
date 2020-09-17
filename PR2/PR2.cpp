@@ -5,6 +5,17 @@
 
 #include "ecosystem.h"
 
+void run() {
+	Script::execute("import emb");
+	Script::execute("version = '0.3'");
+	Script::execute("print(f'Welcome to BlackBox v.{version}')");
+	Script::execute("print(emb.numargs())");
+	Script s("main");
+	s.call("main");	
+	
+	Engine::loop();
+}
+
 int main(int argc, char **argv)
 {
 	if(! Script::initialize() ) {
@@ -17,14 +28,7 @@ int main(int argc, char **argv)
 		return(200);
 	}
 
-	Script::execute("import emb");
-	Script::execute("version = '0.3'");
-	Script::execute("print(f'Welcome to BlackBox v.{version}')");
-	Script::execute("print(emb.numargs())");
-	Script s("main");
-	
-	
-	Engine::loop();
+	run();	
 
 	Engine::deinitialize();
 	Script::deinitialize();
