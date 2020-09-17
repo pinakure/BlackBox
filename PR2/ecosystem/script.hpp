@@ -10,7 +10,7 @@ class Script {
 	private:
 		unsigned int execution_counter = 0;
 		unsigned int program_size = 0;
-		
+		PyObject *__module__ = NULL;
 		bool loaded		= false;
 		bool finalized	= false;
 		std::string path;
@@ -26,7 +26,7 @@ class Script {
 		Script(std::string path);
 		~Script();
 		bool isLoaded();
-		int run();
+		bool call(std::string function_name);
 
 		static bool execute(std::string python_code);
 		static bool initialize();

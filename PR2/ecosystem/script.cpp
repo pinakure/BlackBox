@@ -45,6 +45,8 @@ Script::Script(std::string path) {
 Script::~Script() {
 	// Destroy any dynamic stuff
 	// decref python object references
+	if(__module__)
+		Py_DECREF(__module__);	
 }
 
 bool Script::run_sentence() {
@@ -61,42 +63,38 @@ bool Script::run_sentence() {
 
 bool Script::load() {
 	std::string pythonfile = "scripts." + this->path;
-    PyObject *name = PyUnicode_DecodeFSDefault(pythonfile.c_str());
-	PyObject *modulo = PyImport_Import(name);
+	PyObject *name = PyUnicode_DecodeFSDefault(pythonfile.c_str());
+	__module__ = PyImport_Import(name);
 	Py_DECREF(name);// ya no necesitamos name, dereferenciarlo
-	if (!modulo) {
+	if (!__module__) {
 		PyErr_Print();
 		fprintf(stderr, "Failed to load \"%s\"\n", pythonfile.c_str());
 		return false;
 	}
-    
-	PyObject *funcion = PyObject_GetAttrString(modulo, "main");
-	if (!funcion || !PyCallable_Check(funcion)) {
+	this->loaded = true;
+}
+
+bool Script::call(std::string function_name){
+	PyObject *__function__ = PyObject_GetAttrString(__module__, function_name.c_str());
+	if (!__function__ || !PyCallable_Check( __function__ )) {
 		if (PyErr_Occurred()) PyErr_Print();
-		fprintf(stderr, "Cannot find function \"main\"\n");
-		Py_XDECREF(funcion);
-		Py_DECREF(modulo);	
+		fprintf(stderr, "Cannot find function \"%s\"\n", function_name.c_str());
+		Py_XDECREF(__function__);
 		return false;
 	}
-    PyObject *args  = PyTuple_New(0);
-    PyObject *value = PyObject_CallObject(funcion, args);
+	PyObject *args  = PyTuple_New(0);
+    PyObject *value = PyObject_CallObject(__function__, args);
     Py_DECREF(args); // una vez realizada la llamada, args no sirve para nada, dereferenciarlo
 	if (!value) {
-	    Py_DECREF(funcion);
-        Py_DECREF(modulo);
+	    Py_DECREF(__function__);
         PyErr_Print();
         fprintf(stderr,"Call failed\n");
         return false;
     }
     printf("Result of call: %ld\n", PyLong_AsLong(value));
     Py_DECREF(value); // Una vez utilizado el valor, descartamos la referencia a value
-	Py_XDECREF(funcion);    
-    Py_DECREF(modulo);	
-	return true;	
-}
-
-int Script::run() {
-	return 1;
+    Py_XDECREF(__function__);    
+    return true;	
 }
 
 void Script::print(std::string txt) {
