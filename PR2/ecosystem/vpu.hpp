@@ -3,12 +3,26 @@
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_primitives.h>
+#include <string>
+
+typedef struct s_Surface {
+	ALLEGRO_BITMAP *bitmap = NULL;
+	bool  enabled = false;
+	float rotation[3] = { 0.0f, 0.0f, 0.0f };	
+	float scale[3] = { 0.0f, 0.0f, 0.0f };	
+}Surface;
 
 class Vpu {
 private:
 	static ALLEGRO_DISPLAY *display;
 	static ALLEGRO_FONT *font;
+	static ALLEGRO_BITMAP *target;
 public:
+	static Surface overlay[4];
+	static Surface background[4];
+	static Surface foreground[4];
+	static int scroll[2];
 	static int frames;
 	static int fps;
 	static int width;
@@ -17,6 +31,12 @@ public:
 	static bool initialize();
 	static void deinitialize();
 	static void render();
+	static void select(Surface &target);	
+	static void print(std::string text, int  x, int y);
+	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
+	static void fillCircle(int x, int y, float radius, int r, int g, int b, int alpha=255);
+	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
+		
 };
 
 #endif
