@@ -1,5 +1,5 @@
 #include "engine.hpp"
-#include "typewriter.hpp"
+#include "hud.hpp"
 
 int Engine::width = 320;
 int Engine::height = 240;
@@ -26,6 +26,7 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		TypeWriter::initialize();
+		TypeWriter::enqueue("Hello world!");
 		TypeWriter::enqueue("Hello world!");
 		return true;
 	} catch (int e) {
@@ -64,7 +65,7 @@ void Engine::handleEvents() {
 
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
-		//TypeWriter::draw();
+		Hud::draw();
 		Vpu::render();		
 		Vpu::frames++;
 		cycles = 0;
@@ -73,7 +74,7 @@ void Engine::render() {
 
 void Engine::loop() {
 	while(run){
-		//TypeWriter::update(1.0);
+		Hud::update();
 		handleEvents();		
 		render();
 		cycles++;

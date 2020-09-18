@@ -1,21 +1,21 @@
 #include "typewriter.hpp"
 #include "vpu.hpp"
 
-#define TYPEWRITER_HEIGHT 60
+#define TYPEWRITER_HEIGHT	60
+#define TYPEWRITER_WIDTH	(Vpu::width - (128))
 
 std::vector<std::string> TypeWriter::display;
 std::string TypeWriter::current = "";
-double TypeWriter::current_position= 0;
-int TypeWriter::current_end = 0;
-double TypeWriter::width = 0;
-double TypeWriter::height = 0;
-int TypeWriter::x = 0;
-int TypeWriter::y = 0;
-bool TypeWriter::next = false;
-double TypeWriter::final_width = 0;
-double TypeWriter::final_height = TYPEWRITER_HEIGHT;
-#define TYPEWRITER_WIDTH (Vpu::width - (128))
 std::queue<std::string> TypeWriter::queue;
+double	TypeWriter::current_position= 0;
+int		TypeWriter::current_end = 0;
+double	TypeWriter::width = 0;
+double	TypeWriter::height = 0;
+int		TypeWriter::x = 0;
+int		TypeWriter::y = 0;
+bool	TypeWriter::next = false;
+double	TypeWriter::final_width = 0;
+double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
 
 void TypeWriter::initialize() {
 	current = "";
@@ -26,6 +26,8 @@ void TypeWriter::initialize() {
 }
 
 void TypeWriter::draw() {
+	Vpu::select(Vpu::overlay[1]);
+	Vpu::paint(0, 0, 0, 0);
 	
 	if((!queue.size())
 	&&(width<=2)
@@ -37,18 +39,17 @@ void TypeWriter::draw() {
 	int r = q*8.0;
 	int g = q*32.0;
 	int b = q*8.0;
-    Vpu::select(Vpu::overlay[0]);
-	Vpu::fillRectangle(
+    Vpu::fillRectangle(
 		x, y,
-		x + width, y + height,
+		width, height,
 		r, g, b, alpha
 	);
 	Vpu::fillRectangle(
 		x-1, y+1,
-		x + width+1, y + height-1,
+		width+1, height-1,
 		r, g, b, alpha
 	);
-	for(int line=0; line<int(display.size()); line++){
+	for(int line=0; line<int( TypeWriter::display.size()); line++){
 		if (height >(20*(line+1))) {
 			Vpu::print(
 				TypeWriter::display[line].substr(0, width / 8),
@@ -65,12 +66,12 @@ void TypeWriter::draw() {
 		int ry = TypeWriter::y + 2;
 		Vpu::fillRectangle(
 			rx,ry,
-			rx + 8,ry + 14,
+			8,14,
 			0, 255.0f * q, 0, 128 * q
 		);
 		Vpu::fillRectangle(
 			rx-1,ry+1,
-			rx + 9,ry + 13,
+			9,13,
 			0, 255.0f * q, 0, 128 * q
 		);
 	}
@@ -124,8 +125,8 @@ void TypeWriter::update(double delta) {
 					TypeWriter::current = TypeWriter::queue.front();
 					TypeWriter::current_end = TypeWriter::current.size();
 					TypeWriter::current_position = 0;
-					display.insert(display.begin(), "");
-					if (display.size() == 4) display.pop_back();
+					TypeWriter::display.insert(TypeWriter::display.begin(), "");
+					if (TypeWriter::display.size() == 4) TypeWriter::display.pop_back();
 					TypeWriter::queue.pop();
 					TypeWriter::next = false;
 				}
@@ -136,7 +137,7 @@ void TypeWriter::update(double delta) {
 void TypeWriter::enqueue(const char *text) {
 	if (queue.size() == 0) {
 		current_position = 0;
-		display = std::vector<std::string>();
+		TypeWriter::display = std::vector<std::string>();
 		current = "";
 		queue.push("");queue.push("");queue.push("");
 	}
