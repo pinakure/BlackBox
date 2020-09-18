@@ -28,11 +28,12 @@ void TypeWriter::initialize() {
 void TypeWriter::draw() {
 	Vpu::select(Vpu::overlay[1]);
 	Vpu::paint(0, 0, 0, 0);
-	
 	if((!queue.size())
 	&&(width<=2)
 	&&(height<=2)
 	) return;
+	Vpu::pushColor();
+	Vpu::setColor(200, 255, 0, 220);
 
 	float q = (float(width) / float(TYPEWRITER_WIDTH));
 	double alpha = q * 160;
@@ -72,7 +73,7 @@ void TypeWriter::draw() {
 		Vpu::fillRectangle(
 			rx-1,ry+1,
 			9,13,
-			0, 255.0f * q, 0, 128 * q
+			0, 255.0f * q, 16*q*q, 128 * q
 		);
 	}
 	if (!TypeWriter::next) {
@@ -83,6 +84,7 @@ void TypeWriter::draw() {
 		Vpu::fillCircle(x + width - (2+(max_size)), y + height - (2+(max_size)), q*float(max_size), 64.0f*q,128.0f*q,0,32*q);
 		Vpu::circle(x + width - (2+(max_size)), y + height - (2+(max_size)), q*float(max_size), 64.0f*q,128.0f*q,0,32*q);
 	}
+	Vpu::popColor();
 }
 
 void TypeWriter::update(double delta) {

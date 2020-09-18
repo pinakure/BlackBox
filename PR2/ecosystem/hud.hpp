@@ -8,6 +8,7 @@ private:
 public:
 	static bool initialize();
 	static void draw();
+	static void drawDebugInfo();
 	static void update();
 };
 
