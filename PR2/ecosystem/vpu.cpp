@@ -5,6 +5,7 @@ Surface Vpu::overlay[4];
 Surface Vpu::background[4];
 Surface Vpu::foreground[4];
 
+std::vector<ALLEGRO_COLOR> Vpu::color_stack;
 ALLEGRO_BITMAP *Vpu::target = NULL;
 ALLEGRO_BITMAP *Vpu::buffer= NULL;
 int Vpu::frames = 0;
@@ -118,7 +119,7 @@ void Vpu::setColor(int r, int g, int b, int alpha) {
 
 void Vpu::print(std::string text, int  x, int y) {
 	al_draw_textf(font, shadow, x+1, y+1, 0, text.c_str());	
-	al_draw_textf(font, color , 0  , 0  , 0, text.c_str());	
+	al_draw_textf(font, color , x  , y  , 0, text.c_str());	
 }
 void Vpu::printInteger(std::string text, int d, int  x, int y) {
 	al_draw_textf(font, shadow, x+1, y+1, 0, (text + "%d").c_str(), d);
@@ -176,4 +177,18 @@ void Vpu::render() {
 	al_draw_bitmap(buffer, 0, 0, 0);	
 	al_flip_display();
 	redraw = false;
+}
+
+void Vpu::pushColor() {
+	Vpu::color_stack.push_back(color);
+	Vpu::color_stack.push_back(shadow);
+}
+
+void Vpu::popColor() {
+	if (Vpu::color_stack.size()) {
+		color  = Vpu::color_stack[0];
+		shadow = Vpu::color_stack[1];
+		Vpu::color_stack.pop_back();
+		Vpu::color_stack.pop_back();
+	}
 }

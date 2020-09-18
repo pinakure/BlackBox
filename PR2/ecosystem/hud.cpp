@@ -9,13 +9,17 @@ bool Hud::initialize() {
 
 
 void Hud::draw() {
+	drawDebugInfo();
+	TypeWriter::draw();	
+}
+
+void Hud::drawDebugInfo() {
 	Vpu::select(Vpu::overlay[0]);
 	Vpu::paint(0, 0, 0);
-	Vpu::fillRectangle(148, 0, 32, 24, 200, 180, 0, 255);
 	Vpu::printInteger("Last Frame Events:", Engine::cycles	,  0,  0);
 	Vpu::printInteger("Frames per Second:", Vpu::fps		,  0,  8);
-	Vpu::printInteger("Engine Epoch time:", Engine::epoch	,  0, 16);
-	TypeWriter::draw();	
+	Vpu::printInteger("Engine Epoch time:", Engine::epoch	,  0, 16);	
+	Vpu::printInteger("Color_Stack.len():", Vpu::color_stack.size(),  0, 24);	
 }
 
 void Hud::update() {

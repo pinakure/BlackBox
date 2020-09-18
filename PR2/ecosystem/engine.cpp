@@ -1,8 +1,8 @@
 #include "engine.hpp"
 #include "hud.hpp"
 
-int Engine::width = 320;
-int Engine::height = 240;
+int Engine::width = 640;
+int Engine::height = 480;
 bool Engine::run = true;
 int Engine::cycles = 0;
 long int Engine::epoch= 0;

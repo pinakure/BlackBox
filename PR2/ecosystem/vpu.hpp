@@ -6,6 +6,7 @@
 #include <allegro5/allegro_color.h>
 #include <allegro5/allegro_primitives.h>
 #include <string>
+#include <vector>
 
 typedef struct s_Surface {
 	ALLEGRO_BITMAP *bitmap = NULL;
@@ -23,6 +24,7 @@ private:
 	static ALLEGRO_COLOR	shadow;
 	static ALLEGRO_BITMAP	*target;	
 public:
+	static std::vector<ALLEGRO_COLOR> color_stack;
 	static Surface overlay[4];
 	static Surface background[4];
 	static Surface foreground[4];
@@ -46,6 +48,8 @@ public:
 	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void paint(int r, int g, int b, int alpha = 255);
 	static void setColor(int r, int g, int b, int alpha = 255);
+	static void pushColor();
+	static void popColor();
 };
 
 #endif
