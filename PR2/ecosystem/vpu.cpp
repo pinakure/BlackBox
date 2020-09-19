@@ -17,60 +17,88 @@ bool Vpu::redraw = true;
 ALLEGRO_DISPLAY *Vpu::display = NULL;
 ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
+bool Vpu::fullscreen = true;
+ALLEGRO_COLOR Vpu::transparent;
 ALLEGRO_FONT *Vpu::font = NULL;
 
-#define VPU_OVERSCAN 32
-
 void prepareTests() {
-	Vpu::overlay[2].enabled = false;
-	Vpu::overlay[3].enabled = false;
 	Vpu::foreground[0].enabled = false;
 	Vpu::foreground[1].enabled = false;
 	Vpu::foreground[2].enabled = false;
 	Vpu::foreground[3].enabled = false;
-	Vpu::background[0].enabled = false;
 	Vpu::background[1].enabled = false;
 	Vpu::background[2].enabled = false;
-	Vpu::background[3].enabled = false;
+	Vpu::background[3].enabled = false;		
+
+	Vpu::select(Vpu::background[0]);
+	int w = Vpu::background[0].width/2;
+	int h = Vpu::background[0].height/2;
+	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN    , w, h, 64, 200,   0);
+	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN    , w, h, 64,   0, 200);
+	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN + h, w, h, 64,   0, 200);
+	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN + h, w, h, 64, 200,   0);
+	al_lock_bitmap(Vpu::background[0].bitmap,al_get_bitmap_format(Vpu::background[0].bitmap), ALLEGRO_LOCK_WRITEONLY);
+	for (int x = 0,xo=w*2; x < xo; x++) {
+		for (int y = 0,yo=h*2; y < yo; y++) {
+			int c = rand() * 255;
+			al_put_pixel(x, y, al_map_rgb(c,c,c));
+		}
+	}
+	al_unlock_bitmap(Vpu::background[0].bitmap);
 }
 
 bool Vpu::initialize() {
 	try {
-		width = Engine::width;
-		height = Engine::height;
-		display = al_create_display(width, height);
+		width = Engine::width*2;
+		height = Engine::height*2;
+		al_set_new_display_flags(fullscreen ? ALLEGRO_OPENGL | ALLEGRO_FULLSCREEN : ALLEGRO_OPENGL);
+		//al_set_display_flag(display, ALLEGRO_FULLSCREEN, (!(al_get_display_flags(display) & ALLEGRO_FULLSCREEN)));
+		display = al_create_display(width/2, height/2);
+		if (!display) {
+			printf("Cannot initialize display\n");
+			return false;
+		}
 		font = al_create_builtin_font();
 		redraw = true;
 		al_register_event_source(Engine::queue, al_get_display_event_source(display));
 		if (!al_init_primitives_addon())return false;
 		
 		for (int i = 0; i < 4; i++) {
-			overlay[i].bitmap = al_create_bitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
-			if(!overlay[i].bitmap) return false;
-			overlay[i].enabled = true;
+			overlay[i] = createBitmap((width/2)+(VPU_OVERSCAN*2), (height/2)+(VPU_OVERSCAN*2));
+			if(!overlay[i].enabled) return false;
 			Vpu::select(overlay[i]);
 			Vpu::paint(0, 0, 0, 0);
-			al_convert_mask_to_alpha(overlay[i].bitmap, al_map_rgba(0, 0, 0,0));
+			//al_convert_mask_to_alpha(overlay[i].bitmap, al_map_rgba(0, 0, 0,0));
 			
-			foreground[i].bitmap = al_create_bitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
-			if(!foreground[i].bitmap) return false;
-			foreground[i].enabled = true;
+			foreground[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
+			if(!foreground[i].enabled) return false;
 			Vpu::select(foreground[i]);
 			Vpu::paint(255, 0,255);
-			al_convert_mask_to_alpha(foreground[i].bitmap, al_map_rgba(255, 0, 255,255));
+			//al_convert_mask_to_alpha(foreground[i].bitmap, al_map_rgba(255, 0, 255,255));
 			
-			background[i].bitmap = al_create_bitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
-			if(!background[i].bitmap) return false;
-			background[i].enabled = true;
+			background[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
+			if(!background[i].enabled) return false;
 			Vpu::select(background[i]);
-			Vpu::paint(255, 0,255);
-			al_convert_mask_to_alpha(background[i].bitmap, al_map_rgba(255, 0, 255,255));
+			Vpu::paint(255, 0,255);			
+			//al_convert_mask_to_alpha(background[i].bitmap, al_map_rgba(255, 0, 255,255));
 			prepareTests();
 		}
 		buffer = al_create_bitmap(width, height);
 		if(!buffer) return false;			
 
 		setColor(255, 255, 255);
+
+		// Initialize font
+		al_init_font_addon();
+		al_init_ttf_addon();
+		ALLEGRO_FONT *legacy_font = font;
+		font = al_load_ttf_font("data/fonts/small.ttf",16,0 );
+		if (!font){
+			std::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
+			font = legacy_font;			
+		}
+		
+		transparent = al_map_rgba(0, 0, 0, 0);	
 
 		return true;
 	} catch (int e) {
@@ -145,6 +173,13 @@ void Vpu::fillRectangle(int x, int y, int width, int height, int r, int g, int b
 		al_map_rgba(r, g, b, alpha)
 	);
 }
+void Vpu::fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha) {
+	Vpu::fillRectangle(x, y, width, height, r, g, b, alpha);
+	al_put_pixel(x, y, transparent);
+	al_put_pixel(x+width, y, transparent);
+	al_put_pixel(x, y+height, transparent);
+	al_put_pixel(x+width, y+height, transparent);	
+}
 
 void Vpu::circle(int x, int y, float radius, int r, int g, int b, int alpha){
 	al_draw_circle(x, y, radius, al_map_rgba(r, g, b, alpha), 1.0f);
@@ -155,24 +190,61 @@ void Vpu::fillCircle(int x, int y, float radius, int r, int g, int b, int alpha)
 }
 
 void Vpu::render() {
-	al_set_target_bitmap(buffer);
 	
-	/* Render enabled layers */
-	if(background[0].enabled) al_draw_bitmap(background[0].bitmap, 0, 0, 0);
-	if(background[1].enabled) al_draw_bitmap(background[1].bitmap, 0, 0, 0);
-	if(background[2].enabled) al_draw_bitmap(background[2].bitmap, 0, 0, 0);
-	if(background[3].enabled) al_draw_bitmap(background[3].bitmap, 0, 0, 0);	
-	
-	if(foreground[0].enabled) al_draw_bitmap(foreground[0].bitmap, 0, 0, 0);
-	if(foreground[1].enabled) al_draw_bitmap(foreground[1].bitmap, 0, 0, 0);
-	if(foreground[2].enabled) al_draw_bitmap(foreground[2].bitmap, 0, 0, 0);
-	if(foreground[3].enabled) al_draw_bitmap(foreground[3].bitmap, 0, 0, 0);	
-	
-	if(overlay[0].enabled) al_draw_bitmap(overlay[0].bitmap, 0, 0, 0);
-	if(overlay[1].enabled) al_draw_bitmap(overlay[1].bitmap, 0, 0, 0);
-	if(overlay[2].enabled) al_draw_bitmap(overlay[2].bitmap, 0, 0, 0);
-	if(overlay[3].enabled) al_draw_bitmap(overlay[3].bitmap, 0, 0, 0);
 
+
+	overlay[0].rotation[0] += 0.01f;
+	overlay[1].rotation[0] += 0.0125f;
+	background[0].rotation[0] -= 0.05f;
+	background[0].scale[0] += 0.1f;
+	background[0].scale[1] += 0.1f;
+	//background[0].scale[0] *= 1.005f;
+	//background[0].scale[1] *= 1.005f;
+	if (background[0].scale[0] > 200000.0f)background[0].scale[0] = -200000.0f;
+	if (background[0].scale[1] > 200000.0f)background[0].scale[1] = -200000.0f;
+	//overlay[0].rotation[0] = 3.141519f;
+	//overlay[1].rotation[0] = 3.141519f;
+	if(overlay[0].scale[0]>0.0f) overlay[0].scale[0] -= 0.001f;
+	if(overlay[0].scale[1]>0.0f) overlay[0].scale[1] -= 0.001f;
+	if(overlay[1].scale[0]>0.0f) overlay[1].scale[0] -= 0.00125f;
+	if(overlay[1].scale[1]>0.0f) overlay[1].scale[1] -= 0.00125f;
+
+	/*if(overlay[1].scale[0]>-1.0f) overlay[1].scale[0] -= 0.001f;
+	if(overlay[1].scale[1]>-1.0f) overlay[1].scale[1] -= 0.001f;*/
+	al_set_target_bitmap(buffer);
+	/* Render enabled layers */
+	#define renderlayer(l,i) if(l[i].enabled)							\
+								 al_draw_scaled_rotated_bitmap(			\
+									l[i].bitmap,						\
+									l[i].width/2, l[i].height/2,		\
+									l[i].width/4, l[i].height/4,		\
+									l[i].scale[0],l[i].scale[1],		\
+									l[i].rotation[0],					\
+									0									\
+								);
+		renderlayer(background, 0);
+		renderlayer(background, 1);
+		renderlayer(background, 2);
+		renderlayer(background, 3);
+		renderlayer(foreground, 0);
+		renderlayer(foreground, 1);
+		renderlayer(foreground, 2);
+		renderlayer(foreground, 3);
+	#undef renderlayer	
+	#define renderlayer(l,i) if(l[i].enabled)							\
+								 al_draw_scaled_rotated_bitmap(			\
+									l[i].bitmap,						\
+									l[i].width/2, l[i].height/2,		\
+									l[i].width/2, l[i].height/2,		\
+									l[i].scale[0],l[i].scale[1],		\
+									l[i].rotation[0],					\
+									0									\
+								);
+		renderlayer(overlay, 0);
+		renderlayer(overlay, 1);
+		renderlayer(overlay, 2);
+		renderlayer(overlay, 3);
+	#undef renderlayer	
 	al_set_target_backbuffer(display);
 	al_draw_bitmap(buffer, 0, 0, 0);	
 	al_flip_display();
@@ -191,4 +263,26 @@ void Vpu::popColor() {
 		Vpu::color_stack.pop_back();
 		Vpu::color_stack.pop_back();
 	}
+}
+
+Surface Vpu::createBitmap(int width, int height) {
+	Surface s;
+	s.bitmap = al_create_bitmap(width, height);
+	s.enabled = s.bitmap != NULL;
+	if (s.enabled) {
+		s.width  = width;
+		s.height = height;
+	}
+	return s;
+}
+
+Surface Vpu::loadBitmap(std::string filename) {
+	Surface s;
+	s.bitmap = al_load_bitmap(filename.c_str());	
+	s.enabled = s.bitmap != NULL;
+	if (s.enabled) {
+		s.width  = al_get_bitmap_width(s.bitmap);
+		s.height = al_get_bitmap_height(s.bitmap);
+	}
+	return s;
 }
