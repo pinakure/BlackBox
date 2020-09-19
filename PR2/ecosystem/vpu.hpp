@@ -30,8 +30,8 @@ private:
 	static ALLEGRO_COLOR				transparent;
 	static ALLEGRO_BITMAP				*target;	
 	static std::vector<ALLEGRO_COLOR>	color_stack;
-	static bool							fullscreen;	
 public:
+	static bool							fullscreen;	
 	static Surface overlay[4];
 	static Surface background[4];
 	static Surface foreground[4];

@@ -1,4 +1,6 @@
-import emb
+import vpu
+
 def main():
-    print("Number of arguments", emb.numargs())
+    vpu.fullscreen(False)
+    vpu.rotate(11, 3.1495)
     return 0
