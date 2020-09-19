@@ -25,25 +25,32 @@ private:
 	static ALLEGRO_DISPLAY				*display;
 	static ALLEGRO_BITMAP				*buffer;	
 	static ALLEGRO_FONT					*font;
+	static ALLEGRO_FONT					*legacy_font;
 	static ALLEGRO_COLOR				color;
 	static ALLEGRO_COLOR				shadow;
 	static ALLEGRO_COLOR				transparent;
 	static ALLEGRO_BITMAP				*target;	
 	static std::vector<ALLEGRO_COLOR>	color_stack;
 public:
+	static bool							is_initialized;
 	static bool							fullscreen;	
-	static Surface overlay[4];
-	static Surface background[4];
-	static Surface foreground[4];
-	static int scroll[2];
-	static int frames;
-	static int fps;
-	static int width;
-	static int height;
-	static bool redraw;
+	static Surface						overlay[4];
+	static Surface						background[4];
+	static Surface						foreground[4];
+	static int							scroll[2];
+	static int							frames;
+	static int							fps;
+	static int							width;
+	static int							height;
+	static bool							redraw;
+	static unsigned long int			total_frames;
+	
 	static bool initialize();
+	static void initializeFonts();
 	static void deinitialize();
 	static void render();
+	static bool start();
+	static bool restart();
 	static void select(Surface &target);	
 	static void print(std::string text, int  x, int y);
 	static void printInteger(std::string text, int d, int  x, int y);
@@ -60,6 +67,7 @@ public:
 	static void popColor();
 	static Surface loadBitmap(std::string filename);
 	static Surface createBitmap(int width, int height);
+	static Surface *__layers[12];
 };
 
 #endif
