@@ -56,7 +56,7 @@ static PyObject *vpu_scale(PyObject *self, PyObject *args){
 static PyObject *blackbox_version(PyObject *self, PyObject *args){
 	if(!PyArg_ParseTuple(args, ""))
         return NULL;	
-    return PyLong_FromLong(3);// Por ejemplo, devolvemos un 3 (podríamos devolver cualquier dato, siempre y cuando lo casteemos al tipo esperado en el script)
+    return PyLong_FromLong(3);
 }
 
 /* ----------------------------------------------------------------------
@@ -160,7 +160,7 @@ bool Script::call(std::string function_name){
         fprintf(stderr,"Call failed\n");
         return false;
     }
-    printf("Result of call: %ld\n", PyLong_AsLong(value));
+    //printf("Result of call: %ld\n", PyLong_AsLong(value));
     Py_DECREF(value); // Una vez utilizado el valor, descartamos la referencia a value
     Py_XDECREF(__function__);    
     return true;	

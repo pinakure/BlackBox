@@ -7,12 +7,17 @@
 
 
 
-void run() {
-	Script::execute("import blackbox");
-	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
+bool initialize() {
 	Script s("main");
-	s.call("main");	
+	if(s.isLoaded()) s.call("configure");	
 	
+	if (!Engine::initialize()) {
+		printf("ERROR: Cannot initialize allegro backend.");
+		return false;
+	}
+	
+	if (s.isLoaded()) s.call("main");
+	return true;
 }
 
 int main(int argc, char **argv)
@@ -22,15 +27,11 @@ int main(int argc, char **argv)
 		return(100);
 	}
 	
-	run();	
+	if (!initialize()) return 200;
 
-	if (!Engine::initialize()) {
-		printf("ERROR: Cannot initialize allegro backend.");
-		return(200);
-	}
+	Script::execute("import blackbox");
+	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
 	
-	run();
-
 	Engine::loop();
 
 	Engine::deinitialize();
