@@ -28,3 +28,5 @@ blackbox_debug.ilk
 blackbox.ipdb
 
 blackbox_debug.exe
+
+scripts/__pycache__/
