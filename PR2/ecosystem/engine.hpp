@@ -1,7 +1,7 @@
 #ifndef __ENGINE_HPP
 #define __ENGINE_HPP
 
-#include "vpu.hpp"
+#include "sprite.hpp"
 
 class Engine {
 private:
@@ -11,6 +11,7 @@ public:
 	static ALLEGRO_EVENT_QUEUE *queue;
 	static ALLEGRO_EVENT_QUEUE *clock_queue;
 	static ALLEGRO_EVENT event;
+	static std::vector<Sprite> sprites;
 	static int  cycles;
 	static long int epoch;
 	static int	width;

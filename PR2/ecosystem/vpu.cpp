@@ -4,22 +4,30 @@
 Surface Vpu::overlay[4];
 Surface Vpu::background[4];
 Surface Vpu::foreground[4];
+Surface *Vpu::__layers[12] = {
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL
+};
 
 std::vector<ALLEGRO_COLOR> Vpu::color_stack;
 ALLEGRO_BITMAP *Vpu::target = NULL;
 ALLEGRO_BITMAP *Vpu::buffer= NULL;
 int Vpu::frames = 0;
+unsigned long int Vpu::total_frames = 0;
 int Vpu::fps = 0;
 int Vpu::width = 0;
 int Vpu::height = 0;
 int Vpu::scroll[2] = { 0, 0 };
 bool Vpu::redraw = true;
+bool Vpu::is_initialized = false;
 ALLEGRO_DISPLAY *Vpu::display = NULL;
 ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
 bool Vpu::fullscreen = false;
 ALLEGRO_COLOR Vpu::transparent;
 ALLEGRO_FONT *Vpu::font = NULL;
+ALLEGRO_FONT *Vpu::legacy_font = NULL;
 
 void prepareTests() {
 	Vpu::foreground[0].enabled = false;
@@ -47,59 +55,89 @@ void prepareTests() {
 	al_unlock_bitmap(Vpu::background[0].bitmap);
 }
 
+bool Vpu::start() {
+		
+	width = Engine::width*2;
+	height = Engine::height*2;
+	al_set_new_display_flags(fullscreen ? ALLEGRO_OPENGL | ALLEGRO_FULLSCREEN : ALLEGRO_OPENGL);
+	if (display) {
+		al_unregister_event_source(Engine::queue, al_get_display_event_source(display));
+		al_destroy_display(display);
+		display = NULL;
+	}
+	display = al_create_display(width/2, height/2);
+	if (!display) {
+		printf("Cannot initialize %s %dx%d display\n", fullscreen?"fullscreen":"",width/2, height/2);
+		return false;
+	}
+	al_register_event_source(Engine::queue, al_get_display_event_source(display));	
+	return true;
+}
+
+void Vpu::initializeFonts() {
+	font = al_load_ttf_font("data/fonts/small.ttf",16,0 );
+	if (!font){
+		std::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
+		font = legacy_font;
+	}
+}
+
+bool Vpu::restart() {
+	for (int i = 0; i < 12; i++) {
+		if(__layers[i]){
+			if((*__layers[i]).bitmap){
+				al_destroy_bitmap((*__layers[i]).bitmap);
+				(*__layers[i]).bitmap = NULL;
+			}
+			__layers[i] = NULL;
+		}
+	}
+	is_initialized = false;
+	for (int i = 0; i < 4; i++) {
+		overlay[i] = createBitmap((width/2)+(VPU_OVERSCAN*2), (height/2)+(VPU_OVERSCAN*2));
+		if(!overlay[i].enabled) return false;
+		Vpu::select(overlay[i]);
+		Vpu::paint(0, 0, 0, 0);
+		__layers[i+8] = &overlay[i];
+		foreground[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
+		if(!foreground[i].enabled) return false;
+		Vpu::select(foreground[i]);
+		Vpu::paint(255, 0,255);
+		__layers[i+4] = &foreground[i];
+		background[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
+		if(!background[i].enabled) return false;
+		Vpu::select(background[i]);
+		Vpu::paint(255, 0,255);			
+		__layers[ i ] = &background[i];
+		prepareTests();
+	}
+	// (Re)initialize squash framebuffer
+	if (buffer) {
+		al_destroy_bitmap(buffer);
+		buffer = NULL;
+	}
+	buffer = al_create_bitmap(width, height);
+	if(!buffer) return false;			
+
+	// (Re)define default colors and reset flags
+	transparent = al_map_rgba(0, 0, 0, 0);	
+	setColor(255, 255, 255);
+	redraw = true;
+	is_initialized = true;
+	initializeFonts();
+	return true;
+
+}
+
 bool Vpu::initialize() {
 	try {
-		width = Engine::width*2;
-		height = Engine::height*2;
-		al_set_new_display_flags(fullscreen ? ALLEGRO_OPENGL | ALLEGRO_FULLSCREEN : ALLEGRO_OPENGL);
-		//al_set_display_flag(display, ALLEGRO_FULLSCREEN, (!(al_get_display_flags(display) & ALLEGRO_FULLSCREEN)));
-		display = al_create_display(width/2, height/2);
-		if (!display) {
-			printf("Cannot initialize display\n");
-			return false;
-		}
-		font = al_create_builtin_font();
-		redraw = true;
-		al_register_event_source(Engine::queue, al_get_display_event_source(display));
+		if (!start())return false;		
+		if (!al_init_font_addon()) return false;
+		if (!al_init_ttf_addon()) return false;
 		if (!al_init_primitives_addon())return false;
-		
-		for (int i = 0; i < 4; i++) {
-			overlay[i] = createBitmap((width/2)+(VPU_OVERSCAN*2), (height/2)+(VPU_OVERSCAN*2));
-			if(!overlay[i].enabled) return false;
-			Vpu::select(overlay[i]);
-			Vpu::paint(0, 0, 0, 0);
-			//al_convert_mask_to_alpha(overlay[i].bitmap, al_map_rgba(0, 0, 0,0));
-			
-			foreground[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
-			if(!foreground[i].enabled) return false;
-			Vpu::select(foreground[i]);
-			Vpu::paint(255, 0,255);
-			//al_convert_mask_to_alpha(foreground[i].bitmap, al_map_rgba(255, 0, 255,255));
-			
-			background[i]= createBitmap(width+(VPU_OVERSCAN*2), height+(VPU_OVERSCAN*2));
-			if(!background[i].enabled) return false;
-			Vpu::select(background[i]);
-			Vpu::paint(255, 0,255);			
-			//al_convert_mask_to_alpha(background[i].bitmap, al_map_rgba(255, 0, 255,255));
-			prepareTests();
-		}
-		buffer = al_create_bitmap(width, height);
-		if(!buffer) return false;			
-
-		setColor(255, 255, 255);
-
-		// Initialize font
-		al_init_font_addon();
-		al_init_ttf_addon();
-		ALLEGRO_FONT *legacy_font = font;
-		font = al_load_ttf_font("data/fonts/small.ttf",16,0 );
-		if (!font){
-			std::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
-			font = legacy_font;			
-		}
-		
-		transparent = al_map_rgba(0, 0, 0, 0);	
-
+		legacy_font = al_create_builtin_font();
+		font = legacy_font;	
+		if (!restart()) return false;
 		return true;
 	} catch (int e) {
 		e = e;
@@ -190,10 +228,7 @@ void Vpu::fillCircle(int x, int y, float radius, int r, int g, int b, int alpha)
 }
 
 void Vpu::render() {
-	
-
-
-	overlay[0].rotation[0] += 0.01f;
+	/*overlay[0].rotation[0] += 0.01f;
 	overlay[1].rotation[0] += 0.0125f;
 	background[0].rotation[0] -= 0.05f;
 	background[0].scale[0] += 0.1f;
@@ -206,7 +241,7 @@ void Vpu::render() {
 	if(overlay[0].scale[1]>0.0f) overlay[0].scale[1] -= 0.001f;
 	if(overlay[1].scale[0]>0.0f) overlay[1].scale[0] -= 0.00125f;
 	if(overlay[1].scale[1]>0.0f) overlay[1].scale[1] -= 0.00125f;
-
+	*/
 	al_set_target_bitmap(buffer);
 	/* Render enabled layers */
 	#define renderlayer(l,i) if(l[i].enabled)							\

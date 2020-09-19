@@ -70,6 +70,7 @@ void Engine::render() {
 		Hud::draw();
 		Vpu::render();		
 		Vpu::frames++;
+		Vpu::total_frames++;
 		cycles = 0;
 	}
 }
