@@ -20,6 +20,7 @@ public:
 	static void deinitialize();
 	static void loop();
 	static void tick();
+	static void update();
 	static void render();
 	static void handleEvents();
 };

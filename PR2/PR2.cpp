@@ -15,6 +15,8 @@ bool initialize() {
 		printf("ERROR: Cannot initialize allegro backend.");
 		return false;
 	}
+	Script::execute("import blackbox");
+	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
 	
 	if (s.isLoaded()) s.call("main");
 	return true;
@@ -29,8 +31,6 @@ int main(int argc, char **argv)
 	
 	if (!initialize()) return 200;
 
-	Script::execute("import blackbox");
-	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
 	
 	Engine::loop();
 

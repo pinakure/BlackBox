@@ -9,4 +9,6 @@ def main():
     #some tests to check vpu functionalities
     vpu.rotate(11, 3.1495) 
     vpu.scale(11, 2.0, 0.5)    
-    
+    for i in range(0,314):
+        vpu.rotate(11,i/100)
+        vpu.update()

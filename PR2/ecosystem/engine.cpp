@@ -74,11 +74,15 @@ void Engine::render() {
 	}
 }
 
+void Engine::update() {
+	Hud::update();
+	handleEvents();		
+	render();
+	cycles++;
+}
+
 void Engine::loop() {
 	while(run){
-		Hud::update();
-		handleEvents();		
-		render();
-		cycles++;
+		update();
 	}	
 }
