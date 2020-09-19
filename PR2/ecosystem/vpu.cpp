@@ -17,7 +17,7 @@ bool Vpu::redraw = true;
 ALLEGRO_DISPLAY *Vpu::display = NULL;
 ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
-bool Vpu::fullscreen = true;
+bool Vpu::fullscreen = false;
 ALLEGRO_COLOR Vpu::transparent;
 ALLEGRO_FONT *Vpu::font = NULL;
 
@@ -198,19 +198,15 @@ void Vpu::render() {
 	background[0].rotation[0] -= 0.05f;
 	background[0].scale[0] += 0.1f;
 	background[0].scale[1] += 0.1f;
-	//background[0].scale[0] *= 1.005f;
-	//background[0].scale[1] *= 1.005f;
 	if (background[0].scale[0] > 200000.0f)background[0].scale[0] = -200000.0f;
 	if (background[0].scale[1] > 200000.0f)background[0].scale[1] = -200000.0f;
-	//overlay[0].rotation[0] = 3.141519f;
-	//overlay[1].rotation[0] = 3.141519f;
+	//overlay[0].rotation[0] = 3.141519f; // 180 deg
+	//overlay[1].rotation[0] = 3.141519f; // 180 deg
 	if(overlay[0].scale[0]>0.0f) overlay[0].scale[0] -= 0.001f;
 	if(overlay[0].scale[1]>0.0f) overlay[0].scale[1] -= 0.001f;
 	if(overlay[1].scale[0]>0.0f) overlay[1].scale[0] -= 0.00125f;
 	if(overlay[1].scale[1]>0.0f) overlay[1].scale[1] -= 0.00125f;
 
-	/*if(overlay[1].scale[0]>-1.0f) overlay[1].scale[0] -= 0.001f;
-	if(overlay[1].scale[1]>-1.0f) overlay[1].scale[1] -= 0.001f;*/
 	al_set_target_bitmap(buffer);
 	/* Render enabled layers */
 	#define renderlayer(l,i) if(l[i].enabled)							\

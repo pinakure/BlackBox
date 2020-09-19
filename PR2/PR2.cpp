@@ -8,14 +8,11 @@
 
 
 void run() {
-	Script::execute("import emb");
-	Script::execute("version = '0.3'");
-	Script::execute("print(f'Welcome to BlackBox v.{version}')");
-	Script::execute("print(emb.numargs())");
+	Script::execute("import blackbox");
+	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
 	Script s("main");
 	s.call("main");	
 	
-	Engine::loop();
 }
 
 int main(int argc, char **argv)
@@ -25,12 +22,16 @@ int main(int argc, char **argv)
 		return(100);
 	}
 	
+	run();	
+
 	if (!Engine::initialize()) {
 		printf("ERROR: Cannot initialize allegro backend.");
 		return(200);
 	}
+	
+	run();
 
-	run();	
+	Engine::loop();
 
 	Engine::deinitialize();
 	Script::deinitialize();

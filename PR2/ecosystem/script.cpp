@@ -1,22 +1,89 @@
 #include "script.hpp"
+#include "vpu.hpp"
 
-static PyObject *emb_numargs(PyObject *self, PyObject *args){
-    // Definicion de funcion C++ { emb_numargs }
-	if(!PyArg_ParseTuple(args, ":numargs"))
+/* ----------------------------------------------------------------------
+	Definicion de funciones pegamento C++ 
+---------------------------------------------------------------------- */
+static PyObject *vpu_fullscreen(PyObject *self, PyObject *args){
+	bool fullscreen;
+	if(!PyArg_ParseTuple(args, "b", &fullscreen))
         return NULL;
-	// Por ejemplo, devolvemos un 3 (podríamos devolver cualquier dato, siempre y cuando lo casteemos al tipo esperado en el script)
-    return PyLong_FromLong(3);
+	Vpu::fullscreen = fullscreen;
+	return PyBool_FromLong(Vpu::fullscreen);
+}
+static PyObject *vpu_rotate(PyObject *self, PyObject *args){
+	int index;
+	float rotation;
+	if(!PyArg_ParseTuple(args, "if", &index, &rotation))
+        return NULL;
+	switch (index) {
+		case 0:case 1:case 2:case 3: 
+			Vpu::background[index].rotation[0] = rotation;
+			break;
+		case 4:case 5:case 6:case 7: 
+			Vpu::foreground[index-4].rotation[0] = rotation;
+			break;
+		case 8:case 9:case 10:case 11: 
+			Vpu::overlay[index-8].rotation[0] = rotation;
+			break;
+	
+	}
+	return PyBool_FromLong(1);
+}
+static PyObject *vpu_scale(PyObject *self, PyObject *args){
+	int index;
+	float scale_x;
+	float scale_y;
+	if(!PyArg_ParseTuple(args, "iff", &index, &scale_x, &scale_y))
+        return NULL;
+	switch (index) {
+		case 0:case 1:case 2:case 3: 
+			Vpu::background[index].scale[0] = scale_x;
+			Vpu::background[index].scale[1] = scale_y;
+			break;
+		case 4:case 5:case 6:case 7: 
+			Vpu::foreground[index-4].scale[0] = scale_x;
+			Vpu::foreground[index-4].scale[1] = scale_y;
+			break;
+		case 8:case 9:case 10:case 11: 
+			Vpu::overlay[index-8].scale[0] = scale_x;
+			Vpu::overlay[index-8].scale[1] = scale_y;
+			break;
+	
+	}
+	return PyBool_FromLong(1);
+}
+static PyObject *blackbox_version(PyObject *self, PyObject *args){
+	if(!PyArg_ParseTuple(args, ""))
+        return NULL;	
+    return PyLong_FromLong(3);// Por ejemplo, devolvemos un 3 (podríamos devolver cualquier dato, siempre y cuando lo casteemos al tipo esperado en el script)
 }
 
-static PyMethodDef EmbMethods[] = {
-	// Enlazar python{ numargs() }---> C++{ emb_numargs(PyObject*, PyObject) }
-    {"numargs", emb_numargs, METH_VARARGS, "Return the number of arguments received by the process."},{NULL, NULL, 0, NULL}
+/* ----------------------------------------------------------------------
+	Enlazar python{ function() }---> C++{ function(PyObject*, PyObject) }
+---------------------------------------------------------------------- */
+static PyMethodDef BlackBoxMethods[] = {
+    {"version", blackbox_version, METH_VARARGS, "Return current BlackBox engine version"},
+	{NULL, NULL, 0, NULL}
+};
+static PyMethodDef VpuMethods[] = {
+	{"fullscreen", vpu_fullscreen	, METH_VARARGS, "Toggle fullscreen mode ( True ~ False )"},
+	{"rotate"	 , vpu_rotate		, METH_VARARGS, "Rotate specified layer (0-11) given degrees ( -6.30 ~ 6.30 )"},
+	{"scale"	 , vpu_scale		, METH_VARARGS, "Change specified layer (0-11) given horizontal and vertical scale factor ( 20000.0 ~ 0.0 )"},
+	{NULL, NULL, 0, NULL}
 };
 
-static PyModuleDef EmbModule = {PyModuleDef_HEAD_INIT, "emb", NULL, -1, EmbMethods,NULL, NULL, NULL, NULL};
+/* ----------------------------------------------------------------------
+	Definir Modulos
+---------------------------------------------------------------------- */
+static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox", NULL, -1, BlackBoxMethods	,NULL, NULL, NULL, NULL};
+static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"		, NULL, -1, VpuMethods		,NULL, NULL, NULL, NULL};
 
-static PyObject *PyInit_emb(void){
-    return PyModule_Create(&EmbModule);
+static PyObject *PyInit_blackbox(void){
+    return PyModule_Create(&BlackBoxModule);
+}
+static PyObject *PyInit_vpu(void){
+    return PyModule_Create(&VpuModule);
 }
 
 bool Script::initialize() {
@@ -24,7 +91,8 @@ bool Script::initialize() {
 		//std::string str = "hello";
 		PyObject* pInt = NULL;
 
-		PyImport_AppendInittab("emb", &PyInit_emb);
+		PyImport_AppendInittab("blackbox", &PyInit_blackbox);
+		PyImport_AppendInittab("vpu"	 , &PyInit_vpu);
 		Py_Initialize();
 	}catch (int e) {
 		e = e;
