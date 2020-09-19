@@ -1,8 +1,9 @@
 #include "typewriter.hpp"
+#include "engine.hpp"
 #include "vpu.hpp"
 
 #define TYPEWRITER_HEIGHT	60
-#define TYPEWRITER_WIDTH	(Vpu::width - (128))
+#define TYPEWRITER_WIDTH	((Engine::width) - (128))
 
 std::vector<std::string> TypeWriter::display;
 std::string TypeWriter::current = "";
@@ -26,7 +27,7 @@ void TypeWriter::initialize() {
 }
 
 void TypeWriter::draw() {
-	Vpu::select(Vpu::overlay[1]);
+	Vpu::select(Vpu::overlay[3]);
 	Vpu::paint(0, 0, 0, 0);
 	if((!queue.size())
 	&&(width<=2)
@@ -75,6 +76,7 @@ void TypeWriter::draw() {
 			9,13,
 			0, 255.0f * q, 16*q*q, 128 * q
 		);
+		
 	}
 	if (!TypeWriter::next) {
 		static int t = 0;
@@ -101,9 +103,9 @@ void TypeWriter::update(double delta) {
 		    if (width > final_width) width -= rx;
 			if (height > final_height) height -= ry;
 		}
-		TypeWriter::x = (Vpu::width / 2) - (TypeWriter::width / 2);
+		TypeWriter::x = (Engine::width / 2) - (TypeWriter::width / 2);
 		TypeWriter::height = TypeWriter::height <= 0 ? 0 : TypeWriter::height;
-		TypeWriter::y = (-32)+ (Vpu::height - (TYPEWRITER_HEIGHT/2)) - (TypeWriter::height/2);		
+		TypeWriter::y = (-32)+ ((Vpu::height/2) - (TYPEWRITER_HEIGHT/2)) - (TypeWriter::height/2);		
 	} else {
         if (TypeWriter::queue.size() >= 0) {
 			if (current_position < current_end) {

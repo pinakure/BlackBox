@@ -28,6 +28,8 @@ bool Engine::initialize() {
 		TypeWriter::initialize();
 		TypeWriter::enqueue("Hello world!");
 		TypeWriter::enqueue("Hello world!");
+		TypeWriter::enqueue("Hello world!");
+		TypeWriter::enqueue("Hello world!");
 		return true;
 	} catch (int e) {
 		e = e;
