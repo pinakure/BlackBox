@@ -1,3 +1,4 @@
+#include "engine.hpp"
 #include "script.hpp"
 #include "vpu.hpp"
 
@@ -10,6 +11,14 @@ static PyObject *vpu_fullscreen(PyObject *self, PyObject *args){
         return NULL;
 	Vpu::fullscreen = fullscreen;
 	return PyBool_FromLong(Vpu::fullscreen);
+}
+
+static PyObject *vpu_update(PyObject *self, PyObject *args){
+	if(!PyArg_ParseTuple(args, ""))
+        return NULL;
+	Engine::update();
+	if (!Engine::run)exit(-1);
+	return PyBool_FromLong(1);
 }
 static PyObject *vpu_rotate(PyObject *self, PyObject *args){
 	int index;
@@ -70,6 +79,7 @@ static PyMethodDef VpuMethods[] = {
 	{"fullscreen", vpu_fullscreen	, METH_VARARGS, "Toggle fullscreen mode ( True ~ False )"},
 	{"rotate"	 , vpu_rotate		, METH_VARARGS, "Rotate specified layer (0-11) given degrees ( -6.30 ~ 6.30 )"},
 	{"scale"	 , vpu_scale		, METH_VARARGS, "Change specified layer (0-11) given horizontal and vertical scale factor ( 20000.0 ~ 0.0 )"},
+	{"update"	 , vpu_update		, METH_VARARGS, "Must be called inside any loop"},
 	{NULL, NULL, 0, NULL}
 };
 
