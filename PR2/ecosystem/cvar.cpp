@@ -2,6 +2,7 @@
 #include "cvar.hpp"
 #include "color.hpp"
 #include "integer.hpp"
+#include "input.hpp"
 #include <assert.h>
 
 std::map<std::string, CVar*> CVar::settings;
@@ -373,17 +374,15 @@ COMMAND_CALLBACK(writeconfig) {
 			fprintf(fp, "alias %s \"%s\"\n", a_it->first.c_str(), val.c_str());
 		}
 		
-		/*
-		Trigger *t;
-		for (size_t i = 0, o = InputDevice::trigger.size(); i<o; i++) {
-			t = InputDevice::trigger[i];
-			if (!t->callBack)
-				while ((q = t->command.find(";")) != std::string::npos) {
-					t->command.replace(q, 1, "|");
-				}
-			fprintf(fp, "bind %s \"%s\"\n", t->name.c_str(), t->command.c_str());
+		
+		for (Trigger &t : InputDevice::trigger) {
+			if (!t.callBack)
+			while ((q = t.command.find(";")) != std::string::npos) {
+				t.command.replace(q, 1, "|");
+			}
+			fprintf(fp, "bind %s \"%s\"\n", t.name.c_str(), t.command.c_str());
 		}
-		*/
+		
 		// Save current font
 		//fprintf(fp, "font %d", Vpu::current_font_index);
 		
@@ -431,21 +430,7 @@ void CVar::loadCommands(void) {
 void CVar::loadVars(void) {
 	if (initialized)return;
 	Console::loadVars();
-
-	/*
 	InputDevice::loadVars();
-	GPU::loadVars();
-	Map::loadVars();
-	Script::loadVars();
-	Editor::loadVars();
-	Engine::loadVars();
-	Net::loadVars();
-	Entity::loadVars();
-	Player::loadVars();
-	Camera::loadVars();
-	SPU::loadVars();
-	UI::loadVars();
-	World::loadVars();
-	*/
+	Vpu::loadVars();
 	sortVars();
 }

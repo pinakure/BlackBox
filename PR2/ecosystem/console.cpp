@@ -4,6 +4,7 @@
 #include "color.hpp"
 #include "engine.hpp"
 #include "console.hpp"
+#include "input.hpp"
 #include <sstream>
 #include <algorithm>
 
@@ -161,14 +162,14 @@ void Console::toggleVariable(const char* name){
 	CVar *cv = CVar::getVar(std::string(name));
 	if (cv){
 		((Boolean*)cv)->set(((Boolean*)cv)->get() ^ 1);
-		printf("~b%s ~f= ~7'~e%s~7'"
+		Console::printf("~b%s ~f= ~7'~e%s~7'"
 			  , name
 			  , ((Boolean*)cv)->get() ? "enabled" : "disabled");
 	}
 }
 
 void Console::reportBind(const char *var){
-	printf("~b%s ~f= ~7'~e%s~7'\n", var, getBind(var).c_str());
+	Console::printf("~b%s ~f= ~7'~e%s~7'\n", var, getBind(var).c_str());
 }
 
 Command *Console::findCommand(std::string name){
@@ -421,12 +422,14 @@ void Console::deleteChar(void) { //del key
 	stringRemChar(command, commandPosition);
 }
 
-void Console::addChar(int chr){
-	/*
+extern const char *keyNames[];
+
+void Console::addChar(int k){
+	
 	std::string a, b;
 	// leave ctrl + ascii to special functions...
-	if ((!(key_shifts & KB_ALT_FLAG)) && (key_shifts & KB_CTRL_FLAG)) {
-		if (k == KB_C) ctrlc = true;
+	if ((!(InputDevice::alt)) && (InputDevice::control)) {
+		if (k == ALLEGRO_KEY_C) ctrlc = true;
 		return;
 	}
 	char st[2] = " ";
@@ -439,12 +442,12 @@ void Console::addChar(int chr){
 	i = 0;
 	while (t != 0) {
 		if (k == t) {
-			if (key_shifts & KB_ALT_FLAG) st[0] = t_alt;
-			else if (key_shifts & KB_SHIFT_FLAG) {
-				if (key_shifts & KB_CAPSLOCK_FLAG) st[0] = t_ascii;
+			if (InputDevice::alt) st[0] = t_alt;
+			else if (InputDevice::shift) {
+				if (InputDevice::caps) st[0] = t_ascii;
 				else st[0] = t_shift;
 			}
-			else if (key_shifts & KB_CAPSLOCK_FLAG) st[0] = t_shift;
+			else if (InputDevice::caps) st[0] = t_shift;
 			else st[0] = t_ascii;
 
 			command = stringAddChar(command, commandPosition, st);
@@ -458,8 +461,7 @@ void Console::addChar(int chr){
 		t_shift = codepage[i + 2];
 		t_alt = codepage[i + 3];
 	}
-	printf("%s is not bound\n", keyNames[k]);	
-	*/
+	Console::printf("%s is not bound\n", keyNames[k]);	
 }
 
 void Console::moveLeft(void){
@@ -485,38 +487,30 @@ void Console::sendPrompt(void){
 	clearPrompt();
 }
 
-void Console::readKeyboard(void){
-	/*
-	int k = -1;
-	if(InputDevice::activity){
-		k = InputDevice::pollKeyboard() >> 8;
-					
-	    if(enabled) {
-			redraw = true;
-			switch(k){
-				case KB_ESC:		return clearPrompt();				
-				case KB_ENTER:		return sendPrompt();
-				case KB_DELETE:		return deleteChar();
-				case KB_BACKSPACE:	return removeChar();
-				case KB_TAB:		return autoCompletion();
-				case KB_LEFT:		return moveLeft();
-				case KB_RIGHT:		return moveRight();					
-				case KB_HOME:		return moveBegin();
-				case KB_END:		return moveEnd();
-				case KB_UP:			return historyPrev();
-				case KB_DOWN:		return historyNext();
-				case KB_SPACEBAR:	return addSpace();
-				case KB_PAGEUP:		return scroll(-1);
-				case KB_PAGEDOWN:	return scroll(1);					
-				default:			return addChar(k);
-			}			
-		}
-	}
-	*/
+void Console::readKeyboard(int k){
+	if(enabled) {
+		redraw = true;
+		switch(k){
+			case ALLEGRO_KEY_ESCAPE:	return clearPrompt();				
+			case ALLEGRO_KEY_ENTER:		return sendPrompt();
+			case ALLEGRO_KEY_DELETE:	return deleteChar();
+			case ALLEGRO_KEY_BACKSPACE:	return removeChar();
+			case ALLEGRO_KEY_TAB:		return autoCompletion();
+			case ALLEGRO_KEY_LEFT:		return moveLeft();
+			case ALLEGRO_KEY_RIGHT:		return moveRight();					
+			case ALLEGRO_KEY_HOME:		return moveBegin();
+			case ALLEGRO_KEY_END:		return moveEnd();
+			case ALLEGRO_KEY_UP:		return historyPrev();
+			case ALLEGRO_KEY_DOWN:		return historyNext();
+			case ALLEGRO_KEY_SPACE:		return addSpace();
+			case ALLEGRO_KEY_PGUP:		return scroll(-1);
+			case ALLEGRO_KEY_PGDN:		return scroll(1);					
+			default:					return addChar(k);
+		}			
+	}	
 }
 
 void Console::update(void){	
-	readKeyboard();
 	handleMessages();
 	//if((wait==0)&&(!wait_for_window)) script.run();		
 }
@@ -712,10 +706,12 @@ void Console::render(int h, bool drawCursor){
 		a.append(drawCursor?"_":" ");
 	}
 	
-		Vpu::setColor(200, 200, 0,250);
-		char cmdline[65535];
-		sprintf_s(cmdline, "%02d:%02d:%02d > %s", ((Engine::epoch/3600)%24), (Engine::epoch/60)%60, Engine::epoch%60, a.c_str());
-		Vpu::print(std::string(cmdline), 0, (Vpu::console.height) - h);
+	int H = ((Engine::epoch / 3600) % 24);
+	int m = (Engine::epoch / 60) % 60;
+	int s = Engine::epoch % 60;
+
+	Vpu::setColor(200, 200, 0,250);
+	Vpu::printf(0, (Vpu::console.height) - h, 0, "%02d:%02d:%02d > %s", H, m, s, a.c_str());
 	
 	// Render lines
 	for(int u = (Vpu::console.height)-(h*2); u>=0; u-= h){
@@ -776,7 +772,7 @@ void Console::render(int h, bool drawCursor){
 }
 
 void Console::printColoredNameValuePairFloat(const char *name, float value){
-	printf("~b%s ~f= ~e%f", name, value);
+	Console::printf("~b%s ~f= ~e%f", name, value);
 }
 
 void Console::printColoredNameValuePairDir(const char *name, int value){
@@ -788,19 +784,19 @@ void Console::printColoredNameValuePairDir(const char *name, int value){
 	if(value & 8) direction.append(" RIGHT ");
 	if(!direction.length())direction = "NONE";
 	
-	printf("~b%s ~f= ~e%s", name, direction.c_str());
+	Console::printf("~b%s ~f= ~e%s", name, direction.c_str());
 }
 		
 void Console::printColoredNameValuePairInt(const char *name, int value){
-	printf("~b%s ~f= ~e%d", name, value);
+	Console::printf("~b%s ~f= ~e%d", name, value);
 }
 
 void Console::printColoredNameValuePairBool(const char *name, bool value){
-	printf("~b%s ~f= ~e%s", name, value ? "TRUE" : "FALSE");
+	Console::printf("~b%s ~f= ~e%s", name, value ? "TRUE" : "FALSE");
 }
 
 void Console::printColoredNameValuePair(const char *name, const char *value){
-	printf("~b%s ~f= ~e'%s'", name, value);
+	Console::printf("~b%s ~f= ~e'%s'", name, value);
 }
 
 #include <cstdarg>
@@ -1123,13 +1119,11 @@ void Console::dumpBindList(void){
 	
 	tabulate(buffer, 2048, 15, "sss", "CALLBACK", "KEY NAME", "COMMAND");
 	dumpHeader(buffer);
-
-	/*
-	for(Trigger *t : InputDevice::trigger){
-		tabulate(buffer, 2048, 15, "sss", t->callBack ? "FUNCTION" : "   --   ", t->name.c_str(), t->command.c_str());
+		
+	for(Trigger &t : InputDevice::trigger){
+		tabulate(buffer, 2048, 15, "sss", t.callBack ? "FUNCTION" : "   --   ", t.name.c_str(), t.command.c_str());
 		Console::printf("~f%s", buffer);
 	}
-	*/
 }
 
 void Console::dumpPropertyList(std::map<std::string, std::string> &pl){

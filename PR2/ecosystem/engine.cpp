@@ -21,13 +21,13 @@ bool Engine::initialize() {
 		queue	= al_create_event_queue();
 		
 		if (!Vpu::initialize()) return false;
+		CVar::initialize();
+		Console::initialize();
 		if (!InputDevice::initialize())return false;
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
 		al_start_timer(clock);
-		CVar::initialize();
-		Console::initialize();
 		TypeWriter::initialize();
 		TypeWriter::enqueue(" ");
 		TypeWriter::enqueue(" ");
@@ -62,19 +62,27 @@ void Engine::handleEvents() {
 			if (event.timer.source == clock) return(tick());
 			if(event.timer.source == timer) Vpu::redraw = true;
 			break;
-		//case ALLEGRO_EVENT_KEY_DOWN:
+		
+			//case ALLEGRO_EVENT_KEY_DOWN:
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
 			run = false;
 			break;
+		
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
-			{
-				al_acknowledge_resize(Vpu::display);
-				Engine::width = event.display.width;
-				Engine::height = event.display.height;
-				if (!Vpu::start()) run = false;
-				if (!Vpu::restart()) run = false;
-				break;
-			}
+			al_acknowledge_resize(Vpu::display);
+			Engine::width = event.display.width;
+			Engine::height = event.display.height;
+			if (!Vpu::start()) run = false;
+			if (!Vpu::restart()) run = false;
+			break;
+		
+		case ALLEGRO_EVENT_KEY_DOWN:
+			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
+			break;
+		case ALLEGRO_EVENT_KEY_UP:
+			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
+			break;
+			
 		default:
 			break;
 	}		
@@ -83,6 +91,7 @@ void Engine::handleEvents() {
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		Hud::draw();
+		InputDevice::draw(11);
 		Console::draw(12);
 		Vpu::render();		
 		Vpu::frames++;
@@ -93,6 +102,7 @@ void Engine::render() {
 
 void Engine::update() {
 	Hud::update();
+	InputDevice::update(1);
 	Console::update();
 	render();
 	handleEvents();

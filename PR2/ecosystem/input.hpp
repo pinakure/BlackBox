@@ -1,7 +1,7 @@
 #ifndef __INPUT_HPP
 #define __INPUT_HPP
 
-#include <list>
+#include <forward_list>
 #include "vpu.hpp"
 #include "cvar.hpp"
 #include "integer.hpp"
@@ -37,11 +37,13 @@ enum E_InputButton {
 
 class InputDevice {
 	private:
-		static Demo				*demo;
+		static Demo				demo;
 	public:
 		///////////////////////
 		// CVARS				//
 		///////////////////////
+		static Boolean			*in_keyboard;
+		static Boolean			*in_mouse;
 		static Boolean			*in_joystick;
 		static Floating			*in_joysens;
 		static Boolean			*aim_acceleration;
@@ -65,7 +67,7 @@ class InputDevice {
 		static int				axis_x[2];
 		static int				axis_y[2];
 
-		static std::list		<Trigger>	trigger; //!< List of trigger pointers
+		static std::forward_list		<Trigger>	trigger; //!< List of trigger pointers
 
 		static int				mouse_w;
 		static int				mouse_x;
@@ -94,6 +96,8 @@ class InputDevice {
 		static bool				shift;				
 		//!< true if alt is being pressed
 		static bool				alt;				
+		static bool				control;				
+		static bool				caps;				
 
 		static int				keyRepeat;
 		static int				keyRepeatDelay;
@@ -111,8 +115,6 @@ class InputDevice {
 
 		static void			update(int); //!< Update status for each one of the triggers registered
 
-		static void			pollAsciiKeyArray(char (&keyBuf)[0x80]);
-		
 		static int			findKeyByString(std::string &key);
 
 		static void			setBind(const char* key, const char* value, int n, bool keydown = true, bool keypress = false, bool keyup = false);
@@ -133,8 +135,12 @@ class InputDevice {
 
 		static int			waitForJoystick(void);
 
-		static bool			playing(void){return demo && demo->isPlaying();}
-		static bool			recording(void){return demo?true:false;};
+		static bool			playing(void) { return demo.isPlaying(); }
+		static bool			recording(void) { return demo.isRecording(); }
+
+		static void			loadVars();
+		static void			restart();
+		static void			handleEvent(ALLEGRO_EVENT &event);
 
 		~InputDevice(void);
 };

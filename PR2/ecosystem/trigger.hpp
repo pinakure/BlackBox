@@ -25,9 +25,12 @@ class Trigger {
 		bool keyUp;						//!< true if key has just been released 
 		bool keyRepeat;					//!< true if keyRepeat is enabled
 
+		
 		Trigger(int, int, void(*)(int), bool, bool, bool);//!< Creates a trigger with given values. @details It shall call the defined callback when keyValue is true, when the corresponding onKey* flag is enabled (they all can be true), using keyRepeat specified, or no keyRepeat if it is zero.
+		bool operator==(Trigger &t);
 		void trig(int buttonState);
 		void update(void);				//!< Manages internal key status to know its status. @details A key is first pressed, being keep pressed, or it have just been released, then calls the callback if it is enabled for that case 
+		
 
 };
 
