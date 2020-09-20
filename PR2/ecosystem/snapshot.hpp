@@ -12,22 +12,22 @@ class InputSnapshot {
 		int axis_y[2];
 
 	public:
-		InputSnapshot(InputDevice *device);
-		void play(InputDevice *device);
+		InputSnapshot();
+		void play();
 };
 
 class InputSnapshotChunk {
 	private:
-		InputSnapshot *snapshot[INPUTSNAPSHOT_CHUNK_SIZE];
+		InputSnapshot snapshot[INPUTSNAPSHOT_CHUNK_SIZE];
 		size_t size;
 		size_t playback_position;
 	
 	public:
 		InputSnapshotChunk(void);
 		~InputSnapshotChunk(void);
-		bool record(InputDevice *device);
+		bool record();
 		void rewind(void);
-		bool play(InputDevice *device);
+		bool play();
 		inline const size_t getSize(void){return size; };
 		inline const size_t getRecordPosition(void){return size; };
 		inline const size_t getPlaybackPosition(void){return playback_position; };
@@ -37,8 +37,9 @@ class Demo {
 	private:
 		bool	playing;
 		bool	recording;
-		std::vector<InputSnapshotChunk*> chunk;
-		InputSnapshotChunk *current_chunk;
+		std::vector<InputSnapshotChunk> chunk;
+		InputSnapshotChunk empty_chunk;
+		InputSnapshotChunk &current_chunk = empty_chunk;
 		unsigned long int size;
 		unsigned long int playback_position;
 		unsigned long int record_position;
@@ -51,9 +52,10 @@ class Demo {
 		~Demo(void);
 		void rewind(void);
 		void draw();
-		void record(InputDevice *device);
-		bool play(InputDevice *device);
+		void record();
+		bool play();
 		void start(void);
+		void stop();
 		inline const bool isPlaying(void){ return playing; }
 		inline const bool isRecording(void){ return recording; }
 		inline const size_t getSize(void){ return size; };

@@ -88,7 +88,7 @@ bool Vpu::start() {
 	}
 	display = al_create_display(width/2, height/2);
 	if (!display) {
-		printf("Cannot initialize %s %dx%d display\n", fullscreen?"fullscreen":"",width/2, height/2);
+		Engine::printf("Cannot initialize %s %dx%d display\n", fullscreen?"fullscreen":"",width/2, height/2);
 		return false;
 	}
 	al_register_event_source(Engine::queue, al_get_display_event_source(display));	
@@ -98,7 +98,7 @@ bool Vpu::start() {
 void Vpu::initializeFonts() {
 	font = al_load_ttf_font("data/fonts/small.ttf",16,0 );
 	if (!font){
-		std::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
+		Engine::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
 		font = legacy_font;
 	}
 }
@@ -151,9 +151,8 @@ bool Vpu::restart() {
 	setColor(255, 255, 255);
 	redraw = true;
 	is_initialized = true;
-	initializeFonts();
+	al_set_window_title(display, "BlackBox v.3");		
 	return true;
-
 }
 
 bool Vpu::initialize() {
@@ -166,8 +165,7 @@ bool Vpu::initialize() {
 		legacy_font = al_create_builtin_font();
 		font = legacy_font;	
 		if (!restart()) return false;
-		al_set_window_title(display, "BlackBox v.3");
-		al_set_window_constraints(display, 320, 240, 1280, 1024);
+		initializeFonts();			
 		return true;
 	} catch (int e) {
 		e = e;
@@ -223,25 +221,33 @@ ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, flo
 	return ret;
 }
 
-void Vpu::print(std::string text, int  x, int y) {
-	al_draw_textf(font, shadow, x+1, y+1, 0, text.c_str());	
-	al_draw_textf(font, color , x  , y  , 0, text.c_str());	
+void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	al_draw_textf(font, shadow, x+1, y+1, flags, fmt, ap);	
+	al_draw_textf(font, color , x  , y  , flags, fmt, ap);	
+	va_end(ap);
 }
-void Vpu::printInteger(std::string text, int d, int  x, int y) {
-	al_draw_textf(font, shadow, x+1, y+1, 0, (text + "%d").c_str(), d);
-	al_draw_textf(font, color , x  , y  , 0, (text + "%d").c_str(), d);
+
+void Vpu::print(std::string text, int  x, int y, int flags) {
+	al_draw_textf(font, shadow, x+1, y+1, flags, text.c_str());	
+	al_draw_textf(font, color , x  , y  , flags, text.c_str());	
 }
-void Vpu::printFloat(std::string text, float d, int  x, int y) {
-	al_draw_textf(font, shadow, x+1, y+1, 0, (text + "%f").c_str(), d);
-	al_draw_textf(font, color , x  , y  , 0, (text + "%f").c_str(), d);
+void Vpu::printInteger(std::string text, int d, int  x, int y, int flags) {
+	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%d").c_str(), d);
+	al_draw_textf(font, color , x  , y  , flags, (text + "%d").c_str(), d);
 }
-void Vpu::printDouble(std::string text, double d, int  x, int y) {
-	al_draw_textf(font, shadow, x+1, y+1, 0, (text + "%f").c_str(), d);
-	al_draw_textf(font, color , x  , y  , 0, (text + "%f").c_str(), d);
+void Vpu::printFloat(std::string text, float d, int  x, int y, int flags) {
+	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
+	al_draw_textf(font, color , x  , y  , flags, (text + "%f").c_str(), d);
 }
-void Vpu::printBool(std::string text,bool d, int  x, int y) {
-	al_draw_textf(font, shadow, x+1, y+1, 0, (text + "%b").c_str(), d);
-	al_draw_textf(font, color , x  , y  , 0, (text + "%b").c_str(), d);
+void Vpu::printDouble(std::string text, double d, int  x, int y, int flags) {
+	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
+	al_draw_textf(font, color , x  , y  , flags, (text + "%f").c_str(), d);
+}
+void Vpu::printBool(std::string text,bool d, int  x, int y, int flags) {
+	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%b").c_str(), d);
+	al_draw_textf(font, color , x  , y  , flags, (text + "%b").c_str(), d);
 }
 
 void Vpu::fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha) {
@@ -305,7 +311,7 @@ void Vpu::render() {
 		
 	#undef renderlayer	
 	if (console.enabled)
-		al_draw_scaled_bitmap(console.bitmap, 0, 0, width, height, 0, 0, width, height, 0);
+		al_draw_scaled_bitmap(console.bitmap, 0, 0, width/2, height/2, 0, 0, al_get_display_width(display), al_get_display_height(display), 0);
 
 	al_set_target_backbuffer(display);
 	al_draw_bitmap(buffer, 0, 0, 0);	
@@ -428,3 +434,6 @@ Example layer alterations:
 	if(overlay[1].scale[1]>0.0f) overlay[1].scale[1] -= 0.00125f;
 */
 
+void Vpu::loadVars() {
+
+}

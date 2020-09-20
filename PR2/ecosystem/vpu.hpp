@@ -47,42 +47,55 @@ public:
 	static bool							redraw;
 	static unsigned long int			total_frames;
 	
+	// Initialization and base routines
 	static bool initialize();
 	static void initializeFonts();
 	static void deinitialize();
 	static void render();
 	static bool start();
 	static bool restart();
-	static void select(Surface &target);	
-	static void print(std::string text, int  x, int y);
-	static void printInteger(std::string text, int d, int  x, int y);
-	static void printFloat(std::string text, float d, int  x, int y);
-	static void printDouble(std::string text, double d, int  x, int y);
-	static void printBool(std::string text, bool d, int  x, int y);
+	static void loadVars();
+
+	// Text output
+	static void printf(int  x, int y, int flags, const char *fmt, ...);//slow!
+	static void print(std::string text, int  x, int y, int flags=0);
+	static void printInteger(std::string text, int d, int  x, int y, int flags=0);
+	static void printFloat(std::string text, float d, int  x, int y, int flags=0);
+	static void printDouble(std::string text, double d, int  x, int y, int flags=0);
+	static void printBool(std::string text, bool d, int  x, int y, int flags=0);
+
+	// Primitives
 	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillCircle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void paint(int r, int g, int b, int alpha = 255);
-	static void lock();
-	static void unlock();
-	static void clear();
-	static void clearAll();
+	static void putpixel(int x, int y);
+	
+	// Color routines
 	static void setColor(int r, int g, int b, int alpha = 255);
 	static void setColor(ALLEGRO_COLOR color);
-	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
-	static void randomize();
-	static void subdivide(int r, int g, int b, int alpha=255);
 	static void pushColor();
 	static void popColor();
-	static void fadeout();
-	static void fadein();
-	static void putpixel(int x, int y);
+	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
+	
+	// Blitting and Surfaces
+	static void clear();
+	static void clearAll();	
+	static void select(Surface &target);	
+	static void lock();
+	static void unlock();	
 	static void drawSurface(Surface &surface, float sx, float sy, float sw, float sh, float dx=0, float dy=0);
 	static Surface &destroySurface(Surface &surface);
 	static Surface loadBitmap(std::string filename);
 	static Surface createBitmap(int width, int height);
 	static Surface *__layers[12];
+	
+	// Surface effects
+	static void randomize();
+	static void subdivide(int r, int g, int b, int alpha=255);
+	static void fadeout();
+	static void fadein();
 };
 
 #endif

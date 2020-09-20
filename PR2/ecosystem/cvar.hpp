@@ -60,7 +60,6 @@ class CVar {
 		template <typename T, typename X> static T* create(std::string iname, std::string ihelp, const X &ivalue, bool sys_var = false) {
 			T *var = new T(iname, ihelp, ivalue);
 			var->system_var = sys_var;
-			//variables.push_back(var);
 			return var;
 		}
 };

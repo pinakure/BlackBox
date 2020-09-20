@@ -62,19 +62,24 @@ void Engine::handleEvents() {
 			if (event.timer.source == clock) return(tick());
 			if(event.timer.source == timer) Vpu::redraw = true;
 			break;
-		//case ALLEGRO_EVENT_KEY_DOWN:
+		
+			//case ALLEGRO_EVENT_KEY_DOWN:
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
 			run = false;
 			break;
+		
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
-			{
-				al_acknowledge_resize(Vpu::display);
-				Engine::width = event.display.width;
-				Engine::height = event.display.height;
-				if (!Vpu::start()) run = false;
-				if (!Vpu::restart()) run = false;
-				break;
-			}
+			al_acknowledge_resize(Vpu::display);
+			Engine::width = event.display.width;
+			Engine::height = event.display.height;
+			if (!Vpu::start()) run = false;
+			if (!Vpu::restart()) run = false;
+			break;
+		
+		case ALLEGRO_EVENT_KEY_CHAR:
+			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
+			break;
+			
 		default:
 			break;
 	}		

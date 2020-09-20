@@ -140,6 +140,7 @@ class InputDevice {
 
 		static void			loadVars();
 		static void			restart();
+		static void			handleEvent(ALLEGRO_EVENT &event);
 
 		~InputDevice(void);
 };

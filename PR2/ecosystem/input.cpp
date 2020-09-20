@@ -166,9 +166,9 @@ void InputDevice::pollAsciiKeyArray(char (&keyBuf)[0x80]){//one extra place for 
 					}
 				}
 				o++;
-			}
-		 	
+			}		 	
 		}
+		key[i] = 0;
 	}
 	
 	if(o == 0) {
@@ -416,19 +416,19 @@ void InputDevice::deinitialize(void){
 	Vpu::destroySurface(keyboard_bitmap[1]);	
 }
 
-void right_callback(int i);
-void left_callback(int i);
-void down_callback(int i);
-void up_callback(int i);
-void jump_callback(int i);
+void right_callback(int i) {};
+void left_callback(int i) {};
+void down_callback(int i) {};
+void up_callback(int i) {};
+void jump_callback(int i) {};
 void fire_callback(int i) {}
-void action_callback(int i);
-void matrixmode_callback(int i);
-void walk_callback(int i);
+void action_callback(int i) {};
+void matrixmode_callback(int i) {};
+void walk_callback(int i) {};
 
 void InputDevice::updateController(void){
-	/*
-	PROFILE_START();
+	
+	//PROFILE_START();
 	int sens = InputDevice::in_joysens->get();
 	if (aim_swap_axis->get()){
 		int aim_swap = axis_x[1];
@@ -467,8 +467,8 @@ void InputDevice::updateController(void){
 	//TODO: handle menu
 	//
 
-	PROFILE_END("joystick");
-	*/
+	//PROFILE_END("joystick");
+	
 }
 
 
@@ -576,48 +576,40 @@ void InputDevice::draw(int layer_index){
 }
 
 void InputDevice::update(int delta){
-/*
-	if(key[KEY_O]){
-		if(!demo){
-			demo = new Demo();
-		} else {
-			SAFE_RELEASE(demo);
-			demo = new Demo();
-		}
+
+	if(key[ALLEGRO_KEY_O]){
+		demo.clear();		
 	}
-	if(key[KEY_P]){
-		if(demo){
-			demo->start();
+	if(key[ALLEGRO_KEY_P]){
+		if(demo.isInitialized()){
+			demo.start();
 		} 
 	}
-	if(key[KEY_ESC]){
-		if(demo){
-			demo->rewind();
-		} 
+	if(key[ALLEGRO_KEY_ESCAPE]){
+		demo.rewind();		 
 	}
 
-	if(demo){
-		PROFILE_START();
-		if(demo->isPlaying()){
-			if(!demo->play(this)) {
-				demo->rewind();
+	if(demo.isInitialized()){
+		//PROFILE_START();
+		if(demo.isPlaying()){
+			if(!demo.play()) {
+				demo.rewind();
 				//SAFE_RELEASE(demo);
 			};
 			updateController();
-			PROFILE_END("demo");
+			//PROFILE_END("demo");
 			return;
 		}
 		updateController();
-		PROFILE_END("demo");
+		//PROFILE_END("demo");
 	}
 
-	PROFILE_START();
-	if(demo){
-		if(demo->isRecording())demo->record(this);
-	}
-	PROFILE_END("demo");
-	PROFILE_START();
-*/
+	//PROFILE_START();
+	if (demo.isRecording())
+		demo.record();
+
+	//PROFILE_END("demo");
+	//PROFILE_START();
 
 	// TODO: update local member at callback when var changes only!
 	int aim_radius = 1024 - InputDevice::aim_sensitivity->get();
@@ -785,6 +777,27 @@ void InputDevice::loadVars() {
 	CREATE_CVAR("debug_keyboard"	, Boolean	, "Show keyboard debugging information"	, false	, true);
 	CREATE_CVAR("debug_crosshair"	, Boolean	, "Show crosshair debugging information", false	, true);
 	CREATE_CVAR("aim_backwards"		, Boolean	, "Aim backwards enable"				, false	, true);	
+}
+
+void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
+	switch(event.keyboard.keycode){
+		case ALLEGRO_KEY_ENTER :
+			key[13] = 1;
+			return;
+		
+		case ALLEGRO_KEY_BACKSPACE :
+			/// Remove character before caret
+			return;
+		
+		case ALLEGRO_KEY_DELETE :
+			/// Remove character at caret
+			return;
+		
+		default :
+			/// Add character to our string
+			key[event.keyboard.keycode] = 1;
+			return;
+	}
 }
 
 #undef gpu

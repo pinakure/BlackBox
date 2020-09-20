@@ -1,40 +1,33 @@
-InputSnapshot::InputSnapshot(InputDevice *device){
+InputSnapshot::InputSnapshot(){
 	for(int i=0; i<INPUT_MAX; i++){
-		controller[i] = device->controller[i];
+		controller[i] = InputDevice::controller[i];
 	}
-	axis_x[0] = device->axis_x[0];
-	axis_y[0] = device->axis_y[0];
-	axis_x[1] = device->axis_x[1];
-	axis_y[1] = device->axis_y[1];
+	axis_x[0] = InputDevice::axis_x[0];
+	axis_y[0] = InputDevice::axis_y[0];
+	axis_x[1] = InputDevice::axis_x[1];
+	axis_y[1] = InputDevice::axis_y[1];
 }
 
-void InputSnapshot::play(InputDevice *device){
+void InputSnapshot::play(){
 	for(int i=0; i<INPUT_MAX; i++){
-		device->controller[i] = controller[i];
+		InputDevice::controller[i] = controller[i];
 	}
-	device->axis_x[0] = axis_x[0];
-	device->axis_y[0] = axis_y[0];
-	device->axis_x[1] = axis_x[1];
-	device->axis_y[1] = axis_y[1];
+	InputDevice::axis_x[0] = axis_x[0];
+	InputDevice::axis_y[0] = axis_y[0];
+	InputDevice::axis_x[1] = axis_x[1];
+	InputDevice::axis_y[1] = axis_y[1];
 }
 
-InputSnapshotChunk::InputSnapshotChunk(void){
-	size = 0;
-	for(int i=0; i < INPUTSNAPSHOT_CHUNK_SIZE; i++){
-		snapshot[i] = NULL;
-	}
+InputSnapshotChunk::InputSnapshotChunk(){
+	size = 0;	
 }
 
-InputSnapshotChunk::~InputSnapshotChunk(void){
-	/*
-	for(int i=0; i < INPUTSNAPSHOT_CHUNK_SIZE; i++){
-		SAFE_RELEASE(snapshot[i]);
-	}			
-	*/
+InputSnapshotChunk::~InputSnapshotChunk(){
+	
 }
 
-bool InputSnapshotChunk::record(InputDevice *device){
-	snapshot[size] = new InputSnapshot(device);
+bool InputSnapshotChunk::record(){
+	snapshot[size] = InputSnapshot();
 	size++;
 	if(size==INPUTSNAPSHOT_CHUNK_SIZE)return false;
 	return true;
@@ -44,18 +37,18 @@ void InputSnapshotChunk::rewind(void){
 	playback_position = 0;
 }
 
-bool InputSnapshotChunk::play(InputDevice *device){
+bool InputSnapshotChunk::play(){
 	if(playback_position == INPUTSNAPSHOT_CHUNK_SIZE) return false;
 	if(playback_position == size) return false;
-	snapshot[ playback_position ]->play(device);
+	snapshot[ playback_position ].play();
 	playback_position++;
 	return true;
 }
 
 
 // New demo from scratch
-Demo::Demo(void){
-	chunk.push_back(new InputSnapshotChunk());
+Demo::Demo(){
+	chunk.push_back(InputSnapshotChunk());
 	
 	// Select current chunk
 	size = 1;
@@ -72,55 +65,57 @@ Demo::Demo(std::string name){
 }
 
 Demo::~Demo(void){
-	/*
-	FOREACH(chunk, b, bb){ 
-		SAFE_RELEASE(chunk[b]);
 	
-	}
-	*/
 }
 
 void Demo::rewind(void){
-	/*
-	FOREACH(chunk, b, bb){ 
-		chunk[b]->rewind();
-	}
-
+	for (InputSnapshotChunk &c : chunk) {
+		c.rewind();
+	}	
 	playing				= false;
 	recording			= false;
 	playback_position	= 0;
 	record_position		= 0;
-	current_chunk		= chunk[playback_position];
-	*/
+	current_chunk		= chunk[playback_position];	
+}
+
+void Demo::stop() {
+	recording	= false;
+	playing		= false;
+	initialized = true;
+	rewind();
 }
 
 void Demo::draw(){
-	//int x = X_CENTER;
-	//int y = 0;
-
-	if(playing){
-		/*
-		Vpu::printCenter(X_CENTER, 72, makecol(0,255,0), "PLAYING BACK CONTROLLER DATA");
-		Vpu::printCenter(X_CENTER, 80,																						// Where
-						 makecol(128,200,0), "% 4d Chunks - Position CHUNK %03d [% 4d / % 4d]",								// How
-						 chunk.size(), playback_position, current_chunk->getPlaybackPosition(), current_chunk->getSize());	// What
-		*/
-	}
-	if(recording){
-		/*
-		Vpu::printCenter(X_CENTER, 72, makecol(255,0,0), "RECORDING CONTROLLER INPUT");
-		Vpu::printCenter(X_CENTER, 80,																						// Where
-						 makecol(200, 128,0), "% 4d Chunks - Position CHUNK %03d [% 4d / % 4d]",							// How
-						 chunk.size(), record_position, current_chunk->getRecordPosition(), current_chunk->getSize());		// What
-		*/
+	static const int  flags	 = ALLEGRO_ALIGN_CENTER;
+	static const char format[] = "% 4d Chunks - Position CHUNK %03d [% 4d / % 4d]";
+	
+	if (playing || recording) {
+		int x = Vpu::width/2;
+		Vpu::setColor(128, 200, 0);
+		Vpu::pushColor();
+		Vpu::setColor(0, 255, 0);
+		Vpu::pushColor();
+		Vpu::select(Vpu::overlay[3]);		
+		if(playing){
+			Vpu::popColor();
+			Vpu::print("PLAYING BACK CONTROLLER DATA", x, 72, flags);
+			Vpu::popColor();
+			Vpu::printf(x, 80, flags, format, chunk.size(), playback_position, current_chunk.getPlaybackPosition(), current_chunk.getSize());
+		} else {
+			Vpu::popColor();
+			Vpu::print("RECORDING CONTROLLER INPUT", x, 72, flags);
+			Vpu::popColor();
+			Vpu::printf(x, 80, flags, format, chunk.size(), record_position, current_chunk.getRecordPosition(), current_chunk.getSize());
+		}
 	}
 }
 
-void Demo::record(InputDevice *device){
-	if(!current_chunk->record(device)){
-		chunk.push_back(new InputSnapshotChunk());
+void Demo::record(){
+	if(!current_chunk.record()){
+		chunk.push_back(InputSnapshotChunk());
 		current_chunk = chunk.back();
-		current_chunk->record(device);
+		current_chunk.record();
 		record_position++;
 		size++;	
 	}
@@ -136,17 +131,17 @@ void Demo::clear() {
 	initialized = false;//set to true when recording is finished to be able to notify there is demo data stored available to play back
 }
 
-bool Demo::play(InputDevice *device){
-	if(!current_chunk) playing = false;
+bool Demo::play(){
+	if(current_chunk.getSize()==0) playing = false;
 	if(!playing) return false;
 	
-	if(!current_chunk->play(device)){
+	if(!current_chunk.play()){
 		//Reached End Of Chunk
 		
 		if(playback_position == size){
 			//After playing last chunk, stop playback
 			playing = false;
-			current_chunk = NULL;
+			current_chunk = empty_chunk;
 			return false;
 		}
 		
