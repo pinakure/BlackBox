@@ -160,7 +160,7 @@ class Console{
 	
 		static bool						evaluate(const char *expr);
 		static void						draw(int h);
-		static void						readKeyboard(void);
+		static void						readKeyboard(int k);
 		static void						handleMessages(void);
 
 		static void						autoCompletion(void);

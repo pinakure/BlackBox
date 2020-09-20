@@ -222,11 +222,14 @@ ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, flo
 }
 
 void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
+	char buffer[1024];
 	va_list ap;
 	va_start(ap, fmt);
-	al_draw_textf(font, shadow, x+1, y+1, flags, fmt, ap);	
-	al_draw_textf(font, color , x  , y  , flags, fmt, ap);	
+	vsprintf_s(buffer, 1024, fmt, ap);
 	va_end(ap);
+
+	al_draw_textf(font, shadow, x+1, y+1, flags, buffer);	
+	al_draw_textf(font, color , x  , y  , flags, buffer);	
 }
 
 void Vpu::print(std::string text, int  x, int y, int flags) {

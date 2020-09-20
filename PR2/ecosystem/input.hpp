@@ -96,6 +96,8 @@ class InputDevice {
 		static bool				shift;				
 		//!< true if alt is being pressed
 		static bool				alt;				
+		static bool				control;				
+		static bool				caps;				
 
 		static int				keyRepeat;
 		static int				keyRepeatDelay;

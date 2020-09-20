@@ -36,8 +36,10 @@ bool					InputDevice::readMouse;
 bool					InputDevice::readJoystick;
 
 bool					InputDevice::joystick;
-bool					InputDevice::shift;
-bool					InputDevice::alt;
+bool					InputDevice::caps = false;
+bool					InputDevice::shift = false;
+bool					InputDevice::alt = false;
+bool					InputDevice::control = false;
 
 int						InputDevice::keyRepeat;
 int						InputDevice::keyRepeatDelay;
@@ -701,7 +703,6 @@ bool InputDevice::unSetBind(const char* name){
 	for (Trigger &t : trigger) {
 		if (!strcmp(t.name.c_str(), name)){
 			if (!t.callBack){
-				//trigger.remove(t);
 				trigger.remove_if([name](Trigger const& value){
 					return !value.name.compare(name);
 				});
@@ -750,11 +751,15 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 		case ALLEGRO_KEY_ENTER :
 		case ALLEGRO_KEY_BACKSPACE :
 		case ALLEGRO_KEY_DELETE :
-			/// Add character to our string
-			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) 
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN)
 				key[event.keyboard.keycode] = 1;
-			else if(event.keyboard.type == ALLEGRO_EVENT_KEY_UP) 
+			else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP)
 				key[event.keyboard.keycode] = 3;
+			if (Console::enabled) {
+				if(key[event.keyboard.keycode]==1)
+					Console::readKeyboard(event.keyboard.keycode);
+			}	
+			
 	}
 }
 
