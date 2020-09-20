@@ -1,7 +1,7 @@
 #ifndef __INPUT_HPP
 #define __INPUT_HPP
 
-#include <list>
+#include <forward_list>
 #include "vpu.hpp"
 #include "cvar.hpp"
 #include "integer.hpp"
@@ -37,11 +37,13 @@ enum E_InputButton {
 
 class InputDevice {
 	private:
-		static Demo				*demo;
+		static Demo				demo;
 	public:
 		///////////////////////
 		// CVARS				//
 		///////////////////////
+		static Boolean			*in_keyboard;
+		static Boolean			*in_mouse;
 		static Boolean			*in_joystick;
 		static Floating			*in_joysens;
 		static Boolean			*aim_acceleration;
@@ -65,7 +67,7 @@ class InputDevice {
 		static int				axis_x[2];
 		static int				axis_y[2];
 
-		static std::list		<Trigger>	trigger; //!< List of trigger pointers
+		static std::forward_list		<Trigger>	trigger; //!< List of trigger pointers
 
 		static int				mouse_w;
 		static int				mouse_x;
@@ -133,8 +135,11 @@ class InputDevice {
 
 		static int			waitForJoystick(void);
 
-		static bool			playing(void){return demo && demo->isPlaying();}
-		static bool			recording(void){return demo?true:false;};
+		static bool			playing(void) { return demo.isPlaying(); }
+		static bool			recording(void) { return demo.isRecording(); }
+
+		static void			loadVars();
+		static void			restart();
 
 		~InputDevice(void);
 };

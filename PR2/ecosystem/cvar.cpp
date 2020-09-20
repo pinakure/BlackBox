@@ -2,6 +2,7 @@
 #include "cvar.hpp"
 #include "color.hpp"
 #include "integer.hpp"
+#include "input.hpp"
 #include <assert.h>
 
 std::map<std::string, CVar*> CVar::settings;
@@ -431,9 +432,8 @@ void CVar::loadCommands(void) {
 void CVar::loadVars(void) {
 	if (initialized)return;
 	Console::loadVars();
-
-	/*
 	InputDevice::loadVars();
+	/*
 	GPU::loadVars();
 	Map::loadVars();
 	Script::loadVars();

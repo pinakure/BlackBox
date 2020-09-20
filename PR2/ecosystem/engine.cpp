@@ -21,13 +21,13 @@ bool Engine::initialize() {
 		queue	= al_create_event_queue();
 		
 		if (!Vpu::initialize()) return false;
+		CVar::initialize();
+		Console::initialize();
 		if (!InputDevice::initialize())return false;
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
 		al_start_timer(clock);
-		CVar::initialize();
-		Console::initialize();
 		TypeWriter::initialize();
 		TypeWriter::enqueue(" ");
 		TypeWriter::enqueue(" ");
@@ -83,6 +83,7 @@ void Engine::handleEvents() {
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		Hud::draw();
+		InputDevice::draw(11);
 		Console::draw(12);
 		Vpu::render();		
 		Vpu::frames++;
@@ -93,6 +94,7 @@ void Engine::render() {
 
 void Engine::update() {
 	Hud::update();
+	InputDevice::update(1);
 	Console::update();
 	render();
 	handleEvents();

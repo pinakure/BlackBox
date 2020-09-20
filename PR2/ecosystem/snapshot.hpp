@@ -42,9 +42,10 @@ class Demo {
 		unsigned long int size;
 		unsigned long int playback_position;
 		unsigned long int record_position;
+		bool initialized = false;
 
 	public:
-		
+		bool isInitialized() { return initialized; }
 		Demo(void);					// New demo from scratch
 		Demo(std::string name);		// New demo from existing file
 		~Demo(void);
@@ -58,6 +59,7 @@ class Demo {
 		inline const size_t getSize(void){ return size; };
 		inline const size_t getPlayingPosition(void){ return playback_position; };
 		inline const size_t getRecordPosition(void){ return record_position; };
+		void clear();
 };
 
 

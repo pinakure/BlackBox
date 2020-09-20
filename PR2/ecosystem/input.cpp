@@ -12,7 +12,9 @@ E_InputButton			InputDevice::remap[INPUT_MAX];
 int						InputDevice::axis_x[2];
 int						InputDevice::axis_y[2];
 
-std::list<Trigger>		InputDevice::trigger;
+static int num_joysticks = 0;
+
+std::forward_list<Trigger> InputDevice::trigger;
 
 int						InputDevice::mouse_w;
 int						InputDevice::mouse_x;
@@ -40,8 +42,10 @@ bool					InputDevice::alt;
 int						InputDevice::keyRepeat;
 int						InputDevice::keyRepeatDelay;
 
-Demo					*InputDevice::demo;
+Demo					InputDevice::demo;
 
+Boolean					*InputDevice::in_mouse;
+Boolean					*InputDevice::in_keyboard;
 Boolean					*InputDevice::in_joystick;
 Floating				*InputDevice::in_joysens;
 Boolean					*InputDevice::aim_invert_y;
@@ -66,22 +70,37 @@ Boolean					*InputDevice::debug_crosshair;
 
 static int key[256];
 
-//const char *controller_button_names[INPUT_MAX] = { "><", "()", "[]", "/\\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
+												// "><", "()", "[]", "/\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 const char *controller_button_names[INPUT_MAX] = { "B1", "B2", "B3", "B4", "T1", "T2", "T3", "T4", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
+
+InputDevice::InputDevice(){
+	
+} 
+InputDevice::~InputDevice(void){
+	disableTimer();		
+}		
+
+void InputDevice::enableTimer(void){
+	//install_int_ex(readKeyboardInterrupt, MSEC_TO_TIMER(30));
+}
+
+void InputDevice::disableTimer(void){
+	//remove_int(readKeyboardInterrupt);
+}
+
 
 const char *InputDevice::getControllerButtonName(E_InputButton button){
 	return controller_button_names[button];
 }
 
 void InputDevice::describeJoystick(int index){
-	
-	Console::printf("Describing Joystick #%d:", index);
+	Engine::printf("Describing Joystick #%d:", index);
 
 	bool digital	= false;// joy[index].flags & JOYFLAG_DIGITAL ? true : false;
 	bool analog		= false;// joy[index].flags & JOYFLAG_ANALOGUE ? true : false;
 	bool calibrate	= false;// joy[index].flags & JOYFLAG_CALIBRATE ? true : false;
 
-	if (digital)Console::printf(">> ~bCapabilities :~a%s%s%s", digital ? " ~e[~aDIGITAL~e]" : "", analog ? " ~e[~aANALOGIC~e]" : "", calibrate ? " ~e[~aNEED CALIBRATION~e]" : "");
+	if (digital)Engine::printf(">> ~bCapabilities :~a%s%s%s", digital ? " ~e[~aDIGITAL~e]" : "", analog ? " ~e[~aANALOGIC~e]" : "", calibrate ? " ~e[~aNEED CALIBRATION~e]" : "");
 
 	int button_count = 0; // joy[index].num_buttons;
 	Engine::printf(">> ~a% 2d ~bbuttons found:", button_count);
@@ -105,26 +124,6 @@ void InputDevice::describeJoystick(int index){
 		}
 	}
 	
-}
-
-
-/** 
-@param useKeyboard Enable keyboard
-@param useMouse Enable mouse
-@param useJoystick Enable joystick
-**/
-
-
-InputDevice::InputDevice(){
-	
-} 
-
-void InputDevice::enableTimer(void){
-	//install_int_ex(readKeyboardInterrupt, MSEC_TO_TIMER(30));
-}
-
-void InputDevice::disableTimer(void){
-	//remove_int(readKeyboardInterrupt);
 }
 
 /**
@@ -297,72 +296,49 @@ static bool initializeBitmapKeys(void) {
 	return true;
 }
 
-static void Abort(int i) {
-	i = i;
-}
-static void SetFullScreen(int i) {
-	i = i;
-}
-
-bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
-	readJoystick = false;
-	readKeyboard = false;
-	readMouse = false;
-
-	// Set cvars
-	in_joystick = Boolean::cast(CVar::settings["in_joystick"]);
-	in_joysens = Floating::cast(CVar::settings["in_joysens"]);
-	aim_swap_axis = Boolean::cast(CVar::settings["aim_swap_axis"]);
-	aim_invert_x = Boolean::cast(CVar::settings["aim_invert_x"]);
-	aim_invert_y = Boolean::cast(CVar::settings["aim_invert_y"]);
-	aim_acceleration = Boolean::cast(CVar::settings["aim_acceleration"]);
-	aim_sensitivity = Floating::cast(CVar::settings["aim_sensitivity"]);
-	debug_joystick = Boolean::cast(CVar::settings["debug_joystick"]);
-	debug_keyboard = Boolean::cast(CVar::settings["debug_keyboard"]);
-	aim_backwards = Boolean::cast(CVar::settings["aim_backwards"]);
-	debug_crosshair = Boolean::cast(CVar::settings["debug_crosshair"]);
-
-	if (useMouse) {
+void InputDevice::restart() {
+	
+	if (in_mouse->integer()) {
 		al_install_mouse();
 		al_register_event_source(Engine::queue, al_get_mouse_event_source());
 		//al_disable_hardware_cursor();
+	} else {
+		//TODO: deinit code
 	}
 
-	if (useKeyboard) {
+	if (in_keyboard->integer()) {
 		al_install_keyboard();
 		al_register_event_source(Engine::queue, al_get_keyboard_event_source());
+	} else {
+		//TODO: deinit code
 	}
 
-	if (useJoystick) {
+	if (in_joystick->integer()) {
 		al_install_joystick();
 		al_register_event_source(Engine::queue, al_get_joystick_event_source());
 		// TODO: Allow changing to another driver:
 		// JOY_TYPE_DIRECTX
 		// JOY_TYPE_WIN32
 		// JOY_TYPE_NONE
-		/*
-		if (install_joystick(JOY_TYPE_DIRECTX)) joystick = false;
-		else joystick = true;
-		*/
+		
 
 		// clear controller button array			
 		for (int i = 0; i<INPUT_MAX; i++) {
 			controller[i] = false;
 			remap[i] = (E_InputButton)i;
 		}
-		/*
-		if (num_joysticks == 0) {
-			in_joystick->set(false);
-			useJoystick = false;
-		}
-		*/
-		/*
-		for (int i = 0; i < num_joysticks; i++) {
-			describeJoystick(i);
-		}
-		*/
+		
+		//if (num_joysticks == 0) {
+		//	in_joystick->set(false);
+		//	useJoystick = false;
+		//}
+		//for (int i = 0; i < num_joysticks; i++) {
+		//	describeJoystick(i);
+		//}
+	} else {
+		//TODO: deinit code
 	}
-
+	
 	keyRepeat = 0;
 	keyRepeatDelay = 0;
 
@@ -373,14 +349,41 @@ bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
 	aim_y = 1;
 	movement_x = 0;
 	movement_y = 0;
+	Engine::print("Initialized input");
+}
 
-	demo = NULL;
 
-#ifndef NDEBUG
-	trigger.push_back(Trigger(0x0/*BUTTON_ABORT*/			, 0, Abort			, true, false, false));
-	trigger.push_back(Trigger(0x1/*BUTTON_DEBUG_FULLSCREEN*/, 0, SetFullScreen	, true, false, false));
-#endif
+bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
+	readJoystick = false;
+	readKeyboard = false;
+	readMouse = false;
 
+	// Set cvars
+	in_keyboard		 = Boolean::cast(	CVar::settings["in_keyboard"]);
+	in_mouse		 = Boolean::cast(	CVar::settings["in_mouse"]);
+	in_joystick		 = Boolean::cast(	CVar::settings["in_joystick"]);
+	in_joysens		 = Floating::cast(	CVar::settings["in_joysens"]);
+	aim_swap_axis	 = Boolean::cast(	CVar::settings["aim_swap_axis"]);
+	aim_invert_x	 = Boolean::cast(	CVar::settings["aim_invert_x"]);
+	aim_invert_y	 = Boolean::cast(	CVar::settings["aim_invert_y"]);
+	aim_acceleration = Boolean::cast(	CVar::settings["aim_acceleration"]);
+	aim_sensitivity  = Floating::cast(	CVar::settings["aim_sensitivity"]);
+	debug_joystick	 = Boolean::cast(	CVar::settings["debug_joystick"]);
+	debug_keyboard	 = Boolean::cast(	CVar::settings["debug_keyboard"]);
+	aim_backwards	 = Boolean::cast(	CVar::settings["aim_backwards"]);
+	debug_crosshair  = Boolean::cast(	CVar::settings["debug_crosshair"]);
+
+	in_joystick->set(useJoystick);
+	in_mouse->set(useMouse);
+	in_keyboard->set(useKeyboard);
+	
+	CVar::settings["in_joystick"]->function = InputDevice::restart;
+	CVar::settings["in_keyboard"]->function = InputDevice::restart;
+	CVar::settings["in_mouse"	]->function = InputDevice::restart;
+
+	restart();
+	
+	demo.clear();
 	
 	joystick_image = Vpu::loadBitmap("data/gfx/hud/joypad.png");
 	if (!joystick_image.enabled){
@@ -418,7 +421,7 @@ void left_callback(int i);
 void down_callback(int i);
 void up_callback(int i);
 void jump_callback(int i);
-void fire_callback(int i);
+void fire_callback(int i) {}
 void action_callback(int i);
 void matrixmode_callback(int i);
 void walk_callback(int i);
@@ -568,8 +571,8 @@ void InputDevice::draw(int layer_index){
 	Vpu::select(*Vpu::__layers[layer_index]);
 	int x = ((*Vpu::__layers[layer_index]).width/2) - (keyboard_bitmap[0].width/2);
 	drawKeyboard(x, 32);
-	//drawJoystick(x, 32);
-	if (demo)demo->draw();
+	drawJoystick(x, 32);
+	if (demo.isInitialized()) demo.draw();
 }
 
 void InputDevice::update(int delta){
@@ -664,13 +667,13 @@ void InputDevice::update(int delta){
 	if(key[120])alt = true;
 	
 	
-	std::list<Trigger>::iterator e;
-	for (e = trigger.begin(); e != trigger.end(); ++e){
-		e->update();		
+	for (Trigger &t : trigger) {
+		t.update();
 	}
-	readKeyboard=false;
-	readMouse=false;
-	readJoystick=false;	
+	
+	readKeyboard = false;
+	readMouse	 = false;
+	readJoystick = false;	
 
 	//PROFILE_END("input");
 }
@@ -688,18 +691,8 @@ int InputDevice::findKeyByString(std::string &skey){
 
 	return -1;
 }
-		
-InputDevice::~InputDevice(void){
-	disableTimer();
-	/*
-	SAFE_RELEASE(demo);
-
-	debug("Input", "Destroying...\n");
-	*/
-}		
 
 int InputDevice::waitForJoystick(void){
-	/*
 	if (num_joysticks == 0)return -1;
 
 	updateJoystick();
@@ -707,14 +700,13 @@ int InputDevice::waitForJoystick(void){
 	for (int i = 0; i < INPUT_SELECT; i++){
 		if (controller[i])return i;
 	}
-	*/
 	return INPUT_MAX;
 }
 
 void InputDevice::setBind(const char* skey, const char* value, int n, bool keydown, bool keyrepeat, bool keyup){
 	if (!unSetBind(skey)){
 		if (!Console::initialized)return;
-		return Console::printf("~cERROR: ~e%s~c is reserved for the system", skey);
+		return Engine::printf("~cERROR: ~e%s~c is reserved for the system", skey);
 	}
 
 	void(*c)(int) = NULL;
@@ -738,54 +730,61 @@ void InputDevice::setBind(const char* skey, const char* value, int n, bool keydo
 	}
 
 	if (Console::initialized){
-		/*
-		FOREACH(Console::special_commands, i, o){
-			if (Console::special_commands[i].isCommand(v)) {
-				c = Console::special_commands[i].callBack;
+		std::vector<SpecialCommand>::iterator it;
+		for (SpecialCommand &s: Console::special_commands) {
+			if (s.isCommand(v)) {
+				c = s.callBack;
 				break;
 			}
-		}
-		*/
+		}		
 	}
-	//*if(!v.compare("fire"))c = fire_callback;
+	if(!v.compare("fire")) c = fire_callback;
 
 	Trigger t = Trigger(n, 0, c, keydown, keyrepeat, keyup);
 	t.command = c ? value : v.c_str();
 	t.name = skey;
-	trigger.push_back(t);
+	trigger.push_front(t);
 }
 
 std::string InputDevice::getBind(const char *name){
-	Trigger *t;
-	/*
-	foreach(trigger){
-		t = trigger.get(i);
-		if (!t) continue;
-		if (!strcmp(t->name.c_str(), name)){
-			return trigger.get(i)->command;
+	for (Trigger &t : trigger) {
+		if (!strcmp(t.name.c_str(), name)){
+			return t.command;
 		}
 	}
-	*/
-	return "0";
+    return "0";
 }
 
 bool InputDevice::unSetBind(const char* name){
-	Trigger *t;
-	/*
-	foreach(trigger){
-		t = trigger.get(i);
-		if (!t) continue;
-		if (!strcmp(t->name.c_str(), name)){
-			if (!trigger.get(i)->callBack){
-				trigger.remove(i);
+	for (Trigger &t : trigger) {
+		if (!strcmp(t.name.c_str(), name)){
+			if (!t.callBack){
+				//trigger.remove(t);
 				return true;
 			}
 			return false;
 		}
 	}
-	*/
 	return true;
 }
 
+void InputDevice::loadVars() {
+	#define CREATE_CVAR(name, type, help, default_value, system_var)	CVar::settings[name] = CVar::create<type>(name, help, default_value, system_var)
+
+	CREATE_CVAR("in_keyboard"		, Boolean	, "Control Keyboard input interaction"	, true	, true);
+	CREATE_CVAR("in_mouse"			, Boolean	, "Control Mouse input interaction"		, false	, true);
+	CREATE_CVAR("in_joystick"		, Boolean	, "Control Joystick input interaction"	, false	, true);
+	CREATE_CVAR("in_joysens"		, Floating	, "Joystick axis sensibility"			, 1.0f	, true);
+	CREATE_CVAR("aim_swap_axis"		, Boolean	, "Aim Swap X - Y Axes"					, false	, true);
+	CREATE_CVAR("aim_invert_x"		, Boolean	, "Invert only X Axis"					, false	, true);
+	CREATE_CVAR("aim_invert_y"		, Boolean	, "Invert only Y Axis"					, false	, true);
+	CREATE_CVAR("aim_acceleration"	, Boolean	, "Enable aiming acceleration"			, false	, true);
+	CREATE_CVAR("aim_sensitivity"	, Floating	, "Aiming sensitivity"					, 1.0f	, true);
+		((Floating*)CVar::settings["aim_sensitivity"])->setMinMax(0.0001f, 100.0f);
+	CREATE_CVAR("debug_joystick"	, Boolean	, "Show joystick debugging information"	, false	, true);
+	CREATE_CVAR("debug_keyboard"	, Boolean	, "Show keyboard debugging information"	, false	, true);
+	CREATE_CVAR("debug_crosshair"	, Boolean	, "Show crosshair debugging information", false	, true);
+	CREATE_CVAR("aim_backwards"		, Boolean	, "Aim backwards enable"				, false	, true);	
+}
 
 #undef gpu

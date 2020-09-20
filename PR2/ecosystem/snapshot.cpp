@@ -131,6 +131,11 @@ void Demo::start(void){
 	playing = true;
 }
 
+void Demo::clear() {
+	//TODO: clear all data and prepare to create new demo
+	initialized = false;//set to true when recording is finished to be able to notify there is demo data stored available to play back
+}
+
 bool Demo::play(InputDevice *device){
 	if(!current_chunk) playing = false;
 	if(!playing) return false;
