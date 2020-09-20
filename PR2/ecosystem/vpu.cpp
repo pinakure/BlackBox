@@ -1,5 +1,6 @@
 #include "vpu.hpp"
 #include "engine.hpp"
+#include "console.hpp"
 
 Surface Vpu::console;
 Surface Vpu::overlay[4];
@@ -78,7 +79,8 @@ void Vpu::clearAll() {
 bool Vpu::start() {		
 	width = Engine::width*2;
 	height = Engine::height*2;
-	al_set_new_display_flags(fullscreen ? ALLEGRO_OPENGL | ALLEGRO_FULLSCREEN : ALLEGRO_OPENGL);
+	int flags = ALLEGRO_OPENGL | ALLEGRO_RESIZABLE;
+	al_set_new_display_flags(fullscreen ? flags | ALLEGRO_FULLSCREEN : flags);
 	if (display) {
 		al_unregister_event_source(Engine::queue, al_get_display_event_source(display));
 		al_destroy_display(display);
@@ -104,10 +106,7 @@ void Vpu::initializeFonts() {
 bool Vpu::restart() {
 	for (int i = 0; i < 12; i++) {
 		if(__layers[i]){
-			if((*__layers[i]).bitmap){
-				al_destroy_bitmap((*__layers[i]).bitmap);
-				(*__layers[i]).bitmap = NULL;
-			}
+			destroySurface(*__layers[i]);
 			__layers[i] = NULL;
 		}
 	}
@@ -139,12 +138,11 @@ bool Vpu::restart() {
 	buffer = al_create_bitmap(width, height);
 	if(!buffer) return false;			
 	// (Re)initialize console framebuffer
-	if (console.bitmap) {
-		al_destroy_bitmap(console.bitmap);
-		buffer = NULL;
-	}
+	destroySurface(console);
+	destroySurface(Console::bitmap);
+	destroySurface(Console::backdrop);
 	console = createBitmap(width/2, height/2);
-	if(!console.enabled) return false;			
+	if(!console.enabled) return false;	
 	Vpu::select(console);
 	Vpu::paint(0, 0, 0, 0);
 
@@ -167,6 +165,8 @@ bool Vpu::initialize() {
 		legacy_font = al_create_builtin_font();
 		font = legacy_font;	
 		if (!restart()) return false;
+		al_set_window_title(display, "BlackBox v.3");
+		al_set_window_constraints(display, 320, 240, 1280, 1024);
 		return true;
 	} catch (int e) {
 		e = e;
@@ -186,23 +186,11 @@ void Vpu::select(Surface &target) {
 void Vpu::deinitialize() {
 	if(  font ) al_destroy_font(font);
 	if(display) al_destroy_display(display);
-	for (int i = 0; i < 4; i++) {
-		if (overlay[i].bitmap) {
-			al_destroy_bitmap(overlay[i].bitmap);
-			overlay[i].bitmap = NULL;
-		}
-		if (foreground[i].bitmap) {
-			al_destroy_bitmap(foreground[i].bitmap);
-			foreground[i].bitmap = NULL;
-		}
-		if (background[i].bitmap) {
-			al_destroy_bitmap(background[i].bitmap);
-			background[i].bitmap = NULL;
-		}
-	}
-	if(console.bitmap) {
-		al_destroy_bitmap(console.bitmap);
-		console.bitmap = NULL;
+	destroySurface(console);
+	for (int i = 0; i < 4; i++) {		
+		destroySurface(overlay[i]);
+		destroySurface(foreground[i]);
+		destroySurface(background[i]);		
 	}
 	if (buffer) {
 		al_destroy_bitmap(buffer);

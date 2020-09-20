@@ -22,7 +22,6 @@ typedef struct s_Surface {
 
 class Vpu {
 private:
-	static ALLEGRO_DISPLAY				*display;
 	static ALLEGRO_BITMAP				*buffer;	
 	static ALLEGRO_FONT					*font;
 	static ALLEGRO_FONT					*legacy_font;
@@ -32,6 +31,7 @@ private:
 	static ALLEGRO_BITMAP				*target;	
 	static std::vector<ALLEGRO_COLOR>	color_stack;
 public:
+	static ALLEGRO_DISPLAY				*display;
 	static bool							is_initialized;
 	static bool							fullscreen;	
 	static Surface						overlay[4];

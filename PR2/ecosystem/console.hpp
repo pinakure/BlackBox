@@ -202,7 +202,8 @@ class Console{
 		static void						addCommand(const char *cmdname, callback function, const char *help, const char *usage);
 		static void						addSpecial(const char *cmdname, void(*function)(int), const char *help);
 
-		
+
+		static void						paintBackdrop();
 
 		// PUBLIC API
 		static void 					scroll(int i);
