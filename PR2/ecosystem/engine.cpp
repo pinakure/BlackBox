@@ -65,6 +65,15 @@ void Engine::handleEvents() {
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
 			run = false;
 			break;
+		case ALLEGRO_EVENT_DISPLAY_RESIZE:
+			{
+				al_acknowledge_resize(Vpu::display);
+				Engine::width = event.display.width;
+				Engine::height = event.display.height;
+				if (!Vpu::start()) run = false;
+				if (!Vpu::restart()) run = false;
+				break;
+			}
 		default:
 			break;
 	}		
@@ -84,8 +93,8 @@ void Engine::render() {
 void Engine::update() {
 	Hud::update();
 	Console::update();
-	handleEvents();
 	render();
+	handleEvents();
 	cycles++;
 }
 

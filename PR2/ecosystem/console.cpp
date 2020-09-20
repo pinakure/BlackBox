@@ -1,4 +1,4 @@
-#include "cvar.hpp"
+﻿#include "cvar.hpp"
 #include "integer.hpp"
 #include "vpu.hpp"
 #include "color.hpp"
@@ -567,7 +567,7 @@ void Console::clear(void){
 		lines.erase(lines.begin());
 	}
 	while(lines.size() < (unsigned)height){
-		lines.push_back("[------------------------]");
+		lines.push_back("");
 	}
 	return;
 }
@@ -631,6 +631,30 @@ bool Console::evaluate(const char *expr){
 	}
 	return false;
 }
+
+void Console::paintBackdrop() {	
+	static bool blink = false;
+	
+	Color *bgc = Console::con_bgcolor; 
+		
+	float c = float(bgc->lightness) / float(Vpu::console.height );
+	float i = 0.0f;
+	Vpu::select(backdrop);
+	Vpu::lock();
+	for(int y= 0 ; y < Vpu::console.height; y++){
+		for(int x= 0 ; x < Vpu::console.width; x++){
+			if (blink)
+				Vpu::setColor(y/8,120,120,Console::opacity*255);
+			else
+				Vpu::setColor(128,y/8,120,Console::opacity*255);
+			Vpu::putpixel(x, y);
+			blink ^=1;	
+		}
+		blink ^=1;
+		i+=c;
+	}		
+	Vpu::unlock();
+}
 	
 void Console::draw(int h){
 	if (!enabled){
@@ -641,28 +665,7 @@ void Console::draw(int h){
 	if(!bitmap.bitmap) bitmap = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );	
 	if (!backdrop.bitmap) {
 		backdrop = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );
-		static bool blink = false;
-
-	
-		Color *bgc = Console::con_bgcolor; 
-		
-		float c = float(bgc->lightness) / float(Vpu::console.height );
-		float i = 0.0f;
-		Vpu::select(backdrop);
-		Vpu::lock();
-		for(int y= 0 ; y < Vpu::console.height; y++){
-			for(int x= 0 ; x < Vpu::console.width; x++){
-				if (blink)
-					Vpu::setColor(y/8,120,120,Console::opacity*255);
-				else
-					Vpu::setColor(128,y/8,120,Console::opacity*255);
-				Vpu::putpixel(x, y);
-				blink ^=1;	
-			}
-			blink ^=1;
-			i+=c;
-		}		
-		Vpu::unlock();
+		Console::paintBackdrop();
 	}
 	
 	static int cursor = CONSOLE_BLINK_SPEED;
@@ -701,10 +704,9 @@ void Console::render(int h, bool drawCursor){
 		a.append(drawCursor?"_":" ");
 	}
 	
-	//Vpu::print(bitmap, 0, GPU::height - h, Bitmap::makecolor(255,255,0), -1, "%02d:%02d:%02d > %s", Clock::hour, Clock::minute, Clock::second,a.c_str());
-		Vpu::setColor(255, 255, 0);
+		Vpu::setColor(200, 200, 0,250);
 		char cmdline[65535];
-		sprintf_s(cmdline, "%02d:%02d:%02d > %s", 0/*Clock::hour*/, 0/*Clock::minute*/, 0/*Clock::second*/, a.c_str());
+		sprintf_s(cmdline, "%02d:%02d:%02d > %s", ((Engine::epoch/3600)%24), (Engine::epoch/60)%60, Engine::epoch%60, a.c_str());
 		Vpu::print(std::string(cmdline), 0, (Vpu::console.height) - h);
 	
 	// Render lines
@@ -747,7 +749,7 @@ void Console::render(int h, bool drawCursor){
 
 		n++;
 		if(n >= lines.size()) {
-			lines.push_back("[-------------]");
+			lines.push_back("");
 		}
 	}
 
