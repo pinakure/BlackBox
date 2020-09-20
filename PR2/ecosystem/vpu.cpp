@@ -180,7 +180,21 @@ void Vpu::deinitialize() {
 
 void Vpu::setColor(int r, int g, int b, int alpha) {
 	color  = al_map_rgba(r, g, b, alpha);
-	shadow = al_map_rgba(r/2, g/2, b/2, alpha);
+	shadow = Vpu::alter(color, 0.5f, 0.5f, 0.5f);
+}
+
+void Vpu::setColor(ALLEGRO_COLOR _color) {
+	Vpu::color  = _color;
+	Vpu::shadow = Vpu::alter(_color, 0.5f, 0.5f, 0.5f);
+}
+
+ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, float qa) {
+	ALLEGRO_COLOR ret = _color; 
+	ret.r *= qr;
+	ret.g *= qg;
+	ret.b *= qb;
+	ret.a *= qa;
+	return ret;
 }
 
 void Vpu::print(std::string text, int  x, int y) {
@@ -296,6 +310,25 @@ void Vpu::popColor() {
 	}
 }
 
+void Vpu::putpixel(int x, int y) {
+	al_put_pixel(x, y, color);
+}
+
+Surface &Vpu::destroySurface(Surface &surface) {
+	if (surface.bitmap) al_destroy_bitmap(surface.bitmap);
+	surface.bitmap = NULL;
+	surface.width = 0;
+	surface.height = 0;
+	surface.enabled = false;
+	surface.rotation[0] = 0;
+	surface.rotation[1] = 0;
+	surface.rotation[2] = 0;
+	surface.scale[0] = 0;
+	surface.scale[1] = 0;
+	surface.scale[2] = 0;
+	return surface;
+}
+
 Surface Vpu::createBitmap(int width, int height) {
 	Surface s;
 	s.bitmap = al_create_bitmap(width, height);
@@ -317,3 +350,34 @@ Surface Vpu::loadBitmap(std::string filename) {
 	}
 	return s;
 }
+
+void Vpu::fadeout() {
+	select(*__layers[11]);
+	al_draw_bitmap(buffer, 0, 0, 0);
+	float alpha = 0.0f;
+	while (alpha < 255.0f) {
+		al_set_target_bitmap(buffer);
+		al_draw_bitmap((*__layers[11]).bitmap, 0, 0, 0);	
+		al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(0, 0, 0, alpha));
+		al_set_target_backbuffer(display);
+		al_draw_bitmap(buffer, 0, 0, 0);	
+		al_flip_display();
+		alpha += 1.5f;
+	}	
+}
+
+void Vpu::fadein() {
+	select(*__layers[11]);
+	al_draw_bitmap(buffer, 0, 0, 0);
+	float alpha = 255.0f;
+	while (alpha > 0.0f) {
+		al_set_target_bitmap(buffer);
+		al_draw_bitmap((*__layers[11]).bitmap, 0, 0, 0);	
+		al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(0, 0, 0, alpha));
+		al_set_target_backbuffer(display);
+		al_draw_bitmap(buffer, 0, 0, 0);	
+		al_flip_display();
+		alpha -= 1.5f;
+	}	
+}
+	

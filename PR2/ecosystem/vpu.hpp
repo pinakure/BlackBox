@@ -63,8 +63,14 @@ public:
 	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void paint(int r, int g, int b, int alpha = 255);
 	static void setColor(int r, int g, int b, int alpha = 255);
+	static void setColor(ALLEGRO_COLOR color);
+	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
 	static void pushColor();
 	static void popColor();
+	static void fadeout();
+	static void fadein();
+	static void putpixel(int x, int y);
+	static Surface &destroySurface(Surface &surface);
 	static Surface loadBitmap(std::string filename);
 	static Surface createBitmap(int width, int height);
 	static Surface *__layers[12];
