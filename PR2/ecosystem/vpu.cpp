@@ -162,6 +162,7 @@ bool Vpu::initialize() {
 		if (!al_init_font_addon()) return false;
 		if (!al_init_ttf_addon()) return false;
 		if (!al_init_primitives_addon())return false;
+		if (!al_init_image_addon())return false;		
 		legacy_font = al_create_builtin_font();
 		font = legacy_font;	
 		if (!restart()) return false;
@@ -196,7 +197,11 @@ void Vpu::deinitialize() {
 		al_destroy_bitmap(buffer);
 		buffer = NULL;
 	}
+	al_shutdown_image_addon();
 	al_shutdown_primitives_addon();
+	al_shutdown_ttf_addon();
+	al_shutdown_font_addon();
+		
 }
 
 void Vpu::setColor(int r, int g, int b, int alpha) {
@@ -359,7 +364,7 @@ Surface Vpu::createBitmap(int width, int height) {
 
 Surface Vpu::loadBitmap(std::string filename) {
 	Surface s;
-	s.bitmap = al_load_bitmap(filename.c_str());	
+	s.bitmap = al_load_bitmap(("./"+filename).c_str());	
 	s.enabled = s.bitmap != NULL;
 	if (s.enabled) {
 		s.width  = al_get_bitmap_width(s.bitmap);

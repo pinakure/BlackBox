@@ -2,6 +2,7 @@
 #define __ENGINE_HPP
 
 #include "sprite.hpp"
+#include <string>
 
 class Engine {
 private:
@@ -24,6 +25,9 @@ public:
 	static void update();
 	static void render();
 	static void handleEvents();
+	static void error(std::string text);
+	static void print(std::string text);
+	static void printf(const char *fmt, ...);
 };
 
 #endif

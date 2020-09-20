@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "input.hpp"
 #include "hud.hpp"
 #include "console.hpp"
 
@@ -15,13 +16,12 @@ ALLEGRO_EVENT Engine::event;
 bool Engine::initialize() {
 	try{
 		al_init();
-		al_install_keyboard();
 		clock   = al_create_timer(1.0);
 		timer	= al_create_timer(1.0 / 60.0);
 		queue	= al_create_event_queue();
 		
 		if (!Vpu::initialize()) return false;
-		al_register_event_source(queue, al_get_keyboard_event_source());
+		if (!InputDevice::initialize())return false;
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
@@ -43,6 +43,7 @@ bool Engine::initialize() {
 void Engine::deinitialize() {
 	//TypeWriter::deInitialize();
 	Console::deInitialize();
+	InputDevice::deinitialize();
 	Vpu::deinitialize();
 	if(timer) al_destroy_timer(timer);
 	if(queue) al_destroy_event_queue(queue);
@@ -102,4 +103,30 @@ void Engine::loop() {
 	while(run){
 		update();
 	}	
+}
+void Engine::error(std::string text) {
+	if (Console::initialized) {
+		Console::print(text);
+		return;
+	}
+	fprintf(stderr, "%s\n", text.c_str());
+}
+
+void Engine::printf(const char *fmt, ...){
+	char buffer[1024];
+
+	va_list ap;
+	va_start(ap, fmt);
+	vsprintf_s(buffer, 1024, fmt, ap);
+	va_end(ap);
+
+	Engine::print(buffer);
+}
+
+void Engine::print(std::string text) {	
+	if (Console::initialized) {
+		Console::print(text);
+		return;
+	}
+	fprintf(stdout, "%s\n", text.c_str());
 }

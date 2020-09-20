@@ -644,9 +644,17 @@ void Console::paintBackdrop() {
 	for(int y= 0 ; y < Vpu::console.height; y++){
 		for(int x= 0 ; x < Vpu::console.width; x++){
 			if (blink)
-				Vpu::setColor(y/8,120,120,Console::opacity*255);
+				Vpu::setColor(
+					128-((float(y)/float(Vpu::console.height))*128.0f),
+					100-((float(y)/float(Vpu::console.height))*100.0f),
+					 50-((float(y)/float(Vpu::console.height))* 50.0f),
+					Console::opacity*255);
 			else
-				Vpu::setColor(128,y/8,120,Console::opacity*255);
+				Vpu::setColor(
+					 50-((float(y)/float(Vpu::console.height))* 50.0f),
+					255-((float(y)/float(Vpu::console.height))*128.0f),
+					200-((float(y)/float(Vpu::console.height))*100.0f),
+					Console::opacity*255);
 			Vpu::putpixel(x, y);
 			blink ^=1;	
 		}
