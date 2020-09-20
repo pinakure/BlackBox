@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "hud.hpp"
+#include "console.hpp"
 
 int Engine::width = 640;
 int Engine::height = 480;
@@ -25,11 +26,13 @@ bool Engine::initialize() {
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
 		al_start_timer(clock);
+		CVar::initialize();
+		Console::initialize();
 		TypeWriter::initialize();
-		TypeWriter::enqueue("Hello world!");
-		TypeWriter::enqueue("Hello world!");
-		TypeWriter::enqueue("Hello world!");
-		TypeWriter::enqueue("Hello world!");
+		TypeWriter::enqueue(" ");
+		TypeWriter::enqueue(" ");
+		TypeWriter::enqueue("Welcome to BlackBox");
+		TypeWriter::enqueue(" ");
 		return true;
 	} catch (int e) {
 		e = e;
@@ -38,7 +41,9 @@ bool Engine::initialize() {
 }
 
 void Engine::deinitialize() {
-	Vpu::initialize();
+	//TypeWriter::deInitialize();
+	Console::deInitialize();
+	Vpu::deinitialize();
 	if(timer) al_destroy_timer(timer);
 	if(queue) al_destroy_event_queue(queue);
 }
@@ -68,6 +73,7 @@ void Engine::handleEvents() {
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		Hud::draw();
+		Console::draw(12);
 		Vpu::render();		
 		Vpu::frames++;
 		Vpu::total_frames++;
@@ -77,7 +83,8 @@ void Engine::render() {
 
 void Engine::update() {
 	Hud::update();
-	handleEvents();		
+	Console::update();
+	handleEvents();
 	render();
 	cycles++;
 }

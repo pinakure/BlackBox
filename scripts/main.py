@@ -7,6 +7,7 @@ def configure():
     vpu.fullscreen(False)
 
 def main():
+    return
     # some tests to check vpu functionalities
     #for i in range(0,11):
     #    vpu.disable(i)

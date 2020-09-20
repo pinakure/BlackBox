@@ -28,7 +28,7 @@ void TypeWriter::initialize() {
 
 void TypeWriter::draw() {
 	Vpu::select(Vpu::overlay[3]);
-	Vpu::paint(0, 0, 0, 0);
+	Vpu::clear();
 	if((!queue.size())
 	&&(width<=2)
 	&&(height<=2)

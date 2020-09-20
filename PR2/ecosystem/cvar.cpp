@@ -430,9 +430,9 @@ void CVar::loadCommands(void) {
 
 void CVar::loadVars(void) {
 	if (initialized)return;
+	Console::loadVars();
 
 	/*
-	Console::loadVars();
 	InputDevice::loadVars();
 	GPU::loadVars();
 	Map::loadVars();

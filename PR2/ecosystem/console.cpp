@@ -11,8 +11,8 @@ std::map<std::string, std::string>	Console::aliases;
 std::vector<Toggle*>		Console::toggles;
 std::vector<std::string>	Console::lines;				
 std::vector<Message>		Console::messages;
-int							Console::height = 0;		//!< Recalculated in runtime // (GPU::height / 8) - 1;
-int							Console::visibleHeight = 0;	//!< Visible size of the console, to draw it full sized, it must match CONSOLE_HEIGHT macro.
+int							Console::height = 29;		//!< Recalculated in runtime // (GPU::height / 8) - 1;
+int							Console::visibleHeight = 960;//0;	//!< Visible size of the console, to draw it full sized, it must match CONSOLE_HEIGHT macro.
 int							Console::speed = 24;
 
 Text*						Console::result = 0;
@@ -29,8 +29,10 @@ int							Console::bgcolor = 0xC0104010;
 Surface						Console::backdrop;
 Surface						Console::bitmap;			
 
+float						Console::opacity=0.75f;
+
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
-bool						Console::enabled = false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
+bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
 bool						Console::redraw = true;		//!< true if the console buffer must be redrawn (so render would be called)
 bool						Console::echo = true;		//!< true if inputted console commands are shown ingame
 bool						Console::ctrlc = false; 	//!< true if was pressed
@@ -73,6 +75,7 @@ void Console::initialize(void){
 
 	std::replace(cwd.begin(), cwd.end(), '\\', '/');
 	clear();
+
 	loadCommands();
 
 	// Set pointers to CVars
@@ -564,7 +567,7 @@ void Console::clear(void){
 		lines.erase(lines.begin());
 	}
 	while(lines.size() < (unsigned)height){
-		lines.push_back("");
+		lines.push_back("[------------------------]");
 	}
 	return;
 }
@@ -635,11 +638,31 @@ void Console::draw(int h){
 		return;
 	} 
 	
-	if(bitmap.bitmap){
-		bitmap = Vpu::createBitmap(Vpu::width, Vpu::height);
-	}
-	if(backdrop.bitmap){
-		backdrop = Vpu::createBitmap(Vpu::width, Vpu::height);
+	if(!bitmap.bitmap) bitmap = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );	
+	if (!backdrop.bitmap) {
+		backdrop = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );
+		static bool blink = false;
+
+	
+		Color *bgc = Console::con_bgcolor; 
+		
+		float c = float(bgc->lightness) / float(Vpu::console.height );
+		float i = 0.0f;
+		Vpu::select(backdrop);
+		Vpu::lock();
+		for(int y= 0 ; y < Vpu::console.height; y++){
+			for(int x= 0 ; x < Vpu::console.width; x++){
+				if (blink)
+					Vpu::setColor(y/8,120,120,Console::opacity*255);
+				else
+					Vpu::setColor(128,y/8,120,Console::opacity*255);
+				Vpu::putpixel(x, y);
+				blink ^=1;	
+			}
+			blink ^=1;
+			i+=c;
+		}		
+		Vpu::unlock();
 	}
 	
 	static int cursor = CONSOLE_BLINK_SPEED;
@@ -652,45 +675,21 @@ void Console::draw(int h){
 		redraw = true;
 	}
 	
-	if(redraw)render(h, showCursor);
 	
-	if( visibleHeight < Vpu::height) visibleHeight += speed;
-	else visibleHeight = Vpu::height;
+	if( visibleHeight < Vpu::console.height ) visibleHeight += speed;
+	else visibleHeight = Vpu::console.height ;
 	
-	Vpu::select(Vpu::overlay[3]);
-	//Vpu::drawBitmap(bitmap.bitmap);
-	/*
-	bitmap->copyTransparent(GPU::ui_vram, 
-							0, GPU::height-visibleHeight,
-							0, 0, 
-							bitmap->w, visibleHeight);	
-	*/
+	if (redraw) {
+		render(h, showCursor);
+	}
+	
 }
 
 void Console::render(int h, bool drawCursor){
-	static bool blink = false;
-
 	
-	Color *bgc = Console::con_bgcolor; 
-	Color *fgc = Console::con_fgcolor; 
-	
-	float c = float(bgc->lightness) / float(Vpu::height);
-	float i = 0.0f;
-	for(int y= 0 ; y < Vpu::height; y++){
-		for(int x= 0 ; x < Vpu::width; x++){
-			if (blink)
-				Vpu::setColor(255,120,120,128);
-			else
-				Vpu::setColor(128,120,120,128);
-			Vpu::putpixel(x, y);
-			blink ^=1;	
-		}
-		blink ^=1;
-		i+=c;
-	}		
-
 	unsigned int n = consoleHistoryCursor;
-	
+	Vpu::select(bitmap);
+	Vpu::clear();
 	// If edit point is not first, move cursor...
 	std::string a = "";
 	if(command.length() > 0) {
@@ -701,21 +700,24 @@ void Console::render(int h, bool drawCursor){
 	} else {
 		a.append(drawCursor?"_":" ");
 	}
-		
-	Vpu::select(Vpu::overlay[3]);
-	Vpu::setColor(255, 255, 0);
+	
 	//Vpu::print(bitmap, 0, GPU::height - h, Bitmap::makecolor(255,255,0), -1, "%02d:%02d:%02d > %s", Clock::hour, Clock::minute, Clock::second,a.c_str());
-	char cmdline[65535];
-	sprintf_s(cmdline, "%02d:%02d:%02d > %s", 0/*Clock::hour*/, 0/*Clock::minute*/, 0/*Clock::second*/, a.c_str());
-	Vpu::print(std::string(cmdline), 0, Vpu::height - h);
+		Vpu::setColor(255, 255, 0);
+		char cmdline[65535];
+		sprintf_s(cmdline, "%02d:%02d:%02d > %s", 0/*Clock::hour*/, 0/*Clock::minute*/, 0/*Clock::second*/, a.c_str());
+		Vpu::print(std::string(cmdline), 0, (Vpu::console.height) - h);
 	
 	// Render lines
-	for(int u = Vpu::height-(h*2); u>=0; u-= h){
+	for(int u = (Vpu::console.height)-(h*2); u>=0; u-= h){
+		if (!lines.size())continue;		
 #ifndef CONSOLE_COLOR		
-		textout_ex(bitmap, font, lines.get(n)->c_str(), 0, i, config.con_fgcolor->get(), -1);
+		//textout_ex(bitmap, font, lines.get(n)->c_str(), 0, i, config.con_fgcolor->get(), -1);
+		Vpu::print(lines[n], 0, i);
 #else
+		Color *fgc = Console::con_fgcolor; 
 		std::string li = lines[n].c_str();			
 		if(li.find("~")== std::string::npos){
+			Vpu::print(li, 0, u);
 			//textout_ex(bitmap, font, li.c_str(), 0, u, Color::get(fgc), -1);
 		} else {
 			if(li.length() > 0){		
@@ -732,7 +734,6 @@ void Console::render(int h, bool drawCursor){
 						color = Console::palette[strtol(piece.substr(0,1).c_str(), NULL, 16)];
 						//Vpu::setColor(color);
 						Vpu::setColor(255,0,128);
-						Vpu::select(Vpu::overlay[3]);
 						Vpu::print(std::string(data), x, u);
 								// originally commented out // x += GPU::currentFont->width(piece.append(" ").c_str());
 						//x += Vpu::current_font->width(data);
@@ -746,7 +747,7 @@ void Console::render(int h, bool drawCursor){
 
 		n++;
 		if(n >= lines.size()) {
-			lines.push_back(std::string(""));
+			lines.push_back("[-------------]");
 		}
 	}
 
@@ -754,6 +755,13 @@ void Console::render(int h, bool drawCursor){
 
 	n++;
 	
+	Vpu::select(Vpu::console);
+	Vpu::clear();
+	Vpu::drawSurface(backdrop, 0, Vpu::console.height -visibleHeight,							
+							   Vpu::console.width, visibleHeight);	
+	Vpu::drawSurface(bitmap, 0, Vpu::console.height -visibleHeight,							
+							 Vpu::console.width, visibleHeight);
+
 	redraw = false;
 }
 

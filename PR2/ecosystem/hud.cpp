@@ -14,25 +14,18 @@ void Hud::draw() {
 }
 
 void Hud::drawDebugInfo() {
+	return;
 	Vpu::select(Vpu::overlay[0]);
-	Vpu::paint(0, 0, 0,0);
+	Vpu::paint(0, 64, 0, 255);
+	/*
 	Vpu::select(Vpu::overlay[0]);
-	int w = Vpu::overlay[0].width/2;
-	int h = Vpu::overlay[0].height/2;
-	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN    , w, h, 200,   0, 64, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN    , w, h,   0, 200, 64, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN + h, w, h,   0, 200, 64, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN + h, w, h, 200,   0, 64, 64);
-
+	Vpu::subdivide(200, 0, 64, 64);
+	
 	Vpu::select(Vpu::overlay[1]);
-	Vpu::paint(0, 0, 0,0);
-	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN    , w, h, 0, 0, 200, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN    , w, h, 0, 200, 200, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN    , VPU_OVERSCAN + h, w, h, 0, 200, 200, 64);
-	Vpu::fillRectangle(VPU_OVERSCAN + w, VPU_OVERSCAN + h, w, h, 0, 0, 200 , 64);
-
+	Vpu::subdivide(0, 0, 200, 64);
+	*/
 	Vpu::select(Vpu::overlay[2]);
-	Vpu::paint(0, 0, 0,0);
+	Vpu::clear();
 	Vpu::printInteger("Last Frame Events:", Engine::cycles	,  0,  0);
 	Vpu::printInteger("Frames per Second:", Vpu::fps		,  0, 20);
 	Vpu::printInteger("Engine Epoch time:", Engine::epoch	,  0, 40);		
