@@ -77,6 +77,7 @@ class Console{
 		static Color					*con_fgcolor;
 		static Color					*con_bgcolor;
 		static Boolean					*debug_script;
+		static float					opacity;
 
 		////////////////////////////////////////////
 		// MEMBERS										//
