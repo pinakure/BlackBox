@@ -1,4 +1,4 @@
-
+static unsigned char key[256];
 
 /** 
 @param keyValue Value of the key to monitor status
@@ -27,8 +27,7 @@ Trigger::Trigger(int keyValue, int enableKeyRepeat, void(*callback)(int), bool o
 }
 
 void Trigger::update(void){
-	/*
-		if(key[keyValue]){
+	if(key[keyValue]){
 		if(keyDown){
 			keyDown = false;
 			keyPress = true; 
@@ -56,8 +55,7 @@ void Trigger::update(void){
 			keyPress = false;
 			keyUp = true;
 		}
-	}
-	*/
+	}	
 	
 	// Automatically call callbacks when its authorized
 	if(enableKeyDownCallBack){ if(keyDown) trig(0); }
@@ -71,4 +69,10 @@ void Trigger::trig(int buttonState){
 		return;
 	}
 	Console::execute(command.c_str(), true);	
+}
+
+bool Trigger::operator==(Trigger &t) {
+	return (this->callBack == t.callBack)
+		&& (this->command == t.command)
+		&& (this->name == t.name);
 }

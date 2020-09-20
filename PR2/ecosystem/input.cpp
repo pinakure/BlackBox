@@ -68,8 +68,6 @@ Boolean					*InputDevice::debug_crosshair;
 // #define ALLEGRO_NO_INPUT
 // this is defined in target release preprocessor in VStudio
 
-static int key[256];
-
 												// "><", "()", "[]", "/\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 const char *controller_button_names[INPUT_MAX] = { "B1", "B2", "B3", "B4", "T1", "T2", "T3", "T4", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 
@@ -130,55 +128,6 @@ void InputDevice::describeJoystick(int index){
 @param &keyBuf Reference to a char[0x80] containing a string which maximum length can be 0x7F, and each one of the chars until a zero is found represents the keycodes being pressed.
 @bug When pressing simultaneously two or more keys, there is no keyrepeat. I dont know if this is really a bug or a cool feature. 
 **/
-void InputDevice::pollAsciiKeyArray(char (&keyBuf)[0x80]){//one extra place for \0
-	
-	static int lastKey = 0x00;
-	
-	int o = 0;
-	
-	
-	for(int i=1; i<0x70; i++) {
-		
-		
-		if(!key[i]) {
-			if(i == lastKey) {
-				keyRepeatDelay = 25; 
-				lastKey = 0x00;
-			}
-		} else {
-			if(key[i]) {
-				if(lastKey == 0x00){
-					keyRepeatDelay = 25;		
-					keyRepeat = 5;					
-					lastKey = i;
-					keyBuf[o] = lastKey;
-				} else if(lastKey == i){
-					
-					if(keyRepeatDelay != 0) {
-						keyRepeatDelay --; 
-					} else {
-						if(keyRepeat > 1){
-							keyRepeat--;					
-						} else {
-							keyRepeat = 3;
-							keyBuf[o] = lastKey;
-						}
-					}
-				}
-				o++;
-			}		 	
-		}
-		key[i] = 0;
-	}
-	
-	if(o == 0) {
-		keyRepeat = 5;
-		lastKey=0x00;
-	}
-	
-	keyBuf[o] = '\0';	
-} 
-
 typedef struct s_Point {
 	int x;
 	int y;
@@ -194,105 +143,103 @@ float bitmap_keys_size =4.0f;
 static std::map<int, KeyInfo> bitmap_keys;
 
 static bool initializeBitmapKeys(void) {
-	/*
-	bitmap_keys[KEY_ESC		] = { {  0, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F1		] = { {  4, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F2		] = { {  6, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F3		] = { {  8, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F4		] = { { 10, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F5		] = { { 13, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F6		] = { { 15, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F7		] = { { 17, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F8		] = { { 19, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F9		] = { { 22, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F10		] = { { 24, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F11		] = { { 26, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_F12		] = { { 28, 0 },{ 2, 2 } };
 	
-	bitmap_keys[KEY_PRTSCR	] = { { 31, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_SCRLOCK	] = { { 33, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_PAUSE	] = { { 35, 0 },{ 2, 2 } };
-	bitmap_keys[KEY_INSERT	] = { { 31, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_HOME	] = { { 33, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_PGUP	] = { { 35, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_DEL		] = { { 31, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_END		] = { { 33, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_PGDN	] = { { 35, 4 },{ 2, 2 } };
-
-	bitmap_keys[KEY_TILDE	] = { {  0, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_1		] = { {  2, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_2		] = { {  4, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_3		] = { {  6, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_4		] = { {  8, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_5		] = { { 10, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_6		] = { { 12, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_7		] = { { 14, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_8		] = { { 16, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_9		] = { { 18, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_0		] = { { 20, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_BACKQUOTE] = { { 22, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_QUOTE]= { { 22, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_EQUALS	] = { { 24, 2 },{ 2, 2 } };
-	bitmap_keys[KEY_BACKSPACE]= { { 26, 2 },{ 4, 2 } };
+	bitmap_keys[ALLEGRO_KEY_ESCAPE  ] = { {  0, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F1		] = { {  4, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F2		] = { {  6, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F3		] = { {  8, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F4		] = { { 10, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F5		] = { { 13, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F6		] = { { 15, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F7		] = { { 17, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F8		] = { { 19, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F9		] = { { 22, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F10		] = { { 24, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F11		] = { { 26, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F12		] = { { 28, 0 },{ 2, 2 } };
 	
-	bitmap_keys[KEY_TAB		] = { {  0, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_Q		] = { {  3, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_W		] = { {  5, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_E		] = { {  7, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_R		] = { {  9, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_T		] = { { 11, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_Y		] = { { 13, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_U		] = { { 15, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_I		] = { { 17, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_O		] = { { 19, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_P		] = { { 21, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_OPENBRACE ] = { { 23, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_CLOSEBRACE] = { { 25, 4 },{ 2, 2 } };
-	bitmap_keys[KEY_ENTER	] = { { 27, 4 },{ 3, 4 } };
+	bitmap_keys[ALLEGRO_KEY_PRINTSCREEN] = { { 31, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_SCROLLLOCK ] = { { 33, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_PAUSE	] = { { 35, 0 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_INSERT	] = { { 31, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_HOME	] = { { 33, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_PGUP	] = { { 35, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_DELETE	] = { { 31, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_END		] = { { 33, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_PGDN	] = { { 35, 4 },{ 2, 2 } };
 
-	bitmap_keys[KEY_CAPSLOCK] = { {  0, 6 },{ 4, 2 } };
-	bitmap_keys[KEY_A		] = { {  4, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_S		] = { {  6, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_D		] = { {  8, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_F		] = { { 10, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_G		] = { { 12, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_H		] = { { 14, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_J		] = { { 16, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_K		] = { { 18, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_L		] = { { 20, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_SEMICOLON]= { { 22, 6 },{ 2, 2 } };
-	bitmap_keys[KEY_QUOTE	] = { { 24, 6 },{ 2, 2 } };
-	//bitmap_keys[KEY_] = { { 24, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_TILDE	] = { {  0, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_1		] = { {  2, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_2		] = { {  4, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_3		] = { {  6, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_4		] = { {  8, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_5		] = { { 10, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_6		] = { { 12, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_7		] = { { 14, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_8		] = { { 16, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_9		] = { { 18, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_0		] = { { 20, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_BACKQUOTE] = { { 22, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_QUOTE]= { { 22, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_EQUALS	] = { { 24, 2 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_BACKSPACE]= { { 26, 2 },{ 4, 2 } };
+	
+	bitmap_keys[ALLEGRO_KEY_TAB		] = { {  0, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_Q		] = { {  3, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_W		] = { {  5, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_E		] = { {  7, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_R		] = { {  9, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_T		] = { { 11, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_Y		] = { { 13, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_U		] = { { 15, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_I		] = { { 17, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_O		] = { { 19, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_P		] = { { 21, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_OPENBRACE ] = { { 23, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_CLOSEBRACE] = { { 25, 4 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_ENTER	] = { { 27, 4 },{ 3, 4 } };
 
-	bitmap_keys[KEY_LSHIFT	] = { {  0, 8 },{ 3, 2 } };
-	bitmap_keys[KEY_Z		] = { {  3, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_X		] = { {  5, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_C		] = { {  7, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_V		] = { {  9, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_B		] = { { 11, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_N		] = { { 13, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_M		] = { { 15, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_COMMA	] = { { 17, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_STOP	] = { { 19, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_MINUS	] = { { 21, 8 },{ 2, 2 } };
-//	bitmap_keys[KEY_CIRCUMFLEX] = { { 21, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_CAPSLOCK] = { {  0, 6 },{ 4, 2 } };
+	bitmap_keys[ALLEGRO_KEY_A		] = { {  4, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_S		] = { {  6, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_D		] = { {  8, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_F		] = { { 10, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_G		] = { { 12, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_H		] = { { 14, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_J		] = { { 16, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_K		] = { { 18, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_L		] = { { 20, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_SEMICOLON]= { { 22, 6 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_QUOTE	] = { { 24, 6 },{ 2, 2 } };
+	//bitmap_keys[ALLEGRO_KEY_] = { { 24, 6 },{ 2, 2 } };
 
-	bitmap_keys[KEY_UP		] = { { 33, 8 },{ 2, 2 } };
-	bitmap_keys[KEY_RSHIFT	] = { { 23, 8 },{ 8, 2 } };
+	bitmap_keys[ALLEGRO_KEY_LSHIFT	] = { {  0, 8 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_Z		] = { {  3, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_X		] = { {  5, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_C		] = { {  7, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_V		] = { {  9, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_B		] = { { 11, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_N		] = { { 13, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_M		] = { { 15, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_COMMA	] = { { 17, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_START	] = { { 19, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_MINUS	] = { { 21, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_CIRCUMFLEX] = { { 21, 8 },{ 2, 2 } };
 
-	bitmap_keys[KEY_LCONTROL] = { {  0, 10 },{ 4, 2 } };
-	bitmap_keys[KEY_LWIN	] = { {  4, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_ALT		] = { {  7, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_ALTGR	] = { { 18, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_SPACE	] = { { 10, 10 },{ 8, 2 } };
-	bitmap_keys[KEY_RWIN	] = { { 21, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_MENU	] = { { 24, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_RCONTROL] = { { 27, 10 },{ 3, 2 } };
-	bitmap_keys[KEY_LEFT	] = { { 31, 10 },{ 2, 2 } };
-	bitmap_keys[KEY_DOWN	] = { { 33, 10 },{ 2, 2 } };
-	bitmap_keys[KEY_RIGHT	] = { { 35, 10 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_UP		] = { { 33, 8 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_RSHIFT	] = { { 23, 8 },{ 8, 2 } };
 
-	*/
+	bitmap_keys[ALLEGRO_KEY_LCTRL   ] = { {  0, 10 },{ 4, 2 } };
+	bitmap_keys[ALLEGRO_KEY_LWIN	] = { {  4, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_ALT		] = { {  7, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_ALTGR	] = { { 18, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_SPACE	] = { { 10, 10 },{ 8, 2 } };
+	bitmap_keys[ALLEGRO_KEY_RWIN	] = { { 21, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_MENU	] = { { 24, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_RCTRL   ] = { { 27, 10 },{ 3, 2 } };
+	bitmap_keys[ALLEGRO_KEY_LEFT	] = { { 31, 10 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_DOWN	] = { { 33, 10 },{ 2, 2 } };
+	bitmap_keys[ALLEGRO_KEY_RIGHT	] = { { 35, 10 },{ 2, 2 } };	
 	return true;
 }
 
@@ -544,18 +491,24 @@ void InputDevice::drawJoystick(int x, int y) {
 void InputDevice::drawKeyboard(int x, int y) {
 	/*
 	PROFILE_START();
+	*/
+	
+	/*
 	masked_blit(keyboard_bitmap[0], bmp, 0, 0, x, y, keyboard_bitmap[0]->w, keyboard_bitmap[0]->h);
-
+	*/
 	for (size_t i = 0; i<255; i++) {
 		if(key[i] && (bitmap_keys.find(i) != bitmap_keys.end())) {
 			KeyInfo ki = bitmap_keys[i];
+			/*
 			masked_blit(keyboard_bitmap[1], bmp, 
 						ki.position.x*bitmap_keys_size, ki.position.y*bitmap_keys_size,
 						x+(ki.position.x*bitmap_keys_size), y+(ki.position.y*bitmap_keys_size), 
 						ki.size.x*bitmap_keys_size, ki.size.y*bitmap_keys_size);
+			*/
 		}
 	}
-
+	
+	/*
 	PROFILE_END("input.drawkeyboard");
 	*/
 }
@@ -576,8 +529,9 @@ void InputDevice::draw(int layer_index){
 }
 
 void InputDevice::update(int delta){
-
-	if(key[ALLEGRO_KEY_O]){
+	
+	if(key[ALLEGRO_KEY_O]==1){
+		Engine::print("O pressed");
 		demo.clear();		
 	}
 	if(key[ALLEGRO_KEY_P]){
@@ -648,21 +602,17 @@ void InputDevice::update(int delta){
 	
 	if(joystick)updateJoystick();
 
-	shift = false;
-	alt = false;
-	/*
-	READ FLAGS
-	if(key_shifts & KB_SHIFT_FLAG) shift = true;
-	else if(key_shifts & KB_ALT_FLAG) alt = true;
-	*/
-	if(key[116])shift = true;
-	if(key[120])alt = true;
-	
-	
 	for (Trigger &t : trigger) {
 		t.update();
 	}
-	
+
+	for (int i = 0; i < 255; i++) {
+		if (key[i] == 1) 
+			key[i] = 2; // Convert keyDown in keyPress
+		if (key[i] == 3) 
+			key[i] = 0; // Convert keyUp   in keyOff
+	}
+
 	readKeyboard = false;
 	readMouse	 = false;
 	readJoystick = false;	
@@ -752,6 +702,9 @@ bool InputDevice::unSetBind(const char* name){
 		if (!strcmp(t.name.c_str(), name)){
 			if (!t.callBack){
 				//trigger.remove(t);
+				trigger.remove_if([name](Trigger const& value){
+					return !value.name.compare(name);
+				});
 				return true;
 			}
 			return false;
@@ -781,22 +734,27 @@ void InputDevice::loadVars() {
 
 void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 	switch(event.keyboard.keycode){
-		case ALLEGRO_KEY_ENTER :
-			key[13] = 1;
-			return;
 		
-		case ALLEGRO_KEY_BACKSPACE :
-			/// Remove character before caret
-			return;
+		case ALLEGRO_KEY_LSHIFT:
+		case ALLEGRO_KEY_RSHIFT:
+		case 116:
+			shift = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			break;
 		
-		case ALLEGRO_KEY_DELETE :
-			/// Remove character at caret
-			return;
-		
+		case ALLEGRO_KEY_ALT:
+		case 120:
+			alt = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			break;
+
 		default :
+		case ALLEGRO_KEY_ENTER :
+		case ALLEGRO_KEY_BACKSPACE :
+		case ALLEGRO_KEY_DELETE :
 			/// Add character to our string
-			key[event.keyboard.keycode] = 1;
-			return;
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) 
+				key[event.keyboard.keycode] = 1;
+			else if(event.keyboard.type == ALLEGRO_EVENT_KEY_UP) 
+				key[event.keyboard.keycode] = 3;
 	}
 }
 

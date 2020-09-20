@@ -113,8 +113,6 @@ class InputDevice {
 
 		static void			update(int); //!< Update status for each one of the triggers registered
 
-		static void			pollAsciiKeyArray(char (&keyBuf)[0x80]);
-		
 		static int			findKeyByString(std::string &key);
 
 		static void			setBind(const char* key, const char* value, int n, bool keydown = true, bool keypress = false, bool keyup = false);

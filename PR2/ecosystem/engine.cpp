@@ -76,7 +76,10 @@ void Engine::handleEvents() {
 			if (!Vpu::restart()) run = false;
 			break;
 		
-		case ALLEGRO_EVENT_KEY_CHAR:
+		case ALLEGRO_EVENT_KEY_DOWN:
+			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
+			break;
+		case ALLEGRO_EVENT_KEY_UP:
 			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
 			break;
 			
