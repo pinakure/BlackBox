@@ -56,6 +56,21 @@
     <ClCompile Include="ecosystem\animation.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\command.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\console.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\cvar.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\integer.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\color.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
