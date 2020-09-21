@@ -96,9 +96,9 @@ bool Vpu::start() {
 }
 
 void Vpu::initializeFonts() {
-	font = al_load_ttf_font("data/fonts/small.ttf",16,0 );
+	font = al_load_ttf_font("data/fonts/big.ttf",16,0 );
 	if (!font){
-		Engine::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
+		Engine::printf("WARNING: Failed to initialize font 'data/fonts/big.ttf'.\nUsing default font.\n");
 		font = legacy_font;
 	}
 }

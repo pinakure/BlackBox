@@ -85,6 +85,23 @@ void Console::initialize(void){
 	Console::con_bgcolor = Color::cast(CVar::settings["con_bgcolor"]);
 	Console::debug_script = Boolean::cast(CVar::settings["debug_script"]);
 
+	Console::palette[ 0] = 0xff000000;
+	Console::palette[ 1] = 0xff000080;
+	Console::palette[ 2] = 0xff008000;
+	Console::palette[ 3] = 0xff008080;
+	Console::palette[ 4] = 0xff800000;
+	Console::palette[ 5] = 0xff800080;
+	Console::palette[ 6] = 0xff808000;
+	Console::palette[ 7] = 0xff808080;
+	Console::palette[ 8] = 0xff404040;
+	Console::palette[ 9] = 0xff0000f0;
+	Console::palette[10] = 0xff00f000;
+	Console::palette[11] = 0xff00f0f0;
+	Console::palette[12] = 0xfff00000;
+	Console::palette[13] = 0xfff000f0;
+	Console::palette[14] = 0xfff0f000;
+	Console::palette[15] = 0xfff0f0f0;
+
 	initialized = true;
 	redirect = false;
 }
@@ -169,7 +186,7 @@ void Console::toggleVariable(const char* name){
 }
 
 void Console::reportBind(const char *var){
-	Console::printf("~b%s ~f= ~7'~e%s~7'\n", var, getBind(var).c_str());
+	Console::printf("~b%s ~f= ~7'~e%s~7'", var, getBind(var).c_str());
 }
 
 Command *Console::findCommand(std::string name){
@@ -461,7 +478,7 @@ void Console::addChar(int k){
 		t_shift = codepage[i + 2];
 		t_alt = codepage[i + 3];
 	}
-	Console::printf("%s is not bound\n", keyNames[k]);	
+	Console::printf("%s is not bound", keyNames[k]);	
 }
 
 void Console::moveLeft(void){
@@ -542,7 +559,7 @@ void Console::handleMessages(void){
 		//ABORT SCRIPT EXECUTION!
 		if(ctrlc){
 			if(script.blocks.size() > 0){
-				print(" *** Break by user ***\n");
+				Console::print(" *** Break by user ***");
 				script.clear();
 			}
 			ctrlc = false;			
@@ -711,10 +728,10 @@ void Console::render(int h, bool drawCursor){
 	int s = Engine::epoch % 60;
 
 	Vpu::setColor(200, 200, 0,250);
-	Vpu::printf(0, (Vpu::console.height) - h, 0, "%02d:%02d:%02d > %s", H, m, s, a.c_str());
+	Vpu::printf(0, (Vpu::console.height-4) - h, 0, "%02d:%02d:%02d > %s", H, m, s, a.c_str());
 	
 	// Render lines
-	for(int u = (Vpu::console.height)-(h*2); u>=0; u-= h){
+	for(int u = (Vpu::console.height-4)-(h*2); u>=0; u-= h){
 		if (!lines.size())continue;		
 #ifndef CONSOLE_COLOR		
 		//textout_ex(bitmap, font, lines.get(n)->c_str(), 0, i, config.con_fgcolor->get(), -1);
@@ -739,11 +756,15 @@ void Console::render(int h, bool drawCursor){
 						const char *data = piece.c_str() + (firstPiece?0:1);
 						color = Console::palette[strtol(piece.substr(0,1).c_str(), NULL, 16)];
 						//Vpu::setColor(color);
-						Vpu::setColor(255,0,128);
+						Vpu::setColor(
+							((color & 0x00ff0000)	>>16),
+							((color & 0x0000ff00)	>>8	),
+							((color & 0x000000ff)		),
+							((color & 0xff000000)	>>24)
+						);
 						Vpu::print(std::string(data), x, u);
-								// originally commented out // x += GPU::currentFont->width(piece.append(" ").c_str());
-						//x += Vpu::current_font->width(data);
-						x += 10;//replace by font width
+								
+						x += 8*strlen(piece.c_str());//replace by font width//x += Vpu::current_font->width(data);
 					}
 					firstPiece = false;
 				}
@@ -945,7 +966,7 @@ void Console::execute(std::string commandline, bool nohist){
 			cmd = translateVariables(cmd);
 	
 			if(!parse(cmd)){
-				cmd.append(" :: Unknown Command\n");
+				cmd.append(" :: Unknown Command");
 				print(cmd.c_str());
 				//9-2020//if (!echo) UI::oneLinerTimer = 0;
 			} else {
@@ -1109,9 +1130,9 @@ void Console::dumpList(std::vector<std::string> &s){
 }
 
 void Console::dumpHeader(const char *header){
-	Console::print("~8--------------------------------------------------\n");
-	Console::printf("~7%s\n", header);
-	Console::print("~8--------------------------------------------------\n");
+	Console::print("~8--------------------------------------------------");
+	Console::printf("~7%s", header);
+	Console::print("~8--------------------------------------------------");
 }
 
 void Console::dumpBindList(void){
@@ -1129,7 +1150,7 @@ void Console::dumpBindList(void){
 void Console::dumpPropertyList(std::map<std::string, std::string> &pl){
 	std::map<std::string, std::string>::iterator it = pl.begin();
 	while (it != pl.end()) {
-		Console::printf("~b%s ~f= ~e'%s'\n", it->first.c_str(), it->second.c_str());
+		Console::printf("~b%s ~f= ~e'%s'", it->first.c_str(), it->second.c_str());
 		it++;
 	}		
 }
@@ -1232,7 +1253,7 @@ COMMAND_CALLBACK(cwdCommand) {
 COMMAND_CALLBACK(dirCommand) {
 	std::string v = "Showing files in ";
 	v += Console::cwd;
-	Console::print("\n");
+	Console::print("");
 	Console::print(v);
 	/*
 
@@ -1287,7 +1308,7 @@ COMMAND_CALLBACK(view) {
 
 	std::ifstream t(file.c_str());
 	if (!t) {
-		Console::print("~cFile not found!\n");
+		Console::print("~cFile not found!");
 		return 0x1;
 	}
 	std::stringstream buffer;
@@ -1297,7 +1318,7 @@ COMMAND_CALLBACK(view) {
 	std::string line;
 	while (!buffer.eof()) {
 		getline(buffer, line);
-		Console::printf("~d%s\n", line.c_str());
+		Console::printf("~d%s", line.c_str());
 	}
 	return 0;
 }
@@ -1336,20 +1357,20 @@ COMMAND_CALLBACK(help) {
 	std::string helpstr = "~cNo help for requested command.";
 	if (!strcmp(args[0].c_str(), "-full")) {
 		char b[1024];
-		Console::print("\n");
+		Console::print("");
 		for (size_t i = 0, o = Console::commands.size(); i<o; i++) {
 			topic = &Console::commands[i];
 			std::string hlp = "~e";
 			hlp.append(topic->help.c_str());
 			tabulate(b, 1024, 25, "ss", topic->command.c_str(), hlp.c_str());
-			Console::printf("~f%s\n", b);
+			Console::printf("~f%s", b);
 		}
 		return 0;
 	}
 	if (!strcmp(args[0].c_str(), "-toc")) {
 		char b[1024];
-		Console::print("\n");
-		Console::print("~eAvailable Commands:\n");
+		Console::print("");
+		Console::print("~eAvailable Commands:");
 		for (size_t i = 0, o = Console::commands.size(); i<o; i += 4) {
 			Command *t1, *t2, *t3, *t4;
 			t1 = ((i) < o) ? &Console::commands[i] : NULL;
@@ -1357,16 +1378,16 @@ COMMAND_CALLBACK(help) {
 			t3 = ((i + 2) < o) ? &Console::commands[i + 2] : NULL;
 			t4 = ((i + 3) < o) ? &Console::commands[i + 3] : NULL;
 			tabulate(b, 1024, 20, "ssss", t1 ? t1->command.c_str() : "", t2 ? t2->command.c_str() : "", t3 ? t3->command.c_str() : "", t4 ? t4->command.c_str() : "");
-			Console::printf("~f%s\n", b);
+			Console::printf("~f%s", b);
 		}
 		return 0;
 	}
 	topic = Console::findCommand(args[0]);
 	if (!topic) Console::print(helpstr); //Unmodified (no help for requested command)
 	else {
-		Console::printf("~d%s\n", topic->help.c_str());
+		Console::printf("~d%s", topic->help.c_str());
 		if (topic->usage.length() > 0) {
-			Console::printf("~b Usage : ~f%s\n", topic->usage.c_str());
+			Console::printf("~b Usage : ~f%s", topic->usage.c_str());
 		}
 	}
 	return 0;
@@ -1378,7 +1399,7 @@ COMMAND_CALLBACK(echoCommand) {
 		msg += args[i];
 		if (i + 1 < args.size()) msg += " ";
 	}
-	msg.append("\n");
+	msg.append("");
 	Console::print(msg);
 	return 0;
 }
