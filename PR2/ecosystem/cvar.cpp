@@ -42,12 +42,14 @@ void CVar::serialize(FILE *fp){
 	
 	std::map<std::string, CVar*>::iterator it = settings.begin();
 	while (it != settings.end()) {
-		std::string v = it->second->toString();
-		while ((q = v.find(";")) != std::string::npos) {
-			v.replace(q, 1, "|");
+		if (it->second) {
+			std::string v = it->second->toString();
+			while ((q = v.find(";")) != std::string::npos) {
+				v.replace(q, 1, "|");
+			}
+			if (it->second->system_var)fprintf(fp, "%s %s\n", it->first.c_str(), v.c_str());
+			else fprintf(fp, "set %s \"%s\"\n", it->first.c_str(), v.c_str());
 		}
-		if (it->second->system_var)fprintf(fp, "%s %s\n", it->first.c_str(), v.c_str());
-		else fprintf(fp, "set %s \"%s\"\n", it->first.c_str(), v.c_str());
 		it++;
 	}	
 }
@@ -363,7 +365,7 @@ COMMAND_CALLBACK(writeconfig) {
 	if (fp) {
 		fprintf(fp, "unbindall\nunsetall\n");
 		CVar::serialize(fp);
-		fprintf(fp, "gpu_restart\n");
+		fprintf(fp, "vpu.restart\n");
 		
 		std::map<std::string, std::string>::iterator a_it= Console::aliases.begin();
 		while (a_it != Console::aliases.end()) {
@@ -372,6 +374,7 @@ COMMAND_CALLBACK(writeconfig) {
 				val.replace(q, 1, "|");
 			}
 			fprintf(fp, "alias %s \"%s\"\n", a_it->first.c_str(), val.c_str());
+			a_it++;
 		}
 		
 		
