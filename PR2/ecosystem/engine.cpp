@@ -92,7 +92,7 @@ void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		Hud::draw();
 		InputDevice::draw(11);
-		Console::draw(12);
+		Console::draw(16);
 		Vpu::render();		
 		Vpu::frames++;
 		Vpu::total_frames++;

@@ -31,7 +31,7 @@ void CVar::dumpVars(void) {
 	while (it != settings.end()){
 		std::string value = it->second?it->second->toString():"NULL";
 
-		Console::printf("~b%s ~f= ~e'%s'\n", it->first.c_str(), value.c_str());
+		Console::printf("~b%s ~f= ~e'%s'", it->first.c_str(), value.c_str());
 		it++;
 	}	
 }

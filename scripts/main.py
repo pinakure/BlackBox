@@ -7,7 +7,7 @@ def configure():
     vpu.fullscreen(False)
 
 def main():
-    return
+    #return
     # some tests to check vpu functionalities
     #for i in range(0,11):
     #    vpu.disable(i)
@@ -34,7 +34,7 @@ def main():
         rot = rrot;
         sca = ssca;
         vpu.rotate(11, rot)
-        vpu.setscale(11, sca, sca)
+        vpu.setscale(11, -sca, sca)
         rot *= 2;
         sca *= 2;
         vpu.rotate(8, rot)
