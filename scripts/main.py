@@ -8,62 +8,66 @@ def configure():
 
 def main():
     return
-    # some tests to check vpu functionalities
-    #for i in range(0,11):
-    #    vpu.disable(i)
-    #vpu.enable(4)
-    vpu.fadeout()
-    then = blackbox.epoch()
-    #vpu.rotate(11, 3.1495) 
-    #vpu.scale(11, 2.0, 0.5)    
-    #for i in range(0,314):
-    #    vpu.rotate(11,i/100)
-    #    vpu.update()
-    # wait 10 seconds
-    rrot = 0.0
-    ssca = 1.0
-    vpu.fadein()
-    while((blackbox.epoch()-then) < 60):
-        vpu.select(10)
-        vpu.print("Hello", 320, 240);
-        if vpu.frames() % 2:
-            vpu.enable(0)
-        else:
-            vpu.disable(0)
 
-        rot = rrot;
-        sca = ssca;
-        vpu.rotate(11, rot)
-        vpu.setscale(11, -sca, sca)
-        rot *= 2;
-        sca *= 2;
-        vpu.rotate(8, rot)
-        vpu.setscale(8, sca, sca)
-        rot *= 2;
-        sca *= 2;
-        vpu.rotate(9, rot)
-        vpu.scale(9, sca, sca/2)
-        rot *= 2;
-        sca *= 2;
-        vpu.rotate(7, rot)
-        vpu.setscale(7, sca, sca)
-        rot *= 2;
-        sca *= 2;
-        vpu.rotate(0, rot)
-        vpu.setscale(0, sca/2, sca)    
-        rot *= 2;
-        sca *= 2;
-        rrot += 0.001
-        ssca += 0.001
-        vpu.update()
-    vpu.fadeout()
-    then = blackbox.epoch()
-    vpu.fadein()
-    while((blackbox.epoch()-then) < 60):
-        vpu.select(10)
-        vpu.print("Hello", 320, 240);
-        if vpu.frames() % 2:
-            vpu.enable(0)
-        else:
-            vpu.disable(0)
-        vpu.update()
+class benchmark():
+    @staticmethod
+    def run():
+        # some tests to check vpu functionalities
+        for i in range(0,11):
+            vpu.disable(i)
+        vpu.enable(4)
+        #vpu.fadeout()
+        then = blackbox.epoch()
+        #vpu.rotate(11, 3.1495) 
+        #vpu.scale(11, 2.0, 0.5)    
+        #for i in range(0,314):
+        #    vpu.rotate(11,i/100)
+        #    vpu.update()
+        # wait 10 seconds
+        rrot = 0.0
+        ssca = 1.0
+        vpu.fadein()
+        while((blackbox.epoch()-then) < 60):
+            vpu.select(10)
+            vpu.print("Hello", 320, 240);
+            if vpu.frames() % 2:
+                vpu.enable(0)
+            else:
+                vpu.disable(0)
+
+            rot = rrot;
+            sca = ssca;
+            vpu.rotate(11, rot)
+            vpu.setscale(11, -sca, sca)
+            rot *= 2;
+            sca *= 2;
+            vpu.rotate(8, rot)
+            vpu.setscale(8, sca, sca)
+            rot *= 2;
+            sca *= 2;
+            vpu.rotate(9, rot)
+            vpu.scale(9, sca, sca/2)
+            rot *= 2;
+            sca *= 2;
+            vpu.rotate(7, rot)
+            vpu.setscale(7, sca, sca)
+            rot *= 2;
+            sca *= 2;
+            vpu.rotate(0, rot)
+            vpu.setscale(0, sca/2, sca)    
+            rot *= 2;
+            sca *= 2;
+            rrot += 0.001
+            ssca += 0.001
+            vpu.update()
+        vpu.fadeout()
+        then = blackbox.epoch()
+        vpu.fadein()
+        while((blackbox.epoch()-then) < 60):
+            vpu.select(10)
+            vpu.print("Hello", 320, 240);
+            if vpu.frames() % 2:
+                vpu.enable(0)
+            else:
+                vpu.disable(0)
+            vpu.update()

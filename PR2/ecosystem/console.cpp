@@ -80,12 +80,6 @@ static void restore_stdout() {
 void Console::initialize(void){
 	if (initialized) return;
 	
-	// Backup stdout streambuffer
-    Console::_stdout = std::cout.rdbuf(); 
-    // Redirect stdout to Console::buffer
-    std::streambuf* stream_buffer_file = Console::buffer.rdbuf(); 
-    std::cout.rdbuf(stream_buffer_file); 
-	
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
 	cwd = cCurrentPath;
@@ -129,7 +123,7 @@ void Console::initialize(void){
 
 void Console::deInitialize(void){
 	// Restore stdout
-	std::cout.rdbuf(Console::_stdout);
+	
 }
 
 const std::string Console::getBind(const char *name){
@@ -550,14 +544,6 @@ void Console::readKeyboard(int k){
 }
 
 void Console::update(void){	
-	std::cout << "Hello world from cout!" ;
-	std::cout << "Hello world from cout!" ;
-	Console::buffer.read(Console::char_buffer, 16535);
-	std::string s(Console::char_buffer);
-	if (s.size() > 0) {
-		Console::print(s.c_str());
-		Console::char_buffer[0] = '\0';
-	}
 	handleMessages();
 	//if((wait==0)&&(!wait_for_window)) script.run();		
 }
@@ -566,11 +552,16 @@ void Console::update(void){
 void Console::handleMessages(void){
 	if(messages.size() > 0){
 		Message *msg;
-		
+		std::string str;
 		if((msg = &messages[0])!=0){
 			switch(msg->message){
 				case CONSOLE_EXEC:
-					if(!ctrlc)execute(msg->cdata);
+					str = msg->cdata;
+					if (!ctrlc) {
+						messages.erase(messages.begin());
+						execute(str.c_str());
+						return;
+					}
 					break;
 					
 				case CONSOLE_CHAR:
@@ -1000,7 +991,12 @@ void Console::execute(std::string commandline, bool nohist){
 					cmd.append(" :: Syntax Error");
 					print(cmd.c_str());
 					//9-2020//if (!echo) UI::oneLinerTimer = 0;
-				}
+				} else {
+					if(nohist){ 
+						continue;
+					}
+					historyAdd(hist);
+				}				
 			} else {
 				if(nohist){ 
 					continue;

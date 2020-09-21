@@ -28,7 +28,8 @@ class Script {
 		bool isLoaded();
 		bool call(std::string function_name);
 
-		static bool execute(std::string python_code);
+		static bool execute(const char *python_code);
+		static bool execute(std::string &python_code);
 		static bool initialize();
 		static void deinitialize();
 };

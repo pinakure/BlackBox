@@ -95,9 +95,14 @@ bool Script::isLoaded() {
 	return this->loaded; 
 }
 
-bool Script::execute(std::string python_code) {
+bool Script::execute(const char *python_code) {
+	std::string temp(python_code);
+	return execute(temp);
+}
+bool Script::execute(std::string &python_code) {
 	try {
 		int i = PyRun_SimpleStringFlags(python_code.c_str(), NULL);
+		python_code = "";
 		if (i != 0) {
 			return false;			
 		}
