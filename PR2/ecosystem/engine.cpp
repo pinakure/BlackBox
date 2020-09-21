@@ -17,7 +17,7 @@ bool Engine::initialize() {
 	try{
 		al_init();
 		clock   = al_create_timer(1.0);
-		timer	= al_create_timer(1.0 / 60.0);
+		timer	= al_create_timer(1.0 / 120.0);
 		queue	= al_create_event_queue();
 		
 		if (!Vpu::initialize()) return false;

@@ -10,6 +10,7 @@ bool Script::initialize() {
 		PyImport_AppendInittab("blackbox", &PyInit_blackbox);
 		PyImport_AppendInittab("vpu"	 , &PyInit_vpu);
 		Py_Initialize();
+		Py_LoadCommands();
 	}catch (int e) {
 		e = e;
 		return false;

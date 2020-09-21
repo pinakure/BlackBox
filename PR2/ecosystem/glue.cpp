@@ -4,18 +4,6 @@ Surface *getLayer(int index) {
 		return NULL;
 	}
 	return Vpu::__layers[index];	
-	/*
-	switch (index) {
-		case 0:case 1:case 2:case 3: 
-			return &Vpu::background[index];
-		case 4:case 5:case 6:case 7: 
-			return &Vpu::foreground[index - 4];
-		case 8:case 9:case 10:case 11: 
-			return &Vpu::overlay[index - 8];
-		default:
-			return NULL;
-	}
-	*/
 }
 
 /* ----------------------------------------------------------------------
@@ -184,3 +172,8 @@ static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"		, NULL, -1, VpuMe
 static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
 static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
 
+#include "console.hpp"
+
+static void Py_LoadCommands() {
+
+}

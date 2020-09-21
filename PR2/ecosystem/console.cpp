@@ -30,7 +30,7 @@ int							Console::bgcolor = 0xC0104010;
 Surface						Console::backdrop;
 Surface						Console::bitmap;			
 
-float						Console::opacity=0.75f;
+float						Console::opacity=0.25f;
 
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
 bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
