@@ -17,6 +17,16 @@ static PyObject *vpu_print(PyObject *self, PyObject *args){
 	Vpu::print(std::string(text), x, y);
 	return PyBool_FromLong(true);
 }
+static PyObject *vpu_reload(PyObject *self, PyObject *args){
+	char *text;
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "")) return NULL;
+	if (!Vpu::start())exit(1);
+	if (!Vpu::restart())exit(1);
+	return PyBool_FromLong(true);
+}
+
 
 static PyObject *vpu_select(PyObject *self, PyObject *args){
 	int index;
@@ -149,6 +159,7 @@ static PyMethodDef BlackBoxMethods[] = {
 static PyMethodDef VpuMethods[] = {
 	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
+	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
 	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
 	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
