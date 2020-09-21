@@ -356,8 +356,8 @@ Surface &Vpu::destroySurface(Surface &surface) {
 }
 
 void Vpu::drawSurface(Surface &surface,float sx, float sy, float sw, float sh, float dx, float dy) {
-	//al_draw_bitmap_region(surface.bitmap, sx, sy, sw, sh, dx, dy, 0);
-	al_draw_bitmap(surface.bitmap, 0, 0, 0);
+	al_draw_bitmap_region(surface.bitmap, sx, sy, sw, sh, dx, dy, 0);
+	//al_draw_bitmap(surface.bitmap, 0, 0, 0);
 }
 
 Surface Vpu::createBitmap(int width, int height) {

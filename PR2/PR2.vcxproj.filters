@@ -13,11 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Scripts">
-      <UniqueIdentifier>{2df214a1-1d0b-4853-88d6-9300081ff897}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Archivos de origen\ecosystem">
       <UniqueIdentifier>{0d5bf539-b0f7-402e-932c-801248fdd8e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Scripts">
+      <UniqueIdentifier>{2df214a1-1d0b-4853-88d6-9300081ff897}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -78,10 +78,10 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="..\scripts\__init__.py">
-      <Filter>Scripts</Filter>
+      <Filter>Archivos de origen\Scripts</Filter>
     </None>
     <None Include="..\scripts\main.py">
-      <Filter>Scripts</Filter>
+      <Filter>Archivos de origen\Scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

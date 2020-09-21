@@ -4,18 +4,6 @@ Surface *getLayer(int index) {
 		return NULL;
 	}
 	return Vpu::__layers[index];	
-	/*
-	switch (index) {
-		case 0:case 1:case 2:case 3: 
-			return &Vpu::background[index];
-		case 4:case 5:case 6:case 7: 
-			return &Vpu::foreground[index - 4];
-		case 8:case 9:case 10:case 11: 
-			return &Vpu::overlay[index - 8];
-		default:
-			return NULL;
-	}
-	*/
 }
 
 /* ----------------------------------------------------------------------
@@ -29,6 +17,16 @@ static PyObject *vpu_print(PyObject *self, PyObject *args){
 	Vpu::print(std::string(text), x, y);
 	return PyBool_FromLong(true);
 }
+static PyObject *vpu_reload(PyObject *self, PyObject *args){
+	char *text;
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "")) return NULL;
+	if (!Vpu::start())exit(1);
+	if (!Vpu::restart())exit(1);
+	return PyBool_FromLong(true);
+}
+
 
 static PyObject *vpu_select(PyObject *self, PyObject *args){
 	int index;
@@ -161,6 +159,7 @@ static PyMethodDef BlackBoxMethods[] = {
 static PyMethodDef VpuMethods[] = {
 	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
+	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
 	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
 	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
@@ -184,3 +183,8 @@ static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"		, NULL, -1, VpuMe
 static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
 static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
 
+#include "console.hpp"
+
+static void Py_LoadCommands() {
+
+}

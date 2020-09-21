@@ -10,6 +10,7 @@ bool Script::initialize() {
 		PyImport_AppendInittab("blackbox", &PyInit_blackbox);
 		PyImport_AppendInittab("vpu"	 , &PyInit_vpu);
 		Py_Initialize();
+		Py_LoadCommands();
 	}catch (int e) {
 		e = e;
 		return false;
@@ -96,11 +97,14 @@ bool Script::isLoaded() {
 
 bool Script::execute(std::string python_code) {
 	try {
-		PyRun_SimpleString(python_code.c_str());
+		int i = PyRun_SimpleStringFlags(python_code.c_str(), NULL);
+		if (i != 0) {
+			return false;			
+		}
 		return true;
-	} catch (int e) {
-		e = e;
-		PyErr_Print();        
+	}catch (int e) {
+		PyObject *ptype, *pvalue, *ptraceback;
+		PyErr_Fetch(&ptype, &pvalue, &ptraceback);		
 		return false;
 	}
 }

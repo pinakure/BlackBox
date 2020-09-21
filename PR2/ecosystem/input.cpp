@@ -60,15 +60,9 @@ Boolean					*InputDevice::debug_keyboard;
 Boolean					*InputDevice::aim_backwards;
 Boolean					*InputDevice::debug_crosshair;
 
-#include "callbacks.cpp" // <- timer function
-#include "codepage.cpp"  // <- codepage enum, value and key string name arrays
-#include "trigger.cpp"   // <- 
+#include "codepage.cpp"  // <- codepage enum, value and key string name arrays, keys contained inside codepage array will be caught by console prompt
+#include "trigger.cpp"   //  
 #include "snapshot.cpp"
-
-// Undefine to use input! 
-// This is to prevent allegro to freeze the whole system!!
-// #define ALLEGRO_NO_INPUT
-// this is defined in target release preprocessor in VStudio
 
 												// "><", "()", "[]", "/\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 const char *controller_button_names[INPUT_MAX] = { "B1", "B2", "B3", "B4", "T1", "T2", "T3", "T4", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
@@ -350,9 +344,9 @@ bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
 	keyboard_bitmap[0] = Vpu::createBitmap(keyboard_image.width, keyboard_image.height / 2);
 	keyboard_bitmap[1] = Vpu::createBitmap(keyboard_image.width, keyboard_image.height / 2);
 	Vpu::select(keyboard_bitmap[0]);
-	Vpu::drawSurface(keyboard_image, 0, 0, 0, 0, keyboard_image.width, keyboard_image.height / 2);
+	Vpu::drawSurface(keyboard_image, 0, 0,  keyboard_image.width, keyboard_image.height / 2, 0, 0);
 	Vpu::select(keyboard_bitmap[1]);
-	Vpu::drawSurface(keyboard_image, 0, keyboard_image.height/2, 0, 0, keyboard_image.width, keyboard_image.height / 2);
+	Vpu::drawSurface(keyboard_image, 0, keyboard_image.height/2, keyboard_image.width, keyboard_image.height / 2, 0, 0);
 	Vpu::destroySurface(keyboard_image);
 	initializeBitmapKeys();
 	return true;
@@ -460,15 +454,16 @@ void InputDevice::updateJoystick(void){
 
 void InputDevice::drawJoystick(int x, int y) {
 	if (!joystick)return;
-	/*
-	PROFILE_START();
-
-	Vpu::drawBitmap... -> masked_blit(joystick_image, bmp, 0, 0, x, y, 96, 64);
+	/* PROFILE_START(); */
+	Vpu::select(Vpu::overlay[3]);
+	al_draw_bitmap_region(joystick_image.bitmap, 0, 0, 96,64, x, y, 0);
 
 	for (int i = 0; i<INPUT_MAX; i++) {
-		if (controller[i]) masked_blit(joystick_image, bmp, 0, 64 + (i * 64), x, y, 96, 64);
+		if (controller[i]) al_draw_bitmap_region(joystick_image.bitmap, 0, 64 + (i * 64), 96,64, x, y, 0);
 	}
 
+	/* Draw Analog Velocity lines */
+	/*
 	int lcx = x + 36;
 	int rcx = x + 58;
 	int lcy = y + 45;
@@ -482,37 +477,31 @@ void InputDevice::drawJoystick(int x, int y) {
 	rx = rcx + ((float(axis_x[1]) / 256.0f)*8.0f) - 4;
 	ry = lcy + ((float(axis_y[1]) / 256.0f)*8.0f) - 4;
 	Vpu::line(bmp, rcx, lcy, rx, ry, makecol(255, 0, 0));
-
-	Vpu::print(x + 8, y + 56, makecol(180, 196, 240), "% 4d <-LX  RX-> % 4d", axis_x[0], axis_x[1]);
-	Vpu::print(x + 8, y + 64, makecol(180, 196, 240), "% 4d <-LY  RY-> % 4d", axis_y[0], axis_y[1]);
-
-	PROFILE_END("joystick");
 	*/
+	Vpu::setColor(180, 196, 240);
+	Vpu::printf(x + 8, y + 56, 0, "% 4d <-LX  RX-> % 4d", axis_x[0], axis_x[1]);
+	Vpu::printf(x + 8, y + 64, 0, "% 4d <-LY  RY-> % 4d", axis_y[0], axis_y[1]);
+	/* PROFILE_END("joystick"); */
 }
 
 void InputDevice::drawKeyboard(int x, int y) {
-	/*
-	PROFILE_START();
-	*/
+	/* PROFILE_START(); */
+	Vpu::select(Vpu::overlay[3]);
+	al_draw_bitmap_region(keyboard_bitmap[0].bitmap, 0, 0, keyboard_bitmap[0].width, keyboard_bitmap[0].height, x, y, 0);
 	
-	/*
-	masked_blit(keyboard_bitmap[0], bmp, 0, 0, x, y, keyboard_bitmap[0]->w, keyboard_bitmap[0]->h);
-	*/
 	for (size_t i = 0; i<255; i++) {
 		if(key[i] && (bitmap_keys.find(i) != bitmap_keys.end())) {
 			KeyInfo ki = bitmap_keys[i];
-			/*
-			masked_blit(keyboard_bitmap[1], bmp, 
-						ki.position.x*bitmap_keys_size, ki.position.y*bitmap_keys_size,
-						x+(ki.position.x*bitmap_keys_size), y+(ki.position.y*bitmap_keys_size), 
-						ki.size.x*bitmap_keys_size, ki.size.y*bitmap_keys_size);
-			*/
+			al_draw_bitmap_region(
+				keyboard_bitmap[1].bitmap,
+				ki.position.x*bitmap_keys_size, ki.position.y*bitmap_keys_size,
+				ki.size.x*bitmap_keys_size, ki.size.y*bitmap_keys_size,
+				x + (ki.position.x*bitmap_keys_size), y + (ki.position.y*bitmap_keys_size),
+				0
+			);
 		}
 	}
-	
-	/*
-	PROFILE_END("input.drawkeyboard");
-	*/
+	/* PROFILE_END("input.drawkeyboard"); */
 }
 
 

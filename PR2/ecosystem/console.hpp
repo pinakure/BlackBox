@@ -15,6 +15,9 @@ enum E_MessageTypes {
 #include "vpu.hpp"
 #include <vector>
 #include <string>
+#include <fstream> 
+#include <iostream> 
+#include <sstream> 
 
 class Message {
 public:
@@ -73,6 +76,10 @@ class Console{
 		////////////////////////////////////////////
 		// CVARS										//
 		////////////////////////////////////////////
+		static char						char_buffer[16536];
+		static std::stringstream		buffer;
+		static std::streambuf			*_stdout;
+
 		static Text						*result;
 		static Color					*con_fgcolor;
 		static Color					*con_bgcolor;

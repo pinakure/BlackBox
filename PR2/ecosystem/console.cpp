@@ -7,6 +7,9 @@
 #include "input.hpp"
 #include <sstream>
 #include <algorithm>
+char						Console::char_buffer[16536];
+std::stringstream			Console::buffer;
+std::streambuf*				Console::_stdout;
 
 std::map<std::string, std::string>	Console::aliases;
 std::vector<Toggle*>		Console::toggles;
@@ -30,7 +33,7 @@ int							Console::bgcolor = 0xC0104010;
 Surface						Console::backdrop;
 Surface						Console::bitmap;			
 
-float						Console::opacity=0.75f;
+float						Console::opacity=0.25f;
 
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
 bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
@@ -62,9 +65,27 @@ int							Console::palette[16];
 #include <direct.h> /* for _getcwd() and _chdir() */
 #define getcwd _getcwd
 #define getcwd _getcwd
+
+
+
+static void redirect_stdout() {
+	
+    return; 
+}
+
+static void restore_stdout() {
+	
+}
+
 void Console::initialize(void){
 	if (initialized) return;
-
+	
+	// Backup stdout streambuffer
+    Console::_stdout = std::cout.rdbuf(); 
+    // Redirect stdout to Console::buffer
+    std::streambuf* stream_buffer_file = Console::buffer.rdbuf(); 
+    std::cout.rdbuf(stream_buffer_file); 
+	
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
 	cwd = cCurrentPath;
@@ -107,7 +128,8 @@ void Console::initialize(void){
 }
 
 void Console::deInitialize(void){
-
+	// Restore stdout
+	std::cout.rdbuf(Console::_stdout);
 }
 
 const std::string Console::getBind(const char *name){
@@ -528,6 +550,14 @@ void Console::readKeyboard(int k){
 }
 
 void Console::update(void){	
+	std::cout << "Hello world from cout!" ;
+	std::cout << "Hello world from cout!" ;
+	Console::buffer.read(Console::char_buffer, 16535);
+	std::string s(Console::char_buffer);
+	if (s.size() > 0) {
+		Console::print(s.c_str());
+		Console::char_buffer[0] = '\0';
+	}
 	handleMessages();
 	//if((wait==0)&&(!wait_for_window)) script.run();		
 }
@@ -966,9 +996,11 @@ void Console::execute(std::string commandline, bool nohist){
 			cmd = translateVariables(cmd);
 	
 			if(!parse(cmd)){
-				cmd.append(" :: Unknown Command");
-				print(cmd.c_str());
-				//9-2020//if (!echo) UI::oneLinerTimer = 0;
+				if (!Script::execute(cmd)) {
+					cmd.append(" :: Syntax Error");
+					print(cmd.c_str());
+					//9-2020//if (!echo) UI::oneLinerTimer = 0;
+				}
 			} else {
 				if(nohist){ 
 					continue;
