@@ -730,16 +730,48 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 		case 116:
 			shift = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
 			break;
-		
+
+		case 47: //f1
+		case 48: //f2
+		case 49: //f3
+		case 50: //f4
+		case 51: //f5
+		case 52: //f6
+		case 53: //f7
+		case 54: //f8
+		case 55: //f9
+		case 56: //f10
+		case 57: //f11
+		case 58: //f11
+		case 93: //pause / break
+		case 92: //print screen
+
+		case 223: // menu key
+		case 224: // scroll lock
+		case 225: // num lock
+		case 222://windows right
+		case 221://windows left
+		case 120://dunno
+		case 130://ctrl+scroll_lock
 		case ALLEGRO_KEY_ALT:
-		case 120:
-			alt = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
 			break;
 
-		default :
-		case ALLEGRO_KEY_ENTER :
-		case ALLEGRO_KEY_BACKSPACE :
-		case ALLEGRO_KEY_DELETE :
+		case 226: // capslock
+			InputDevice::caps ^= event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			break;
+
+		case ALLEGRO_KEY_ALTGR:
+			alt = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			break;
+		
+		case ALLEGRO_KEY_LCTRL:
+		case ALLEGRO_KEY_RCTRL:
+			control = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			break;
+				
+		case ALLEGRO_KEY_PAD_ENTER:
+			event.keyboard.keycode = ALLEGRO_KEY_ENTER;
+		default :			
 			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN)
 				key[event.keyboard.keycode] = 1;
 			else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP)

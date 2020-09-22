@@ -33,7 +33,7 @@ int							Console::bgcolor = 0xC0104010;
 Surface						Console::backdrop;
 Surface						Console::bitmap;			
 
-float						Console::opacity=0.25f;
+float						Console::opacity=0.95f;
 
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
 bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
@@ -677,15 +677,15 @@ void Console::paintBackdrop() {
 		for(int x= 0 ; x < Vpu::console.width; x++){
 			if (blink)
 				Vpu::setColor(
-					128-((float(y)/float(Vpu::console.height))*128.0f),
-					100-((float(y)/float(Vpu::console.height))*100.0f),
-					 50-((float(y)/float(Vpu::console.height))* 50.0f),
+					64-((float(y)/float(Vpu::console.height))*32.0f),
+					50-((float(y)/float(Vpu::console.height))*25.0f),
+					 25-((float(y)/float(Vpu::console.height))* 12.50f),
 					Console::opacity*255);
 			else
 				Vpu::setColor(
-					 50-((float(y)/float(Vpu::console.height))* 50.0f),
-					255-((float(y)/float(Vpu::console.height))*128.0f),
-					200-((float(y)/float(Vpu::console.height))*100.0f),
+					 50-((float(y)/float(Vpu::console.height))* 25.0f),
+					128-((float(y)/float(Vpu::console.height))*64.0f),
+					100-((float(y)/float(Vpu::console.height))*50.0f),
 					Console::opacity*255);
 			Vpu::putpixel(x, y);
 			blink ^=1;	
@@ -776,7 +776,6 @@ void Console::render(int h, bool drawCursor){
 					if(piece.length() > 0){
 						const char *data = piece.c_str() + (firstPiece?0:1);
 						color = Console::palette[strtol(piece.substr(0,1).c_str(), NULL, 16)];
-						//Vpu::setColor(color);
 						Vpu::setColor(
 							((color & 0x00ff0000)	>>16),
 							((color & 0x0000ff00)	>>8	),
