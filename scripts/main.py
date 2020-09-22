@@ -9,7 +9,22 @@ def configure():
 def main():
     return
 
-class benchmark():
+class tests():
+    @staticmethod
+    def a():
+        while(1):
+            vpu.select(10)
+            vpu.print("A", 330, 240);
+            vpu.update()
+        
+    @staticmethod
+    def b():
+        while(1):
+            vpu.select(10)
+            vpu.print("B", 340, 240);
+            vpu.update()
+        
+
     @staticmethod
     def run():
         # some tests to check vpu functionalities
@@ -27,9 +42,9 @@ class benchmark():
         rrot = 0.0
         ssca = 1.0
         vpu.fadein()
-        while((blackbox.epoch()-then) < 60):
+        while((blackbox.epoch()-then) < 5):
             vpu.select(10)
-            vpu.print("Hello", 320, 240);
+            vpu.print("Hello", 220, 240);
             if vpu.frames() % 2:
                 vpu.enable(0)
             else:
@@ -62,12 +77,16 @@ class benchmark():
             vpu.update()
         vpu.fadeout()
         then = blackbox.epoch()
+        while((blackbox.epoch()-then) < 5):
+            vpu.update()        
         vpu.fadein()
-        while((blackbox.epoch()-then) < 60):
+        while((blackbox.epoch()-then) < 15):
             vpu.select(10)
-            vpu.print("Hello", 320, 240);
+            vpu.print("Hello", 220, 140);
             if vpu.frames() % 2:
                 vpu.enable(0)
             else:
                 vpu.disable(0)
             vpu.update()
+        print("Finished.")
+        return True
