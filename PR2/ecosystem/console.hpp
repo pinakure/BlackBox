@@ -210,7 +210,7 @@ class Console{
 		static void						addSpecial(const char *cmdname, void(*function)(int), const char *help);
 
 
-		static void						paintBackdrop(float variance=1.0f);
+		static void						paintBackdrop(float variance=0.05f);
 
 		// PUBLIC API
 		static void 					scroll(int i);

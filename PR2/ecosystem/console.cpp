@@ -35,7 +35,7 @@ int							Console::bgcolor = 0xC0104010;
 Surface						Console::backdrop;
 Surface						Console::bitmap;			
 
-float						Console::opacity=0.95f;
+float						Console::opacity=1.0f;
 
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
 bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
@@ -656,51 +656,37 @@ bool Console::evaluate(const char *expr){
 }
 
 void Console::paintBackdrop(float variance) {	
-	static bool blink = false;
-	
+	variance = 0.0005f;
 	Color *bgc = Console::con_bgcolor; 
 		
 	float c = float(bgc->lightness) / float(Vpu::console.height );
-	float i = 0.0f;
+	int i = 0;
 	Vpu::select(backdrop);
 	Vpu::lock();
+	float factor = (Console::opacity * 255.0f);
 	for(int y= 0 ; y < Vpu::console.height; y++){
+		float _opacity = factor - ((float(Vpu::console.height-y) / float(Vpu::height)) * factor);
 		for(int x= 0 ; x < Vpu::console.width; x++){
-			if (blink)
-				/*
+			if (i & 1) {
+				c = ((int(float(x*y*y / (y + 1))*variance) & 0x000000ff));
 				Vpu::setColor(
-					64-((float(y)/float(Vpu::console.height))*32.0f),
-					50-((float(y)/float(Vpu::console.height))*25.0f),
-					 25-((float(y)/float(Vpu::console.height))* 12.50f),
-					Console::opacity*255
+					c*1.1,
+					c,
+					c,
+					_opacity
 				);
-				*/
+			} else {
+				c = ((int(float(y*x*x / (y + 1))*variance) & 0x000000ff));
 				Vpu::setColor(
-					((int(float(y*y/(x+1))*variance) & 0x00ff0000)	>>16),
-					((int(float(y*y/(x+1))*variance) & 0x0000ff00)	>>8	),
-					((int(float(y*y/(x+1))*variance) & 0x000000ff)		),
-					Console::opacity*255
+					c / 2,
+					c / 2,
+					c / 1.8,
+					_opacity
 				);
-			else
-				/*
-				Vpu::setColor(
-					 50-((float(y)/float(Vpu::console.height))* 25.0f),
-					128-((float(y)/float(Vpu::console.height))*64.0f),
-					100-((float(y)/float(Vpu::console.height))*50.0f),
-					Console::opacity*255
-				);
-				*/
-				Vpu::setColor(
-					((int(float(x*x/(y+1))*variance) & 0x00ff0000)	>>16),
-					((int(float(x*x/(y+1))*variance) & 0x0000ff00)	>>8	),
-					((int(float(x*x/(y+1))*variance) & 0x000000ff)		),
-					Console::opacity*255
-				);
-			Vpu::putpixel(x, y);
-			blink ^=1;	
+			}
+			Vpu::putpixel(x, y);			
+			i++;
 		}
-		blink ^=1;
-		i+=c;
 	}		
 	Vpu::unlock();
 }
