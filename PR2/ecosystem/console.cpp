@@ -7,9 +7,11 @@
 #include "input.hpp"
 #include <sstream>
 #include <algorithm>
+
+#define BUFFERSIZE 1024
+
+StdOutRedirect				Console::_stdout;
 char						Console::char_buffer[16536];
-std::stringstream			Console::buffer;
-std::streambuf*				Console::_stdout;
 
 std::map<std::string, std::string>	Console::aliases;
 std::vector<Toggle*>		Console::toggles;
@@ -67,16 +69,6 @@ int							Console::palette[16];
 #define getcwd _getcwd
 
 
-
-static void redirect_stdout() {
-	
-    return; 
-}
-
-static void restore_stdout() {
-	
-}
-
 void Console::initialize(void){
 	if (initialized) return;
 	
@@ -119,11 +111,18 @@ void Console::initialize(void){
 
 	initialized = true;
 	redirect = false;
+
+	Console::execute("import blackbox", false);
+	Console::execute("import vpu", false);
+	Console::execute("import console", false);
+
+	//_stdout.initialize();
+	//_stdout.Start();
 }
 
 void Console::deInitialize(void){
 	// Restore stdout
-	
+	_stdout.Stop();
 }
 
 const std::string Console::getBind(const char *name){
@@ -536,14 +535,18 @@ void Console::readKeyboard(int k){
 			case ALLEGRO_KEY_UP:		return historyPrev();
 			case ALLEGRO_KEY_DOWN:		return historyNext();
 			case ALLEGRO_KEY_SPACE:		return addSpace();
-			case ALLEGRO_KEY_PGUP:		return scroll(-1);
-			case ALLEGRO_KEY_PGDN:		return scroll(1);					
+			case ALLEGRO_KEY_PGDN:		return scroll(-1);
+			case ALLEGRO_KEY_PGUP:		return scroll(1);					
 			default:					return addChar(k);
 		}			
 	}	
 }
 
 void Console::update(void){	
+	static char szBuffer[512];
+    int nOutRead = _stdout.GetBuffer(szBuffer);
+    if(nOutRead)
+        Console::printf("%s",szBuffer);
 	handleMessages();
 	//if((wait==0)&&(!wait_for_window)) script.run();		
 }
@@ -574,19 +577,7 @@ void Console::handleMessages(void){
 			}
 		}
 		messages.erase(messages.begin());
-	} else {
-		// if no exec commands left, we can reset safely the ctrlc flag
-		/*
-		//ABORT SCRIPT EXECUTION!
-		if(ctrlc){
-			if(script.blocks.size() > 0){
-				Console::print(" *** Break by user ***");
-				script.clear();
-			}
-			ctrlc = false;			
-		}
-		*/
-	}
+	} 
 }
 
 void Console::clearPrompt(void){
@@ -664,7 +655,7 @@ bool Console::evaluate(const char *expr){
 	return false;
 }
 
-void Console::paintBackdrop() {	
+void Console::paintBackdrop(float variance) {	
 	static bool blink = false;
 	
 	Color *bgc = Console::con_bgcolor; 
@@ -676,17 +667,35 @@ void Console::paintBackdrop() {
 	for(int y= 0 ; y < Vpu::console.height; y++){
 		for(int x= 0 ; x < Vpu::console.width; x++){
 			if (blink)
+				/*
 				Vpu::setColor(
 					64-((float(y)/float(Vpu::console.height))*32.0f),
 					50-((float(y)/float(Vpu::console.height))*25.0f),
 					 25-((float(y)/float(Vpu::console.height))* 12.50f),
-					Console::opacity*255);
+					Console::opacity*255
+				);
+				*/
+				Vpu::setColor(
+					((int(float(y*y/(x+1))*variance) & 0x00ff0000)	>>16),
+					((int(float(y*y/(x+1))*variance) & 0x0000ff00)	>>8	),
+					((int(float(y*y/(x+1))*variance) & 0x000000ff)		),
+					Console::opacity*255
+				);
 			else
+				/*
 				Vpu::setColor(
 					 50-((float(y)/float(Vpu::console.height))* 25.0f),
 					128-((float(y)/float(Vpu::console.height))*64.0f),
 					100-((float(y)/float(Vpu::console.height))*50.0f),
-					Console::opacity*255);
+					Console::opacity*255
+				);
+				*/
+				Vpu::setColor(
+					((int(float(x*x/(y+1))*variance) & 0x00ff0000)	>>16),
+					((int(float(x*x/(y+1))*variance) & 0x0000ff00)	>>8	),
+					((int(float(x*x/(y+1))*variance) & 0x000000ff)		),
+					Console::opacity*255
+				);
 			Vpu::putpixel(x, y);
 			blink ^=1;	
 		}
@@ -760,9 +769,8 @@ void Console::render(int h, bool drawCursor){
 #else
 		Color *fgc = Console::con_fgcolor; 
 		std::string li = lines[n].c_str();			
-		if(li.find("~")== std::string::npos){
+		if(li.find("~")== std::string::npos){			
 			Vpu::print(li, 0, u);
-			//textout_ex(bitmap, font, li.c_str(), 0, u, Color::get(fgc), -1);
 		} else {
 			if(li.length() > 0){		
 				std::string templine(li.c_str());
@@ -1015,13 +1023,6 @@ void Console::execute(std::string commandline, bool nohist){
 #include <assert.h>
 
 bool Console::parse(std::string &comond){
-	/*
-	if(scriptInput){
-		//TODO:
-		//script.setInputValue(comond);
-		scriptInput = false;
-	}
-	*/
 	
 	std::vector<std::string> args;
 	
@@ -1041,26 +1042,6 @@ bool Console::parse(std::string &comond){
 			args.push_back(arg.c_str());
 		}		
 	}
-#if 0
-	char *s = (char*)cmd.c_str();
-		char *p = strchr(s, ' ');
-		if(p != NULL){
-			int pos = p - s;
-			cmd = comond.substr(0, pos);
-			
-			// Get arguments
-			char *argline = s+pos+1;
-			
-			// Separate quoted arguments first
-			std::string quoted(argline);
-			List<std::string*> *ls = extractArguments(argline);
-			for(int u=0; u<ls->count; u++){
-				std::string *arg = ls->get(u);
-				if(arg)args.add(*arg);
-			}
-			delete ls;
-		}
-#endif
 
 	// find in list of commands the command given
 	for(size_t i=0; i<commands.size(); i++){
@@ -1129,10 +1110,8 @@ bool Console::parse(std::string &comond){
 	return false;
 }
 
-Console::~Console(void){
-	
-	commandHistory.clear();
-	
+Console::~Console(void){	
+	commandHistory.clear();	
 	backdrop = Vpu::destroySurface(backdrop);
 	bitmap	 = Vpu::destroySurface(bitmap);	
 }
@@ -1220,16 +1199,17 @@ std::string Console::stripColors(const char *colored_string) {
 	return s;
 }
 
-/*
-BOOL DirectoryExists(LPCTSTR szPath) {
-	DWORD dwAttrib = GetFileAttributes(szPath);
+#include <windows.h>
+
+BOOL DirectoryExists(const char *szPath) {
+	DWORD dwAttrib = GetFileAttributesA(szPath);
 	return	(dwAttrib != INVALID_FILE_ATTRIBUTES &&
 		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
-*/
+
 
 COMMAND_CALLBACK(cdCommand) {
-	/*
+	
 	std::string path = Console::cwd;
 	std::vector<std::string> tokens;
 	
@@ -1267,7 +1247,7 @@ COMMAND_CALLBACK(cdCommand) {
 		Console::cwd = path;
 		return 0;
 	}
-	*/
+	
 	Console::print("~cCannot open directory");
 	return 0;
 }
@@ -1282,10 +1262,10 @@ COMMAND_CALLBACK(dirCommand) {
 	v += Console::cwd;
 	Console::print("");
 	Console::print(v);
-	/*
+	
 
 	HANDLE hFind;
-	WIN32_FIND_DATA data;
+	WIN32_FIND_DATAA data;
 
 	v = "";
 	v = Console::cwd;
@@ -1298,7 +1278,7 @@ COMMAND_CALLBACK(dirCommand) {
 		v += "*.*";
 	}
 	std::string w = v.c_str();
-	hFind = FindFirstFile(w.c_str(), &data);
+	hFind = FindFirstFileA(w.c_str(), &data);
 	if (hFind != INVALID_HANDLE_VALUE) {
 
 		do {
@@ -1308,21 +1288,21 @@ COMMAND_CALLBACK(dirCommand) {
 				Console::print(v.c_str());
 			}
 
-		} while (FindNextFile(hFind, &data));
+		} while (FindNextFileA(hFind, &data));
 		FindClose(hFind);
 	}
 
-	hFind = FindFirstFile(w.c_str(), &data);
+	hFind = FindFirstFileA(w.c_str(), &data);
 	if (hFind != INVALID_HANDLE_VALUE) {
 
 		do {
 			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
 			v = data.cFileName;
 			Console::printf("~b%s", v.c_str());
-		} while (FindNextFile(hFind, &data));
+		} while (FindNextFileA(hFind, &data));
 		FindClose(hFind);
 	}
-	*/
+	
 	return 0;
 }
 
@@ -1516,7 +1496,6 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 	if (cmd.length() == 0) return candidates;
 
 	// If prefix is empty, look for candidates in existing commands
-	//if(isCmd){
 	Command *c;
 	for (size_t i = 0, o = commands.size(); i<o; i++) {
 		c = &commands[i];
@@ -1525,8 +1504,7 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 			candidates.push_back(c->command.c_str());
 		}
 	}
-	//}
-
+	
 
 	// Iterate existing variables
 	std::vector < std::string> vcand;
@@ -1557,23 +1535,21 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 
 	if (!isCmd) {
 		// Iterate existing filenames, only when using as parameters
-		/*
-		//NOT WORKING :(
+		
 		HANDLE hFind;
-		WIN32_FIND_DATA data;
+		WIN32_FIND_DATAA data;
 		std::string v = cmd;
 		v.append("*.*");
 		std::string w = v.c_str();
-		hFind = FindFirstFile(w.c_str(), &data);
+		hFind = FindFirstFileA(w.c_str(), &data);
 		if (hFind != INVALID_HANDLE_VALUE) {
 			do {
 				v = data.cFileName;
 				if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)continue;
 				candidates.push_back(v.c_str());
-			} while (FindNextFile(hFind, &data));
+			} while (FindNextFileA(hFind, &data));
 			FindClose(hFind);
 		}
-		*/
 	}
 
 	// Remove duplicates
@@ -1604,25 +1580,23 @@ std::vector<std::string> tokenize(std::string set, char split) {
 
 std::vector<std::string> findFiles(const char *path, const char *extension) {
 	std::vector<std::string> files;
-	/*
-	HANDLE hFind;
-	WIN32_FIND_DATA data;
 	
-	NOT WORKING :(
-
+	HANDLE hFind;
+	WIN32_FIND_DATAA data;
+	
+	
 	std::string filename = path;
 	filename.append("/*.");
 	filename.append(extension);
-	hFind = FindFirstFile(filename.c_str(), &data);
+	hFind = FindFirstFileA(filename.c_str(), &data);
 	if (hFind != INVALID_HANDLE_VALUE) {
 
 		do {
 			filename = data.cFileName;
 			files.push_back(filename.c_str());
-		} while (FindNextFile(hFind, &data));
+		} while (FindNextFileA(hFind, &data));
 		FindClose(hFind);
 	}
-	*/
 	return files;
 }
 
@@ -1700,21 +1674,6 @@ void Console::loadCommands(void) {
 	if (initialized)return;
 
 	CVar::loadCommands();
-	/*
-	InputDevice::loadCommands();
-	GPU::loadCommands();
-	Map::loadCommands();
-	Script::loadCommands();
-	Editor::loadCommands();
-	Engine::loadCommands();
-	Net::loadCommands();
-	Entity::loadCommands();
-	Player::loadCommands();
-	Camera::loadCommands();
-	SPU::loadCommands();
-	UI::loadCommands();
-	World::loadCommands();
-	*/
 	// Commands defined with last parameter as "" wont drop an error if no arguments are given along
 	addCommand("cd", cdCommand, "Changes active working directory", "cd <folder_name>");
 	addCommand("cls", cls, "Clear console buffer", "");

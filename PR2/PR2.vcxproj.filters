@@ -74,6 +74,9 @@
     <ClCompile Include="ecosystem\input.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\redirect.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -18,6 +18,7 @@ enum E_MessageTypes {
 #include <fstream> 
 #include <iostream> 
 #include <sstream> 
+#include "redirect.hpp"
 
 class Message {
 public:
@@ -76,10 +77,9 @@ class Console{
 		////////////////////////////////////////////
 		// CVARS										//
 		////////////////////////////////////////////
+		static StdOutRedirect			_stdout;    
 		static char						char_buffer[16536];
-		static std::stringstream		buffer;
-		static std::streambuf			*_stdout;
-
+		
 		static Text						*result;
 		static Color					*con_fgcolor;
 		static Color					*con_bgcolor;
@@ -210,7 +210,7 @@ class Console{
 		static void						addSpecial(const char *cmdname, void(*function)(int), const char *help);
 
 
-		static void						paintBackdrop();
+		static void						paintBackdrop(float variance=1.0f);
 
 		// PUBLIC API
 		static void 					scroll(int i);
