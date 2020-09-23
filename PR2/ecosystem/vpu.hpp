@@ -9,6 +9,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <string>
 #include <vector>
+#include <map>
 
 #define VPU_OVERSCAN 0
 
@@ -91,11 +92,18 @@ public:
 	static Surface createBitmap(int width, int height);
 	static Surface *__layers[12];
 	
+	/* High Level API */
+	static long int allocateSurface(int width, int height);
+	static void deallocateSurface(long int handle);
+	static std::map<long int, Surface> surfaces;
+	static long int surface_handle;
+	
 	// Surface effects
 	static void randomize();
 	static void subdivide(int r, int g, int b, int alpha=255);
 	static void fadeout();
 	static void fadein();
+
 };
 
 #endif

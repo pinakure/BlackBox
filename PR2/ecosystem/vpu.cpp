@@ -2,6 +2,10 @@
 #include "engine.hpp"
 #include "console.hpp"
 
+std::map<long int, Surface> Vpu::surfaces;
+long int Vpu::surface_handle = 0;
+	
+
 Surface Vpu::console;
 Surface Vpu::overlay[4];
 Surface Vpu::background[4];
@@ -439,4 +443,15 @@ Example layer alterations:
 
 void Vpu::loadVars() {
 
+}
+
+long int Vpu::allocateSurface(int width, int height) {
+	surface_handle++;
+	surfaces.insert( std::pair<long int, Surface>(surface_handle, createBitmap(width, height)) );
+	return surface_handle;
+}
+
+void Vpu::deallocateSurface(long int handle) {
+	destroySurface(surfaces.at(handle));
+	surfaces.erase(handle);	
 }

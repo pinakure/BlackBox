@@ -119,39 +119,19 @@ pythoncommand(vpu_setscale){
 	return PyBool_FromLong(1);
 }
 
+pythoncommand(vpu_deletesurf){
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Vpu::deallocateSurface(handle);
+	return PyLong_FromLong(1);		
+}
+
 pythoncommand(vpu_createsurf){
 	int width;
 	int height;
 	if(!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
-	Surface surf = Vpu::createBitmap(width, height);
-	
-	PyObject *rot = Py_BuildValue("{s:f,s:f,s:f}",
-		"x", surf.rotation[0],
-		"y", surf.rotation[1],
-		"z", surf.rotation[2]
-	);
-	PyObject *sca = Py_BuildValue("{s:f,s:f,s:f}",
-		"x", surf.scale[0],
-		"y", surf.scale[1],
-		"z", surf.scale[2]
-	);
-	
-	/*
-	return Py_BuildValue("{s:i, s:i}", 
-		"width"		, width, 
-		"height"	, height
-	);
-	*/
-	PyObject *obj = Py_BuildValue("{s:i,s:i,s:i,s:O,s:O,s:i}", 
-		"width"		, width, 
-		"height"	, height,
-		"address"	, surf.bitmap,
-		"rotation"	, rot,			
-		"scale"		, sca,
-		"enabled"	, surf.enabled
-	);
-	return Py_BuildValue("O", obj);
-	
+	long int handle = Vpu::allocateSurface(width, height);
+	return PyLong_FromLong(handle);	
 }
 
 pythoncommand(vpu_fadein){
@@ -207,6 +187,7 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef VpuMethods[] = {
+	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(a) : Delete given Surface" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Surface object to be drawn arbitrarily to screen" },
 	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
