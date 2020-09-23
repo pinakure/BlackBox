@@ -33,8 +33,6 @@ enum E_InputButton {
 #include "trigger.hpp"
 #include "snapshot.hpp"
 
-#define INPUT InputDevice
-
 class InputDevice {
 	private:
 		static Demo				demo;

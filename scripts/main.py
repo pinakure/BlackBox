@@ -27,6 +27,9 @@ class tests():
 
     @staticmethod
     def run():
+        for i in range(1, 1000000):
+            vpu.renderbg(float(i))
+            vpu.update()    
         # some tests to check vpu functionalities
         for i in range(0,11):
             vpu.disable(i)

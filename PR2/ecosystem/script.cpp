@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "script.hpp"
+#include "console.hpp"
 #include "vpu.hpp"
 #include "glue.cpp"
 
@@ -9,6 +10,7 @@ bool Script::initialize() {
 
 		PyImport_AppendInittab("blackbox", &PyInit_blackbox);
 		PyImport_AppendInittab("vpu"	 , &PyInit_vpu);
+		PyImport_AppendInittab("console" , &PyInit_console);
 		Py_Initialize();
 		Py_LoadCommands();
 	}catch (int e) {
