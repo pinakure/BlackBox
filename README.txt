@@ -1,7 +1,8 @@
-# BlackBox
-BlackBox Engine Core
+BlackBox
 
+BlackBox Engine Core
 Use ESC to open the console. 
+
 This black box has Py powers, being more accurate, version 3.8.5.
 
 alias                    Set given alias for a command line
@@ -53,3 +54,4 @@ setrotation              Sets rotation for specified layer (0-11) at given degre
 setscale                 Sets scale for specified layer [0-11] given horizontal and vertical values
 update                   Allow blackbox engine to perform its rendering based input and output operations
 version                  Return current BlackBox engine version
+</pre>
