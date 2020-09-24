@@ -39,7 +39,7 @@ class InputDevice {
 	public:
 		///////////////////////
 		// CVARS				//
-		///////////////////////
+		///////////////////////		
 		static Boolean			*in_keyboard;
 		static Boolean			*in_mouse;
 		static Boolean			*in_joystick;
@@ -66,6 +66,8 @@ class InputDevice {
 		static int				axis_y[2];
 
 		static std::forward_list		<Trigger>	trigger; //!< List of trigger pointers
+
+		static char				keyrepeat_rate;
 
 		static int				mouse_w;
 		static int				mouse_x;
@@ -144,4 +146,9 @@ class InputDevice {
 };
 
 extern int codepage[];
+
+#define KEYDOWN(keyvalue)	(keyvalue == 1)
+#define KEYPRESS(keyvalue)	(keyvalue > 1)
+#define KEYUP(keyvalue)		(keyvalue ==-1)
+
 #endif

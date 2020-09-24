@@ -2,7 +2,7 @@
 #include "input.hpp"
 #include "engine.hpp"
 #include "console.hpp"
-
+char					InputDevice::keyrepeat_rate = 32;
 Surface					InputDevice::joystick_image;
 Surface					InputDevice::joystick_bitmap;
 Surface					InputDevice::keyboard_bitmap[2];
@@ -325,7 +325,7 @@ bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
 	CVar::settings["in_mouse"	]->function = InputDevice::restart;
 
 	restart();
-	
+	memset(&lap, 1, sizeof(int) * 256);
 	demo.clear();
 	
 	joystick_image = Vpu::loadBitmap("data/gfx/hud/joypad.png");
@@ -519,98 +519,6 @@ void InputDevice::draw(int layer_index){
 	if (demo.isInitialized()) demo.draw();
 }
 
-void InputDevice::update(int delta){
-	
-	if(key[ALLEGRO_KEY_O]==1){
-		Engine::print("O pressed");
-		demo.clear();		
-	}
-	if(key[ALLEGRO_KEY_P]){
-		if(demo.isInitialized()){
-			demo.start();
-		} 
-	}
-	if(key[ALLEGRO_KEY_ESCAPE]){
-		demo.rewind();		 
-	}
-
-	if(demo.isInitialized()){
-		//PROFILE_START();
-		if(demo.isPlaying()){
-			if(!demo.play()) {
-				demo.rewind();
-				//SAFE_RELEASE(demo);
-			};
-			updateController();
-			//PROFILE_END("demo");
-			return;
-		}
-		updateController();
-		//PROFILE_END("demo");
-	}
-
-	//PROFILE_START();
-	if (demo.isRecording())
-		demo.record();
-
-	//PROFILE_END("demo");
-	//PROFILE_START();
-
-	// TODO: update local member at callback when var changes only!
-	int aim_radius = 1024 - InputDevice::aim_sensitivity->get();
-
-	if(readMouse){
-		/*
-		int mx, my;
-		get_mouse_mickeys(&mx, &my);
-		InputDevice::mouse_w = mouse_w;
-		position_mouse(GPU::width/2, GPU::height/2); 
-		
-		// TODO: update local member at callback when var changes only!
-		if(InputDevice::aim_acceleration->get()){
-			// accel
-			movement_x = float(mx + movement_x) * 0.90f;
-			movement_y = float(my + movement_y) * 0.90f;
-		} else {
-			// no accel
-			movement_x = mx;
-			movement_y = my;
-		}
-		// Calculate angle
-		aim_x += movement_x;
-		aim_y += movement_y;
-		float t = atan2(aim_y, aim_x);
-		aim_x = aim_radius * cos(t);
-		aim_y = aim_radius * sin(t);
-		
-		InputDevice::mouse_x += movement_x;
-		InputDevice::mouse_y += movement_y;
-		InputDevice::mouse_x = InputDevice::mouse_x >= 0 ? InputDevice::mouse_x < (GPU::width*GPU::scale) ? InputDevice::mouse_x : (GPU::width*GPU::scale) -1 : 0;
-		InputDevice::mouse_y = InputDevice::mouse_y >= 0 ? InputDevice::mouse_y < (GPU::height*GPU::scale) ? InputDevice::mouse_y : (GPU::height*GPU::scale)-1: 0;
-		*/
-		readMouse = false;
-	}
-	
-	if(joystick)updateJoystick();
-
-	for (Trigger &t : trigger) {
-		t.update();
-	}
-
-	for (int i = 0; i < 255; i++) {
-		if (key[i] == 1) 
-			key[i] = 2; // Convert keyDown in keyPress
-		if (key[i] == 3) 
-			key[i] = 0; // Convert keyUp   in keyOff
-	}
-
-	readKeyboard = false;
-	readMouse	 = false;
-	readJoystick = false;	
-
-	//PROFILE_END("input");
-}
-
 int InputDevice::findKeyByString(std::string &skey){
 	const char *p;
 	int index = 0;
@@ -775,13 +683,117 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN)
 				key[event.keyboard.keycode] = 1;
 			else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP)
-				key[event.keyboard.keycode] = 3;
+				key[event.keyboard.keycode] = -1;
 			if (Console::enabled) {
-				if(key[event.keyboard.keycode]==1)
-					Console::readKeyboard(event.keyboard.keycode);
+				if (KEYDOWN(key[event.keyboard.keycode])) {
+					Console::messages.push_back(Message(CONSOLE_CHAR, event.keyboard.keycode));					
+				}				
 			}	
 			
 	}
+}
+
+void InputDevice::update(int delta){
+	
+	if(key[ALLEGRO_KEY_O]==1){
+		Engine::print("O pressed");
+		demo.clear();		
+	}
+	if(key[ALLEGRO_KEY_P]){
+		if(demo.isInitialized()){
+			demo.start();
+		} 
+	}
+	if(key[ALLEGRO_KEY_ESCAPE]){
+		demo.rewind();		 
+	}
+
+	if(demo.isInitialized()){
+		//PROFILE_START();
+		if(demo.isPlaying()){
+			if(!demo.play()) {
+				demo.rewind();
+				//SAFE_RELEASE(demo);
+			};
+			updateController();
+			//PROFILE_END("demo");
+			return;
+		}
+		updateController();
+		//PROFILE_END("demo");
+	}
+
+	//PROFILE_START();
+	if (demo.isRecording())
+		demo.record();
+
+	//PROFILE_END("demo");
+	//PROFILE_START();
+
+	// TODO: update local member at callback when var changes only!
+	int aim_radius = 1024 - InputDevice::aim_sensitivity->get();
+
+	if(readMouse){
+		/*
+		int mx, my;
+		get_mouse_mickeys(&mx, &my);
+		InputDevice::mouse_w = mouse_w;
+		position_mouse(GPU::width/2, GPU::height/2); 
+		
+		// TODO: update local member at callback when var changes only!
+		if(InputDevice::aim_acceleration->get()){
+			// accel
+			movement_x = float(mx + movement_x) * 0.90f;
+			movement_y = float(my + movement_y) * 0.90f;
+		} else {
+			// no accel
+			movement_x = mx;
+			movement_y = my;
+		}
+		// Calculate angle
+		aim_x += movement_x;
+		aim_y += movement_y;
+		float t = atan2(aim_y, aim_x);
+		aim_x = aim_radius * cos(t);
+		aim_y = aim_radius * sin(t);
+		
+		InputDevice::mouse_x += movement_x;
+		InputDevice::mouse_y += movement_y;
+		InputDevice::mouse_x = InputDevice::mouse_x >= 0 ? InputDevice::mouse_x < (GPU::width*GPU::scale) ? InputDevice::mouse_x : (GPU::width*GPU::scale) -1 : 0;
+		InputDevice::mouse_y = InputDevice::mouse_y >= 0 ? InputDevice::mouse_y < (GPU::height*GPU::scale) ? InputDevice::mouse_y : (GPU::height*GPU::scale)-1: 0;
+		*/
+		readMouse = false;
+	}
+	
+	if(joystick)updateJoystick();
+
+	for (Trigger &t : trigger) {
+		t.update();
+	}
+
+	for (int i = 0; i < 255; i++) {
+		if (KEYDOWN(key[i])||KEYPRESS(key[i])) 
+			key[i]++; // Convert keyDown in keyPress
+		if (KEYUP(key[i])) {
+			key[i] = 0; // Convert keyUp   in keyOff
+			lap[i] = 1; // Reset lap retrigger divider
+		} if (Console::enabled) {
+			//Keyrepeat if console is enabled
+			if (key[i] > (InputDevice::keyrepeat_rate/lap[i]))
+				key[i] = -2;
+			if (key[i] < 0) {
+				key[i] = 1;
+				lap[i]++;
+				Console::messages.push_back(Message(CONSOLE_CHAR, i));
+			}
+		}
+	}
+
+	readKeyboard = false;
+	readMouse	 = false;
+	readJoystick = false;	
+
+	//PROFILE_END("input");
 }
 
 #undef gpu

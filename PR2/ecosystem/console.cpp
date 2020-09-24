@@ -14,7 +14,7 @@ std::map<std::string, std::string> Console::pyhelp;
 
 StdOutRedirect				Console::_stdout;
 char						Console::char_buffer[16536];
-
+bool						Console::remember_syntax_errors = true;
 std::map<std::string, std::string>	Console::aliases;
 std::vector<Toggle*>		Console::toggles;
 std::vector<std::string>	Console::lines;				
@@ -571,6 +571,7 @@ void Console::handleMessages(void){
 					
 				case CONSOLE_CHAR:
 					if(!enabled) break;
+					readKeyboard(msg->data);
 					break;
 					
 				case CONSOLE_TOGGLE:
@@ -985,6 +986,7 @@ void Console::execute(std::string commandline, bool nohist){
 				if (!Script::execute(cmd)) {
 					cmd.append(" :: Syntax Error");
 					print(cmd.c_str());
+					if(Console::remember_syntax_errors) historyAdd(hist); 
 					//9-2020//if (!echo) UI::oneLinerTimer = 0;
 				} else {
 					if(nohist){ 

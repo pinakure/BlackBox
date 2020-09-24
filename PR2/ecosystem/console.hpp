@@ -96,7 +96,8 @@ class Console{
 			
 		static Surface					backdrop;
 		static Surface					bitmap;				
-	
+
+		static bool						remember_syntax_errors;
 		static bool						redirect; 			//!< true when console cannot use graphical routines and must send output to stdout (WIP)
 		//static bool						scriptInput;		//!< true when script is going to receive the command line
 		//static Script					script;
@@ -231,7 +232,7 @@ class Console{
 		static void 					moveBegin(void);
 		static void 					moveEnd(void);
 		static void 					sendPrompt(void);
-
+		
 		static std::string				stripColors(const char *colored);
 
 
