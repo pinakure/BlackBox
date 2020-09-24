@@ -114,9 +114,9 @@ void Console::initialize(void){
 	initialized = true;
 	redirect = false;
 
-	Console::execute("import blackbox", false);
-	Console::execute("import vpu", false);
-	Console::execute("import console", false);
+	Console::execute("import blackbox"	, true);
+	Console::execute("import vpu"		, true);
+	Console::execute("import console"	, true);
 
 	//_stdout.initialize();
 	//_stdout.Start();
@@ -129,15 +129,15 @@ void Console::deInitialize(void){
 
 const std::string Console::getBind(const char *name){
 	return name;
-	//return (InputDevice::getBind(name));
+	return (InputDevice::getBind(name));
 }
 
 void Console::setBind(const char *key_name, const char *cmd_line, int key_code){
-	//InputDevice::setBind(key_name, cmd_line, key_code);
+	InputDevice::setBind(key_name, cmd_line, key_code);
 }
 
 void Console::unSetBind(const char *name){
-	//InputDevice::unSetBind(name);
+	InputDevice::unSetBind(name);
 }
 
 std::vector<std::string> extractArguments(std::string haystack){
@@ -1329,7 +1329,7 @@ COMMAND_CALLBACK(dump) {
 		std::string st = Console::lines[i];
 		if (st.empty())continue;
 		if (!st.compare("\n"))continue;
-		fprintf(fp, "%s", st.c_str());
+		  fprintf(fp, "%s\n", Console::stripColorCodes(st.c_str()).c_str());
 	}
 	fclose(fp);
 
@@ -1353,7 +1353,7 @@ COMMAND_CALLBACK(help) {
 	size_t pos;
 
 	std::string helpstr = "~cNo help for requested command.";
-	if (!strcmp(args[0].c_str(), "-full")) {
+	if (!strcmp(args[0].c_str(), "-full") || !strcmp(args[0].c_str(), "-f")) {
 		char b[1024];
 		Console::print("");
 		std::string hlp;
@@ -1364,18 +1364,25 @@ COMMAND_CALLBACK(help) {
 			tabulate(b, 1024, 25, "ss", topic->command.c_str(), hlp.c_str());
 			Console::printf("~f%s", b);
 		}
+		Console::print("~7-----------------------------------------------");
+		Console::print("~f SCRIPTING API. Use ~ehelp <term>~f for details");
+		Console::print("~7-----------------------------------------------");
 		pit = Console::pyhelp.begin();
 		while (pit != Console::pyhelp.end()) {
 			pos = pit->second.find(" : ");
 			hlp = "~e";
+			std::string fullname = pit->second.substr(0, pos);
+			size_t pos2 = fullname.find('.')+1;
+			std::string name = fullname.substr(pos2, fullname.length() - (pos2));
+			name = name.substr(0, name.find("("));
 			hlp.append((pit->second.substr(pos + 3, pit->second.length() - (pos + 3))).c_str());
-			tabulate(b, 1024, 25, "ss", (pit->second.substr(0, pos)).c_str(), hlp.c_str());
+			tabulate(b, 1024, 25, "ss", name.c_str(), hlp.c_str());
 			Console::printf("~f%s", b);
 			pit++;
 		}
 		return 0;
 	}
-	if (!strcmp(args[0].c_str(), "-toc")) {
+	if (!strcmp(args[0].c_str(), "-toc") || !strcmp(args[0].c_str(), "-t")) {
 		char b[1024];
 		Console::print("");
 		Console::print("~eAvailable Commands:");
