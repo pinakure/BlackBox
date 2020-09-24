@@ -27,9 +27,14 @@ class tests():
 
     @staticmethod
     def run():
-        for i in range(1, 1000000):
-            vpu.renderbg(float(i))
-            vpu.update()    
+        for e in range(0,1000):
+            for i in range(0,512):
+                c = i if i<256 else 512-i
+                vpu.select(10)
+                vpu.setrotation(10, (c/256)-0.5)    
+                #vpu.setcolor(c,c,c)
+                vpu.print(f"Iteration {e}", 160,120)
+                vpu.update()
         # some tests to check vpu functionalities
         for i in range(0,11):
             vpu.disable(i)

@@ -218,5 +218,16 @@ static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
 static PyObject *PyInit_console(void){ return PyModule_Create(&ConsoleModule); }
 
 static void Py_LoadCommands() {
-
+	for (PyMethodDef &d : VpuMethods) {
+		if (!d.ml_name)continue;
+		Console::addHelp(d.ml_name, d.ml_doc);
+	}
+	for (PyMethodDef &d : BlackBoxMethods) {
+		if (!d.ml_name)continue;
+		Console::addHelp(d.ml_name, d.ml_doc);
+	}
+	for (PyMethodDef &d : ConsoleMethods) {
+		if (!d.ml_name)continue;
+		Console::addHelp(d.ml_name, d.ml_doc);
+	}
 }

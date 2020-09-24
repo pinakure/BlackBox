@@ -8,6 +8,8 @@
 #include <sstream>
 #include <algorithm>
 
+std::map<std::string, std::string> Console::pyhelp;
+
 #define BUFFERSIZE 1024
 
 StdOutRedirect				Console::_stdout;
@@ -1347,16 +1349,29 @@ COMMAND_CALLBACK (toggleCon) {
 
 COMMAND_CALLBACK(help) {
 	Command *topic;
+	std::map<std::string, std::string>::iterator pit;
+	size_t pos;
+
 	std::string helpstr = "~cNo help for requested command.";
 	if (!strcmp(args[0].c_str(), "-full")) {
 		char b[1024];
 		Console::print("");
+		std::string hlp;
 		for (size_t i = 0, o = Console::commands.size(); i<o; i++) {
 			topic = &Console::commands[i];
-			std::string hlp = "~e";
+			hlp = "~e";
 			hlp.append(topic->help.c_str());
 			tabulate(b, 1024, 25, "ss", topic->command.c_str(), hlp.c_str());
 			Console::printf("~f%s", b);
+		}
+		pit = Console::pyhelp.begin();
+		while (pit != Console::pyhelp.end()) {
+			pos = pit->second.find(" : ");
+			hlp = "~e";
+			hlp.append((pit->second.substr(pos + 3, pit->second.length() - (pos + 3))).c_str());
+			tabulate(b, 1024, 25, "ss", (pit->second.substr(0, pos)).c_str(), hlp.c_str());
+			Console::printf("~f%s", b);
+			pit++;
 		}
 		return 0;
 	}
@@ -1373,13 +1388,27 @@ COMMAND_CALLBACK(help) {
 			tabulate(b, 1024, 20, "ssss", t1 ? t1->command.c_str() : "", t2 ? t2->command.c_str() : "", t3 ? t3->command.c_str() : "", t4 ? t4->command.c_str() : "");
 			Console::printf("~f%s", b);
 		}
+		Console::print("~aUse -full to get a comprehensive command list, including scripting API");
 		return 0;
 	}
 	topic = Console::findCommand(args[0]);
-	if (!topic) Console::print(helpstr); //Unmodified (no help for requested command)
+	if (!topic) {
+		// Look into pyhelp for matches
+		pit = Console::pyhelp.begin();
+		while (pit != Console::pyhelp.end()) {
+			if (!pit->first.compare(args[0])) {
+				pos = pit->second.find(" : ");
+				Console::printf("~d%s", (pit->second.substr(0, pos)).c_str());
+				Console::printf("  ~e%s", (pit->second.substr(pos+3, pit->second.length() - (pos+3))).c_str());
+				return 0;
+			}
+			pit++;
+		}
+		Console::print(helpstr); //Unmodified (no help for requested command)
+	}
 	else {
 		Console::printf("~d%s", topic->help.c_str());
-		if (topic->usage.length() > 0) {
+		if (topic->usage.length() > 0) {			
 			Console::printf("~b Usage : ~f%s", topic->usage.c_str());
 		}
 	}
@@ -1509,6 +1538,19 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 	// Look into aliases for matches
 	std::map<std::string, std::string>::iterator pit = aliases.begin();
 	while (pit != aliases.end()) {
+		if (autoCompletionCheck(pit->first, cmd)) {
+			std::string s = "";
+			//if(isCmd) s.append("alias ");
+			s.append(pit->first);
+			//s.append(" ");
+			candidates.push_back(s.c_str());
+		}
+		pit++;
+	}
+
+	// Look into pyhelp for matches
+	pit = pyhelp.begin();
+	while (pit != pyhelp.end()) {
 		if (autoCompletionCheck(pit->first, cmd)) {
 			std::string s = "";
 			//if(isCmd) s.append("alias ");
@@ -1696,4 +1738,8 @@ void Console::loadVars(void) {
 	// :( not working yet! -> ((Color*)CVar::settings["con_bgcolor"])->set(Bitmap::makecolor(0x40, 0, 0x10));
 
 	CVar::settings["result"] = CVar::create<Text>("result", "Stores operation results", "0", true);
+}
+
+void Console::addHelp(std::string name, std::string hlp) {
+	pyhelp.insert(std::pair<std::string, std::string>(name, hlp));
 }

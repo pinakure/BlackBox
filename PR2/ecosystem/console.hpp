@@ -18,6 +18,7 @@ enum E_MessageTypes {
 #include <fstream> 
 #include <iostream> 
 #include <sstream> 
+#include <map> 
 #include "redirect.hpp"
 
 class Message {
@@ -223,6 +224,8 @@ class Console{
 		static void 					removeChar(void);
 		static void 					deleteChar(void);
 		static void 					addChar(int chr);
+		static void						addHelp(std::string name, std::string hlp);
+		static std::map<std::string, std::string> pyhelp;
 		static void 					moveLeft(void);
 		static void 					moveRight(void);
 		static void 					moveBegin(void);
