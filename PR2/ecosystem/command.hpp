@@ -2,6 +2,7 @@
 #define COMMAND_HPP
 
 #include <vector>
+#include <string>
 
 typedef int (*callback)(std::vector<std::string>&);
 
