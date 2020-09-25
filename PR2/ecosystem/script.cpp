@@ -110,6 +110,7 @@ bool Script::execute(std::string &python_code) {
 		}
 		return true;
 	}catch (int e) {
+		e = e;
 		PyObject *ptype, *pvalue, *ptraceback;
 		PyErr_Fetch(&ptype, &pvalue, &ptraceback);		
 		return false;
