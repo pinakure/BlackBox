@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "interp.hpp"
 #include "input.hpp"
 #include "hud.hpp"
 #include "console.hpp"
@@ -110,8 +111,16 @@ void Engine::update() {
 }
 
 void Engine::loop() {
+	static float q[29];
+	for (int i = 0; i < 29; i++) {
+		Interpolator::add(q[i], 0, i*1000, 0, 600*i);		
+	}
+	
+
+
 	while(run){
 		update();
+		Interpolator::update();
 	}	
 }
 void Engine::error(std::string text) {
