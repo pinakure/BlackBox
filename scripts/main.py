@@ -24,6 +24,15 @@ class tests():
             vpu.print("B", 340, 240);
             vpu.update()
         
+    @staticmethod
+    def fill():
+        vpu.enable(1)
+        while(1):
+            vpu.select(1)
+            vpu.setcolor(255,255,0,255)
+            vpu.fill()
+            vpu.update()
+        
 
     @staticmethod
     def run():

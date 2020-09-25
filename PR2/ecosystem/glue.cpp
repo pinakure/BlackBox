@@ -3,7 +3,11 @@ Surface *getLayer(int index) {
 		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");
 		return NULL;
 	}
-	return Vpu::__layers[index];	
+	if (index < 12) {
+		return Vpu::__layers[index];
+	} else {
+		return &Vpu::surfaces[index - 12];
+	}
 }
 
 /* ----------------------------------------------------------------------
@@ -118,20 +122,52 @@ pythoncommand(vpu_setscale){
 	(*layer).scale[1] = scale_y;	
 	return PyBool_FromLong(1);
 }
+pythoncommand(vpu_setcolor){
+	int r;
+	int g;
+	int b;
+	int a=255;
+	if(!PyArg_ParseTuple(args, "iii|i", &r, &g, &b, &a)) return NULL;
+	Vpu::setColor(r, g, b, a);
+	return PyBool_FromLong(1);
+}
 
 pythoncommand(vpu_deletesurf){
+	// Must subtract 12 units from handle (12 system layers to be selected which are not in <Vpu::surfaces>)
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Vpu::deallocateSurface(handle);
-	return PyLong_FromLong(1);		
+	Vpu::deallocateSurface(handle-12);
+	return PyLong_FromLong(1);
 }
 
 pythoncommand(vpu_createsurf){
+	// Must add 12 units to handle (12 system layers to be selected which are not in <Vpu::surfaces> )
 	int width;
 	int height;
 	if(!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
 	long int handle = Vpu::allocateSurface(width, height);
-	return PyLong_FromLong(handle);	
+	return PyLong_FromLong(handle+12);	
+}
+
+pythoncommand(vpu_drawsurf){
+	// Must subtract 12 units from handle (12 system layers to be selected which are not in <surfaces>)
+	int handle;
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	Surface &s = Vpu::surfaces[handle-12];
+	Vpu::drawSurface(s, 0, 0, s.width, s.height, x, y);
+	return PyLong_FromLong(1);	
+}
+
+pythoncommand(vpu_fill){
+	int r = Vpu::color.r*255;
+	int g = Vpu::color.g*255;
+	int b = Vpu::color.b*255;
+	int a = Vpu::color.a*255;
+	if(!PyArg_ParseTuple(args, "")) return NULL;
+	Vpu::paint(r, g, b, a);
+	return PyLong_FromLong(1);	
 }
 
 pythoncommand(vpu_fadein){
@@ -187,16 +223,19 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef VpuMethods[] = {
-	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(a) : Delete given Surface" },
-	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Surface object to be drawn arbitrarily to screen" },
+	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
+	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
+	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },
 	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
 	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
 	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
+	{"setcolor"		, vpu_setcolor			, METH_VARARGS, "vpu.setcolor(r, g, b, a) : Sets current painting color"},
 	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
 	{"scale"		, vpu_scale				, METH_VARARGS, "vpu.scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
 	{"update"		, vpu_update			, METH_VARARGS, "vpu.update() : Allow blackbox engine to perform its rendering based input and output operations"},
+	{"fill"			, vpu_fill				, METH_VARARGS, "vpu.fill(r, g, b, a) : Fill selected bitmap with given color or default color"},
 	{"fadein"		, vpu_fadein			, METH_VARARGS, "vpu.fadein() : Fade screen from black"},
 	{"fadeout"		, vpu_fadeout			, METH_VARARGS, "vpu.fadeout() : Fade screen to black"},
 	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},
