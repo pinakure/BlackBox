@@ -325,7 +325,10 @@ bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
 	CVar::settings["in_mouse"	]->function = InputDevice::restart;
 
 	restart();
-	memset(&lap, 1, sizeof(int) * 256);
+	for (int i = 0; i < 256; i++) {
+		key[i] = 0;
+		lap[i] = 1;
+	}
 	demo.clear();
 	
 	joystick_image = Vpu::loadBitmap("data/gfx/hud/joypad.png");
@@ -639,11 +642,36 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 			shift = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
 			break;
 
-		case 47: //f1
-		case 48: //f2
-		case 49: //f3
-		case 50: //f4
-		case 51: //f5
+		case ALLEGRO_KEY_F1:
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Console::enabled ^= 1;
+			}
+			break;
+
+		case ALLEGRO_KEY_F2:
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::print("Erasing Demo...");
+				demo.clear();
+			}
+			break;
+			
+		case ALLEGRO_KEY_F3:
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::print("Playing back Demo...");
+				demo.start();
+			}
+			break;
+
+		case ALLEGRO_KEY_F4: 
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::print("Rewinding Demo...");
+				demo.rewind();
+			}
+			break;
+
+		case ALLEGRO_KEY_F5: 
+			break;
+
 		case 52: //f6
 		case 53: //f7
 		case 54: //f8
@@ -651,6 +679,8 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 		case 56: //f10
 		case 57: //f11
 		case 58: //f11
+			break;
+
 		case 93: //pause / break
 		case 92: //print screen
 
@@ -693,41 +723,28 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 	}
 }
 
-void InputDevice::update(int delta){
-	
-	if(key[ALLEGRO_KEY_O]==1){
-		Engine::print("O pressed");
-		demo.clear();		
-	}
-	if(key[ALLEGRO_KEY_P]){
-		if(demo.isInitialized()){
-			demo.start();
-		} 
-	}
-	if(key[ALLEGRO_KEY_ESCAPE]){
-		demo.rewind();		 
-	}
+void InputDevice::update(int delta){	
 
 	if(demo.isInitialized()){
-		//PROFILE_START();
+		
+	
 		if(demo.isPlaying()){
 			if(!demo.play()) {
-				demo.rewind();
-				//SAFE_RELEASE(demo);
+				demo.rewind();				
 			};
+			//PROFILE_START();
 			updateController();
-			//PROFILE_END("demo");
+			//PROFILE_END("demo_k");
 			return;
 		}
+		//PROFILE_START();
 		updateController();
-		//PROFILE_END("demo");
+		//PROFILE_END("demo_j");
 	}
 
-	//PROFILE_START();
 	if (demo.isRecording())
 		demo.record();
 
-	//PROFILE_END("demo");
 	//PROFILE_START();
 
 	// TODO: update local member at callback when var changes only!
@@ -779,7 +796,7 @@ void InputDevice::update(int delta){
 			lap[i] = 1; // Reset lap retrigger divider
 		} if (Console::enabled) {
 			//Keyrepeat if console is enabled
-			if (key[i] > (InputDevice::keyrepeat_rate/lap[i]))
+			if (key[i] > InputDevice::keyrepeat_rate / lap[i])
 				key[i] = -2;
 			if (key[i] < 0) {
 				key[i] = 1;

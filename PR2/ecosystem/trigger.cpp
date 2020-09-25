@@ -1,5 +1,5 @@
 static char key[256];
-static char lap[256];
+static int lap[256];
 
 /** 
 @param keyValue Value of the key to monitor status

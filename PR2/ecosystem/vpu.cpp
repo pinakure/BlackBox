@@ -39,11 +39,10 @@ void prepareTests() {
 	for (int i = 0; i < 4; i++) {
 		Vpu::foreground[i].enabled = false;
 	}
-	/*Vpu::background[0].enabled = true;		
-
+	Vpu::background[0].enabled = true;		
 	Vpu::select(Vpu::background[0]);
-	Vpu::subdivide(200, 120, 0, 64);
-	Vpu::randomize();*/
+	Vpu::subdivide(40, 40, 50, 255);
+	//Vpu::randomize();
 }
 
 void Vpu::subdivide(int r, int g, int b, int alpha) {
@@ -226,14 +225,15 @@ ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, flo
 }
 
 void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
-	char buffer[1024];
+	char buffer[2048];
 	va_list ap;
 	va_start(ap, fmt);
-	vsprintf_s(buffer, 1024, fmt, ap);
+	vsprintf_s(buffer, 2048, fmt, ap);
 	va_end(ap);
 
-	al_draw_textf(font, shadow, x+1, y+1, flags, buffer);	
-	al_draw_textf(font, color , x  , y  , flags, buffer);	
+	al_draw_textf(font, shadow, x + 1, y + 1, flags, buffer);
+	al_draw_textf(font, color, x, y, flags, buffer);
+	
 }
 
 void Vpu::print(std::string text, int  x, int y, int flags) {

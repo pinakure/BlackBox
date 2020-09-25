@@ -673,17 +673,17 @@ void Console::paintBackdrop(float variance) {
 			if (i & 1) {
 				c = ((int(float(x*y*y / (y + 1))*variance) & 0x000000ff));
 				Vpu::setColor(
-					c*1.1,
-					c,
-					c,
+					c / 2,
+					c / 2,
+					c / 1.8,
 					_opacity
 				);
 			} else {
 				c = ((int(float(y*x*x / (y + 1))*variance) & 0x000000ff));
 				Vpu::setColor(
-					c / 2,
-					c / 2,
-					c / 1.8,
+					c / 4,
+					c / 4,
+					c / 3.6,
 					_opacity
 				);
 			}
@@ -696,8 +696,10 @@ void Console::paintBackdrop(float variance) {
 	
 void Console::draw(int h){
 	if (!enabled){
-		visibleHeight = 0;
-		return;
+		if (visibleHeight > 0) {
+			visibleHeight =-32;
+			render(0, false);
+		} else return;
 	} 
 	
 	if(!bitmap.bitmap) bitmap = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );	
@@ -717,7 +719,10 @@ void Console::draw(int h){
 	}
 	
 	
-	if( visibleHeight < Vpu::console.height ) visibleHeight += speed;
+	if (visibleHeight < Vpu::console.height) {
+		visibleHeight += speed;
+		redraw = true;
+	} 
 	else visibleHeight = Vpu::console.height ;
 	
 	if (redraw) {
@@ -747,9 +752,18 @@ void Console::render(int h, bool drawCursor){
 	int s = Engine::epoch % 60;
 
 	Vpu::setColor(200, 200, 0,250);
-	Vpu::printf(0, (Vpu::console.height-4) - h, 0, "%02d:%02d:%02d > %s", H, m, s, a.c_str());
+	static std::string truncate;
+	if (a.length() > 2048-12) {//asuming 2048 byte vpu.printf static buffer
+		truncate = a;
+		a = truncate.substr(0, 2048-12).c_str();		
+	}
+	if (messages.size() > 1) {
+		Vpu::printf(0, 0, 0, "%02d Event Messages in queue", messages.size());
+	}
+	Vpu::printf(0, (Vpu::console.height - 4) - h, 0, "%02d:%02d:%02d > %s", H, m, s, a.c_str());
 	
 	// Render lines
+	if(h>0)
 	for(int u = (Vpu::console.height-4)-(h*2); u>=0; u-= h){
 		if (!lines.size())continue;		
 #ifndef CONSOLE_COLOR		
@@ -984,8 +998,10 @@ void Console::execute(std::string commandline, bool nohist){
 	
 			if(!parse(cmd)){
 				if (!Script::execute(cmd)) {
-					cmd.append(" :: Syntax Error");
-					print(cmd.c_str());
+					std::string tmp = "~4";
+					tmp.append(hist);
+					tmp.append("~c::~4Syntax Error~e");
+					print(tmp.c_str());
 					if(Console::remember_syntax_errors) historyAdd(hist); 
 					//9-2020//if (!echo) UI::oneLinerTimer = 0;
 				} else {
@@ -995,12 +1011,8 @@ void Console::execute(std::string commandline, bool nohist){
 					historyAdd(hist);
 				}				
 			} else {
-				if(nohist){ 
-					continue;
-				}
-				
+				if(nohist) continue;				
 				// *hist is not deleted in this branch, it'll be deleted on ~commandHistory()
-
 				// notice commandHistory refers to the input, consoleHistory is the output
 				historyAdd(hist);				
 			}

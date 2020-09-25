@@ -112,6 +112,7 @@ void Demo::draw(){
 }
 
 void Demo::record(){
+	//PROFILE_START();	
 	if(!current_chunk.record()){
 		chunk.push_back(InputSnapshotChunk());
 		current_chunk = chunk.back();
@@ -119,6 +120,7 @@ void Demo::record(){
 		record_position++;
 		size++;	
 	}
+	//PROFILE_END("demo");
 }
 
 void Demo::start(void){
