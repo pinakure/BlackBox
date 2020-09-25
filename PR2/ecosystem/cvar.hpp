@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 typedef enum E_EvalTypes {
 	EVAL_NOT_EQUAL,
