@@ -385,7 +385,7 @@ void Terrain::createBuildings(Layer *layer) {
 
 }
 
-#include "scripting.hpp"
+//#include "scripting.hpp"
 
 size_t TerrainGenerator::size = 0;
 size_t TerrainGenerator::script_size = 0;
@@ -393,14 +393,14 @@ const char *TerrainGenerator::data = nullptr;
 
 bool TerrainGenerator::initialize() {
 	try {
-	    FILE *script;
+	/*    FILE *script;
 	    fopen_s(&script, "data/scripts/terraingenerator.py","r"); 
 		fseek(script, SEEK_SET, SEEK_END);
 		TerrainGenerator::script_size = ftell(script);
 		rewind(script);
 		
 		fread(&data, sizeof(char) * script_size, 1, script);
-		PyRun_SimpleString(data);
+		PyRun_SimpleString(data);*/
 		return true;
 	} catch (int T){T;} 
 	return false;

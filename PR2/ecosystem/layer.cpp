@@ -41,7 +41,8 @@ Layer::Layer(const char *name, int width, int height, double parallax, __int64 *
 	}
 	catch (int e) {
 		e;
-		al_show_native_message_box(Vpu::screen, "Error", "Error", "Failed to initialize layer!", NULL, ALLEGRO_MESSAGEBOX_ERROR);			
+		//al_show_native_message_box(Vpu::screen, "Error", "Error", "Failed to initialize layer!", NULL, ALLEGRO_MESSAGEBOX_ERROR);			
+		Engine::printf("Failed to initialize layer!");			
 	}
 }
 
@@ -114,7 +115,8 @@ void Layer::draw(int camera_offset_x, int camera_offset_y){
 					if(c < __int64(std::size(Sector::animations))) {
 						Animation *t = &Sector::animations[c];
 						if (t) {
-							t->draw(Vpu::buffer, dx, dy);
+							//t->draw(Vpu::buffer, dx, dy);
+							t->draw(Vpu::background[0], dx, dy);
 						}
 					} else {
 						//al_set_target_bitmap(Vpu::buffer.bitmap);

@@ -95,9 +95,6 @@
     <ClCompile Include="ecosystem\sector.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
-    <ClCompile Include="ecosystem\snapshot.cpp">
-      <Filter>Archivos de origen\ecosystem</Filter>
-    </ClCompile>
     <ClCompile Include="ecosystem\world.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>

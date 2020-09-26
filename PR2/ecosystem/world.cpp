@@ -19,7 +19,8 @@ bool World::initialize() {
 	Material::initialize();
 
 	if (!Sector::initialize()) {
-		al_show_native_message_box(Vpu::screen, "Error", "Error", "Failed to initialize sector!", NULL, ALLEGRO_MESSAGEBOX_ERROR);			
+		//al_show_native_message_box(Vpu::screen, "Error", "Error", "Failed to initialize sector!", NULL, ALLEGRO_MESSAGEBOX_ERROR);			
+		Engine::printf("Failed to initialize sector!");
 		return false;
 	}
 
@@ -29,8 +30,9 @@ bool World::initialize() {
 			for (int x = 0; x < 1; x++) {			
 				Sector *s = new Sector(x, y, z);
 			}
-			Vpu::printCentered(std::to_string(y).c_str(), Vpu::width / 2, 0);
-			Vpu::flip();
+			//Vpu::printCentered(std::to_string(y).c_str(), Vpu::width / 2, 0);
+			Vpu::print(std::to_string(y).c_str(), Vpu::width / 2, 0, ALLEGRO_ALIGN_CENTRE);
+			//Vpu::flip();
 		}
 		
 	}
@@ -101,7 +103,7 @@ void World::drawSectorInfo() {
 }
 
 void World::drawMiniMap() {
-	al_set_target_bitmap(Vpu::overlay.bitmap);
+	Vpu::select(Vpu::overlay[2]);//al_set_target_bitmap(Vpu::overlay.bitmap);
 	int minimap_x = (Vpu::width - (Sector::size+8))-8;
 	int minimap_y = (Vpu::height - (Sector::size+8))-8;
 	for (int y = -8; y < Sector::size + 8; y++) {
@@ -164,7 +166,7 @@ void World::drawRadar(Sector *o ,int recursivity) {
 	}
 }
 
-#include "environment.hpp"
+//#include "environment.hpp"
 #include "typewriter.hpp"
 void World::setOrigin(Sector *o) {
 	static bool first_time = true;
@@ -176,7 +178,7 @@ void World::setOrigin(Sector *o) {
 	World::origin = o;
 	float rain = o->moisture;
 	float rain_speed = 2.0f+(float(o->density)/float(MAX_DENSITY))*4.0f;
-	Environment::setRain(rain, rain_speed);
+//Environment::setRain(rain, rain_speed);
 	/*
 	TypeWriter::enqueue(
 		(
@@ -193,7 +195,7 @@ void World::setOrigin(Sector *o) {
 }
 
 void World::draw() {
-	al_set_target_bitmap(Vpu::buffer.bitmap);
+	al_set_target_bitmap(Vpu::buffer);
 	
 	World::origin->requestRedraw();
 	World::origin->draw();

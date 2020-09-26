@@ -186,9 +186,9 @@ void Sector::drawRadar() {
 		
 	//al_draw_filled_rectangle(RADAR_X-6, RADAR_Y-6, RADAR_X + 6, RADAR_Y + 6, al_map_rgba(0,0,0,128));
 
-	al_set_target_bitmap(Vpu::overlay.bitmap);
+	Vpu::select(Vpu::overlay[2]);// al_set_target_bitmap(Vpu::overlay.bitmap);
 		al_draw_rectangle(rx, ry, rx + RADAR_S, ry + RADAR_S, al_map_rgba(!fullyOutOfCamera() ? 255 : 128, 180,0,255), 1.0f);
-	al_set_target_bitmap(Vpu::overlay.bitmap);
+	//al_set_target_bitmap(Vpu::overlay.bitmap);
 	if (this == World::origin) {
 		al_draw_filled_rectangle(rx, ry, rx + RADAR_S-1, ry + RADAR_S-1, al_map_rgba(0, 255, 0, 96));
 	} else {
@@ -203,7 +203,7 @@ void Sector::draw() {
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
 		);
-		al_set_target_bitmap(Vpu::overlay.bitmap);
+		Vpu::select(Vpu::overlay[2]);//al_set_target_bitmap(Vpu::overlay.bitmap);
 		this->grass->draw(
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
@@ -212,7 +212,7 @@ void Sector::draw() {
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
 		);*/
-		al_set_target_bitmap(Vpu::buffer.bitmap);
+		al_set_target_bitmap(Vpu::buffer);
 		
 		this->need_redraw = false;
 

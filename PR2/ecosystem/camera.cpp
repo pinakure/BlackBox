@@ -1,3 +1,4 @@
+#include "engine.hpp"
 #include "camera.hpp"
 #include "world.hpp"
 #include "sector.hpp"
