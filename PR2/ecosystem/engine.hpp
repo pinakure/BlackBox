@@ -3,6 +3,7 @@
 
 #include "sprite.hpp"
 #include <string>
+#include <limits>
 
 class Engine {
 private:
@@ -29,5 +30,9 @@ public:
 	static void print(std::string text);
 	static void printf(const char *fmt, ...);
 };
+
+#define TRUERAND(a) ( ( float(rand()) / float(INT_MAX) ) * float(a) )
+#define min(a, b) (a>b?b:a)
+#define max(a, b) (a>b?a:b)
 
 #endif

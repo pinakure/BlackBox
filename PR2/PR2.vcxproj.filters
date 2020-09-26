@@ -80,6 +80,27 @@
     <ClCompile Include="ecosystem\interp.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\terrain.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\biome.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\camera.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\material.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\sector.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\world.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\layer.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
