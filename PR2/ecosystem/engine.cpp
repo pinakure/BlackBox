@@ -2,6 +2,7 @@
 #include "input.hpp"
 #include "hud.hpp"
 #include "console.hpp"
+#include "world.hpp"
 
 int Engine::width = 640;
 int Engine::height = 480;
@@ -33,6 +34,8 @@ bool Engine::initialize() {
 		TypeWriter::enqueue(" ");
 		TypeWriter::enqueue("Welcome to BlackBox");
 		TypeWriter::enqueue(" ");
+
+		if (!World::initialize()) return false;
 		return true;
 	} catch (int e) {
 		e = e;
@@ -41,6 +44,7 @@ bool Engine::initialize() {
 }
 
 void Engine::deinitialize() {
+	World::deinitialize();
 	//TypeWriter::deInitialize();
 	Console::deInitialize();
 	InputDevice::deinitialize();
@@ -90,6 +94,7 @@ void Engine::handleEvents() {
 
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
+		World::draw();
 		Hud::draw();
 		InputDevice::draw(11);
 		Console::draw(16);
@@ -101,6 +106,7 @@ void Engine::render() {
 }
 
 void Engine::update() {
+	World::update(1.0);
 	Hud::update();
 	InputDevice::update(1);
 	Console::update();
