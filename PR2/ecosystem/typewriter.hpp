@@ -25,6 +25,8 @@ public:
 	static void draw();
 	static void update(double delta);
     static void enqueue(const char *text);
+	static bool needs_redraw;
+	static int bullet_radius;
 };
 
 #endif

@@ -89,9 +89,9 @@ public:
 	void	relink();
 	void	requestRedraw();
 	void	setColor(int r, int g, int b);
-	static Animation animations[64];
-	static std::vector<ALLEGRO_BITMAP*> tile;
-	static Sprite *tileset;
+	static	Animation animations[64];
+	static	std::vector<ALLEGRO_BITMAP*> tile;
+	static	Sprite tileset;
 
 	Sector(int x = 0, int y = 0, int z = 0);
 	void	destroy(bool cascade=false);

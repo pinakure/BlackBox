@@ -32,3 +32,5 @@ blackbox_debug.exe
 scripts/__pycache__/
 
 olddata/
+
+scripts/urllib/__pycache__/

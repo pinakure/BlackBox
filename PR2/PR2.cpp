@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <conio.h>
 #include <cmath>
+#include <string>
+#include <iostream>
 
 #include "ecosystem.h"
 
@@ -12,7 +14,8 @@ bool initialize() {
 	if(s.isLoaded()) s.call("configure");	
 	
 	if (!Engine::initialize()) {
-		printf("ERROR: Cannot initialize allegro backend.");
+		Engine::deinitialize();
+		std::printf("ERROR: Engine cannot run.\n\tCritical Modules could not be loaded.\n\tIt may be some files missing.\n");
 		return false;
 	}
 	Script::execute("import blackbox");
@@ -22,20 +25,22 @@ bool initialize() {
 	return true;
 }
 
+static int waitForEnter(int return_code) {
+	std::string line;
+	std::printf("\n---------------------------------------\n  *** Press [ ENTER ] to continue ***  \n---------------------------------------\n\n");
+	std::getline(std::cin, line);
+	return return_code;
+}
+
 int main(int argc, char **argv)
 {
-	if(! Script::initialize() ) {
-		printf("ERROR: Cannot initialize scripting machine.");
-		return(100);
-	}
-	
-	if (!initialize()) return 200;
-
-	
+	if(! Script::initialize()	) return waitForEnter(100);	
+	if(! initialize()			) return waitForEnter(200);
+		
 	Engine::loop();
 
 	Engine::deinitialize();
 	Script::deinitialize();
-	
+
 	return 0;
 }

@@ -43,7 +43,7 @@ int Animation::extractFrames(Sprite &sprite, int source_x, int source_y, int des
 	return 0;
 }
 
-void Animation::run(double delta){
+bool Animation::run(double delta){
 	switch (this->direction) {
 		default:
 		case Direction::UP:
@@ -55,7 +55,7 @@ void Animation::run(double delta){
 				} else {
 					this->current_frame = 0;
 				}
-			return;
+			break;
 		case Direction::DOWN:
 			this->current_frame -= abs(delta);
 			if (this->current_frame < 0)				
@@ -65,13 +65,18 @@ void Animation::run(double delta){
 				} else {
 					this->current_frame = this->frame.size()-1;					
 				}
-			return;
+			break;
 	}	
+	if (last_frame != this->current_frame) {
+		last_frame = this->current_frame;
+		return true;
+	}
+	return false;
 }
 
-void Animation::draw(Surface &surface, int x, int y) {
+void Animation::draw(Surface &surface, int x, int y, ALLEGRO_COLOR &color) {
 	al_set_target_bitmap(surface.bitmap);
 	if(this->frame.size() > 0)
-		al_draw_bitmap(this->frame[this->current_frame],x, y,  0);
+		al_draw_tinted_bitmap(this->frame[this->current_frame],color, x, y,  0);
 }
 
