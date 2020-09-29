@@ -28,18 +28,21 @@ private:
 	static ALLEGRO_FONT					*legacy_font;
 	static ALLEGRO_COLOR				shadow;
 	static ALLEGRO_COLOR				transparent;
-	static ALLEGRO_BITMAP				*target;	
 	static std::vector<ALLEGRO_COLOR>	color_stack;
 public:
+	static Surface						*target;	
 	static ALLEGRO_BITMAP				*buffer;	
 	static ALLEGRO_COLOR				color;
 	static ALLEGRO_DISPLAY				*display;
 	static bool							is_initialized;
 	static bool							fullscreen;	
-	static Surface						overlay[4];
-	static Surface						background[4];
-	static Surface						foreground[4];
+	static long int						surface_handle;
+	static std::map<long int, Surface>	surfaces;
+	static Surface						overlay;
+	static Surface						background;
+	static Surface						foreground;
 	static Surface						console;
+	static int							pixel_format;
 	static int							scroll[2];
 	static int							frames;
 	static int							fps;
@@ -59,11 +62,11 @@ public:
 
 	// Text output
 	static void printf(int  x, int y, int flags, const char *fmt, ...);//slow!
-	static void print(std::string text, int  x, int y, int flags=0);
-	static void printInteger(std::string text, int d, int  x, int y, int flags=0);
-	static void printFloat(std::string text, float d, int  x, int y, int flags=0);
-	static void printDouble(std::string text, double d, int  x, int y, int flags=0);
-	static void printBool(std::string text, bool d, int  x, int y, int flags=0);
+	static void print			(std::string text, int  x, int y, int flags=0);
+	static void printInteger	(std::string text, int d, int  x, int y, int flags=0);
+	static void printFloat		(std::string text, float d, int  x, int y, int flags=0);
+	static void printDouble		(std::string text, double d, int  x, int y, int flags=0);
+	static void printBool		(std::string text, bool d, int  x, int y, int flags=0);
 
 	// Primitives
 	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
@@ -79,7 +82,13 @@ public:
 	static void pushColor();
 	static void popColor();
 	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
-	
+
+	// Surface manipulation
+	static bool setScale(float sx=0.0f, float sy=0.0f, float sz=0.0f);
+	static bool scale	(float sx=0.0f, float sy=0.0f, float sz=0.0f);
+	static bool setRotation(float sa=0.0f);
+	static bool rotate	(float sa=0.0f);
+
 	// Blitting and Surfaces
 	static void clear();
 	static void clearAll();	
@@ -90,13 +99,10 @@ public:
 	static Surface &destroySurface(Surface &surface);
 	static Surface loadBitmap(std::string filename);
 	static Surface createBitmap(int width, int height);
-	static Surface *__layers[12];
 	
 	/* High Level API */
 	static long int allocateSurface(int width, int height);
 	static void deallocateSurface(long int handle);
-	static std::map<long int, Surface> surfaces;
-	static long int surface_handle;
 	
 	// Surface effects
 	static void randomize();

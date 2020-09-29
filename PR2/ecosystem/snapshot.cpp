@@ -96,7 +96,7 @@ void Demo::draw(){
 		Vpu::pushColor();
 		Vpu::setColor(0, 255, 0);
 		Vpu::pushColor();
-		Vpu::select(Vpu::overlay[3]);		
+		Vpu::select(Vpu::overlay);		
 		if(playing){
 			Vpu::popColor();
 			Vpu::print("PLAYING BACK CONTROLLER DATA", x, 72, flags);

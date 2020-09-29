@@ -29,9 +29,14 @@ public:
 	static void error(std::string text);
 	static void print(std::string text);
 	static void printf(const char *fmt, ...);
+
+	static void scale(float, float, float);
+	static void rotate(float);
+	static float _scale[3];
+	static float _rotation;
 };
 
-#define TRUERAND(a) ( ( float(rand()) / float(INT_MAX) ) * float(a) )
+#define TRUERAND(a) (((float(rand())/float(RAND_MAX)) * float(a)))
 #define min(a, b) (a>b?b:a)
 #define max(a, b) (a>b?a:b)
 

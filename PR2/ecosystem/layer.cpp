@@ -81,13 +81,42 @@ void Layer::set(int x, int y, __int64 value){
 
 void Layer::draw(int camera_offset_x, int camera_offset_y){
 	int x, y;
+	
+	float scale[3] = {
+		Vpu::target->scale[0],
+		Vpu::target->scale[1],
+		0,
+	};
+	
+	float oscale[3] = {
+		Vpu::width	/ (-(( Vpu::width	*	(-scale[0])		))),
+		Vpu::height / (-(( Vpu::height	*	(-scale[1])		))),
+		0,
+	};
+	
 	int ix = (Camera::x - camera_offset_x);// *this->parallax;
 	int iy = (Camera::y - camera_offset_y);// *this->parallax;
 	int ox = ix;
 	int oy = iy;
-	int lx = ox + Vpu::width;
-	int ly = oy + Vpu::height;
-	int dx = -World::cell_size, dy = -World::cell_size; // Start one row and one column before visible screen
+	int lx = ox + (Vpu::width *2);//Vpu::width*oscale[0];
+	int ly = oy + (Vpu::height *2);//Vpu::height*oscale[1];
+	/*
+	int margin_x = (scale[0]-0.5f)*(Vpu::width *oscale[0]);
+	int margin_y = (scale[1]-0.5f)*(Vpu::height*oscale[1]);
+	int swidth = (Vpu::width*scale[0]);
+	int sheight = (Vpu::height*scale[1]);
+	//int hw =( swidth  /2)-(margin_x*oscale[0])- ( (swidth ) /2 ) ;
+	int hw =margin_x;
+	int hh =margin_y;
+	Vpu::fillRectangle(
+		hw, 
+		hh, 
+		((Vpu::width  * oscale[0])), 
+		((Vpu::height * oscale[1])), 
+		64,2,1,64);
+	*/
+	int dx = -World::cell_size;
+	int dy = -World::cell_size; // Start one row and one column before visible screen
 	
 	dx -= ox % World::cell_size;
 	dy -= oy % World::cell_size;
@@ -96,7 +125,12 @@ void Layer::draw(int camera_offset_x, int camera_offset_y){
 	oy /= World::cell_size;
 	lx /= World::cell_size;
 	ly /= World::cell_size;
-	
+	int r = 128;
+	int g = 128;
+	int b = 128;
+	int alpha = 128;
+	ALLEGRO_COLOR color = al_map_rgba(r, g, b, alpha);
+
 	int dxInit = dx;
 	int dyInit = dy;
 	for(y = oy; y < ly+2; y++){
@@ -105,7 +139,7 @@ void Layer::draw(int camera_offset_x, int camera_offset_y){
 			__int64 index = (y * this->width) + x;
 
 			if( 
-				(index >= 0 && index < (this->width*this->height))
+				(index >= 0 && index < (this->width * this->height))
 										&& 
 					  	  ((x >= 0)&&(x < this->width)) 
 			){
@@ -115,13 +149,12 @@ void Layer::draw(int camera_offset_x, int camera_offset_y){
 					if(c < __int64(std::size(Sector::animations))) {
 						Animation *t = &Sector::animations[c];
 						if (t) {
-							//t->draw(Vpu::buffer, dx, dy);
-							t->draw(Vpu::background[0], dx, dy);
+							t->draw(Vpu::background, dx, dy, color);
 						}
 					} else {
-						//al_set_target_bitmap(Vpu::buffer.bitmap);
-						al_draw_bitmap(Sector::tile[c - std::size(Sector::animations)], dx, dy, 0);
+						al_draw_tinted_bitmap(Sector::tile[c - std::size(Sector::animations)], color, dx, dy, 0);
 					}
+					/*
 					if (this->color==true) {
 						float factor = float(abs((index % Sector::size) - (Sector::size/2) ) ) / (Sector::size*2);
 						ALLEGRO_COLOR color = al_map_rgba(float(this->r)*factor, float(this->g)*factor, float(this->b)*factor, 1.0f - factor);
@@ -156,7 +189,8 @@ void Layer::draw(int camera_offset_x, int camera_offset_y){
 								1.0f
 							);
 						}
-					}			
+					}	
+					*/		
 				}
 
 				#ifdef DRAW_TILE_IDS

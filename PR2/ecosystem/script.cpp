@@ -14,7 +14,7 @@ bool Script::initialize() {
 		Py_Initialize();
 		Py_LoadCommands();
 	}catch (int e) {
-		e = e;
+		std::printf("ERROR: Scripting Machine cannot run.\n\tCritical Modules could not be loaded.\n\tIt may be some files missing.\nException code: 0x%x\n", e);
 		return false;
 	}
 	return true;

@@ -9,6 +9,7 @@ public:
 	static Sector *origin;
 	static int temperature;
 	static int cell_size;
+	static bool needs_redraw;
 	static bool initialize();
 	static void deinitialize();
 	static void draw();

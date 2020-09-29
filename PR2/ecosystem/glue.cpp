@@ -3,11 +3,12 @@ Surface *getLayer(int index) {
 		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");
 		return NULL;
 	}
-	if (index < 12) {
-		return Vpu::__layers[index];
-	} else {
-		return &Vpu::surfaces[index - 12];
-	}
+	index %= 3;
+	return 
+		index == 0 ? &Vpu::background :
+		index == 1 ? &Vpu::foreground :
+		&Vpu::overlay;
+	
 }
 
 /* ----------------------------------------------------------------------

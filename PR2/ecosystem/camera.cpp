@@ -54,12 +54,9 @@ void Camera::update() {
 	}
 	
 	// Follow target only if it is outside radius around target
-	float speed_x = max(Camera::target_x, Camera::x)
-				   - min(Camera::target_x, Camera::x);
-	float speed_y = max(Camera::target_y, Camera::y)
-				   - min(Camera::target_y, Camera::y);
-	float speed_z = max(Camera::target_z, Camera::z)
-				   - min(Camera::target_z, Camera::z);
+	float speed_x = max(Camera::target_x, Camera::x)-min(Camera::target_x, Camera::x);
+	float speed_y = max(Camera::target_y, Camera::y)-min(Camera::target_y, Camera::y);
+	float speed_z = max(Camera::target_z, Camera::z)-min(Camera::target_z, Camera::z);
 	speed_x /= 15;
 	speed_y /= 4;
 	speed_z /= 15;

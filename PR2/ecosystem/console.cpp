@@ -124,7 +124,7 @@ void Console::initialize(void){
 
 void Console::deInitialize(void){
 	// Restore stdout
-	_stdout.Stop();
+	//_stdout.Stop();
 }
 
 const std::string Console::getBind(const char *name){

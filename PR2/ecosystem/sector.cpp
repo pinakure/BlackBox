@@ -3,9 +3,14 @@
 #include "sector.hpp"
 #include "world.hpp"
 
-int		Sector::size	= 64;
-Sprite*	Sector::tileset = nullptr;
-Animation Sector::animations[64];//<- NOT related with Sector::size
+#define VHEIGHT (Vpu::height)
+#define VWIDTH	(Vpu::width)
+
+int sectorcount = 0;
+
+int			Sector::size	= 64;
+Sprite		Sector::tileset = nullptr;
+Animation	Sector::animations[64];//<- NOT related with Sector::size
 std::vector<ALLEGRO_BITMAP*> Sector::tile;
 
 std::vector<Sector*> Sector::list;
@@ -127,7 +132,8 @@ Sector::Sector(int x, int y, int z) {
 	if (this->sibiling[Direction::SOUTH])this->sibiling[Direction::SOUTH]->setColor(r, g, b); ALTER_COLOR;
 	if (this->sibiling[Direction::LEFT])this->sibiling[Direction::LEFT]->setColor(r, g, b); ALTER_COLOR;
 	if (this->sibiling[Direction::RIGHT])this->sibiling[Direction::RIGHT]->setColor(r, g, b); ALTER_COLOR;
-
+	sectorcount++;
+	printf("Initialized: Sectors: %d\n", sectorcount);
 }
 
 void Sector::setColor(int r, int g, int b) {
@@ -153,31 +159,36 @@ void Sector::relink() {
 		}
 	}
 }
+
 	
 void Sector::destroy(bool cascade) {
 	this->deleted = true;
 	for (int i = 0; i < 6; i++) {
 		Sector *t = this->sibiling[i];	
-		if (cascade) {
+		if (cascade && t) {
 			// Set mirror connection to null
-			t->sibiling[OppositeDirection[(Direction)i]] = nullptr;
+			Direction dir = OppositeDirection[(Direction)i];
+			t->sibiling[dir] = nullptr;
 			if(!t->deleted)
 				t->destroy(true);
+			this->sibiling[i] = nullptr;			
 		}
-		this->sibiling[i] = nullptr;		
-	}	
+	}		
+	if (cascade && this != World::origin)delete(this);
 }
 
 Sector::~Sector() {
 	this->destroy(false);	
+	sectorcount--;
+	printf("Deinitialized: Sectors: %d\n", sectorcount);
 }
 
 bool Sector::validMapIndex(int map_index) {
 	return ((map_index >= 0) && (map_index < (Sector::size * Sector::size)));
 }
 
-#define RADAR_X (Vpu::width/2)
-#define RADAR_Y (Vpu::height/8)
+#define RADAR_X (VWIDTH/2)
+#define RADAR_Y (VHEIGHT/8)
 #define RADAR_S 4
 
 void Sector::drawRadar() {
@@ -186,40 +197,40 @@ void Sector::drawRadar() {
 		
 	//al_draw_filled_rectangle(RADAR_X-6, RADAR_Y-6, RADAR_X + 6, RADAR_Y + 6, al_map_rgba(0,0,0,128));
 
-	Vpu::select(Vpu::overlay[2]);// al_set_target_bitmap(Vpu::overlay.bitmap);
-		al_draw_rectangle(rx, ry, rx + RADAR_S, ry + RADAR_S, al_map_rgba(!fullyOutOfCamera() ? 255 : 128, 180,0,255), 1.0f);
-	//al_set_target_bitmap(Vpu::overlay.bitmap);
+	int r = !fullyOutOfCamera() ? 255 : 128;
+	Vpu::select(Vpu::background);// al_set_target_bitmap(Vpu::overlay.bitmap);
+	al_draw_rectangle(rx, ry, rx + RADAR_S, ry + RADAR_S, al_map_rgba(r, 180,0,255), 1.0f);
 	if (this == World::origin) {
 		al_draw_filled_rectangle(rx, ry, rx + RADAR_S-1, ry + RADAR_S-1, al_map_rgba(0, 255, 0, 96));
 	} else {
 		al_draw_filled_rectangle(rx, ry, rx + RADAR_S-1, ry + RADAR_S-1, al_map_rgba(128, 180, 0, 96));
-	}		
+	}	
 }
 
 void Sector::draw() {
 	if ((!this->fullyOutOfCamera()) && (this->need_redraw)) {
-
+	
+		Vpu::select(Vpu::background);//al_set_target_bitmap(Vpu::overlay.bitmap);
 		this->data->draw(
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
 		);
-		Vpu::select(Vpu::overlay[2]);//al_set_target_bitmap(Vpu::overlay.bitmap);
-		this->grass->draw(
+		Vpu::select(Vpu::background);//al_set_target_bitmap(Vpu::overlay.bitmap);
+		/*this->grass->draw(
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
-		);
+		);*/
 		/*this->edificable->draw(
 			World::cell_size + (this->subjective_x * Sector::size * World::cell_size),
 			World::cell_size + (this->subjective_y * Sector::size * World::cell_size)
 		);*/
-		al_set_target_bitmap(Vpu::buffer);
 		
 		this->need_redraw = false;
 
-		this->drawRadar();
+		//this->drawRadar();
 		
-		int py = Vpu::height - 64;
-		
+		int py = VHEIGHT - 64;
+		/*
 		if (this->sibiling[Direction::NORTH])
 			this->sibiling[Direction::NORTH]->draw();
 		if (this->sibiling[Direction::LEFT])
@@ -228,22 +239,27 @@ void Sector::draw() {
 			this->sibiling[Direction::SOUTH]->draw();
 		if (this->sibiling[Direction::RIGHT])
 			this->sibiling[Direction::RIGHT]->draw();
+			*/
 		//if (this->sibiling[Direction::DOWN])
 			//this->sibiling[Direction::DOWN]->draw();
 	}
 }
 
 bool Sector::initialize() {
-	Sector::tileset = new Sprite("atlas");
+	Sector::tileset = Sprite("atlas");
+	if (!Sector::tileset.isInitialized()) {
+		std::printf("ERROR: Cannot initialize Atlas.\n");
+		return false;
+	}
 	int animation_index = 0;
 	// Extract water animations
-	Sector::animations[animation_index++] = Animation(*Sector::tileset, World::cell_size, World::cell_size, 0x0, 4, 0x7, 4, false);
-	Sector::animations[animation_index++] = Animation(*Sector::tileset, World::cell_size, World::cell_size, 0x8, 4, 0xf, 4, false);
+	Sector::animations[animation_index++] = Animation(Sector::tileset, World::cell_size, World::cell_size, 0x0, 4, 0x7, 4, false);
+	Sector::animations[animation_index++] = Animation(Sector::tileset, World::cell_size, World::cell_size, 0x8, 4, 0xf, 4, false);
 	// Extract water transitions	
 	for (int y = 0; y < 4; y++) {
 		for (int n = 0; n < 4; n++) {
 			Sector::animations[animation_index] = Animation(
-				*Sector::tileset,					
+				Sector::tileset,					
 				World::cell_size,
 				World::cell_size,					
 				n*4,
@@ -259,7 +275,7 @@ bool Sector::initialize() {
 	for (int y = 5; y < 16; y++) {
 		for (int n = 0; n < 2; n++) {
 			Sector::animations[animation_index] = Animation(
-				*Sector::tileset,					
+				Sector::tileset,					
 				World::cell_size,
 				World::cell_size,					
 				n*8,
@@ -278,7 +294,7 @@ bool Sector::initialize() {
 			ALLEGRO_BITMAP *bmp = al_create_bitmap(World::cell_size, World::cell_size);			
 			al_set_target_bitmap(bmp);
 			al_draw_bitmap_region(
-				Sector::tileset->picture.bitmap,
+				Sector::tileset.picture.bitmap,
 				x * World::cell_size,
 				y * World::cell_size,
 				World::cell_size,
@@ -290,25 +306,25 @@ bool Sector::initialize() {
 			i++;
 		}
 	}	
-	delete Sector::tileset;
-	Sector::tileset = nullptr;
+	Sector::tileset.deinitialize();
 	return true;
 }
 
 void Sector::deinitialize() {
-	if (Sector::tileset) {
-		delete Sector::tileset;
+	if (Sector::tileset.isInitialized()) {
+		Sector::tileset.deinitialize();
 	}
 }
+
 
 bool Sector::fullyOutOfCamera() {
 	int sector_size = Sector::size * World::cell_size;
 	__int64 sx = this->subjective_x * sector_size;
 	__int64 sy = this->subjective_y * sector_size;
 	if ((sx + sector_size < Camera::x))return true;
-	else if ((sx > Camera::x+Vpu::width))return true;
+	else if ((sx > Camera::x+ VWIDTH))return true;
 	if ((sy + sector_size < Camera::y))return true;
-	else if ((sy > Camera::y+Vpu::height))return true;
+	else if ((sy > Camera::y+VHEIGHT))return true;
 	return false;
 }
 
@@ -318,10 +334,10 @@ bool Sector::partiallyOutOfCamera(OutOfCameraStatus &status) {
 	int sector_size = Sector::size * World::cell_size;
 	__int64 sx = this->subjective_x * sector_size;
 	__int64 sy = this->subjective_y * sector_size;
-	
-	if (sx + sector_size < Camera::x+Vpu::width) {
+		
+	if (sx + sector_size < Camera::x + VWIDTH) {
 		status.right = true;
-		if (sy + sector_size < Camera::y + Vpu::height) 
+		if (sy + sector_size < Camera::y + VHEIGHT) 
 			status.south = true;
 		if (sy > Camera::y) 
 			status.north = true;
@@ -330,16 +346,16 @@ bool Sector::partiallyOutOfCamera(OutOfCameraStatus &status) {
 	} 
 	if (sx > Camera::x) {
 		status.left = true;
-		if (sy + sector_size < Camera::y + Vpu::height) 
+		if (sy + sector_size < Camera::y + VHEIGHT) 
 			status.south = true;
 		if (sy > Camera::y) 
 			status.north = true;
-		if (sx + sector_size < Camera::x + Vpu::width) status.right = true;
+		if (sx + sector_size < Camera::x + VWIDTH) status.right = true;
 		return true;
 	} 
-	if (sy + sector_size < Camera::y + Vpu::height) {
+	if (sy + sector_size < Camera::y + VHEIGHT) {
 		status.south = true;
-		if (sx + sector_size < Camera::x + Vpu::width) 
+		if (sx + sector_size < Camera::x + VWIDTH) 
 			status.right = true;
 		if (sx > Camera::x) 
 			status.left = true;
@@ -348,11 +364,12 @@ bool Sector::partiallyOutOfCamera(OutOfCameraStatus &status) {
 	} 
 	if (sy > Camera::y) {
 		status.north = true;
-		if (sx + sector_size < Camera::x + Vpu::width) 
+		if (sx + sector_size < Camera::x + VWIDTH) 
 			status.right = true;
 		if (sx > Camera::x) 
 			status.left = true;
-		if (sy + sector_size < Camera::y + Vpu::height) status.south = true;
+		if (sy + sector_size < Camera::y + VHEIGHT) 
+			status.south = true;
 		return true;
 	}
 	return false;
@@ -362,11 +379,10 @@ void Sector::update(double delta) {
 	// process entities
 	// move periferic entities to neighborhood when leaving this sector and entering a existing sibiling 
 	// move periferic entities to neighborhood when leaving this sector and create sibiling where not existing
-
 }
 
 void Sector::requestRedraw() {
-	if (this->need_redraw)return;
+	if(this->need_redraw)return;
 	this->need_redraw = true;
 	if (this->sibiling[Direction::NORTH] && !this->sibiling[Direction::NORTH]->need_redraw)this->sibiling[Direction::NORTH]->requestRedraw();
 	if (this->sibiling[Direction::SOUTH] && !this->sibiling[Direction::SOUTH]->need_redraw)this->sibiling[Direction::SOUTH]->requestRedraw();

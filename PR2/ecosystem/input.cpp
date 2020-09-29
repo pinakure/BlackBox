@@ -456,13 +456,15 @@ void InputDevice::updateJoystick(void){
 
 
 void InputDevice::drawJoystick(int x, int y) {
-	if (!joystick)return;
+	//if (!joystick)return;
 	/* PROFILE_START(); */
-	Vpu::select(Vpu::overlay[3]);
-	al_draw_bitmap_region(joystick_image.bitmap, 0, 0, 96,64, x, y, 0);
+	static ALLEGRO_COLOR alpha = al_map_rgba(128, 128, 128, 16);
+
+	Vpu::select(Vpu::overlay);
+	al_draw_tinted_bitmap_region(joystick_image.bitmap, alpha, 0, 0, 96,64, x, y, 0);
 
 	for (int i = 0; i<INPUT_MAX; i++) {
-		if (controller[i]) al_draw_bitmap_region(joystick_image.bitmap, 0, 64 + (i * 64), 96,64, x, y, 0);
+		if (controller[i]) al_draw_tinted_bitmap_region(joystick_image.bitmap, alpha, 0, 64 + (i * 64), 96,64, x, y, 0);
 	}
 
 	/* Draw Analog Velocity lines */
@@ -481,22 +483,27 @@ void InputDevice::drawJoystick(int x, int y) {
 	ry = lcy + ((float(axis_y[1]) / 256.0f)*8.0f) - 4;
 	Vpu::line(bmp, rcx, lcy, rx, ry, makecol(255, 0, 0));
 	*/
+	Vpu::pushColor();
 	Vpu::setColor(180, 196, 240);
 	Vpu::printf(x + 8, y + 56, 0, "% 4d <-LX  RX-> % 4d", axis_x[0], axis_x[1]);
 	Vpu::printf(x + 8, y + 64, 0, "% 4d <-LY  RY-> % 4d", axis_y[0], axis_y[1]);
+	Vpu::popColor();
 	/* PROFILE_END("joystick"); */
 }
 
 void InputDevice::drawKeyboard(int x, int y) {
 	/* PROFILE_START(); */
-	Vpu::select(Vpu::overlay[3]);
-	al_draw_bitmap_region(keyboard_bitmap[0].bitmap, 0, 0, keyboard_bitmap[0].width, keyboard_bitmap[0].height, x, y, 0);
+	static ALLEGRO_COLOR alpha = al_map_rgba(128, 128, 128, 16);
+
+	Vpu::select(Vpu::overlay);
+	al_draw_tinted_bitmap_region(keyboard_bitmap[0].bitmap, alpha, 0, 0, keyboard_bitmap[0].width, keyboard_bitmap[0].height, x, y, 0);
 	
 	for (size_t i = 0; i<255; i++) {
 		if(key[i] && (bitmap_keys.find(i) != bitmap_keys.end())) {
 			KeyInfo ki = bitmap_keys[i];
-			al_draw_bitmap_region(
+			al_draw_tinted_bitmap_region(
 				keyboard_bitmap[1].bitmap,
+				alpha,
 				ki.position.x*bitmap_keys_size, ki.position.y*bitmap_keys_size,
 				ki.size.x*bitmap_keys_size, ki.size.y*bitmap_keys_size,
 				x + (ki.position.x*bitmap_keys_size), y + (ki.position.y*bitmap_keys_size),
@@ -514,11 +521,13 @@ void InputDevice::drawKeyboard(int x, int y) {
 
 // Draws debugging information (demo, joystick, keystrokes)
 void InputDevice::draw(int layer_index){
-	layer_index %= 12;
-	Vpu::select(*Vpu::__layers[layer_index]);
-	int x = ((*Vpu::__layers[layer_index]).width/2) - (keyboard_bitmap[0].width/2);
-	drawKeyboard(x, 32);
-	drawJoystick(x, 32);
+	layer_index %= 3;
+	Surface *surfs[3] = { &Vpu::background, &Vpu::foreground, &Vpu::overlay };
+	Vpu::select(*surfs[layer_index]);
+	int x_key = (Vpu::target->width/2) - (keyboard_bitmap[0].width/2);
+	int x_joy = (Vpu::target->width/2) - (joystick_bitmap.width/2);
+	drawKeyboard(x_key,   5);
+	drawJoystick(x_joy, -12);
 	if (demo.isInitialized()) demo.draw();
 }
 
@@ -670,11 +679,29 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 			break;
 
 		case ALLEGRO_KEY_F5: 
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::scale(-0.01, -0.01, 0.0);				
+			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::scale(0.0, 0.0, 0.0);
 			break;
 
-		case 52: //f6
-		case 53: //f7
+		case ALLEGRO_KEY_F6: //f6
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::scale(0.01, 0.01, 0.0);
+			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::scale(0.0, 0.0, 0.0);
+			break;
+
+		case ALLEGRO_KEY_F7: //f7
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::rotate(-0.01);
+			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::rotate(0.0);
+			break;
+
 		case 54: //f8
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
+				Engine::rotate(0.01);
+			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::rotate(0.0);
+			break;
+
 		case 55: //f9
 		case 56: //f10
 		case 57: //f11
@@ -794,7 +821,7 @@ void InputDevice::update(int delta){
 		if (KEYUP(key[i])) {
 			key[i] = 0; // Convert keyUp   in keyOff
 			lap[i] = 1; // Reset lap retrigger divider
-		} if (Console::enabled) {
+		} if ((Console::enabled)||( (i >= ALLEGRO_KEY_F5 ) &&  (i <= ALLEGRO_KEY_F9 ))) {
 			//Keyrepeat if console is enabled
 			if (key[i] > InputDevice::keyrepeat_rate / lap[i])
 				key[i] = -2;

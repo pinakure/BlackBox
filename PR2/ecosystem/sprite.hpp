@@ -14,6 +14,7 @@ public:
 	int height	= 0;
 	Surface picture;
 	bool isInitialized() { return this->initialized; }
+	void deinitialize();
 	Sprite(const char *filename=nullptr);
 };
 
