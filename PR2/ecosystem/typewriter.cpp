@@ -39,7 +39,7 @@ void TypeWriter::draw() {
 	) return;
 	if (TypeWriter::needs_redraw) {
 		Vpu::select(surface);
-		Vpu::clear();
+		 Vpu::clear();
 		Vpu::pushColor();
 		Vpu::setColor(200, 255, 0, 220);
 

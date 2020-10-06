@@ -1,6 +1,7 @@
 #include "vpu.hpp"
 #include "engine.hpp"
 #include "console.hpp"
+#include "vfx.hpp"
 
 std::map<long int, Surface> Vpu::surfaces;
 long int Vpu::surface_handle = 0;
@@ -135,6 +136,8 @@ bool Vpu::restart() {
 	buffer = al_create_bitmap(width, height);
 	if(!buffer) return false;			
 	
+	VfxProcessor::initialize(buffer);
+	
 	// Get pixel format to accelerate lock calls
 	pixel_format = al_get_bitmap_format(buffer);
 
@@ -166,7 +169,7 @@ bool Vpu::initialize() {
 		legacy_font = al_create_builtin_font();
 		font = legacy_font;	
 		if (!restart()) return false;
-		initializeFonts();			
+		initializeFonts();
 		return true;
 	} catch (int e) {
 		e = e;
@@ -352,9 +355,8 @@ void Vpu::render() {
 	if (console.enabled)
 		al_draw_scaled_bitmap(console.bitmap, 0, 0, width, height, 0, 0, al_get_display_width(display), al_get_display_height(display), 0);
 
-	al_set_target_backbuffer(display);
-	al_draw_bitmap(buffer, 0, 0, 0);	
-	al_flip_display();
+	VfxProcessor::run();
+	
 	redraw = false;
 }
 
@@ -483,12 +485,15 @@ void Vpu::loadVars() {
 }
 
 long int Vpu::allocateSurface(int width, int height) {
-	surface_handle++;
 	surfaces.insert( std::pair<long int, Surface>(surface_handle, createBitmap(width, height)) );
+	surface_handle++;
 	return surface_handle;
 }
 
 void Vpu::deallocateSurface(long int handle) {
-	destroySurface(surfaces.at(handle));
-	surfaces.erase(handle);	
+	if (surfaces.empty())return;
+	if (surfaces.find(handle) != surfaces.end()) {
+		destroySurface(surfaces.at(handle));
+		surfaces.erase(handle);
+	}
 }

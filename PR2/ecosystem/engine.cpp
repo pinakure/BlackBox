@@ -4,20 +4,53 @@
 #include "console.hpp"
 #include "world.hpp"
 #include "camera.hpp"
-
-int Engine::width = 640;
-int Engine::height = 480;
-bool Engine::run = true;
-int Engine::cycles = 0;
-long int Engine::epoch= 0;
-ALLEGRO_TIMER *Engine::timer = NULL;
-ALLEGRO_TIMER *Engine::clock = NULL;
-ALLEGRO_EVENT_QUEUE *Engine::queue = NULL;
+#define WORLD_SIZE					65535
+#define NPC_COUNT					128
+int Engine::width					= 640;
+int Engine::height					= 480;
+bool Engine::run					= true;
+int Engine::cycles					= 0;
+long int Engine::epoch				= 0;
+ALLEGRO_TIMER *Engine::timer		= NULL;
+ALLEGRO_TIMER *Engine::clock		= NULL;
+ALLEGRO_EVENT_QUEUE *Engine::queue	= NULL;
 ALLEGRO_EVENT Engine::event;	
+/* 
+---------------------------------------------------------------------------------------- 
+ Point to the showcase we want to test on runtime 
+---------------------------------------------------------------------------------------- 
+ - dummy_showcase : do nothing
+ - typewriter_showcase : test typewriter display box
+ - sandbox_showcase : initialize world, update and draw , also calls typewriter_showcase
 
-#define WORLD_SIZE 65535
-#define NPC_COUNT 128
 
+
+
+
+
+*/
+#include "showcase.cpp"
+
+Showcase *showcase = 
+	&dummy_showcase
+//	&sandbox_showcase		
+	;
+/* 
+---------------------------------------------------------------------------------------- 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+---------------------------------------------------------------------------------------- 
+*/
 bool Engine::initialize() {
 	try{
 		al_init();
@@ -33,28 +66,9 @@ bool Engine::initialize() {
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
 		al_start_timer(clock);
-		TypeWriter::initialize();
-		TypeWriter::enqueue(" ");
-		TypeWriter::enqueue(" ");
-		TypeWriter::enqueue("Welcome to BlackBox");
-		TypeWriter::enqueue(" ");
-
-		if (!World::initialize()) {
-			std::printf("ERROR: Cannot initialize World.\n");
-			return false;
-		}
-		int mon = (Sector::size * (WORLD_SIZE/2) * World::cell_size)+(Sector::size/2);
-		/*World::setOrigin(new Sector(
-			mon/(Sector::size*World::cell_size), 
-			mon/(Sector::size*World::cell_size), 
-			mon/(Sector::size*World::cell_size)
-		));*/
-		Camera::target_x = World::origin->subjective_x;
-		Camera::target_y = World::origin->subjective_y;
-		Camera::target_z = World::origin->subjective_z;
-		World::origin->requestRedraw();
-
-		return true;
+		TypeWriter::initialize();		
+		Script::execute("from scripts.main import tests");
+		return showcase->initialize();
 	} catch (int e) {
 		e = e;
 		return false;
@@ -116,8 +130,7 @@ void Engine::render() {
 		Vpu::select(Vpu::overlay);
 		Vpu::paint(0, 64, 0, 64);	
 		// -----------------------
-		World::draw();
-		//World::drawMiniMap();
+		showcase->draw();
 		Hud::draw();
 		InputDevice::draw(11);
 		Console::draw(16);
@@ -137,7 +150,7 @@ void Engine::update() {
 			_scale[1],
 			_scale[2]
 		);
-	World::update(1.0);
+	showcase->update(1.0);
 	Camera::update();
 	Hud::update();
 	InputDevice::update(1);
@@ -149,15 +162,7 @@ void Engine::update() {
 
 void Engine::loop() {
 	while(run){
-		update();
-		if (Engine::epoch > 10) {
-			if(World::origin) {
-				World::origin->destroy(true);
-				delete(World::origin);
-				World::origin = new Sector(0, 0, 0);
-			}
-			Engine::epoch= 0;
-		}
+		update();		
 	}	
 }
 void Engine::error(std::string text) {

@@ -3,7 +3,9 @@ Surface *getLayer(int index) {
 		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");
 		return NULL;
 	}
-	index %= 3;
+	if (index >= 3) {
+		return &Vpu::surfaces.at(index-3);
+	}	
 	return 
 		index == 0 ? &Vpu::background :
 		index == 1 ? &Vpu::foreground :
@@ -24,6 +26,15 @@ pythoncommand(vpu_print) {
 	Vpu::print(std::string(text), x, y);
 	return PyBool_FromLong(true);
 }
+
+pythoncommand(vpu_pset) {
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
+	Vpu::putpixel(x, y);
+	return PyBool_FromLong(true);
+}
+
 pythoncommand(vpu_reload){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	if (!Vpu::start())exit(1);
@@ -134,30 +145,30 @@ pythoncommand(vpu_setcolor){
 }
 
 pythoncommand(vpu_deletesurf){
-	// Must subtract 12 units from handle (12 system layers to be selected which are not in <Vpu::surfaces>)
+	// Must subtract 3 units from handle (3 system layers to be selected which are not in <Vpu::surfaces>)
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Vpu::deallocateSurface(handle-12);
+	Vpu::deallocateSurface(handle-3);
 	return PyLong_FromLong(1);
 }
 
 pythoncommand(vpu_createsurf){
-	// Must add 12 units to handle (12 system layers to be selected which are not in <Vpu::surfaces> )
+	// Must add 3 units to handle (3 system layers to be selected which are not in <Vpu::surfaces> )
 	int width;
 	int height;
 	if(!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
 	long int handle = Vpu::allocateSurface(width, height);
-	return PyLong_FromLong(handle+12);	
+	return PyLong_FromLong(handle+2);	
 }
 
 pythoncommand(vpu_drawsurf){
-	// Must subtract 12 units from handle (12 system layers to be selected which are not in <surfaces>)
+	// Must subtract 3 units from handle (3 system layers to be selected which are not in <surfaces>)
 	int handle;
 	int x;
 	int y;
 	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
-	Surface &s = Vpu::surfaces[handle-12];
-	Vpu::drawSurface(s, 0, 0, s.width, s.height, x, y);
+	Surface *s = getLayer(handle);
+	Vpu::drawSurface(*s, 0, 0, s->width, s->height, x, y);
 	return PyLong_FromLong(1);	
 }
 
@@ -224,6 +235,7 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef VpuMethods[] = {
+	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },

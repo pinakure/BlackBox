@@ -25,6 +25,32 @@ class tests():
             vpu.update()
         
     @staticmethod
+    def drawsurf():
+        from random import random
+        vpu.disable(0)
+        vpu.disable(1)
+        vpu.disable(2)
+        vpu.enable(0)
+        vpu.select(0)
+        img = vpu.createsurf(64,64)
+        vpu.select(img)
+        vpu.setcolor(255,255,0,255);
+        vpu.fill()
+        run = True
+
+        while(run):
+            vpu.select(img)
+            vpu.setcolor(int(random()*255),int(random()*255),0,255);
+            for i in range(32):
+                vpu.pset(int(random()*64), int(random()*64))
+            vpu.select(0)
+            vpu.drawsurf(img, 640-32, 480-32);
+            for i in range(32):
+                vpu.pset(int(random()*1280), int(random()*1024))
+            vpu.update()
+        
+
+    @staticmethod
     def fill():
         vpu.enable(1)
         while(1):

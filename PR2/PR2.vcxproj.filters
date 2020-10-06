@@ -101,6 +101,18 @@
     <ClCompile Include="ecosystem\layer.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\vfx.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\showcase.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\vfx.c">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\glue.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
