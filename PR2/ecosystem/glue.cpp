@@ -158,7 +158,7 @@ pythoncommand(vpu_createsurf){
 	int height;
 	if(!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
 	long int handle = Vpu::allocateSurface(width, height);
-	return PyLong_FromLong(handle+2);	
+	return PyLong_FromLong(handle+3);
 }
 
 pythoncommand(vpu_drawsurf){
@@ -169,6 +169,57 @@ pythoncommand(vpu_drawsurf){
 	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
 	Surface *s = getLayer(handle);
 	Vpu::drawSurface(*s, 0, 0, s->width, s->height, x, y);
+	return PyLong_FromLong(1);	
+}
+
+pythoncommand(vpu_deletesprite){
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Vpu::deallocateSprite(handle);
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(vpu_createsprite){
+	int width;
+	int height;
+	const char *filename;
+	if(!PyArg_ParseTuple(args, "iic", &width, &height, &filename)) return NULL;
+	long int handle = Vpu::allocateSprite(width, height, filename);
+	return PyLong_FromLong(handle);
+}
+
+pythoncommand(vpu_drawsprite){
+	int handle;
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
+	return PyLong_FromLong(1);	
+}
+
+pythoncommand(vpu_deleteanim){
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Vpu::deallocateAnimation(handle);
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(vpu_createanim){
+	int width;
+	int height;
+	int sprite;
+	int flags = 0;
+	if(!PyArg_ParseTuple(args, "iii;i", &width, &height, &sprite, &flags)) return NULL;
+	long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), flags);
+	return PyLong_FromLong(handle);
+}
+
+pythoncommand(vpu_drawanim){
+	int handle;
+	int x;
+	int y;
+	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
 	return PyLong_FromLong(1);	
 }
 
@@ -236,6 +287,12 @@ static PyMethodDef BlackBoxMethods[] = {
 };
 static PyMethodDef VpuMethods[] = {
 	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
+	{  "drawanim"	,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
+	{"deleteanim"	, vpu_deleteanim		, METH_VARARGS, "vpu.deleteanim(handle) : Delete Animation identified by given Handle" },
+	{"createanim"	, vpu_createanim		, METH_VARARGS, "vpu.createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
+	{  "drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
+	{"deletesprite"	, vpu_deletesprite		, METH_VARARGS, "vpu.deletesprite(handle) : Delete Sprite identified by given Handle" },
+	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(width, height, filename) : Returns Handle to Sprite object create upon given filename" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },

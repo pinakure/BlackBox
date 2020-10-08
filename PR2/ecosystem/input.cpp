@@ -337,15 +337,15 @@ bool InputDevice::initialize(bool useKeyboard, bool useMouse, bool useJoystick){
 		Engine::error("Cannot load joystick debugging picture 'data/gfx/hud/joypad.png'");
 		return false;
 	}
-	joystick_bitmap   = Vpu::createBitmap(96, 32);
+	joystick_bitmap   = Vpu::createSurface(96, 32);
 
 	Surface keyboard_image = Vpu::loadBitmap("data/gfx/hud/keyboard.png");
 	if(!keyboard_image.enabled){
 		Engine::error("Cannot load keyboard debugging picture 'data/gfx/hud/keyboard.png'");
 		return false;
 	}
-	keyboard_bitmap[0] = Vpu::createBitmap(keyboard_image.width, keyboard_image.height / 2);
-	keyboard_bitmap[1] = Vpu::createBitmap(keyboard_image.width, keyboard_image.height / 2);
+	keyboard_bitmap[0] = Vpu::createSurface(keyboard_image.width, keyboard_image.height / 2);
+	keyboard_bitmap[1] = Vpu::createSurface(keyboard_image.width, keyboard_image.height / 2);
 	Vpu::select(keyboard_bitmap[0]);
 	Vpu::drawSurface(keyboard_image, 0, 0,  keyboard_image.width, keyboard_image.height / 2, 0, 0);
 	Vpu::select(keyboard_bitmap[1]);

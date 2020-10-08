@@ -80,3 +80,8 @@ void Animation::draw(Surface &surface, int x, int y, ALLEGRO_COLOR &color) {
 		al_draw_tinted_bitmap(this->frame[this->current_frame],color, x, y,  0);
 }
 
+void Animation::qdraw(int x, int y) {
+	if(this->frame.size() > 0)
+		al_draw_bitmap(this->frame[this->current_frame],x, y,  0);
+}
+

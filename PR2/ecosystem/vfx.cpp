@@ -30,7 +30,7 @@ bool VfxDummy::initialize() {
 }
 inline void VfxDummy::run() {
 	al_set_shader_sampler("tex", target, 0);
-	float resolution[2] = { VfxProcessor::width,VfxProcessor::height };
+	float resolution[2] = { float(VfxProcessor::width), float(VfxProcessor::height) };
 	al_set_shader_float_vector("resolution" , 2 , &resolution[0] , 1);
 
 }

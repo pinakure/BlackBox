@@ -1,5 +1,6 @@
 #include "sprite.hpp"
 #include "engine.hpp"
+#include "vpu.hpp"
 
 Sprite::Sprite(const char *filename) {	
 	if (filename != nullptr) {
@@ -12,8 +13,6 @@ Sprite::Sprite(const char *filename) {
 			std::printf("ERROR: Cannot load sprite file '%s'.\n", filename);
 			return;
 		} 
-		this->width = this->picture.width;
-		this->height= this->picture.height;
 		this->initialized = true;		
 	}
 
@@ -24,4 +23,12 @@ void Sprite::deinitialize() {
 		Vpu::destroySurface(this->picture);
 	}
 	initialized = false;
+}
+
+void Sprite::draw(int x, int y) {
+	Vpu::drawSurface(this->picture, 
+		0, 0, 
+		this->picture.width, this->picture.height,
+		x, y
+	);
 }

@@ -3,6 +3,7 @@
 
 #include "sprite.hpp"
 #include <string>
+#include <vector>
 #include <limits>
 
 class Engine {

@@ -702,9 +702,9 @@ void Console::draw(int h){
 		} else return;
 	} 
 	
-	if(!bitmap.bitmap) bitmap = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );	
+	if(!bitmap.bitmap) bitmap = Vpu::createSurface(Vpu::console.width, Vpu::console.height );	
 	if (!backdrop.bitmap) {
-		backdrop = Vpu::createBitmap(Vpu::console.width, Vpu::console.height );
+		backdrop = Vpu::createSurface(Vpu::console.width, Vpu::console.height );
 		Console::paintBackdrop();
 	}
 	

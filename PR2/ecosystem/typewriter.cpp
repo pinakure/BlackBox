@@ -26,7 +26,7 @@ void TypeWriter::initialize() {
 	current_end = 0;
 	final_width = 0;
 	final_height = 0;
-	surface = Vpu::createBitmap(Vpu::width/2, TYPEWRITER_HEIGHT);
+	surface = Vpu::createSurface(Vpu::width/2, TYPEWRITER_HEIGHT);
 }
 
 const int max_size = 4;

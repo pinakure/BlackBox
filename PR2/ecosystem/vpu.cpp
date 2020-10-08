@@ -3,8 +3,14 @@
 #include "console.hpp"
 #include "vfx.hpp"
 
-std::map<long int, Surface> Vpu::surfaces;
-long int Vpu::surface_handle = 0;
+std::map<long int, Surface>			Vpu::surfaces;
+std::map<long int, Animation>		Vpu::animations;
+std::map<long int, Sprite>			Vpu::sprites;
+	
+long int							Vpu::animation_handle=0;
+long int							Vpu::surface_handle=0;
+long int							Vpu::sprite_handle=0;
+	
 
 int Vpu::pixel_format = 0;
 
@@ -108,19 +114,19 @@ bool Vpu::restart() {
 	is_initialized = false;
 
 	// overlay 
-	overlay = createBitmap(width, height);
+	overlay = createSurface(width, height);
 	if(!overlay.enabled) return false;
 	select(overlay);
 	clear();		
 	
 	// foreground
-	foreground = createBitmap(width*2, height*2);
+	foreground = createSurface(width*2, height*2);
 	if(!foreground.enabled) return false;
 	select(foreground);
 	clear();
 
 	// background
-	background= createBitmap( width*2 , height*2);
+	background= createSurface( width*2 , height*2);
 	if(!background.enabled) return false;
 	select(background);
 	clear();
@@ -145,7 +151,7 @@ bool Vpu::restart() {
 	destroySurface(console);
 	destroySurface(Console::bitmap);	// This will be dinamically created at paint time by console if null
 	destroySurface(Console::backdrop);	// This will be dinamically created at paint time by console if null
-	console = createBitmap(width, height);
+	console = createSurface(width, height);
 	if(!console.enabled) return false;	
 	Vpu::select(console);
 	Vpu::paint(0, 0, 0, 0);
@@ -378,6 +384,14 @@ void Vpu::putpixel(int x, int y) {
 	al_put_pixel(x, y, color);
 }
 
+Sprite &Vpu::destroySprite(Sprite &sprite) {
+	return sprite;
+}
+
+Animation &Vpu::destroyAnimation(Animation &animation) {
+	return animation;
+}
+
 Surface &Vpu::destroySurface(Surface &surface) {
 	if (surface.bitmap) al_destroy_bitmap(surface.bitmap);
 	surface.bitmap = NULL;
@@ -398,7 +412,15 @@ void Vpu::drawSurface(Surface &surface,float sx, float sy, float sw, float sh, f
 	//al_draw_bitmap(surface.bitmap, 0, 0, 0);
 }
 
-Surface Vpu::createBitmap(int width, int height) {
+void Vpu::drawSprite(Sprite &sprite, float dx, float dy) {
+	sprite.draw(dx, dy);	
+}
+
+void Vpu::drawAnimation(Animation &animation, float dx, float dy) {
+	animation.qdraw(dx, dy);	
+}
+
+Surface Vpu::createSurface(int width, int height) {
 	Surface s;
 	s.bitmap = al_create_bitmap(width, height);
 	s.enabled = !(s.bitmap == NULL);
@@ -484,9 +506,63 @@ void Vpu::loadVars() {
 
 }
 
+Sprite Vpu::createSprite(int width, int height, std::string filename) {
+	Sprite s;
+	/*s.bitmap = al_create_bitmap(width, height);
+	s.enabled = !(s.bitmap == NULL);
+	if (s.enabled) {
+		s.width  = width;
+		s.height = height;
+	}*/
+	return s;
+}
+
+Animation Vpu::createAnimation(int width, int height, Sprite &s, int flags) {
+	Animation a;
+	/*a.bitmap = al_create_bitmap(width, height);
+	a.enabled = !(a.bitmap == NULL);
+	if (a.enabled) {
+		a.width  = width;
+		a.height = height;
+	}*/
+	return a;
+}
+	
+long int Vpu::allocateSprite(int width, int height, std::string filename, int priority){
+	#define SPRITE_PRIORITY_RANGE 1024
+	sprite_handle++;
+	sprite_handle += priority * SPRITE_PRIORITY_RANGE;
+	sprites.insert( std::pair<long int, Sprite>(sprite_handle, createSprite(width, height,filename)) );
+	sprite_handle -= priority * SPRITE_PRIORITY_RANGE;
+	return sprite_handle + (priority * SPRITE_PRIORITY_RANGE);
+	#undef SPRITE_PRIORITY_RANGE
+}
+
+void Vpu::deallocateSprite(long int handle) {
+	if (sprites.empty())return;
+	if (sprites.find(handle) != sprites.end()) {
+		destroySprite(sprites.at(handle));
+		sprites.erase(handle);
+	}
+}
+
+long int Vpu::allocateAnimation(int width, int height, Sprite &sprite, int flags){
+	animation_handle++;
+	animations.insert( std::pair<long int, Animation>(animation_handle, createAnimation(width, height, sprite,flags)) );
+	return animation_handle;
+}
+
+void Vpu::deallocateAnimation(long int handle) {
+	if (animations.empty())return;
+	if (animations.find(handle) != animations.end()) {
+		destroyAnimation(animations.at(handle));
+		animations.erase(handle);
+	}
+}
+
 long int Vpu::allocateSurface(int width, int height) {
-	surfaces.insert( std::pair<long int, Surface>(surface_handle, createBitmap(width, height)) );
 	surface_handle++;
+	surfaces.insert( std::pair<long int, Surface>(surface_handle, createSurface(width, height)) );
 	return surface_handle;
 }
 
