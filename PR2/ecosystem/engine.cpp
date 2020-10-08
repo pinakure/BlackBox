@@ -67,7 +67,7 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		TypeWriter::initialize();		
-		Script::execute("from scripts.main import tests");
+		Script::execute("from scripts.main import test");
 		return showcase->initialize();
 	} catch (int e) {
 		e = e;

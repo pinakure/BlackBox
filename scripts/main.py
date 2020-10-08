@@ -1,5 +1,9 @@
-import vpu
+from math import sin, cos, tan
+from random import random
+from vpu import *
+import vpu 
 import blackbox
+import console
 
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
@@ -9,24 +13,52 @@ def configure():
 def main():
     return
 
-class tests():
+class test():
     @staticmethod
-    def a():
-        while(1):
-            vpu.select(10)
-            vpu.print("A", 330, 240);
-            vpu.update()
-        
+    def menu():
+        console.print('------------------------')
+        console.print('    Available tests')
+        console.print('------------------------')
+        console.print('drawanim()')
+        console.print('drawsprite()')
+        console.print('drawsurf()')
+        console.print('benchmark()')
+
     @staticmethod
-    def b():
+    def drawanim():
+        disable(0)
+        disable(1)
+        disable(2)
+        enable(0)
+        spr = createsprite(32,32, 'down', 8);
+        ani = createanim(32,32, spr, 0, 0, 3, 0, False)
+        x = 0
+        cy = int(1024/2)
+        cx = int(1280/2)
         while(1):
-            vpu.select(10)
-            vpu.print("B", 340, 240);
-            vpu.update()
-        
+            select(0)
+            setcolor(0,0,0)
+            fill()
+            x += (0.3141596/16);
+            px = cx+int(sin(-x)*100)
+            py = cy+int(cos(-x)*100)
+            drawanim(ani, px, py)
+            update()
+
+    @staticmethod
+    def drawsprite():
+        disable(0)
+        disable(1)
+        disable(2)
+        enable(0)
+        spr = createsprite(32,32, 'bottle', 8);
+        while(1):
+            vpu.select(0)
+            drawsprite(spr, int(random()*1280), int(random()*1024))
+            update()
+    
     @staticmethod
     def drawsurf():
-        from random import random
         vpu.disable(0)
         vpu.disable(1)
         vpu.disable(2)
@@ -49,30 +81,35 @@ class tests():
                 vpu.pset(int(random()*1280), int(random()*1024))
             vpu.update()
         
-
     @staticmethod
-    def fill():
-        vpu.enable(1)
-        while(1):
-            vpu.select(1)
-            vpu.setcolor(255,255,0,255)
-            vpu.fill()
-            vpu.update()
-        
-
-    @staticmethod
-    def run():
+    def benchmark():
+        spr = createsprite(32,32, 'down', 8);
+        ani = createanim(32,32, spr, 0, 0, 3, 0, False)
+        x = 0
+        cy = int(1024/2)
+        cx = int(1280/2)
         for e in range(0,1000):
             for i in range(0,512):
                 c = i if i<256 else 512-i
-                vpu.select(10)
-                vpu.setrotation(10, (c/256)-0.5)    
-                #vpu.setcolor(c,c,c)
-                vpu.print(f"Iteration {e}", 160,120)
+                vpu.select(0)
+                #vpu.rotate(0, (c/256)-0.5)    
+                vpu.setrotation(0, (c/256)-0.5)    
+                #vpu.setscale(0, (c/256)-0.5)    
+                vpu.print(f"Iteration {e}", 512,512)
+                vpu.setcolor(0,0,0)
+                fill()
+                x += (0.3141596/16);
+                px = cx+int(sin(-x)*100)
+                py = cy+int(cos(-x)*100)
+                drawanim(ani, px, py)
                 vpu.update()
+                
         # some tests to check vpu functionalities
         for i in range(0,11):
             vpu.disable(i)
+
+    @staticmethod
+    def discard():
         vpu.enable(4)
         #vpu.fadeout()
         then = blackbox.epoch()
@@ -133,3 +170,5 @@ class tests():
             vpu.update()
         print("Finished.")
         return True
+
+console.print('Write down "test.menu()" to discover available tests / benchmarks ')

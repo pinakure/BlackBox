@@ -417,6 +417,7 @@ void Vpu::drawSprite(Sprite &sprite, float dx, float dy) {
 }
 
 void Vpu::drawAnimation(Animation &animation, float dx, float dy) {
+	animation.run(1.0);
 	animation.qdraw(dx, dy);	
 }
 
@@ -507,25 +508,11 @@ void Vpu::loadVars() {
 }
 
 Sprite Vpu::createSprite(int width, int height, std::string filename) {
-	Sprite s;
-	/*s.bitmap = al_create_bitmap(width, height);
-	s.enabled = !(s.bitmap == NULL);
-	if (s.enabled) {
-		s.width  = width;
-		s.height = height;
-	}*/
-	return s;
+	return Sprite(filename.c_str());
 }
 
-Animation Vpu::createAnimation(int width, int height, Sprite &s, int flags) {
-	Animation a;
-	/*a.bitmap = al_create_bitmap(width, height);
-	a.enabled = !(a.bitmap == NULL);
-	if (a.enabled) {
-		a.width  = width;
-		a.height = height;
-	}*/
-	return a;
+Animation Vpu::createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical) {
+	return Animation(s, width, height, sx, sy, dx, dy, vertical);	
 }
 	
 long int Vpu::allocateSprite(int width, int height, std::string filename, int priority){
@@ -546,9 +533,9 @@ void Vpu::deallocateSprite(long int handle) {
 	}
 }
 
-long int Vpu::allocateAnimation(int width, int height, Sprite &sprite, int flags){
+long int Vpu::allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical) {
 	animation_handle++;
-	animations.insert( std::pair<long int, Animation>(animation_handle, createAnimation(width, height, sprite,flags)) );
+	animations.insert( std::pair<long int, Animation>(animation_handle, createAnimation(width, height, s,sx,sy,dx,dy, vertical)) );
 	return animation_handle;
 }
 

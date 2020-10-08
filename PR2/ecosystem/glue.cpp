@@ -4,7 +4,9 @@ Surface *getLayer(int index) {
 		return NULL;
 	}
 	if (index >= 3) {
-		return &Vpu::surfaces.at(index-3);
+		if(Vpu::surfaces.find(index)!=Vpu::surfaces.end())
+			return &(Vpu::surfaces.at(index-3));
+		else index %= 3;
 	}	
 	return 
 		index == 0 ? &Vpu::background :
@@ -182,9 +184,10 @@ pythoncommand(vpu_deletesprite){
 pythoncommand(vpu_createsprite){
 	int width;
 	int height;
-	const char *filename;
-	if(!PyArg_ParseTuple(args, "iic", &width, &height, &filename)) return NULL;
-	long int handle = Vpu::allocateSprite(width, height, filename);
+	int priority = 0;
+	char *filename;
+	if(!PyArg_ParseTuple(args, "iis|i", &width, &height, &filename, &priority)) return NULL;
+	long int handle = Vpu::allocateSprite(width, height, filename, priority);
 	return PyLong_FromLong(handle);
 }
 
@@ -208,9 +211,14 @@ pythoncommand(vpu_createanim){
 	int width;
 	int height;
 	int sprite;
+	int dx;
+	int dy;
+	int sx;
+	int sy;
+	bool vertical;
 	int flags = 0;
-	if(!PyArg_ParseTuple(args, "iii;i", &width, &height, &sprite, &flags)) return NULL;
-	long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), flags);
+	if(!PyArg_ParseTuple(args, "iiiiiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
+	long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
 	return PyLong_FromLong(handle);
 }
 

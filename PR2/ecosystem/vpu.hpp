@@ -94,7 +94,7 @@ public:
 	
 	/* Sprite and animations*/
 	static Sprite createSprite(int width, int height, std::string filename);
-	static Animation createAnimation(int width, int height,Sprite &s, int flags=0);
+	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static Sprite &destroySprite(Sprite &sprite);
 	static Animation &destroyAnimation(Animation &animation);
 	static void drawSprite(Sprite &sprite, float dx, float dy);
@@ -105,7 +105,7 @@ public:
 	static void deallocateSurface(long int handle);
 	static long int allocateSprite(int width, int height, std::string filename, int priority=0);
 	static void deallocateSprite(long int handle);
-	static long int allocateAnimation(int width, int height,Sprite &s, int flags=0);
+	static long int allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static void deallocateAnimation(long int handle);
 	
 	// Surface effects
