@@ -86,8 +86,10 @@ class test():
         spr = createsprite(32,32, 'down', 8);
         ani = createanim(32,32, spr, 0, 0, 3, 0, False)
         x = 0
-        cy = int(1024/2)
-        cx = int(1280/2)
+        select(0)
+        cx, cy = dimensions();
+        cy /= 2
+        cx /= 2
         for e in range(0,1000):
             for i in range(0,512):
                 c = i if i<256 else 512-i
@@ -96,13 +98,15 @@ class test():
                 vpu.setrotation(0, (c/256)-0.5)    
                 #vpu.setscale(0, (c/256)-0.5)    
                 vpu.print(f"Iteration {e}", 512,512)
-                vpu.setcolor(0,0,0)
+                vpu.setcolor(64,32,0)
                 fill()
                 x += (0.3141596/16);
-                px = cx+int(sin(-x)*100)
-                py = cy+int(cos(-x)*100)
+                px = int(cx+(sin(-x)*100))
+                py = int(cy+(cos(-x)*100))
                 drawanim(ani, px, py)
                 vpu.update()
+                if blackbox.ctrlc():
+                    return
                 
         # some tests to check vpu functionalities
         for i in range(0,11):

@@ -231,6 +231,23 @@ pythoncommand(vpu_drawanim){
 	return PyLong_FromLong(1);	
 }
 
+pythoncommand(vpu_dimensions){
+	if(!PyArg_ParseTuple(args, "")) return NULL;
+	int dims[2] = { Vpu::target->width, Vpu::target->height };
+	
+	PyObject* list = PyList_New(2);
+	if (!list) throw("Unable to allocate memory for Python list");
+	for (unsigned int i = 0; i < 2; i++) {
+		PyObject *num = PyFloat_FromDouble( (double) dims[i]);
+		if (!num) {
+			Py_DECREF(list);
+			throw("Unable to allocate memory for Python list");
+		}
+		PyList_SET_ITEM(list, i, num);
+	}
+	return list;	
+}
+
 pythoncommand(vpu_fill){
 	int r = Vpu::color.r*255;
 	int g = Vpu::color.g*255;
@@ -267,6 +284,16 @@ pythoncommand(blackbox_epoch){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(Engine::epoch);
 }
+
+pythoncommand(blackbox_ctrlc){
+	if(!PyArg_ParseTuple(args, "")) return NULL;	
+	if (InputDevice::control_c) {
+		InputDevice::control_c = false;
+		InputDevice::control = false;
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
 /* ----------------------------------------------------------------------
 	Console methods
 ---------------------------------------------------------------------- */
@@ -289,6 +316,7 @@ static PyMethodDef ConsoleMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef BlackBoxMethods[] = {
+    {"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
     {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
     {"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{NULL, NULL, 0, NULL}
@@ -320,6 +348,7 @@ static PyMethodDef VpuMethods[] = {
 	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
 	{"select"		, vpu_select			, METH_VARARGS, "vpu.select(layer) : Select given layer to perform next graphic operations onto it"},
 	{"print"		, vpu_print				, METH_VARARGS, "vpu.print(text, x, y) : Print given text at given coordinates"},
+	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
 	{NULL, NULL, 0, NULL}
 };
 

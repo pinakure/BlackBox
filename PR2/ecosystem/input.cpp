@@ -2,6 +2,7 @@
 #include "input.hpp"
 #include "engine.hpp"
 #include "console.hpp"
+bool					InputDevice::control_c = false;
 char					InputDevice::keyrepeat_rate = 32;
 Surface					InputDevice::joystick_image;
 Surface					InputDevice::joystick_bitmap;
@@ -731,12 +732,16 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 		
 		case ALLEGRO_KEY_LCTRL:
 		case ALLEGRO_KEY_RCTRL:
-			control = event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN;
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN)control = true;
+			if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP)control = false;
 			break;
 				
 		case ALLEGRO_KEY_PAD_ENTER:
 			event.keyboard.keycode = ALLEGRO_KEY_ENTER;
-		default :			
+		default :		
+			if (event.keyboard.keycode == 3 && control) {
+				InputDevice::control_c = true;
+			}
 			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN)
 				key[event.keyboard.keycode] = 1;
 			else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP)

@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "script.hpp"
+#include "input.hpp"
 #include "console.hpp"
 #include "vpu.hpp"
 #include "glue.cpp"

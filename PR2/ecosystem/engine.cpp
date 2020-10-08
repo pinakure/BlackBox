@@ -128,7 +128,7 @@ void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		// Clean before drawing HUD
 		Vpu::select(Vpu::overlay);
-		Vpu::paint(0, 64, 0, 64);	
+		Vpu::paint(0, 0, 0, 16);	
 		// -----------------------
 		showcase->draw();
 		Hud::draw();

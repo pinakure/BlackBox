@@ -40,6 +40,7 @@ class InputDevice {
 		///////////////////////
 		// CVARS				//
 		///////////////////////		
+		static bool				control_c;
 		static Boolean			*in_keyboard;
 		static Boolean			*in_mouse;
 		static Boolean			*in_joystick;
