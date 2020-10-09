@@ -1,14 +1,14 @@
-from math import sin, cos, tan
-from random import random
-from vpu import *
-import vpu 
-import blackbox
-import console
+from math       import sin, cos, tan
+from random     import random
+from vpu        import *
+from blackbox   import *
+from console    import print as cout
+from vpu        import print as textout
 
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
     # bear with this while we dont bring a proper vpu.restart method
-    vpu.fullscreen(False)
+    fullscreen(False)
 
 def main():
     return
@@ -16,13 +16,15 @@ def main():
 class test():
     @staticmethod
     def menu():
-        console.print('------------------------')
-        console.print('    Available tests')
-        console.print('------------------------')
-        console.print('drawanim()')
-        console.print('drawsprite()')
-        console.print('drawsurf()')
-        console.print('benchmark()')
+        setcolor(255,255,255);
+        cout('~f------------------------')
+        cout('~f    Available tests')
+        cout('~f------------------------')
+        setcolor(200,200,200);
+        cout('~7drawanim~8()')
+        cout('~7drawsprite~8()')
+        cout('~7drawsurf~8()')
+        cout('~7benchmark~8()')
 
     @staticmethod
     def drawanim():
@@ -35,7 +37,7 @@ class test():
         x = 0
         cy = int(1024/2)
         cx = int(1280/2)
-        while(1):
+        while(not ctrlc()):
             select(0)
             setcolor(0,0,0)
             fill()
@@ -52,34 +54,34 @@ class test():
         disable(2)
         enable(0)
         spr = createsprite(32,32, 'bottle', 8);
-        while(1):
-            vpu.select(0)
+        while(not ctrlc()):
+            select(0)
             drawsprite(spr, int(random()*1280), int(random()*1024))
             update()
     
     @staticmethod
     def drawsurf():
-        vpu.disable(0)
-        vpu.disable(1)
-        vpu.disable(2)
-        vpu.enable(0)
-        vpu.select(0)
-        img = vpu.createsurf(64,64)
-        vpu.select(img)
-        vpu.setcolor(255,255,0,255);
-        vpu.fill()
+        disable(0);
+        disable(1);
+        disable(2)
+        enable(0);
+        select(0)
+        img = createsurf(64,64)
+        select(img)
+        setcolor(255,255,0,255);
+        fill()
         run = True
 
-        while(run):
-            vpu.select(img)
-            vpu.setcolor(int(random()*255),int(random()*255),0,255);
+        while(not ctrlc()):
+            select(img)
+            setcolor(int(random()*255),int(random()*255),0,255);
             for i in range(32):
-                vpu.pset(int(random()*64), int(random()*64))
-            vpu.select(0)
-            vpu.drawsurf(img, 640-32, 480-32);
+                pset(int(random()*64), int(random()*64))
+            select(0)
+            drawsurf(img, 640-32, 480-32);
             for i in range(32):
-                vpu.pset(int(random()*1280), int(random()*1024))
-            vpu.update()
+                pset(int(random()*1280), int(random()*1024))
+            update()            
         
     @staticmethod
     def benchmark():
@@ -90,89 +92,68 @@ class test():
         cx, cy = dimensions();
         cy /= 2
         cx /= 2
-        for e in range(0,1000):
+        e=1
+        while(not ctrlc()):
             for i in range(0,512):
                 c = i if i<256 else 512-i
-                vpu.select(0)
-                #vpu.rotate(0, (c/256)-0.5)    
-                vpu.setrotation(0, (c/256)-0.5)    
-                #vpu.setscale(0, (c/256)-0.5)    
-                vpu.print(f"Iteration {e}", 512,512)
-                vpu.setcolor(64,32,0)
+                select(0)
+                setrotation(0, (c/256)-0.5)    
+                textout(f"Iteration {e}", 512,512)
+                setcolor(64,32,0)
                 fill()
                 x += (0.3141596/16);
                 px = int(cx+(sin(-x)*100))
                 py = int(cy+(cos(-x)*100))
                 drawanim(ani, px, py)
-                vpu.update()
-                if blackbox.ctrlc():
-                    return
+                update()                
+            e+=1;
                 
-        # some tests to check vpu functionalities
-        for i in range(0,11):
-            vpu.disable(i)
-
     @staticmethod
     def discard():
-        vpu.enable(4)
-        #vpu.fadeout()
-        then = blackbox.epoch()
-        #vpu.rotate(11, 3.1495) 
-        #vpu.scale(11, 2.0, 0.5)    
-        #for i in range(0,314):
-        #    vpu.rotate(11,i/100)
-        #    vpu.update()
-        # wait 10 seconds
+        enable(0)
+        then = epoch()
         rrot = 0.0
         ssca = 1.0
-        vpu.fadein()
-        while((blackbox.epoch()-then) < 5):
-            vpu.select(10)
-            vpu.print("Hello", 220, 240);
-            if vpu.frames() % 2:
-                vpu.enable(0)
+        fadein()
+        while((epoch()-then) < 5):
+            select(0)
+            textout("Hello", 220, 240);
+            if frames() % 2:
+                enable(0)
             else:
-                vpu.disable(0)
+                disable(0)
 
             rot = rrot;
             sca = ssca;
-            vpu.rotate(11, rot)
-            vpu.setscale(11, -sca, sca)
+            rotate(0, rot)
+            setscale(0, -sca, sca)
             rot *= 2;
             sca *= 2;
-            vpu.rotate(8, rot)
-            vpu.setscale(8, sca, sca)
+            rotate(1, rot)
+            setscale(1, sca, sca)
             rot *= 2;
             sca *= 2;
-            vpu.rotate(9, rot)
-            vpu.scale(9, sca, sca/2)
-            rot *= 2;
-            sca *= 2;
-            vpu.rotate(7, rot)
-            vpu.setscale(7, sca, sca)
-            rot *= 2;
-            sca *= 2;
-            vpu.rotate(0, rot)
-            vpu.setscale(0, sca/2, sca)    
+            rotate(2, rot)
+            scale(2, sca, sca/2)
             rot *= 2;
             sca *= 2;
             rrot += 0.001
             ssca += 0.001
-            vpu.update()
-        vpu.fadeout()
-        then = blackbox.epoch()
-        while((blackbox.epoch()-then) < 5):
-            vpu.update()        
-        vpu.fadein()
-        while((blackbox.epoch()-then) < 15):
-            vpu.select(10)
-            vpu.print("Hello", 220, 140);
-            if vpu.frames() % 2:
-                vpu.enable(0)
+            update()
+        fadeout()
+        then = epoch()
+        while((epoch()-then) < 5):
+            update()        
+        fadein()
+        while((epoch()-then) < 15):
+            select(0)
+            textout("Hello", 220, 140);
+            if frames() % 2:
+                enable(0)
             else:
-                vpu.disable(0)
-            vpu.update()
-        print("Finished.")
+                disable(0)
+            update()
+        cout("Script Finished.")
         return True
 
-console.print('Write down "test.menu()" to discover available tests / benchmarks ')
+cout('Write down "test.menu()" to discover available tests / benchmarks ')
