@@ -3,15 +3,17 @@
 #include "input.hpp"
 #include "console.hpp"
 #include "vpu.hpp"
+#include "typewriter.hpp"
 #include "glue.cpp"
 
 bool Script::initialize() {
 	try {
 		PyObject* pInt = NULL;
 
-		PyImport_AppendInittab("blackbox", &PyInit_blackbox);
-		PyImport_AppendInittab("vpu"	 , &PyInit_vpu);
-		PyImport_AppendInittab("console" , &PyInit_console);
+		PyImport_AppendInittab("blackbox"	, &PyInit_blackbox);
+		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
+		PyImport_AppendInittab("console"	, &PyInit_console);
+		PyImport_AppendInittab("typewriter" , &PyInit_typewriter);
 		Py_Initialize();
 		Py_LoadCommands();
 	}catch (int e) {

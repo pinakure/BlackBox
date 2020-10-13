@@ -11,6 +11,7 @@ var global = {
         // generate TOC 
         this.inspect(blackbox);
         this.inspect(con);
+        this.inspect(typewriter);
         this.inspect(vpu);
         // render TOC html
         return this.render(this.toc);        
@@ -37,12 +38,23 @@ var global = {
 
     term        : function(key, value){
         return `
-            <li class="toc_entry" id="${key}">
-                <header title="${value.brief}"><b>${key}</b><span class="dark"><b>(</b>&nbsp;${value.usage}&nbsp;<b>)</b></span></header>
-                <footer>${value.brief}"</footer>
-                <section>${value.example}</section>
+            <li onclick="global.click('${key}')" class="toc_entry" id="${key}">
+                <header title="${value.brief}"><b>${key}</b><span class="dark"><b>(</b>&nbsp;${value.usage}&nbsp;<b>)</b><br></span></header>
+                <footer>${value.brief}<br/><span class="return">${value.return ?`Returns ${value.return}`:''}</span></footer>
+                <section style="padding-right: 16px;padding-left: 0px;"><pre style="overflow-x: auto;padding: 8px 8px 8px 8px; background: #f0f0f0f0; border-radius: 8px 8px 8px 8px;">${value.example}</pre></section>
+                <p></p>
             </li>
         `;
+    },
+
+    click: function (id) {
+        var d = document.getElementById(id);
+        var all = document.getElementsByClassName('toc_entry active');
+        for (ai in all) {
+            var t = all[ai];
+            t.className = 'toc_entry';
+        }
+        d.className = 'toc_entry active'
     },
 
     inspect     : function(object){
@@ -55,6 +67,7 @@ var global = {
                 case 'toc':
                 case 'term':
                 case 'index':
+                case 'click':
                 case 'render':
                 case 'renderTerm':
                 case 'inspect':

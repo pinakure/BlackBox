@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="encoding" value="UTF-8"/>
+        <title>
+            BlackBox Dialog Editor
+        </title>    
+        <script src="include/jquery.js"></script>
+        <script src="include/node.js"></script>
+        <script src="include/editor.js"></script>
+        <link rel="stylesheet" type="text/css" href="skins/icons.css"/>
+        <link rel="stylesheet" type="text/css" href="skins/base.css"/>
+        <link rel="stylesheet" type="text/css" href="skins/child.css"/>
+    </head>
+    <body>
+        <overlay></overlay>
+        <content></content>
+        <nav>
+            <navname><i></i><span></span></navname>
+            <navcontent></navcontent>
+        </nav>
+        <node onclick="$('#menu').show();" style="
+        position: absolute;
+        right: 0px; 
+        top: 0px;
+        "><i class="fa fa-plus"></i></node>
+        <div id="menu">
+            <navcard style="position:relative">
+                <node onclick="Editor.addNode(Types.WAIT)"      style="position: relative"><i class="fa fa-clock-o"           title="Wait Node"></i></node>
+                <node onclick="Editor.addNode(Types.PICTURE)"   style="position: relative"><i class="fa fa-picture-o"         title="Picture Node"></i></node>
+                <node onclick="Editor.addNode(Types.TEXT)"      style="position: relative"><i class="fa fa-commenting-o"      title="Text Node"></i></node>
+                <node onclick="Editor.addNode(Types.CHOICE)"    style="position: relative"><i class="fa fa-question-circle"   title="Choice Node"></i></node>
+                <node onclick="Editor.addNode(Types.RUMBLE)"    style="position: relative"><i class="fa fa-rss"               title="Rumble Node"></i></node>
+                <node onclick="Editor.addNode(Types.FONT)"      style="position: relative"><i class="fa fa-font"              title="Font Node"></i></node>
+                <node onclick="Editor.addNode(Types.STYLE)"     style="position: relative"><i class="fa fa-cog"               title="Style Node"></i></node>
+            </navcard>
+        </div>
+    </body>
+</html>

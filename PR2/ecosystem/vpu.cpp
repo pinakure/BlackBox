@@ -10,6 +10,10 @@ std::map<long int, Sprite>			Vpu::sprites;
 long int							Vpu::animation_handle=0;
 long int							Vpu::surface_handle=0;
 long int							Vpu::sprite_handle=0;
+float								Vpu::fade_target_level=0.0f;
+float								Vpu::fade_level=0.0f;
+float								Vpu::fade_delta=1.5f;
+int									Vpu::fade_color[3] = {0, 0, 0};
 	
 
 int Vpu::pixel_format = 0;
@@ -183,8 +187,12 @@ bool Vpu::initialize() {
 	}
 }
 
-void Vpu::paint(int r, int g, int b, int alpha) {
-	al_clear_to_color(al_map_rgba(r, g, b, alpha));
+void Vpu::paint(int r, int g, int b, int a) {
+	r = r >= 0 ? (r&255) : color.r * 255;
+	g = g >= 0 ? (g&255) : color.g * 255;
+	b = b >= 0 ? (b&255) : color.b * 255;
+	a = a >= 0 ? (a&255) : color.a * 255;
+	al_clear_to_color(al_map_rgba(r, g, b, a));
 }
 
 void Vpu::select(Surface &target) {
@@ -312,6 +320,23 @@ void Vpu::fillRectangle(int x, int y, int width, int height, int r, int g, int b
 		al_map_rgba(r, g, b, alpha)
 	);
 }
+
+void Vpu::qfillRectangle(int x, int y, int width, int height) {
+	al_draw_filled_rectangle(
+		x, y,
+		x + width, y + height,
+		color
+	);
+}
+
+void Vpu::rectangle(int x, int y, int width, int height) {
+	al_draw_rectangle(
+		x, y,
+		x + width, y + height,
+		color, 1.0f
+	);
+}
+
 void Vpu::fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha) {
 	Vpu::fillRectangle(x, y, width, height, r, g, b, alpha);
 	al_put_pixel(x, y, transparent);
@@ -347,6 +372,7 @@ void Vpu::render() {
 								);														\
 							}
 		renderlayer(background);
+		renderlayer(foreground);
 	#undef renderlayer	
 	
 	al_draw_scaled_rotated_bitmap(					
@@ -358,6 +384,19 @@ void Vpu::render() {
 		0											
 	);
 	
+	// Use fade if proceed
+	if(fade_level != fade_target_level)
+		fade_level += fade_delta;
+	// Stop after reaching target level
+	if((fade_target_level > 0.0f && fade_level > fade_target_level) 
+	|| (fade_target_level < 1.0f && fade_level < fade_target_level))
+		fade_level = fade_target_level;
+	
+	
+	al_set_target_bitmap(buffer);
+	al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(fade_color[0], fade_color[1], fade_color[2], 255*fade_level));
+		
+
 	if (console.enabled)
 		al_draw_scaled_bitmap(console.bitmap, 0, 0, width, height, 0, 0, al_get_display_width(display), al_get_display_height(display), 0);
 
@@ -382,6 +421,10 @@ void Vpu::popColor() {
 
 void Vpu::putpixel(int x, int y) {
 	al_put_pixel(x, y, color);
+}
+
+void Vpu::line(int x, int y, int dx, int dy) {
+	al_draw_line(x, y, dx, dy, color, 1.0f);
 }
 
 Sprite &Vpu::destroySprite(Sprite &sprite) {
@@ -443,34 +486,22 @@ Surface Vpu::loadBitmap(std::string filename) {
 	return s;
 }
 
-void Vpu::fadeout() {
-	select(overlay);
-	al_draw_bitmap(buffer, 0, 0, 0);
-	float alpha = 0.0f;
-	while (alpha < 255.0f) {
-		al_set_target_bitmap(buffer);
-		al_draw_bitmap(target->bitmap, 0, 0, 0);	
-		al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(0, 0, 0, alpha));
-		al_set_target_backbuffer(display);
-		al_draw_bitmap(buffer, 0, 0, 0);	
-		al_flip_display();
-		alpha += 1.5f;
-	}	
+void Vpu::fadeout(int r, int g, int b) {
+	fade_color[0] = r>0?r:fade_color[0];
+	fade_color[1] = g>0?g:fade_color[1];
+	fade_color[2] = b>0?b:fade_color[2];
+	fade_level = 0.0f;
+	fade_target_level = 1.0f;
+	fade_delta = 1.0f / 120.0f;
 }
 
-void Vpu::fadein() {
-	select(overlay);
-	al_draw_bitmap(buffer, 0, 0, 0);
-	float alpha = 255.0f;
-	while (alpha > 0.0f) {
-		al_set_target_bitmap(buffer);
-		al_draw_bitmap(target->bitmap, 0, 0, 0);	
-		al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(0, 0, 0, alpha));
-		al_set_target_backbuffer(display);
-		al_draw_bitmap(buffer, 0, 0, 0);	
-		al_flip_display();
-		alpha -= 1.5f;
-	}	
+void Vpu::fadein(int r, int g, int b) {
+	fade_color[0] = r>0?r:fade_color[0];
+	fade_color[1] = g>0?g:fade_color[1];
+	fade_color[2] = b>0?b:fade_color[2];
+	fade_level = 1.0f;
+	fade_target_level = 0.0f;
+	fade_delta = -(1.0f / 120.0f);
 }
 
 void Vpu::lock() {
@@ -486,28 +517,11 @@ void Vpu::unlock() {
 	al_unlock_bitmap(target->bitmap);
 }
 	
-/*
-Example layer alterations:
-	overlay[0].rotation[0] += 0.01f;
-	overlay[1].rotation[0] += 0.0125f;
-	background[0].rotation[0] -= 0.05f;
-	background[0].scale[0] += 0.1f;
-	background[0].scale[1] += 0.1f;
-	if (background[0].scale[0] > 200000.0f)background[0].scale[0] = -200000.0f;
-	if (background[0].scale[1] > 200000.0f)background[0].scale[1] = -200000.0f;
-	//overlay[0].rotation[0] = 3.141519f; // 180 deg
-	//overlay[1].rotation[0] = 3.141519f; // 180 deg
-	if(overlay[0].scale[0]>0.0f) overlay[0].scale[0] -= 0.001f;
-	if(overlay[0].scale[1]>0.0f) overlay[0].scale[1] -= 0.001f;
-	if(overlay[1].scale[0]>0.0f) overlay[1].scale[0] -= 0.00125f;
-	if(overlay[1].scale[1]>0.0f) overlay[1].scale[1] -= 0.00125f;
-*/
-
 void Vpu::loadVars() {
 
 }
 
-Sprite Vpu::createSprite(int width, int height, std::string filename) {
+Sprite Vpu::createSprite(std::string filename) {
 	return Sprite(filename.c_str());
 }
 
@@ -515,11 +529,11 @@ Animation Vpu::createAnimation(int width, int height, Sprite &s, int sx, int sy,
 	return Animation(s, width, height, sx, sy, dx, dy, vertical);	
 }
 	
-long int Vpu::allocateSprite(int width, int height, std::string filename, int priority){
+long int Vpu::allocateSprite(std::string filename, int priority){
 	#define SPRITE_PRIORITY_RANGE 1024
 	sprite_handle++;
 	sprite_handle += priority * SPRITE_PRIORITY_RANGE;
-	sprites.insert( std::pair<long int, Sprite>(sprite_handle, createSprite(width, height,filename)) );
+	sprites.insert( std::pair<long int, Sprite>(sprite_handle, createSprite(filename)) );
 	sprite_handle -= priority * SPRITE_PRIORITY_RANGE;
 	return sprite_handle + (priority * SPRITE_PRIORITY_RANGE);
 	#undef SPRITE_PRIORITY_RANGE

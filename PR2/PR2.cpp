@@ -19,6 +19,7 @@ bool initialize() {
 		return false;
 	}
 	Script::execute("import blackbox");
+	Script::execute("import typewriter");
 	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
 	
 	if (s.isLoaded()) s.call("main");

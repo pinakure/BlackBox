@@ -20,7 +20,12 @@ Surface *getLayer(int index) {
 ---------------------------------------------------------------------- */
 #define pythoncommand(name) static PyObject *name(PyObject *self, PyObject *args)
 
-pythoncommand(vpu_print) {
+pythoncommand(vpu_fading) {
+	if(!PyArg_ParseTuple(args, "")) return NULL;
+	return PyBool_FromLong(Vpu::fade_level==Vpu::fade_target_level);
+}
+
+pythoncommand(vpu_textout) {
 	char *text;
 	int x;
 	int y;
@@ -28,7 +33,6 @@ pythoncommand(vpu_print) {
 	Vpu::print(std::string(text), x, y);
 	return PyBool_FromLong(true);
 }
-
 pythoncommand(vpu_pset) {
 	int x;
 	int y;
@@ -36,14 +40,39 @@ pythoncommand(vpu_pset) {
 	Vpu::putpixel(x, y);
 	return PyBool_FromLong(true);
 }
-
+pythoncommand(vpu_line) {
+	int x;
+	int y;
+	int dx;
+	int dy;
+	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	Vpu::line(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
+pythoncommand(vpu_rect) {
+	int x;
+	int y;
+	int dx;
+	int dy;
+	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	Vpu::rectangle(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
+pythoncommand(vpu_fillrect) {
+	int x;
+	int y;
+	int dx;
+	int dy;
+	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	Vpu::qfillRectangle(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
 pythoncommand(vpu_reload){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	if (!Vpu::start())exit(1);
 	if (!Vpu::restart())exit(1);
 	return PyBool_FromLong(true);
 }
-
 pythoncommand(vpu_select){
 	int index;
 	if(!PyArg_ParseTuple(args, "i", &index)) return NULL;
@@ -52,21 +81,18 @@ pythoncommand(vpu_select){
 	Vpu::select(*layer);
 	return PyBool_FromLong(true);
 }
-
 pythoncommand(vpu_fullscreen){
 	bool fullscreen;
 	if(!PyArg_ParseTuple(args, "b", &fullscreen)) return NULL;
 	Vpu::fullscreen = fullscreen;
 	return PyBool_FromLong(Vpu::fullscreen);
 }
-
 pythoncommand(vpu_update){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	Engine::update();
 	if (!Engine::run) exit(-1);
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_enable){
 	int index;
 	if(!PyArg_ParseTuple(args, "i", &index)) return NULL;
@@ -75,7 +101,6 @@ pythoncommand(vpu_enable){
 	(*layer).enabled = true;
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_disable){
 	int index;
 	if(!PyArg_ParseTuple(args, "i", &index)) return NULL;
@@ -84,7 +109,6 @@ pythoncommand(vpu_disable){
 	(*layer).enabled = false;
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_restart) {
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	bool r = true;
@@ -92,7 +116,6 @@ pythoncommand(vpu_restart) {
 	r &= Vpu::restart();
 	return PyBool_FromLong(r);
 }
-
 pythoncommand(vpu_rotate){
 	int index;
 	float rotation;
@@ -102,7 +125,6 @@ pythoncommand(vpu_rotate){
 	(*layer).rotation[0] += rotation;	
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_scale){
 	int index;
 	float scale_x;
@@ -114,7 +136,6 @@ pythoncommand(vpu_scale){
 	(*layer).scale[1] += scale_y;	
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_setrotation){
 	int index;
 	float rotation;
@@ -124,7 +145,6 @@ pythoncommand(vpu_setrotation){
 	(*layer).rotation[0] = rotation;	
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_setscale){
 	int index;
 	float scale_x;
@@ -145,7 +165,6 @@ pythoncommand(vpu_setcolor){
 	Vpu::setColor(r, g, b, a);
 	return PyBool_FromLong(1);
 }
-
 pythoncommand(vpu_deletesurf){
 	// Must subtract 3 units from handle (3 system layers to be selected which are not in <Vpu::surfaces>)
 	long int handle;
@@ -153,7 +172,6 @@ pythoncommand(vpu_deletesurf){
 	Vpu::deallocateSurface(handle-3);
 	return PyLong_FromLong(1);
 }
-
 pythoncommand(vpu_createsurf){
 	// Must add 3 units to handle (3 system layers to be selected which are not in <Vpu::surfaces> )
 	int width;
@@ -162,7 +180,6 @@ pythoncommand(vpu_createsurf){
 	long int handle = Vpu::allocateSurface(width, height);
 	return PyLong_FromLong(handle+3);
 }
-
 pythoncommand(vpu_drawsurf){
 	// Must subtract 3 units from handle (3 system layers to be selected which are not in <surfaces>)
 	int handle;
@@ -173,24 +190,19 @@ pythoncommand(vpu_drawsurf){
 	Vpu::drawSurface(*s, 0, 0, s->width, s->height, x, y);
 	return PyLong_FromLong(1);	
 }
-
 pythoncommand(vpu_deletesprite){
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
 	Vpu::deallocateSprite(handle);
 	return PyLong_FromLong(1);
 }
-
 pythoncommand(vpu_createsprite){
-	int width;
-	int height;
 	int priority = 0;
 	char *filename;
-	if(!PyArg_ParseTuple(args, "iis|i", &width, &height, &filename, &priority)) return NULL;
-	long int handle = Vpu::allocateSprite(width, height, filename, priority);
+	if(!PyArg_ParseTuple(args, "s|i", &filename, &priority)) return NULL;
+	long int handle = Vpu::allocateSprite(filename, priority);
 	return PyLong_FromLong(handle);
 }
-
 pythoncommand(vpu_drawsprite){
 	int handle;
 	int x;
@@ -199,29 +211,26 @@ pythoncommand(vpu_drawsprite){
 	Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
 	return PyLong_FromLong(1);	
 }
-
 pythoncommand(vpu_deleteanim){
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
 	Vpu::deallocateAnimation(handle);
 	return PyLong_FromLong(1);
 }
-
 pythoncommand(vpu_createanim){
 	int width;
 	int height;
 	int sprite;
-	int dx;
-	int dy;
-	int sx;
-	int sy;
-	bool vertical;
+	int dx=0;
+	int dy=0;
+	int sx=1;
+	int sy=0;
+	bool vertical=false;
 	int flags = 0;
-	if(!PyArg_ParseTuple(args, "iiiiiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
+	if(!PyArg_ParseTuple(args, "iii|iiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
 	long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
 	return PyLong_FromLong(handle);
 }
-
 pythoncommand(vpu_drawanim){
 	int handle;
 	int x;
@@ -230,7 +239,6 @@ pythoncommand(vpu_drawanim){
 	Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
 	return PyLong_FromLong(1);	
 }
-
 pythoncommand(vpu_dimensions){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	int dims[2] = { Vpu::target->width, Vpu::target->height };
@@ -247,44 +255,44 @@ pythoncommand(vpu_dimensions){
 	}
 	return list;	
 }
-
 pythoncommand(vpu_fill){
-	int r = Vpu::color.r*255;
-	int g = Vpu::color.g*255;
-	int b = Vpu::color.b*255;
-	int a = Vpu::color.a*255;
-	if(!PyArg_ParseTuple(args, "")) return NULL;
+	int r = -1;
+	int g = -1;
+	int b = -1;
+	int a = -1;
+	if(!PyArg_ParseTuple(args, "|rgba", &r, &g, &b, &a)) return NULL;
 	Vpu::paint(r, g, b, a);
 	return PyLong_FromLong(1);	
 }
-
 pythoncommand(vpu_fadein){
-	if(!PyArg_ParseTuple(args, "")) return NULL;	
-	Vpu::fadein();
+	int r = -1;
+	int g = -1;
+	int b = -1;
+	if(!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;	
+	Vpu::fadein(r,g,b);
     return PyLong_FromLong(1);
 }
-
 pythoncommand(vpu_fadeout){
-	if(!PyArg_ParseTuple(args, "")) return NULL;	
-	Vpu::fadeout();
+	int r = -1;
+	int g = -1;
+	int b = -1;
+	if(!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;	
+	Vpu::fadeout(r,g,b);
 	return PyLong_FromLong(1);
 }
-
 pythoncommand(vpu_frames){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(Vpu::total_frames);
 }
-
+/* BlackBox ----------------------------------------------------------------------------- */
 pythoncommand(blackbox_version){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(3);
 }
-
 pythoncommand(blackbox_epoch){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(Engine::epoch);
 }
-
 pythoncommand(blackbox_ctrlc){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
 	if (InputDevice::control_c) {
@@ -294,9 +302,65 @@ pythoncommand(blackbox_ctrlc){
 	}
 	return PyBool_FromLong(0);
 }
-/* ----------------------------------------------------------------------
-	Console methods
----------------------------------------------------------------------- */
+/* TypeWriter --------------------------------------------------------------------------- */
+
+pythoncommand(typewriter_choices) {	
+	std::map<std::string, std::string> choices;
+	PyObject *keys, *vals;
+	char *question;
+	if(!PyArg_ParseTuple(args, "sOO", &question, &keys, &vals)) return NULL;	
+	int keys_len = PyObject_Length(keys);
+    int vals_len = PyObject_Length(vals);
+	if ((keys_len < 0) || (vals_len < 0)) return NULL;
+	if (keys_len != vals_len) return NULL;
+	if (keys_len > 0) {
+		for (int i = 0; i < keys_len; i++) {
+			char *key, *val;
+			PyArg_Parse(PyList_GetItem(keys, i), "s", &key);
+			PyArg_Parse(PyList_GetItem(vals, i), "s", &val);
+			choices[std::string(key)] = std::string(val);
+		}
+	} else {
+		choices["yes"] = "Yes";
+		choices["no"] = "No";		
+	} 
+    TypeWriter::question(question, choices);
+	return PyLong_FromLong(1);
+}
+pythoncommand(typewriter_getanswer) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	return Py_BuildValue("s", TypeWriter::getAnswer().c_str());
+}
+pythoncommand(typewriter_type) {
+	char *buffer;
+	int wait = 0;
+	if(!PyArg_ParseTuple(args, "s|i", &buffer, &wait)) return NULL;	
+	TypeWriter::enqueue(buffer);
+	TypeWriter::wait_time = wait * ENGINE_FPS;
+	return PyLong_FromLong(1);
+}
+pythoncommand(typewriter_loadpic) {
+	char *buffer;
+	int x=0;
+	int y=0;
+	int w=0;
+	int h=0;
+	if(!PyArg_ParseTuple(args, "s|iiii", &buffer, &x, &y, &w, &h)) return NULL;	
+	TypeWriter::loadPicture(buffer, x,y, w,h);
+	return PyLong_FromLong(1);
+}
+pythoncommand(typewriter_clearpic) {
+	if(!PyArg_ParseTuple(args, "")) return NULL;	
+	TypeWriter::clearPicture();
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(tbi) {
+	Console::print("To Be Implemented");
+	return PyLong_FromLong(1);
+}
+
+/* Console methods ---------------------------------------------------------------------- */
 pythoncommand(console_print) {
 	char *buffer;
 	if(!PyArg_ParseTuple(args, "s", &buffer)) return NULL;	
@@ -307,12 +371,25 @@ pythoncommand(console_cls) {
 	Console::clear();
 	return PyLong_FromLong(1);
 }
-/* ----------------------------------------------------------------------
-	Enlazar python{ function() }---> C++{ function(PyObject*, PyObject) }
----------------------------------------------------------------------- */
+/* Enlazar python{ function() }---> C++{ function(PyObject*, PyObject) } ---------------- */
 static PyMethodDef ConsoleMethods[] = {
-    {"print"		, console_print			, METH_VARARGS, "console.print(text) : Dump given text over console"},
+    {"echo"			, console_print			, METH_VARARGS, "console.echo(text) : Dump given text over console"},
     {"cls"			, console_cls			, METH_VARARGS, "console.cls() : Clean console buffer"},
+	{NULL, NULL, 0, NULL}
+};
+static PyMethodDef TypeWriterMethods[] = {
+	/* TBI */
+	{"setposition"	, tbi					, METH_VARARGS, "typewriter.setposition(x, y) : "},
+    {"setsize"		, tbi					, METH_VARARGS, "typewriter.setsize(w, h) : "},
+    {"setfont"		, tbi					, METH_VARARGS, "typewriter.setfont(font_handle) : "},
+    {"setcolor"		, tbi					, METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
+	/* TBI */
+
+    {"answer"		, typewriter_getanswer	, METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
+    {"choice"		, typewriter_choices	, METH_VARARGS, "typewriter.choice(question, keys[], answers[]) : Enqueue a question, with its answers. Return corresponding key"},
+    {"type"			, typewriter_type		, METH_VARARGS, "typewriter.type(text) : Enqueue message into typewriter buffer and open if if closed"},
+    {"loadpic"		, typewriter_loadpic	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
+    {"clearpic"		, typewriter_clearpic	, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef BlackBoxMethods[] = {
@@ -322,13 +399,23 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 static PyMethodDef VpuMethods[] = {
+	/* TBI */
+	{"loadfont"		, tbi					, METH_VARARGS, "vpu.loadfont(filename, size) : "},
+	{"setfont"		, tbi					, METH_VARARGS, "vpu.setfont(font_handle) : "},
+	{"deletefont"	, tbi					, METH_VARARGS, "vpu.deletefont(font_handle) : "},
+    /* TBI */
+
+	{"fading"		, vpu_fading			, METH_VARARGS, "vpu.fading() : Return True is fade in / fade out is activated" },
+	{"fillrect"		, vpu_fillrect			, METH_VARARGS, "vpu.filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
+	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
+	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
 	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
-	{  "drawanim"	,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
+	{"drawanim"		,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
 	{"deleteanim"	, vpu_deleteanim		, METH_VARARGS, "vpu.deleteanim(handle) : Delete Animation identified by given Handle" },
 	{"createanim"	, vpu_createanim		, METH_VARARGS, "vpu.createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
-	{  "drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
+	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
 	{"deletesprite"	, vpu_deletesprite		, METH_VARARGS, "vpu.deletesprite(handle) : Delete Sprite identified by given Handle" },
-	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(width, height, filename) : Returns Handle to Sprite object create upon given filename" },
+	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },
@@ -347,7 +434,7 @@ static PyMethodDef VpuMethods[] = {
 	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},
 	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
 	{"select"		, vpu_select			, METH_VARARGS, "vpu.select(layer) : Select given layer to perform next graphic operations onto it"},
-	{"print"		, vpu_print				, METH_VARARGS, "vpu.print(text, x, y) : Print given text at given coordinates"},
+	{"textout"		, vpu_textout			, METH_VARARGS, "vpu.textout(text, x, y) : Print given text at given coordinates"},
 	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
 	{NULL, NULL, 0, NULL}
 };
@@ -355,13 +442,15 @@ static PyMethodDef VpuMethods[] = {
 /* ----------------------------------------------------------------------
 	Definir Modulos
 ---------------------------------------------------------------------- */
-static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox", NULL, -1, BlackBoxMethods	,NULL, NULL, NULL, NULL};
-static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"		, NULL, -1, VpuMethods		,NULL, NULL, NULL, NULL};
-static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"	, NULL, -1, ConsoleMethods	,NULL, NULL, NULL, NULL};
+static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods		,NULL, NULL, NULL, NULL};
+static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods			,NULL, NULL, NULL, NULL};
+static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods		,NULL, NULL, NULL, NULL};
+static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriterMethods	,NULL, NULL, NULL, NULL};
 
 static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
 static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
 static PyObject *PyInit_console(void){ return PyModule_Create(&ConsoleModule); }
+static PyObject *PyInit_typewriter(void){ return PyModule_Create(&TypeWriterModule); }
 
 static void Py_LoadCommands() {
 	for (PyMethodDef &d : VpuMethods) {
@@ -373,6 +462,10 @@ static void Py_LoadCommands() {
 		Console::addHelp(d.ml_name, d.ml_doc);
 	}
 	for (PyMethodDef &d : ConsoleMethods) {
+		if (!d.ml_name)continue;
+		Console::addHelp(d.ml_name, d.ml_doc);
+	}
+	for (PyMethodDef &d : TypeWriterMethods) {
 		if (!d.ml_name)continue;
 		Console::addHelp(d.ml_name, d.ml_doc);
 	}

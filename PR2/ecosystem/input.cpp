@@ -457,7 +457,7 @@ void InputDevice::updateJoystick(void){
 
 
 void InputDevice::drawJoystick(int x, int y) {
-	//if (!joystick)return;
+	if (!debug_joystick->get())return;
 	/* PROFILE_START(); */
 	static ALLEGRO_COLOR alpha = al_map_rgba(128, 128, 128, 16);
 
@@ -494,6 +494,8 @@ void InputDevice::drawJoystick(int x, int y) {
 
 void InputDevice::drawKeyboard(int x, int y) {
 	/* PROFILE_START(); */
+	if (!debug_keyboard->get())return;
+	
 	static ALLEGRO_COLOR alpha = al_map_rgba(128, 128, 128, 16);
 
 	Vpu::select(Vpu::overlay);

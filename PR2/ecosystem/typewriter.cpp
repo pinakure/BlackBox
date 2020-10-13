@@ -1,24 +1,30 @@
 #include "typewriter.hpp"
 #include "engine.hpp"
 #include "vpu.hpp"
+#include "console.hpp"
 
 #define TYPEWRITER_HEIGHT	60
 #define TYPEWRITER_WIDTH	((Vpu::width/2) - (32))
 
 std::vector<std::string> TypeWriter::display;
-std::string TypeWriter::current = "";
 std::queue<std::string> TypeWriter::queue;
+std::string TypeWriter::current = "";
+std::string TypeWriter::answer = "";
+std::string TypeWriter::_question = "";
+std::map<std::string, std::string> TypeWriter::choices;
 double	TypeWriter::current_position= 0;
 int		TypeWriter::current_end = 0;
 double	TypeWriter::width = 0;
 double	TypeWriter::height = 0;
 int		TypeWriter::x = 0;
 int		TypeWriter::y = 0;
+int		TypeWriter::wait_time = 0;
 bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
 double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
 bool	TypeWriter::needs_redraw;
 static Surface surface;
+static Surface overlay;
 
 void TypeWriter::initialize() {
 	current = "";
@@ -27,6 +33,7 @@ void TypeWriter::initialize() {
 	final_width = 0;
 	final_height = 0;
 	surface = Vpu::createSurface(Vpu::width/2, TYPEWRITER_HEIGHT);
+	overlay = Vpu::createSurface(Vpu::width/2, TYPEWRITER_HEIGHT);
 }
 
 const int max_size = 4;
@@ -88,6 +95,12 @@ void TypeWriter::draw() {
 		Vpu::popColor();
 		TypeWriter::needs_redraw = false;
 	}
+	Vpu::drawSurface(
+		overlay,
+		0, 0,
+		overlay.width, overlay.height,
+		0, 0
+	);	
 	Vpu::select(Vpu::overlay);	
 	Vpu::drawSurface(
 		surface,
@@ -102,6 +115,11 @@ void TypeWriter::update(double delta) {
 	static int last_height= 0;
 	static int last_position = 0;
 	static int last_radius = 0;
+
+	if (wait_time > 0) {
+		wait_time--;
+		return;
+	}
 
 	if (!TypeWriter::next) {
 		static int t = 0;
@@ -187,3 +205,39 @@ void TypeWriter::enqueue(const char *text) {
 	TypeWriter::final_height = TYPEWRITER_HEIGHT;
 	TypeWriter::final_width  = TYPEWRITER_WIDTH;
 }
+
+void TypeWriter::loadPicture(std::string filename, int x, int y, int w, int h) {
+	Surface s = Vpu::loadBitmap(filename);
+	if (!s.enabled) {
+		Console::printf("~4ERROR:~cCannot load filename %s", filename.c_str());
+		return;
+	}
+	if (w == -1) w = s.width;
+	if (h == -1) h = s.height;
+	Vpu::select(overlay);
+	Vpu::clear();
+	Vpu::drawSurface(s, 0, 0, w, h, x, y);
+}
+
+void TypeWriter::clearPicture() {
+	Vpu::select(overlay);
+	Vpu::clear();
+}
+
+void TypeWriter::question(std::string question, std::map<std::string, std::string> choices) {
+	TypeWriter::choices = choices;
+	TypeWriter::_question = question;
+	TypeWriter::answer = "";
+}
+
+std::string TypeWriter::getAnswer() {
+	if (answer.compare("")) {
+		std::string ret(answer);
+		answer = "";
+		choices.clear();
+		_question = "";
+		return ret;
+	}
+	return "";
+}
+

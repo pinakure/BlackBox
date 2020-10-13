@@ -1,9 +1,10 @@
 from math       import sin, cos, tan
 from random     import random
+from time       import sleep
 from vpu        import *
 from blackbox   import *
-from console    import print as cout
-from vpu        import print as textout
+from console    import echo as cout
+from vpu        import textout
 
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
@@ -12,6 +13,14 @@ def configure():
 
 def main():
     return
+
+def wait(seconds = 1, callback = None):
+    now = then = epoch()
+    while(then+seconds > now):
+        if callback is not None:
+            callback()
+        update()
+        now = epoch()
 
 class test():
     @staticmethod
@@ -24,6 +33,7 @@ class test():
         cout('~7drawanim~8()')
         cout('~7drawsprite~8()')
         cout('~7drawsurf~8()')
+        cout('~ffade~8()')
         cout('~7benchmark~8()')
 
     @staticmethod
@@ -32,7 +42,7 @@ class test():
         disable(1)
         disable(2)
         enable(0)
-        spr = createsprite(32,32, 'down', 8);
+        spr = createsprite('down', 8);
         ani = createanim(32,32, spr, 0, 0, 3, 0, False)
         x = 0
         cy = int(1024/2)
@@ -53,7 +63,7 @@ class test():
         disable(1)
         disable(2)
         enable(0)
-        spr = createsprite(32,32, 'bottle', 8);
+        spr = createsprite('bottle', 8);
         while(not ctrlc()):
             select(0)
             drawsprite(spr, int(random()*1280), int(random()*1024))
@@ -107,52 +117,37 @@ class test():
                 drawanim(ani, px, py)
                 update()                
             e+=1;
-                
+    @staticmethod 
+    def fade():
+        while(not ctrlc()):
+            wait(1)
+            fadeout()
+            wait(1)
+            select(0)
+            r = int(random()*255)
+            g = int(random()*255)
+            b = int(random()*255)
+            setcolor(r,g,b)
+            fill()
+            fadein()
+            wait(1)
+
     @staticmethod
     def discard():
-        enable(0)
-        then = epoch()
-        rrot = 0.0
-        ssca = 1.0
-        fadein()
-        while((epoch()-then) < 5):
-            select(0)
-            textout("Hello", 220, 240);
-            if frames() % 2:
-                enable(0)
-            else:
-                disable(0)
-
-            rot = rrot;
-            sca = ssca;
-            rotate(0, rot)
-            setscale(0, -sca, sca)
-            rot *= 2;
-            sca *= 2;
-            rotate(1, rot)
-            setscale(1, sca, sca)
-            rot *= 2;
-            sca *= 2;
-            rotate(2, rot)
-            scale(2, sca, sca/2)
-            rot *= 2;
-            sca *= 2;
-            rrot += 0.001
-            ssca += 0.001
-            update()
         fadeout()
-        then = epoch()
-        while((epoch()-then) < 5):
-            update()        
-        fadein()
-        while((epoch()-then) < 15):
+        wait(2)        
+        def callback():
             select(0)
-            textout("Hello", 220, 140);
-            if frames() % 2:
-                enable(0)
-            else:
-                disable(0)
-            update()
+            r = int(random()*255)
+            g = int(random()*255)
+            b = int(random()*255)
+            fill();
+            setcolor(r,g,b)          
+        while(not ctrlc()):        
+            fadein()
+            wait(1, callback)
+            fadeout()
+            wait(1, callback)
         cout("Script Finished.")
         return True
 

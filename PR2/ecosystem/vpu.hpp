@@ -61,12 +61,16 @@ public:
 	static void printBool		(std::string text, bool d, int  x, int y, int flags=0);
 
 	// Primitives
+	static void rectangle(int x, int y, int width, int height);
+	static void qfillRectangle(int x, int y, int width, int height);
 	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillCircle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void paint(int r, int g, int b, int alpha = 255);
 	static void putpixel(int x, int y);
+	static void line(int x, int y, int dx, int dy);
+
 	
 	// Color routines
 	static void setColor(int r, int g, int b, int alpha = 255);
@@ -93,7 +97,7 @@ public:
 	static Surface createSurface(int width, int height);
 	
 	/* Sprite and animations*/
-	static Sprite createSprite(int width, int height, std::string filename);
+	static Sprite createSprite(std::string filename);
 	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static Sprite &destroySprite(Sprite &sprite);
 	static Animation &destroyAnimation(Animation &animation);
@@ -103,7 +107,7 @@ public:
 	/* High Level API */
 	static long int allocateSurface(int width, int height);
 	static void deallocateSurface(long int handle);
-	static long int allocateSprite(int width, int height, std::string filename, int priority=0);
+	static long int allocateSprite(std::string filename, int priority=0);
 	static void deallocateSprite(long int handle);
 	static long int allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static void deallocateAnimation(long int handle);
@@ -111,8 +115,13 @@ public:
 	// Surface effects
 	static void randomize();
 	static void subdivide(int r, int g, int b, int alpha=255);
-	static void fadeout();
-	static void fadein();
+	static void fadeout(int r = -1, int g = -1, int b = -1);
+	static void fadein( int r = -1, int g = -1, int b = -1);
+
+	static int   fade_color[3];
+	static float fade_target_level;
+	static float fade_level;
+	static float fade_delta;
 
 };
 

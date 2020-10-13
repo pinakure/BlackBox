@@ -4,6 +4,7 @@
 #include "console.hpp"
 #include "world.hpp"
 #include "camera.hpp"
+
 #define WORLD_SIZE					65535
 #define NPC_COUNT					128
 int Engine::width					= 640;
