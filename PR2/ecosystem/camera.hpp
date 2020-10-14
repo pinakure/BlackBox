@@ -20,7 +20,7 @@ public:
 	static void transformToRelative(Position &absolute);
 	static void transformToSectorIndex(Position &absolute);
 	static void transformToMapIndex(Position &absolute);
-	static void update();
+	static void update(float delta);
 };
 
 typedef struct E_OutOfCameraStatus {

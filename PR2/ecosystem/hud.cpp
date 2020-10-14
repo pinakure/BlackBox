@@ -23,7 +23,6 @@ void Hud::drawDebugInfo() {
 	Vpu::printf(right, 16, ALLEGRO_ALIGN_RIGHT, " T  %#6d", Vpu::total_frames);	
 }
 
-void Hud::update() {
-	static double delta = 1.0;
+void Hud::update(float delta) {
 	TypeWriter::update(delta);	
 }

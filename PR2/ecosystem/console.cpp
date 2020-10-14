@@ -544,7 +544,7 @@ void Console::readKeyboard(int k){
 	}	
 }
 
-void Console::update(void){	
+void Console::update(){	
 	static char szBuffer[512];
     int nOutRead = _stdout.GetBuffer(szBuffer);
     if(nOutRead)

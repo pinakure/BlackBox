@@ -44,7 +44,7 @@ void Camera::set(double x, double y, double z) {
 	Camera::target_z = z;
 }
 
-void Camera::update() {
+void Camera::update(float delta) {
 	// Exit if no target is set
 	if((Camera::target_x == -1.0)
 	|| (Camera::target_y == -1.0)

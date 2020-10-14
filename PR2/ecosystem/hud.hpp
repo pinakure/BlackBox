@@ -9,7 +9,7 @@ public:
 	static bool initialize();
 	static void draw();
 	static void drawDebugInfo();
-	static void update();
+	static void update(float delta);
 };
 
 #endif

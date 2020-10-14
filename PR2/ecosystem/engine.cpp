@@ -142,7 +142,19 @@ void Engine::render() {
 	}
 }
 
+#include <chrono>
+auto tp1 = std::chrono::system_clock::now();
+auto tp2 = std::chrono::system_clock::now();
+
 void Engine::update() {
+	
+	
+    tp2 = std::chrono::system_clock::now();
+    std::chrono::duration<float> elapsedTime = tp2 - tp1;
+	tp1 = tp2;
+    float fElapsedTime = elapsedTime.count();
+    // From this line on, every value must be multiplied by fElapsedTime
+    
 	if(int(_rotation*100))
 		rotate(_rotation);
 	if(int(_scale[0]*100))
@@ -151,11 +163,11 @@ void Engine::update() {
 			_scale[1],
 			_scale[2]
 		);
-	showcase->update(1.0);
-	Camera::update();
-	Hud::update();
-	InputDevice::update(1);
-	Console::update();
+	showcase->update(fElapsedTime);
+	Camera::update(fElapsedTime);
+	Hud::update(fElapsedTime);
+	InputDevice::update(fElapsedTime);
+	Console::update();//!!!
 	render();
 	handleEvents();
 	cycles++;
