@@ -16,7 +16,9 @@ var Editor = {
     update : function(){
         for(ni in this.nodes){
             this.nodes[ni].update();            
-        }        
+        }
+        $('output').html(this.nodes[0].compile());
+
     },
     
     addNode : function(type){
@@ -31,7 +33,10 @@ var Editor = {
         if(this.selected_node) this.selected_node.selected = false;
         this.selected_node = node;
         this.setName(`${node.caption}<super># ${node.id}</super>`, node.icon);
-        $('navcontent').html(node.form());
+        $('navcontent').html(node.controlForm()+'<hr style="filter: opacity(35%)"/>'+node.form())
+        if(node.parent){
+            $(`#parent_${node.id}`).val(node.parent.id);
+        }
         node.selected = true;
     },
 
@@ -63,9 +68,9 @@ var Editor = {
 $(document).ready(function(){               
     Editor.initialize();
     var id = Editor.addNode(Types.TEXT);
-    var id = Editor.addChild(Editor.nodes[id], Types.WAIT);
+    /*var id = Editor.addChild(Editor.nodes[id], Types.WAIT);
     var id = Editor.addChild(Editor.nodes[id], Types.FONT);
-    var id = Editor.addSibling(Editor.nodes[id], Types.RUMBLE);
+    var id = Editor.addSibling(Editor.nodes[id], Types.RUMBLE);*/
     
     $('content, content *, nav, nav *').attr('onclick', `$('#menu').hide()`);
 });

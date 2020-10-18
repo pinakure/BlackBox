@@ -86,6 +86,7 @@ overlay {
 svg {
     pointer-events: none;
     position: absolute; 
+    /* border: 1px solid #8888; */
 }
 node i {
     font-size: 30px !important; 
@@ -209,4 +210,28 @@ super {
     vertical-align: super;
     font-size: 13px;
     padding-left: 8px;
+}
+
+output:hover {
+    height: 25%; 
+    padding: 8px 8px 8px 8px;    
+    overflow-y: auto;
+ }
+ output {
+    transition: height 250ms ease-in-out , padding 250ms ease-in-out;
+    height: 32px;
+    display: inline-block; 
+    box-sizing: border-box; 
+    overflow-y: hidden;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    width: calc(100% - var(--nav-width)); 
+    position: absolute; 
+    bottom: 0px; 
+    right: 0px; 
+    padding: 0px 0px 0px 0px;   
+    background: #f0f0f080;
+    box-shadow: 2px 2px 0px #0008 inset;;
+    color: #303030;
+    font-weight: 640;
 }

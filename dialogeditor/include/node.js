@@ -19,6 +19,13 @@ var Types = {
     STYLE  : 7, // Change box style
 };
 
+function getType(type){
+    for(key in Types){
+        if(Types[key]==type)return key;
+    }
+    return 'Unknown';
+}
+
 var AttributeTypes = {
     NONE    : 0, // 
     TEXT    : 1, // 
@@ -79,7 +86,7 @@ function serializeAttribute(node_id, attribute_name){
         case AttributeTypes.CHOICE:
             for(i in attr.value){ // 'Iterate each choice (2 items per choice)'
                 attr.value[i].choice = $(`#${attr.id}_${i}_c`).val();
-                attr.value[i].node   = $(`#${attr.id}_${i}_n`).val();
+                attr.value[i].node   = $(`#${attr.id}_${i}_n option:selected`).val();                
             }
             break;
         
@@ -88,6 +95,23 @@ function serializeAttribute(node_id, attribute_name){
             attr.value.y = $(`#${attr.id}_y`).val();
             break;
     }
+}
+
+function childForm(attribute, id, callback){
+    var children = attribute.parent.children;
+    var ret = '';
+    for(ci in children){
+        var child = children[ci];
+        
+        ret += `<option ${parseInt(attribute.value[id].node) ==child.id?'selected="selected"':''} id="${child.id}" value="${child.id}">${getType(child.type)} #${child.id}</option>`;
+    }
+    ret = `
+        <select style="width: 49%" id="${attribute.id}_${id}_n" onchange="${callback}">
+            <option id="null" value="null">NONE</option>
+            ${ret}
+        </select>
+    `;  
+    return ret;
 }
 
 function NavCard(attribute){
@@ -115,13 +139,13 @@ function NavCard(attribute){
                                 value="${attribute.value[i].choice }"
                                 class="half" 
                                 onchange="${callback}"
-                        />
-                         <input id="${attribute.id}_${i}_n" 
+                        />${childForm(attribute, `${i}`, callback)}
+                         <!--<input id="${attribute.id}_${i}_n" 
                                 type="text" 
                                 value="${attribute.value[i].node   }"
                                 class="half" 
                                 onchange="${callback}"
-                        />
+                        />-->
                         `;    
             }
             break;
@@ -164,7 +188,13 @@ function NavCard(attribute){
 
 function Node(type, args={}){
     this.x = 0;
-    this.y = node_count;
+    var i = 0;
+    for(ni in Editor.nodes){
+        var n = Editor.nodes[ni];
+        if(!n.parent)
+        i++;
+    }
+    this.y = i;
     this.initialized = false;
     this.selected = false;
     this.icon = '';
@@ -181,18 +211,81 @@ function Node(type, args={}){
     this.initialize(args);
 }
 
-Node.prototype.setParent = function(node){
-    COLUMN++;
-    this.x = node.x + 1;
-    this.y = node.y + 1;
-    this.parent = node;    
-}
-
 Node.prototype.addChild = function(node){
     node.setParent(this);
-    this.children[this.children.length] = node;
     return node.id;
 }
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+Node.prototype.setParent = function(node){
+    if(this.parent)
+        this.parent.removeChild(this);
+    
+    if(node==null){
+        this.parent = null;
+        this.x = 0;
+        this.y=Object.size(Editor.nodes);
+        i = 1;
+        for(ni in Editor.nodes){
+            var n = Editor.nodes[ni];
+            if(!n.parent)
+                n.y = i-1;
+            else 
+                n.y = n.parent.y + 2;
+            n.update();
+            i++;
+        }
+        this.update();
+        return;
+    }
+    
+    this.parent = node;  
+    this.y = this.parent.y+1;
+    this.parent.children[this.parent.children.length] = this;
+    this.x = this.parent.x+this.parent.children.length;
+    var i = 1;
+    for(ni in this.parent.children){
+        var n = this.parent.children[ni];
+        n.x = this.parent.x > 0 ? this.parent.x + i - 1 : this.parent.x + i;
+        n.y = this.parent.y + 2;
+        n.update();
+        i++;
+    }
+}
+
+Node.prototype.removeSibling = function(node){
+    var new_nodes = [];
+    for(ni in this.siblings){
+        var n = this.siblings[ni];
+        if(n.id == node.id) continue; // Skip target sibling on new list
+        new_nodes[n.id] = n;
+    }
+    this.siblings = new_nodes;
+    Editor.update();
+}
+
+Node.prototype.removeChild = function(node){
+    var new_nodes = [];
+    var i = 1;
+    for(ni in this.children){
+        var n = this.children[ni];
+        if(n.id == node.id)continue; // Skip target child on new list
+        n.removeSibling(node);
+        n.x = this.x+i;
+        new_nodes[n.id] = n;
+        i++;
+    }
+    this.children = new_nodes;
+    Editor.update();
+}
+
 
 Node.prototype.addSibling = function(node){
     this.siblings[this.siblings.length] = node;
@@ -205,6 +298,71 @@ Node.prototype.destroy =function(){
         node_count--;
         this.initialized = false;
     }
+}
+
+function assignParent(node_id){
+    /* TO BE CALLED BY SELECT CONTROL BELOW */
+    if(node_id==0)return;
+    var parent_id = $(`#parent_${node_id} option:selected`).val();
+    if(parent_id=='null')Editor.nodes[node_id].setParent(null);
+    else Editor.nodes[node_id].setParent(Editor.nodes[parent_id]);
+}
+
+function highlightNode(id){
+    $('node').each(function(){
+        $(this).css('filter', 'brightness(1.0)');
+    }); 
+    var obj = $(`#parent_${id}`);
+     var selection = $(`#parent_${id} option:hover`).val();
+    console.log(selection);
+    if(selection != 'null')
+        $(`#node_${selection}`).css('filter', 'brightness(1.5)');
+        
+}
+
+Node.prototype.parentControl = function(){
+    var ret = '';
+    ret += '<option style="background: #333;color: #f80; font-weight: 650;" id="null" value="null">NO PARENT</option>';
+    for(ni in Editor.nodes){
+        var node = Editor.nodes[ni];
+        if(this.id == node.id)continue;
+        var ischild = false;
+        for(ci in this.children){
+            var child = this.children[ci];
+            if(child.id == node.id)ischild = true;
+        }
+        if(ischild)continue;
+        if(this.id == node.id)continue;
+        ret += `<option onfocus="highlightNode(${this.id})" style="background: #333;color: #f80; font-weight: 650;" id="${node.id}" value="${node.id}">${node.id} - ${getType(node.type)}</option>`; 
+    }
+    ret = `<select onmousemove="highlightNode(${this.id})"  onchange="assignParent(${this.id});" style="box-shadow: 0px 2px 3px #0008; background: #333; color: #f80; margin-top: 8px; height: 24px;width: 100%; border-radius: 8px 8px 8px 8px;" class="" id="parent_${this.id}">
+        ${ret}
+    </select>`;
+    return ret;
+}
+
+Node.prototype.controlForm = function(){
+    if(this.id==0)return '';
+    var ret = this.parentControl();
+    return ret;
+}
+
+Node.prototype.compile = function(){
+    var code = '';
+    switch(this.type){
+        case Types.TEXT:    code+= 'TEXT();'; break;
+        case Types.CHOICE:  code+= ''; break;
+        case Types.WAIT:    code+= ''; break;
+        case Types.PICTURE: code+= ''; break;
+        case Types.RUMBLE:  code+= ''; break;
+        case Types.FONT:    code+= ''; break;
+        case Types.STYLE:   code+= ''; break;
+    }
+    for(ci in this.children){
+        var child = this.children[ci];
+        code += child.compile();
+    }
+    return code;
 }
 
 Node.prototype.specialize = function(args){
@@ -298,7 +456,9 @@ Node.prototype.initialize = function(args){
 
 Node.prototype.render = function(args){
     // inject initial html
-    $('overlay').append(`<svg height="${NODE_AREA}" width="${NODE_AREA}" version="1.1" xmlns="http://www.w3.org/2000/svg" id="joint_${this.id}"><line x1="0" x2="0" y1="0" y2="0" /></svg>`);
+    var width  = (this.parent ? this.x - this.parent.x :  this.x ) * NODE_AREA;
+    var height = (this.parent ? this.y - this.parent.y :  this.y ) * NODE_AREA;
+    $('overlay').append(`<svg height="${height}" width="${width}" version="1.1" xmlns="http://www.w3.org/2000/svg" id="joint_${this.id}"><line x1="0" x2="0" y1="0" y2="0" /></svg>`);
     $('content').append(`<node root="${this.parent==null}" onclick="Editor.selectNode(Editor.nodes[${this.id}]);" id="node_${this.id}" title="${Object.keys(Types)[this.type]}(${this.id})"><i class="fa fa-${this.icon}"></i></node>`);
     // return jquery object
     return $(`#node_${this.id}`);
@@ -320,11 +480,14 @@ Node.prototype.update = function(args){
     var x = this.x, y = this.y;
     var dx=0,dy=0;
     
+    j.css('width'  , `${(this.parent ? (this.x - this.parent.x)+2 :  this.x ) * NODE_AREA}px`);
+    j.css('height' , `${(this.parent ? this.y - this.parent.y :  this.y ) * NODE_AREA}px`);
+        
     if(this.parent){
         j.css('left', `${NODE_PADDING+((this.parent.x*NODE_AREA)+(NODE_AREA/2))}px`);
         j.css('top' , `${NODE_PADDING+((this.parent.y*NODE_AREA)+(NODE_AREA/2))}px`);
         x = 0;y = 0;
-        dx = 1;dy = 1;
+        dx = (this.parent ? (this.x - this.parent.x) :  this.x );dy = 1;
     } else {
         j.css('left', `${NODE_PADDING+((this.x*NODE_AREA)+(NODE_AREA/2))}px`);
         j.css('top' , `${NODE_PADDING+((this.y*NODE_AREA)+(NODE_AREA/2))}px`);
@@ -332,10 +495,10 @@ Node.prototype.update = function(args){
         dx = 0;dy = 0;    
     }
     var j = $(`#joint_${this.id} line`);
-    j.attr('x1', x*NODE_AREA);
+    j.attr('x1', (x*NODE_AREA)-1);
     j.attr('y1', y*NODE_AREA);
-    j.attr('x2', dx*NODE_AREA);
-    j.attr('y2', dy*NODE_AREA);
+    j.attr('x2', (dx*NODE_AREA)+1);
+    j.attr('y2', (dy+1)*NODE_AREA);
     j.css('stroke', selected ? 'red' : '#000a');
     j.css('stroke-width', selected ? '2' : '1');
 
