@@ -215,12 +215,13 @@ super {
 }
 
 output:hover {
-    height: 25%; 
+    height: 100%;
+    background: #f0f0f0f0;
     padding: 8px 8px 8px 8px;    
     overflow-y: auto;
  }
  output {
-    transition: height 250ms ease-in-out , padding 250ms ease-in-out;
+    transition: height 250ms ease-in-out , padding 250ms ease-in-out, background  500ms ease-in-out;
     height: 32px;
     display: inline-block; 
     box-sizing: border-box; 
@@ -231,8 +232,9 @@ output:hover {
     position: absolute; 
     bottom: 0px; 
     right: 0px; 
+    z-index: 50000;
     padding: 0px 0px 0px 0px;   
-    background: #f0f0f080;
+    background: #f0f0f040;
     box-shadow: 2px 2px 0px #0008 inset;;
     color: #303030;
     font-weight: 640;
