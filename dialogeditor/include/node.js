@@ -17,6 +17,8 @@ var Types = {
     RUMBLE : 5, // Make dialog rumble
     FONT   : 6, // Font node
     STYLE  : 7, // Change box style
+    SCRIPT : 8, // 
+    BRANCH : 9, // Conditional Block
 };
 
 function getType(type){
@@ -33,6 +35,9 @@ var AttributeTypes = {
     FILE    : 3, // 
     NUMBER  : 4, // 
     VECTOR  : 5, //     
+    STRING  : 6,
+    BIGSTRING:7,
+    BRANCH : 8,
 }; 
 
 function addLine(){
@@ -68,8 +73,11 @@ function childForm(attribute, id, callback){
     var ret = '';
     for(ci in children){
         var child = children[ci];
-        
-        ret += `<option ${parseInt(attribute.value[id].node) ==child.id?'selected="selected"':''} id="${child.id}" value="${child.id}">${getType(child.type)} #${child.id}</option>`;
+        try{
+            ret += `<option ${parseInt(attribute.value[id].node) ==child.id?'selected="selected"':''} id="${child.id}" value="${child.id}">${getType(child.type)} #${child.id}</option>`;
+        } catch(e){
+            ret += `<option ${parseInt(attribute.value) ==child.id?'selected="selected"':''} id="${child.id}" value="${child.id}">${getType(child.type)} #${child.id}</option>`;
+        }
     }
     ret = `
         <select style="width: 49%" id="${attribute.id}_${id}_n" onchange="${callback}">
@@ -261,6 +269,8 @@ Node.prototype.initialize = function(args){
         case Types.RUMBLE:  this.icon = 'rss';              this.caption = "Rumble"; break;
         case Types.FONT:    this.icon = 'font';             this.caption = "Font"; break;
         case Types.STYLE:   this.icon = 'cog';              this.caption = "Style"; break;
+        case Types.BRANCH:  this.icon = 'check-square-o';   this.caption = "Branch"; break;
+        case Types.SCRIPT:  this.icon = 'file-o';           this.caption = "Script"; break;
     }    
     this.specialize(args);
     this.initialized = true;

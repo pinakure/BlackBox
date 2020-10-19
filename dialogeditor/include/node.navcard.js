@@ -1,5 +1,6 @@
 function NavCard(attribute){
-    var ret = '';    
+    var ret = '';   
+    var style = ''; // override <navcard> style! 
     var callback = `serializeAttribute(${attribute.parent.id}, '${attribute.name}')`;
     switch(attribute.type){
         case AttributeTypes.TEXT:
@@ -24,13 +25,7 @@ function NavCard(attribute){
                                 class="half" 
                                 onchange="${callback}"
                         />${childForm(attribute, `${i}`, callback)}
-                         <!--<input id="${attribute.id}_${i}_n" 
-                                type="text" 
-                                value="${attribute.value[i].node   }"
-                                class="half" 
-                                onchange="${callback}"
-                        />-->
-                        `;    
+                         `;    
             }
             break;
 
@@ -65,7 +60,34 @@ function NavCard(attribute){
                         onchange="${callback}"                             
                     />`;
             break;
+
+        case AttributeTypes.BIGSTRING:
+            ret +=  `<label>${attribute.name}</label>`;
+            style = 'height: calc(100% - 50px);'
+            ret +=  `<textarea
+                        style="resize: none;width: calc(100% - 6px);height: calc(100% - 22px);"
+                        id="${attribute.id}" 
+                        type="text" 
+                        onchange="${callback}" 
+                    />${attribute.value}</textarea>`;
+            break;
+
+        case AttributeTypes.STRING:
+            ret +=  `<label>${attribute.name}</label>`;
+            ret +=  `<input 
+                        id="${attribute.id}" 
+                        type="text" 
+                        value="${attribute.value}"
+                        onchange="${callback}" 
+                        maxlength="256" 
+                    />`;
+            break;
+    
+        case AttributeTypes.BRANCH:
+            ret +=  `<label>${attribute.name}</label>`;
+            ret +=  `${childForm(attribute, ``, callback)}`;
+            break;
         
     }
-    return `<navcard>${ret}</navcard>`;
+    return `<navcard${style?` style="${style}"`:''}>${ret}</navcard>`;
 }   

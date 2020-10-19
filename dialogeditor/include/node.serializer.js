@@ -25,9 +25,22 @@ function serializeAttribute(node_id, attribute_name){
             }
             break;
         
+        case AttributeTypes.BRANCH:
+            attr.value = $(`#${attr.id}__n option:selected`).val();           
+            debugger    
+            break;
+        
         case AttributeTypes.VECTOR: // same as choice, but with numbers
             attr.value.x = $(`#${attr.id}_x`).val();
             attr.value.y = $(`#${attr.id}_y`).val();
+            break;
+
+        case AttributeTypes.STRING: // Single string, for input=text 
+            attr.value = $(`#${attr.id}`).val();
+            break;
+        
+        case AttributeTypes.BIGSTRING: // For textareas...
+            attr.value = $(`#${attr.id}`).val();
             break;
     }
 }

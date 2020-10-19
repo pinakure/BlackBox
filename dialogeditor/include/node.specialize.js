@@ -64,6 +64,24 @@ Node.prototype.specialize = function(args){
             /* Change COLOR of the textbox */
             break;
 
+        case Types.SCRIPT:
+            this.attributes.code = new NodeAttribute(this, 'code', '', AttributeTypes.BIGSTRING);
+            this.form = function(){
+                return NavCard(this.attributes.code);
+            };
+            break;
+
+        case Types.BRANCH:
+            this.attributes.condition = new NodeAttribute(this, 'condition' , '', AttributeTypes.STRING);
+            this.attributes.true      = new NodeAttribute(this, 'true' , '', AttributeTypes.BRANCH);
+            this.attributes.false     = new NodeAttribute(this, 'false', '', AttributeTypes.BRANCH);
+            this.form = function(){
+                return  NavCard(this.attributes.condition) +
+                        NavCard(this.attributes.true) +
+                        NavCard(this.attributes.false);
+            };
+            break;
+
         default:
             debugger
             break;
