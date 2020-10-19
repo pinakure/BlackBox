@@ -10,15 +10,18 @@ Node.prototype.compileText = function(indent=0){
 Node.prototype.compileChoice = function(indent=0){
     var ret = getIndent(indent)+`typewriter.clearchoice()\n`;
     var aft = '';
+    var first_choice=true;
     for(ai in this.attributes.choices.value){
         var t = this.attributes.choices.value[ai];
-        var value = t.value;
+        var value = t.choice;
         var node  = (t.node && t.node!='null') ? Editor.nodes[t.node] : null;
         if(node){
             ret+= getIndent(indent)+`typewriter.addchoice('${value}', '${node.id}')\n`;
-            aft+= getIndent(indent)+`if choice == '${node.id}':\n${ node.compile(indent+1)}\n`;
+            aft+= getIndent(indent)+`${first_choice?'':'el'}if choice == '${node.id}':\n${ node.compile(indent+1)}`;
+            first_choice=false;
         }
     }
+    ret+= getIndent(indent)+'choice = typewriter.getchoice()\n';
     return ret+aft;
 }
 
