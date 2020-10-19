@@ -4,6 +4,8 @@ Node.prototype.compileText = function(indent=0){
         var at = this.attributes.lines.value[ai];
         ret += getIndent(indent)+`typewriter.enqueue('${at}')\n`;
     }
+    /* Wait for user input! */
+    ret += getIndent(indent)+`while not typewriter.ready():\n${getIndent(indent+1)}vpu.update()\n`;
     return ret;
 }
 
