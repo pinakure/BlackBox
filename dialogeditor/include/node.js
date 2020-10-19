@@ -63,40 +63,6 @@ function NodeAttribute(parent, name, value, type=AttributeTypes.NONE){
     this.type = type;
 }
 
-function serializeAttribute(node_id, attribute_name){
-    var node = Editor.nodes[node_id];
-    var attr = node.attributes[attribute_name];
-    switch(attr.type){
-        case AttributeTypes.TEXT:
-            for(i in attr.value){ // 'Iterate each line'
-                attr.value[i] = $(`#${attr.id}_${i}`).val();
-            }
-            break;
-        
-        case AttributeTypes.FILE:
-            // TODO: READ File data and filename+
-            console.log("WARNING: Function placeholder serializeAttribute(FILE)");
-            attr.value = $(`#${attr.id}`).val();
-            break;
-            
-        case AttributeTypes.NUMBER:
-            attr.value = $(`#${attr.id}`).val();
-            break;
-            
-        case AttributeTypes.CHOICE:
-            for(i in attr.value){ // 'Iterate each choice (2 items per choice)'
-                attr.value[i].choice = $(`#${attr.id}_${i}_c`).val();
-                attr.value[i].node   = $(`#${attr.id}_${i}_n option:selected`).val();                
-            }
-            break;
-        
-        case AttributeTypes.VECTOR: // same as choice, but with numbers
-            attr.value.x = $(`#${attr.id}_x`).val();
-            attr.value.y = $(`#${attr.id}_y`).val();
-            break;
-    }
-}
-
 function childForm(attribute, id, callback){
     var children = attribute.parent.children;
     var ret = '';
@@ -113,78 +79,6 @@ function childForm(attribute, id, callback){
     `;  
     return ret;
 }
-
-function NavCard(attribute){
-    var ret = '';    
-    var callback = `serializeAttribute(${attribute.parent.id}, '${attribute.name}')`;
-    switch(attribute.type){
-        case AttributeTypes.TEXT:
-            ret +=  `<label>${attribute.name}</label>`;
-            for(i in attribute.value){
-                ret +=  `<input 
-                            id="${attribute.id}_${i}" 
-                            type="text" 
-                            value="${attribute.value[i]}"
-                            onchange="${callback}" 
-                            maxlength="64" 
-                        />`;
-            }
-            break;
-
-        case AttributeTypes.CHOICE:
-            ret += `<label style="width:100%">${attribute.name}</label>`;
-            for(i in attribute.value){
-                ret +=  `<input id="${attribute.id}_${i}_c" 
-                                type="text" 
-                                value="${attribute.value[i].choice }"
-                                class="half" 
-                                onchange="${callback}"
-                        />${childForm(attribute, `${i}`, callback)}
-                         <!--<input id="${attribute.id}_${i}_n" 
-                                type="text" 
-                                value="${attribute.value[i].node   }"
-                                class="half" 
-                                onchange="${callback}"
-                        />-->
-                        `;    
-            }
-            break;
-
-        case AttributeTypes.NUMBER:
-            ret +=  `${Spinner(attribute.id, attribute.name, attribute.value, callback)}`;
-            break;  
-            
-        case AttributeTypes.FILE:
-            ret +=  `<label>${attribute.name}</label>
-                    <input 
-                        id="${attribute.id}" 
-                        type="text" 
-                        value="${attribute.value}"
-                        onchange="${callback}" 
-                    />`;
-            break;
-        
-        case AttributeTypes.VECTOR:
-            ret +=  `<label>${attribute.name}</label>
-                    <input 
-                        id="${attribute.id}_x" 
-                        type="number"
-                        value="${attribute.value.x }"
-                        class="half" 
-                        onchange="${callback}" 
-                        />
-                    <input 
-                        id="${attribute.id}_y" 
-                        type="number" 
-                        value="${attribute.value.y }"
-                        class="half" 
-                        onchange="${callback}"                             
-                    />`;
-            break;
-        
-    }
-    return `<navcard>${ret}</navcard>`;
-}   
 
 function Node(type, args={}){
     this.x = 0;
@@ -347,96 +241,15 @@ Node.prototype.controlForm = function(){
     return ret;
 }
 
-Node.prototype.compile = function(){
-    var code = '';
-    switch(this.type){
-        case Types.TEXT:    code+= 'TEXT();'; break;
-        case Types.CHOICE:  code+= ''; break;
-        case Types.WAIT:    code+= ''; break;
-        case Types.PICTURE: code+= ''; break;
-        case Types.RUMBLE:  code+= ''; break;
-        case Types.FONT:    code+= ''; break;
-        case Types.STYLE:   code+= ''; break;
+function getIndent(indent){
+    var indret = '';
+    for(var ii=0; ii<indent; ii++){
+        indret+='\t';
     }
-    for(ci in this.children){
-        var child = this.children[ci];
-        code += child.compile();
-    }
-    return code;
+    return indret;
 }
 
-Node.prototype.specialize = function(args){
-    // Populate attributes depending on node type
-    switch(this.type){
 
-        case Types.TEXT:    
-            this.attributes.lines = new NodeAttribute(this, 'lines', ['',], AttributeTypes.TEXT);
-            this.form = function(){
-                return  NavCard(this.attributes.lines) +  
-                        Button('plus', `addLine()`);
-            };
-            break;
-
-        case Types.CHOICE:  
-            this.attributes.choices = new NodeAttribute(this, 'choices', [ { choice : '', node : '' } ], AttributeTypes.CHOICE);
-            this.form = function(){
-                return  NavCard(this.attributes.choices) +
-                        Button('plus', `addChoice()`);
-            };
-            break;
-
-        case Types.WAIT:    
-            this.attributes.time = new NodeAttribute(this, 'time', 1, AttributeTypes.NUMBER);
-            this.form = function(){
-                return NavCard(this.attributes.time);
-            };
-            break;
-        
-        case Types.PICTURE: 
-            /* Load picture and display on coordinates OR set to zero (remove picture) */
-            this.attributes.filename = new NodeAttribute(this, 'filename', '', AttributeTypes.FILE);
-            this.attributes.position = new NodeAttribute(this, 'position', { x:  0, y:  0}, AttributeTypes.VECTOR);
-            this.attributes.geometry = new NodeAttribute(this, 'geometry', { x: 64, y: 64}, AttributeTypes.VECTOR);
-            this.form = function(){
-                return  NavCard(this.attributes.filename) +
-                        NavCard(this.attributes.position) +
-                        NavCard(this.attributes.geometry);
-            };
-            break;
-        
-        case Types.RUMBLE:  
-            /* Causes the text box to rumble -TODO-parametrically-TODO */
-            this.attributes.movement = new NodeAttribute(this, 'movement', { x:  60, y:  60}, AttributeTypes.VECTOR);
-            this.attributes.time     = new NodeAttribute(this, 'time'    , 1                , AttributeTypes.NUMBER);
-            this.form = function(){
-                return NavCard(this.attributes.movement) +
-                       NavCard(this.attributes.time);
-            };
-            break;
-
-        case Types.FONT:    
-            /* Change FONT used */
-            this.attributes.filename = new NodeAttribute(this, 'filename', '', AttributeTypes.FILE);
-            this.form = function(){
-                return NavCard(this.attributes.filename);
-            };
-            break;
- 
-        case Types.STYLE:
-            /* Causes the text box to rumble -TODO-parametrically-TODO */
-            this.attributes.opacity  = new NodeAttribute(this, 'opacity' , 128  , AttributeTypes.NUMBER);
-            this.form = function(){
-                return NavCard(this.attributes.opacity);
-            };
-            /* Change COLOR of the textbox */
-            break;
-
-        default:
-            debugger
-            break;
-    }    
-    return '';    
-}
 
 Node.prototype.initialize = function(args){
     switch(this.type){
@@ -459,16 +272,27 @@ Node.prototype.render = function(args){
     var width  = (this.parent ? this.x - this.parent.x :  this.x ) * NODE_AREA;
     var height = (this.parent ? this.y - this.parent.y :  this.y ) * NODE_AREA;
     $('overlay').append(`<svg height="${height}" width="${width}" version="1.1" xmlns="http://www.w3.org/2000/svg" id="joint_${this.id}"><line x1="0" x2="0" y1="0" y2="0" /></svg>`);
-    $('content').append(`<node root="${this.parent==null}" onclick="Editor.selectNode(Editor.nodes[${this.id}]);" id="node_${this.id}" title="${Object.keys(Types)[this.type]}(${this.id})"><i class="fa fa-${this.icon}"></i></node>`);
+    $('content').append(`<node root="${this.parent==null}" onclick="Editor.selectNode(Editor.nodes[${this.id}]);" id="node_${this.id}" title="${Object.keys(Types)[this.type]}(${this.id})"><i class="fa fa-${this.icon}"></i><div style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; text-align: center;line-height: 22px;font-size: 12px;color:#ff8a;">${this.id}</div></node>`);
     // return jquery object
     return $(`#node_${this.id}`);
 }
 
+Node.prototype.getX = function(){
+    if(this.id==0)return this.x;
+    return this.parent ? this.x : this.x + 8;
+}
+Node.prototype.getY = function(){
+    if(this.id==0)return this.y;
+    return this.parent ? this.y : this.y - 1;
+}
+
 Node.prototype.update = function(args){
     var n = $(`#node_${this.id}`);
+    var x = this.getX();
+    var y = this.getY();
     if(n.length==0) n = this.render();
-    n.css('left',   `${NODE_PADDING + (this.x*NODE_AREA)}px`);
-    n.css('top',    `${NODE_PADDING + (this.y*NODE_AREA)}px`);
+    n.css('left',   `${NODE_PADDING + (x*NODE_AREA)}px`);
+    n.css('top',    `${NODE_PADDING + (y*NODE_AREA)}px`);
     n.attr('root',  `${this.parent==null}`);
     if(this.selected){
         n.attr('selected',true);
@@ -477,26 +301,25 @@ Node.prototype.update = function(args){
     }
     var selected = this.selected;//$(`#node_${this.id}:hover`).length > 0;
     var j = $(`#joint_${this.id}`);
-    var x = this.x, y = this.y;
     var dx=0,dy=0;
-    
-    j.css('width'  , `${(this.parent ? (this.x - this.parent.x)+2 :  this.x ) * NODE_AREA}px`);
-    j.css('height' , `${(this.parent ? this.y - this.parent.y :  this.y ) * NODE_AREA}px`);
+    j.css('display', `${ this.parent ? 'inline-block' : 'none'}`);    
+    j.css('width'  , `${(this.parent ? (x - this.parent.x)+2 :  x ) * NODE_AREA}px`);
+    j.css('height' , `${(this.parent ? y - this.parent.y :  y ) * NODE_AREA}px`);
         
     if(this.parent){
         j.css('left', `${NODE_PADDING+((this.parent.x*NODE_AREA)+(NODE_AREA/2))}px`);
         j.css('top' , `${NODE_PADDING+((this.parent.y*NODE_AREA)+(NODE_AREA/2))}px`);
-        x = 0;y = 0;
-        dx = (this.parent ? (this.x - this.parent.x) :  this.x );dy = 1;
+        tx = 0;ty = 0;
+        dx = (this.parent ? (x - this.parent.x) :  x );dy = 1;
     } else {
-        j.css('left', `${NODE_PADDING+((this.x*NODE_AREA)+(NODE_AREA/2))}px`);
-        j.css('top' , `${NODE_PADDING+((this.y*NODE_AREA)+(NODE_AREA/2))}px`);
-        x = 0;y = 0;    
+        j.css('left', `${NODE_PADDING+((x*NODE_AREA)+(NODE_AREA/2))}px`);
+        j.css('top' , `${NODE_PADDING+((y*NODE_AREA)+(NODE_AREA/2))}px`);
+        tx = 0;ty = 0;    
         dx = 0;dy = 0;    
     }
     var j = $(`#joint_${this.id} line`);
-    j.attr('x1', (x*NODE_AREA)-1);
-    j.attr('y1', y*NODE_AREA);
+    j.attr('x1', (tx*NODE_AREA)-1);
+    j.attr('y1', ty*NODE_AREA);
     j.attr('x2', (dx*NODE_AREA)+1);
     j.attr('y2', (dy+1)*NODE_AREA);
     j.css('stroke', selected ? 'red' : '#000a');

@@ -17,7 +17,7 @@ var Editor = {
         for(ni in this.nodes){
             this.nodes[ni].update();            
         }
-        $('output').html(this.nodes[0].compile());
+        $('output').html(this.nodes[0].compile(0));
 
     },
     

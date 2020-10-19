@@ -77,7 +77,10 @@ node {
     color: var(--node-hl-bg);
     background-color: var(--node-hl-fg);
 }
-
+node[selected="selected"] div {
+    color: #000 !important;
+    font-weight: 650;
+}
 node[selected="selected"] { 
     background-color: var(--node-hl-bg);
     color: var(--node-hl-fg);

@@ -7,8 +7,11 @@
             BlackBox Dialog Editor
         </title>    
         <script src="include/jquery.js"></script>
-        <script src="include/jstree.js"></script>
         <script src="include/node.js"></script>
+        <script src="include/node.specialize.js"></script>
+        <script src="include/node.serializer.js"></script>
+        <script src="include/node.navcard.js"></script>
+        <script src="include/node.compile.js"></script>
         <script src="include/editor.js"></script>
         <link rel="stylesheet" type="text/css" href="skins/icons.css"/>
         <link rel="stylesheet" type="text/css" href="skins/base.css"/>
@@ -22,7 +25,7 @@
             <navname><i></i><span></span></navname>
             <navcontent></navcontent>
         </nav>
-        <node onclick="$('#menu').show();" style="
+        <node title="Add new orphan node" onclick="$('#menu').show();" style="
         position: absolute;
         right: 0px; 
         top: 0px;
@@ -38,5 +41,25 @@
                 <node onclick="Editor.addNode(Types.STYLE)"     style="position: relative"><i class="fa fa-cog"               title="Style Node"></i></node>
             </navcard>
         </div>
+        
+        <node title="Save to json format" onclick="Editor.save()" style="
+        position: absolute;
+        right: 0px; 
+        top: 64px;
+        "><i class="fa fa-arrow-left"></i><i class="fa fa-save"></i></node>
+        
+        <node title="Load from json file" onclick="Editor.load()" style="
+        position: absolute;
+        right: 0px; 
+        top: 128px;
+        "><small><i class="fa fa-arrow-right"></i><i class="fa fa-save"></i></small></node>
+
+        <node title="Compile" onclick="Editor.compile()" style="
+        position: absolute;
+        right: 0px; 
+        top: 192px;
+        "><small><i class="fa fa-cogs"></i></small></node>
+
+        <filter></filter>
     </body>
 </html>
