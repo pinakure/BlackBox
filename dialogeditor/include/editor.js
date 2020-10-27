@@ -1,7 +1,11 @@
 var Editor = {
-    
+    rows : [],
     nodes : {},
     selected_node : null,
+
+    setrow : function(row_index, padding=0){
+        this.rows[row_index] = padding;
+    },
 
     initialize : function(){
         setInterval(function(){Editor.update();}, 1000/60);
@@ -14,6 +18,7 @@ var Editor = {
     },
 
     update : function(){
+        this.rows = [];
         for(ni in this.nodes){
             this.nodes[ni].update();            
         }
@@ -25,6 +30,9 @@ var Editor = {
         $('#menu').hide();
         var node = new Node(type);
         this.nodes[node.id] = node;
+        if(this.selected_node!=undefined){
+            this.selected_node.addChild(this.nodes[node.id]);
+        }
         return node.id;
     },
 

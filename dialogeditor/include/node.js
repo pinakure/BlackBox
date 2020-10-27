@@ -288,18 +288,34 @@ Node.prototype.render = function(args){
 }
 
 Node.prototype.getX = function(){
-    if(this.id==0)return this.x;
-    return this.parent ? this.x : this.x + 8;
+    var y = this.getY();
+    if(this.id==0) return this.x;
+    return this.parent ? this.x : 8
 }
 Node.prototype.getY = function(){
     if(this.id==0)return this.y;
     return this.parent ? this.y : this.y - 1;
 }
 
+Node.prototype.fixOverlapping = function(){
+    for(i in Editor.nodes){
+        var node = Editor.nodes[i];
+        if(node.id == this.id)continue;
+        if(node.getY() == this.getY()){
+            if(node.getX() == this.getX()){
+                this.x++;
+            }
+        }
+    }
+}
+
 Node.prototype.update = function(args){
     var n = $(`#node_${this.id}`);
     var x = this.getX();
     var y = this.getY();
+    this.fixOverlapping();
+    //x += Editor.rows[y]!=undefined ? Editor.rows[y]+1 : 0;
+    //Editor.rows[y] = x;
     if(n.length==0) n = this.render();
     n.css('left',   `${NODE_PADDING + (x*NODE_AREA)}px`);
     n.css('top',    `${NODE_PADDING + (y*NODE_AREA)}px`);
