@@ -253,7 +253,7 @@ filter {
     left: 0px;
     pointer-events: none;
     /* background-color: #421f; */
-    background-color: #8050808f;
+    /* background-color: #8050808f; */
     mix-blend-mode: overlay;
     
 }

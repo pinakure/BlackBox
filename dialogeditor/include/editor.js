@@ -84,6 +84,10 @@ $(document).ready(function(){
     text.attributes.lines.value[0] = 'Hello world!';
     $('content, content *, nav, nav *').attr('onclick', `$('#menu').hide()`);
 }).ready(function(){
+    var g = parseInt(Math.random()*255);
+    var r = parseInt(Math.random()*g);
+    var b = parseInt(Math.random()*r);
+    $('filter').css('background', `rgb(${r},${g},${b}, 16)`);
     var choice1 = Editor.nodes[Editor.addNode(Types.CHOICE)];
     Editor.selectNode(choice1);
     addChoice();
