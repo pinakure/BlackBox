@@ -90,6 +90,7 @@ function childForm(attribute, id, callback){
 
 function Node(type, args={}){
     this.x = 0;
+    this.multiple_children = false; 
     var i = 0;
     for(ni in Editor.nodes){
         var n = Editor.nodes[ni];
@@ -114,7 +115,10 @@ function Node(type, args={}){
 }
 
 Node.prototype.addChild = function(node){
-    node.setParent(this);
+    if(this.multiple_children){
+        if(this.children.length >= this.max_children)return;
+    } else if(this.children.length>0)return -1;
+    node.setParent(this);    
     return node.id;
 }
 
@@ -126,7 +130,12 @@ Object.size = function(obj) {
     return size;
 };
 
-Node.prototype.setParent = function(node){
+Node.prototype.setParent = function(node){    
+    if(node==!null){
+        if(node.multiple_children){
+            if(node.children.length >= node.max_children)return -1;
+        } else if(node.children.length>0)return -1;
+    }
     if(this.parent)
         this.parent.removeChild(this);
     
@@ -281,7 +290,7 @@ Node.prototype.render = function(args){
     // inject initial html
     var width  = (this.parent ? this.x - this.parent.x :  this.x ) * NODE_AREA;
     var height = (this.parent ? this.y - this.parent.y :  this.y ) * NODE_AREA;
-    $('overlay').append(`<svg height="${height}" width="${width}" version="1.1" xmlns="http://www.w3.org/2000/svg" id="joint_${this.id}"><line x1="0" x2="0" y1="0" y2="0" /></svg>`);
+    //$('overlay').append(`<svg height="${height}" width="${width}" version="1.1" xmlns="http://www.w3.org/2000/svg" id="joint_${this.id}"><line x1="0" x2="0" y1="0" y2="0" /></svg>`);
     $('content').append(`<node root="${this.parent==null}" onclick="Editor.selectNode(Editor.nodes[${this.id}]);" id="node_${this.id}" title="${Object.keys(Types)[this.type]}(${this.id})"><i class="fa fa-${this.icon}"></i><div style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; text-align: center;line-height: 22px;font-size: 12px;color:#ff8a;">${this.id}</div></node>`);
     // return jquery object
     return $(`#node_${this.id}`);
@@ -352,7 +361,7 @@ Node.prototype.update = function(args){
     j.css('stroke-width', selected ? '2' : '1');
 
     for(si in this.siblings){
-        this.siblings[si].update();        
+        this.siblings[si].update();
     }
     for(ci in this.children){
         this.children[ci].update();        

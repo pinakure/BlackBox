@@ -10,7 +10,9 @@ Node.prototype.specialize = function(args){
             };
             break;
 
-        case Types.CHOICE:  
+        case Types.CHOICE: 
+            this.multiple_children = true; 
+            this.max_children      = 256;            
             this.attributes.choices = new NodeAttribute(this, 'choices', [ { choice : '', node : '' } ], AttributeTypes.CHOICE);
             this.form = function(){
                 return  NavCard(this.attributes.choices) +
@@ -75,6 +77,8 @@ Node.prototype.specialize = function(args){
             this.attributes.condition = new NodeAttribute(this, 'condition' , '', AttributeTypes.STRING);
             this.attributes.true      = new NodeAttribute(this, 'true' , '', AttributeTypes.BRANCH);
             this.attributes.false     = new NodeAttribute(this, 'false', '', AttributeTypes.BRANCH);
+            this.multiple_children    = true;
+            this.max_children         = 2;
             this.form = function(){
                 return  NavCard(this.attributes.condition) +
                         NavCard(this.attributes.true) +

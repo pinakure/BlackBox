@@ -2,6 +2,9 @@ var Editor = {
     rows : [],
     nodes : {},
     selected_node : null,
+    width : 0,
+    height : 0,
+    hscroll : 0,
 
     setrow : function(row_index, padding=0){
         this.rows[row_index] = padding;
@@ -10,20 +13,45 @@ var Editor = {
     initialize : function(){
         setInterval(function(){Editor.update();}, 1000/60);
         document.getElementsByTagName('content')[0].addEventListener("scroll", Editor.scroll);
+        window.onresize = Editor.resize;
+        Editor.resize();
     },
 
     scroll : function(evt) {
         //document.getElementsByTagName('overlay')[0].scrollHeight = document.getElementsByTagName('content')[0].scrollHeight;
-        document.getElementsByTagName('overlay')[0].scrollTop = document.getElementsByTagName('content')[0].scrollTop;
+        //document.getElementsByTagName('overlay')[0].scrollTop = document.getElementsByTagName('content')[0].scrollTop;
+        Editor.hscroll = document.getElementsByTagName('content')[0].scrollTop;
+        Editor.update();
     },
 
     update : function(){
+        var canvas = document.getElementsByTagName('canvas')[0];
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.resize();
         this.rows = [];
+        var os = (NODE_AREA/2);
+        var lines = 0;
         for(ni in this.nodes){
-            this.nodes[ni].update();            
-        }
-        $('output').html(this.nodes[0].compile(0));
-
+            this.nodes[ni].update();
+            var n = this.nodes[ni];
+            if(n.parent!=undefined){
+                lines++;
+                ctx.beginPath();
+                ctx.moveTo(
+                    os+(n.x*NODE_AREA),
+                    os+(n.y*NODE_AREA)-Editor.hscroll
+                );
+                ctx.lineTo(
+                    os+(n.parent.x*NODE_AREA), 
+                    os+(n.parent.y*NODE_AREA)-Editor.hscroll
+                );  
+                ctx.strokeStyle = n == Editor.selected_node ? '#f00' : '#0008';
+                ctx.stroke();              
+            }   
+        }   
+        console.log(lines);                
+        $('output').html(this.nodes[0].compile(0));        
     },
     
     addNode : function(type){
@@ -49,6 +77,7 @@ var Editor = {
             $(`#parent_${node.id}`).val(node.parent.id);
         }
         node.selected = true;
+        Editor.resize();
     },
 
     refresh : function(){
@@ -64,6 +93,7 @@ var Editor = {
         var node = new Node(type);
         var id = parent.addChild(node);
         Editor.nodes[id] = node;
+
         return id;
     },
 
@@ -74,9 +104,14 @@ var Editor = {
         return id;
     },
 
-};
+    resize : function(){
+        Editor.width = document.getElementsByTagName('canvas')[0].clientWidth;
+        Editor.height = document.getElementsByTagName('canvas')[0].clientHeight;
+        $('canvas').attr('width'    , Editor.width);
+        $('canvas').attr('height'   , Editor.height);
+    },
 
-var text; 
+};
 
 $(document).ready(function(){               
     Editor.initialize();
@@ -84,10 +119,10 @@ $(document).ready(function(){
     text.attributes.lines.value[0] = 'Hello world!';
     $('content, content *, nav, nav *').attr('onclick', `$('#menu').hide()`);
 }).ready(function(){
-    var g = parseInt(Math.random()*255);
+    var g = parseInt(Math.random()*128);
     var r = parseInt(Math.random()*g);
     var b = parseInt(Math.random()*r);
-    $('filter').css('background', `rgb(${r},${g},${b}, 16)`);
+    $('filter').css('background', `rgb(${127+r},${127+g},${127+b}, 16)`);
     var choice1 = Editor.nodes[Editor.addNode(Types.CHOICE)];
     Editor.selectNode(choice1);
     addChoice();
