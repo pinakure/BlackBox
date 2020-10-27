@@ -131,7 +131,7 @@ node[root='true']{
 node {
     position: absolute;
     user-select: none;
-    transition: filter 250ms ease-in-out;
+    transition: filter 250ms ease-in-out, top 250ms ease-in-out, right 250ms ease-in-out, bottom 250ms ease-in-out, left 250ms ease-in-out;
     cursor: pointer;
     display: inline-block; 
     box-sizing: border-box; 

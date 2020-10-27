@@ -160,7 +160,7 @@ Node.prototype.setParent = function(node){
     this.parent = node;  
     this.y = this.parent.y+1;
     this.parent.children[this.parent.children.length] = this;
-    this.x = this.parent.x+this.parent.children.length;
+    this.x = 0;//this.parent.x+this.parent.children.length;
     var i = 1;
     for(ni in this.parent.children){
         var n = this.parent.children[ni];
@@ -297,7 +297,6 @@ Node.prototype.render = function(args){
 }
 
 Node.prototype.getX = function(){
-    var y = this.getY();
     if(this.id==0) return this.x;
     return this.parent ? this.x : 8
 }
@@ -335,31 +334,7 @@ Node.prototype.update = function(args){
         n.attr('selected',false);
     }
     var selected = this.selected;//$(`#node_${this.id}:hover`).length > 0;
-    var j = $(`#joint_${this.id}`);
-    var dx=0,dy=0;
-    j.css('display', `${ this.parent ? 'inline-block' : 'none'}`);    
-    j.css('width'  , `${(this.parent ? (x - this.parent.x)+2 :  x ) * NODE_AREA}px`);
-    j.css('height' , `${(this.parent ? y - this.parent.y :  y ) * NODE_AREA}px`);
-        
-    if(this.parent){
-        j.css('left', `${NODE_PADDING+((this.parent.x*NODE_AREA)+(NODE_AREA/2))}px`);
-        j.css('top' , `${NODE_PADDING+((this.parent.y*NODE_AREA)+(NODE_AREA/2))}px`);
-        tx = 0;ty = 0;
-        dx = (this.parent ? (x - this.parent.x) :  x );dy = 1;
-    } else {
-        j.css('left', `${NODE_PADDING+((x*NODE_AREA)+(NODE_AREA/2))}px`);
-        j.css('top' , `${NODE_PADDING+((y*NODE_AREA)+(NODE_AREA/2))}px`);
-        tx = 0;ty = 0;    
-        dx = 0;dy = 0;    
-    }
-    var j = $(`#joint_${this.id} line`);
-    j.attr('x1', (tx*NODE_AREA)-1);
-    j.attr('y1', ty*NODE_AREA);
-    j.attr('x2', (dx*NODE_AREA)+1);
-    j.attr('y2', (dy+1)*NODE_AREA);
-    j.css('stroke', selected ? 'red' : '#000a');
-    j.css('stroke-width', selected ? '2' : '1');
-
+    
     for(si in this.siblings){
         this.siblings[si].update();
     }

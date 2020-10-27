@@ -60,7 +60,7 @@ var Editor = {
         this.nodes[node.id] = node;
         if(this.selected_node!=undefined){
             this.selected_node.addChild(this.nodes[node.id]);
-        }
+        } 
         return node.id;
     },
 
