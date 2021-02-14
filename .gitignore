@@ -34,3 +34,27 @@ scripts/__pycache__/
 olddata/
 
 scripts/urllib/__pycache__/
+
+Lib/
+
+PR2/packages.config
+
+PR2/PR2.vcxproj
+
+PR2/PR2.vcxproj.user
+
+blackbox_debug_x64.exe
+
+blackbox_debug_x64.ilk
+
+blackbox_x64.exe
+
+blackbox_x64.iobj
+
+blackbox_x64.ipdb
+
+python3.dll
+
+python38.dll
+
+python39.dll

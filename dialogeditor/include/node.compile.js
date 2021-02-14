@@ -22,7 +22,7 @@ Node.prototype.compileBranch = function(indent=0){
 }
 
 Node.prototype.compileChoice = function(indent=0){
-    var ret = getIndent(indent)+`typewriter.clearchoice()\n`;
+    var ret = '';
     var aft = '';
     var first_choice=true;
     for(ai in this.attributes.choices.value){
@@ -36,7 +36,11 @@ Node.prototype.compileChoice = function(indent=0){
             first_choice=false;
         }
     }
-    ret+= getIndent(indent)+'choice = typewriter.getchoice()\n';
+    ret+= getIndent(indent)+`choice = ''\n`;
+    ret+= getIndent(indent)+`while choice=='':\n`;
+    ret+= getIndent(indent+1)+`vpu.update()\n`;
+    ret+= getIndent(indent+1)+`choice = typewriter.getchoice()\n`;
+            
     return ret+aft;
 }
 

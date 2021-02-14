@@ -363,7 +363,7 @@ void Console::unSetAlias(const char *name){
 	}
 }
 
-std::string &stringRemChar(std::string &str, unsigned int &position){
+std::string &stringRemChar(std::string &str, size_t &position){
 	if(position > str.length()) position = str.length();
 	if(position == 0) return str;
 
@@ -379,7 +379,7 @@ std::string &stringRemChar(std::string &str, unsigned int &position){
 	return str;
 }
 
-std::string &stringAddChar(std::string &str, unsigned int &position, const char c[2]){
+std::string &stringAddChar(std::string &str, size_t &position, const char c[2]){
 	if(position > str.length()) position = str.length();
 	
 	std::string a = str.substr(0, position);

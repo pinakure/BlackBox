@@ -304,37 +304,29 @@ pythoncommand(blackbox_ctrlc){
 }
 /* TypeWriter --------------------------------------------------------------------------- */
 
-pythoncommand(typewriter_choices) {	
-	std::map<std::string, std::string> choices;
-	PyObject *keys, *vals;
-	char *question;
-	if(!PyArg_ParseTuple(args, "sOO", &question, &keys, &vals)) return NULL;	
-	int keys_len = PyObject_Length(keys);
-    int vals_len = PyObject_Length(vals);
-	if ((keys_len < 0) || (vals_len < 0)) return NULL;
-	if (keys_len != vals_len) return NULL;
-	if (keys_len > 0) {
-		for (int i = 0; i < keys_len; i++) {
-			char *key, *val;
-			PyArg_Parse(PyList_GetItem(keys, i), "s", &key);
-			PyArg_Parse(PyList_GetItem(vals, i), "s", &val);
-			choices[std::string(key)] = std::string(val);
-		}
-	} else {
-		choices["yes"] = "Yes";
-		choices["no"] = "No";		
-	} 
-    TypeWriter::question(question, choices);
+pythoncommand(typewriter_ready) {
+	return PyLong_FromLong(TypeWriter::next);
+}
+
+pythoncommand(typewriter_addchoice) {
+	char* name;
+	char* value;
+	int wait = 0;
+	if (!PyArg_ParseTuple(args, "ss", &name, &value)) return NULL;
+	TypeWriter::choices.insert(std::pair < std::string, std::string>(name, value));
 	return PyLong_FromLong(1);
 }
-pythoncommand(typewriter_getanswer) {
-	if (!PyArg_ParseTuple(args, "")) return NULL;
+
+pythoncommand(typewriter_getchoice) {
+	if (!PyArg_ParseTuple(args, "")) 
+		return NULL;
 	return Py_BuildValue("s", TypeWriter::getAnswer().c_str());
 }
-pythoncommand(typewriter_type) {
-	char *buffer;
+
+pythoncommand(typewriter_enqueue) {
+	char* buffer;
 	int wait = 0;
-	if(!PyArg_ParseTuple(args, "s|i", &buffer, &wait)) return NULL;	
+	if (!PyArg_ParseTuple(args, "s|i", &buffer, &wait)) return NULL;
 	TypeWriter::enqueue(buffer);
 	TypeWriter::wait_time = wait * ENGINE_FPS;
 	return PyLong_FromLong(1);
@@ -349,7 +341,7 @@ pythoncommand(typewriter_loadpic) {
 	TypeWriter::loadPicture(buffer, x,y, w,h);
 	return PyLong_FromLong(1);
 }
-pythoncommand(typewriter_clearpic) {
+pythoncommand(typewriter_clearpic) {	
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
 	TypeWriter::clearPicture();
 	return PyLong_FromLong(1);
@@ -377,6 +369,9 @@ static PyMethodDef ConsoleMethods[] = {
     {"cls"			, console_cls			, METH_VARARGS, "console.cls() : Clean console buffer"},
 	{NULL, NULL, 0, NULL}
 };
+
+/* Typewriter methods ---------------------------------------------------------------------- */
+
 static PyMethodDef TypeWriterMethods[] = {
 	/* TBI */
 	{"setposition"	, tbi					, METH_VARARGS, "typewriter.setposition(x, y) : "},
@@ -385,19 +380,27 @@ static PyMethodDef TypeWriterMethods[] = {
     {"setcolor"		, tbi					, METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
 	/* TBI */
 
-    {"answer"		, typewriter_getanswer	, METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
-    {"choice"		, typewriter_choices	, METH_VARARGS, "typewriter.choice(question, keys[], answers[]) : Enqueue a question, with its answers. Return corresponding key"},
-    {"type"			, typewriter_type		, METH_VARARGS, "typewriter.type(text) : Enqueue message into typewriter buffer and open if if closed"},
-    {"loadpic"		, typewriter_loadpic	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
+    {"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available option array"},
+	{"getchoice"    , typewriter_getchoice  , METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
+	{"ready"		, typewriter_ready		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},
+	
+	{"enqueue"		, typewriter_enqueue	, METH_VARARGS, "typewriter.enqueue(text) : Enqueue message into typewriter buffer and open if if closed"},
+	{"loadpic"		, typewriter_loadpic	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
     {"clearpic"		, typewriter_clearpic	, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
 	{NULL, NULL, 0, NULL}
 };
+
+/* Engine internal methods ---------------------------------------------------------------------- */
+
 static PyMethodDef BlackBoxMethods[] = {
     {"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
     {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
     {"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{NULL, NULL, 0, NULL}
 };
+
+/* Video Engine internal methods ---------------------------------------------------------------------- */
+
 static PyMethodDef VpuMethods[] = {
 	/* TBI */
 	{"loadfont"		, tbi					, METH_VARARGS, "vpu.loadfont(filename, size) : "},

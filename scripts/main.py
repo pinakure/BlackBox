@@ -5,6 +5,8 @@ from vpu        import *
 from blackbox   import *
 from console    import echo as cout
 from vpu        import textout
+import typewriter 
+import vpu
 
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
@@ -150,5 +152,40 @@ class test():
             wait(1, callback)
         cout("Script Finished.")
         return True
+
+    @staticmethod
+    def dialog():
+        typewriter.enqueue('Hello world!')
+        while not typewriter.ready():
+            vpu.update()
+        typewriter.addchoice('A', '2')
+        typewriter.addchoice('B', '3')
+        choice = ''
+        while choice=='':
+            vpu.update()
+            choice = typewriter.getchoice()
+        if choice == '2':
+            typewriter.enqueue('CHOSEN A')
+            while not typewriter.ready():
+                vpu.update()
+        elif choice == '3':
+            typewriter.enqueue('CHOSEN B')
+            while not typewriter.ready():
+                vpu.update()
+            typewriter.addchoice('C', '5')
+            typewriter.addchoice('D', '6')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if choice == '5':
+                typewriter.enqueue('CHOSEN C')
+                while not typewriter.ready():
+                    vpu.update()
+            elif choice == '6':
+                typewriter.enqueue('CHOSEN D')
+                while not typewriter.ready():
+                    vpu.update()
+
 
 cout('Write down "test.menu()" to discover available tests / benchmarks ')

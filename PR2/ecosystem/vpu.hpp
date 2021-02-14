@@ -12,12 +12,12 @@
 
 class Vpu {
 private:
-	static ALLEGRO_FONT					*font;
 	static ALLEGRO_FONT					*legacy_font;
 	static ALLEGRO_COLOR				shadow;
 	static ALLEGRO_COLOR				transparent;
 	static std::vector<ALLEGRO_COLOR>	color_stack;
 public:
+	static ALLEGRO_FONT					*font;
 	static Surface						*target;	
 	static ALLEGRO_BITMAP				*buffer;	
 	static ALLEGRO_COLOR				color;

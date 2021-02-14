@@ -1,7 +1,9 @@
 #include "typewriter.hpp"
 #include "engine.hpp"
 #include "vpu.hpp"
+#include "input.hpp"
 #include "console.hpp"
+extern char key[256];
 
 #define TYPEWRITER_HEIGHT	60
 #define TYPEWRITER_WIDTH	((Vpu::width/2) - (32))
@@ -19,6 +21,7 @@ double	TypeWriter::height = 0;
 int		TypeWriter::x = 0;
 int		TypeWriter::y = 0;
 int		TypeWriter::wait_time = 0;
+int		TypeWriter::active_choice = 0;
 bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
 double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
@@ -39,7 +42,65 @@ void TypeWriter::initialize() {
 const int max_size = 4;
 static float radius = 0.0f;
 
-void TypeWriter::draw() {
+void TypeWriter::drawChoices() {
+	int cx = (Vpu::width / 2);
+	int cy = (Vpu::height / 4);
+	int block_height = TypeWriter::choices.size() * 20;
+	// Find choice rectangle dimensions
+	int line_height = 20;
+	int max_width = 0;
+	int max_height = 0;
+	std::map<std::string, std::string>::iterator it;
+	int line;
+	for (line = 0, it = choices.begin(); it != choices.end(); it++, line++) {
+		int w = al_get_text_width(Vpu::font, it->first.c_str());
+		max_width = w > max_width ? w : max_width;
+		max_height += line_height;
+	}
+	// Draw rectangle
+	Vpu::select(Vpu::overlay);
+	Vpu::fillRectangle(
+		(cx - (max_width / 2)) - 8, (cy - (max_height / 2)) - 7,
+		max_width + 16, max_height + 10,
+		4.0f, 16.0f, 4.0f, 0.25f
+	);
+	Vpu::fillRectangle(
+		(cx - (max_width / 2)) - 9, (cy - (max_height / 2)) - 6,
+		max_width + 18, max_height + 8,
+		4.0f, 16.0f, 4.0f, 0.25f
+	);
+	// Draw choices
+	Vpu::pushColor();
+	static int q = 0;
+	q+=2;
+	q %= 128;
+	int rx = 0;
+	int ry = 0;
+	for (line = 0, it = choices.begin(); it != choices.end(); it++, line++) {
+		Vpu::setColor(50, 128, 0, 200);
+		if (line == active_choice) {
+			Vpu::setColor(50 + q, 128 + q, 0, 200);
+			int r = rand() % 100;
+			if (r == 1)cx++;
+			else if (r == 2)cx--;
+			else if (r == 3)cy--;
+			else if (r == 4)cy++;
+		}
+		Vpu::print(
+			it->first,
+			rx+cx - al_get_text_width(Vpu::font, it->first.c_str()) / 2,
+			ry+(cy - (block_height / 2)) + (line * line_height) + 2
+		);
+	}
+	Vpu::popColor();
+}
+
+void TypeWriter::draw() {	
+	if (choices.size() > 0) {
+		TypeWriter::drawChoices();
+		return;
+	}
+
 	if ((!queue.size())
 		&& (width <= 2)
 		&& (height <= 2)
@@ -81,9 +142,9 @@ void TypeWriter::draw() {
 				0, 255.0f * q, 0, 128 * q
 			);
 			Vpu::fillRectangle(
-				rx-1,ry+1,
-				9,13,
-				0, 255.0f * q, 16*q*q, 128 * q
+				rx - 1, ry + 1,
+				9, 13,
+				0, 255.0f * q, 16 * q * q, 128 * q
 			);
 
 		}
@@ -110,16 +171,47 @@ void TypeWriter::draw() {
 	);	
 }
 
+void TypeWriter::nextChoice() {
+	active_choice++;
+	active_choice %= choices.size();
+}
+
+void TypeWriter::prevChoice() {
+	active_choice--;
+	active_choice %= choices.size();
+}
+
+void TypeWriter::selectChoice(){
+	std::map<std::string, std::string>::iterator it;
+	int i;
+	for (i = 0, it = choices.begin(); it != choices.end(); it++,i++) {
+		if (i == active_choice) {
+			answer = std::string(it->second);
+			break;
+		}
+	}
+	choices.clear();
+	active_choice = 0;
+	//TypeWriter::wait_time = 120;
+}
+
+void TypeWriter::updateChoices(double delta) {
+	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) return TypeWriter::selectChoice();
+	if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevChoice();
+	if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextChoice();
+}
+
 void TypeWriter::update(double delta) {
 	static int last_width = 0;
 	static int last_height= 0;
 	static int last_position = 0;
 	static int last_radius = 0;
-
 	if (wait_time > 0) {
 		wait_time--;
 		return;
 	}
+
+	if (choices.size() > 0) return TypeWriter::updateChoices(delta);
 
 	if (!TypeWriter::next) {
 		static int t = 0;
@@ -129,6 +221,13 @@ void TypeWriter::update(double delta) {
 	}
 
 	if ((round(TypeWriter::width) != int(final_width)) || (round(TypeWriter::height) != int(final_height))) {
+		if (round(TypeWriter::width) > int(final_width)) {
+			TypeWriter::needs_redraw = true;
+			if(KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+				TypeWriter::next = true;
+			}
+			if(!TypeWriter::next)return;
+		}
 		double qx = (final_width - width) / 16.0;
 		double qy = (final_height - height) / 16.0;
 		if (qx > 0.0 && qx < 0.2) qx = 0.2;
@@ -146,13 +245,15 @@ void TypeWriter::update(double delta) {
 		TypeWriter::y = (-16)+ ((surface.height/2) - (TYPEWRITER_HEIGHT/2)) - (TypeWriter::height/2);		
 	} else {
         if (TypeWriter::queue.size() >= 0) {
+
 			if (current_position < current_end) {
-				current_position += 0.5*delta;
+				current_position += 0.125;
 				if(TypeWriter::display.size())
 				TypeWriter::display[0] = std::string(TypeWriter::current.substr(0, TypeWriter::current_position));
 				//else TypeWriter::display.push_back(TypeWriter::current.substr(0, TypeWriter::current_position));
 			}
 			else {
+				
 				if(TypeWriter::current == "" 
 				|| TypeWriter::next 
 				|| (TypeWriter::display.size()>=2 && TypeWriter::display[1]=="" && TypeWriter::display[2]=="")
@@ -181,6 +282,10 @@ void TypeWriter::update(double delta) {
 					TypeWriter::queue.pop();
 					TypeWriter::next = false;
 				}
+				if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+					TypeWriter::next = true;
+					TypeWriter::wait_time = 120;
+				}
 			}
 		}
 	}
@@ -196,6 +301,7 @@ void TypeWriter::update(double delta) {
 }
 void TypeWriter::enqueue(const char *text) {
 	if (queue.size() == 0) {
+		next = false;
 		current_position = 0;
 		TypeWriter::display = std::vector<std::string>();
 		current = "";

@@ -2,7 +2,13 @@
 #define __SCRIPT_HPP
 #define PY_SSIZE_T_CLEAN
 
-#include <Python.h>
+#ifdef _DEBUG
+#undef _DEBUG
+#include <python.h>
+#define _DEBUG
+#else
+#include <python.h>
+#endif
 #include <string>
 #include <vector>
 

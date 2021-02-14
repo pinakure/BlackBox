@@ -1,4 +1,4 @@
-static char key[256];
+char key[256];
 static int lap[256];
 
 /** 
