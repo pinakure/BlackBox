@@ -369,7 +369,9 @@ void TypeWriter::selectChoice(){
 void TypeWriter::updateChoices(double delta) {
 	if (Console::enabled)return;
 
-	
+	InputDevice::control_c = false;
+	InputDevice::control = false;
+
 	if (active_option < options.size()) {
 		TypeWriter::updateOptions(delta);
 	} else {
