@@ -391,8 +391,10 @@ pythoncommand(typewriter_addoption) {
 }
 
 pythoncommand(typewriter_getchoice) {
-	if (!PyArg_ParseTuple(args, "")) 
+	char* question = NULL;
+	if (!PyArg_ParseTuple(args, "|s",&question)) 
 		return NULL;
+	if (question != NULL)TypeWriter::question = question;
 	return Py_BuildValue("s", TypeWriter::getAnswer().c_str());
 }
 

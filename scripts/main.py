@@ -44,7 +44,7 @@ def menu():
         choice = ''
         while choice=='':
             vpu.update()
-            choice = typewriter.getchoice()
+            choice = typewriter.getchoice("BlackBox Menu")
         if   choice == 'c': return
         elif choice == 'x': quit()
         elif choice == 'f': functions.menu()
@@ -62,7 +62,7 @@ class options():
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice("Option menu")
             if   choice == 'x': return
             elif choice == 't': options.typewriter_color()
             if not typewriter.ready():
@@ -70,14 +70,14 @@ class options():
 
     @staticmethod
     def typewriter_color():
-        typewriter.addoption(' R '      , 0)#VARIABLE_TYPEWRITER_R
-        typewriter.addoption(' G '      , 1)#VARIABLE_TYPEWRITER_G
-        typewriter.addoption(' B '      , 2)#VARIABLE_TYPEWRITER_B
+        typewriter.addoption('1. R '      , 0)#VARIABLE_TYPEWRITER_R
+        typewriter.addoption('2. G '      , 1)#VARIABLE_TYPEWRITER_G
+        typewriter.addoption('3. B '      , 2)#VARIABLE_TYPEWRITER_B
         typewriter.addchoice('OK'             , 'x')
         choice = ''
         while choice=='':
             vpu.update()
-            choice = typewriter.getchoice()
+            choice = typewriter.getchoice("TypeWriter Background Color")
         if   choice == 'x': return
         if not typewriter.ready():
                 vpu.update()
@@ -87,14 +87,14 @@ class functions():
     @staticmethod
     def menu():
         while(1):
-            typewriter.addchoice(' BlackBox '   , 'b')
+            typewriter.addchoice(' Engine '     , 'b')
             typewriter.addchoice(' TypeWriter ' , 't')
             typewriter.addchoice(' Vpu '        , 'v')
             typewriter.addchoice('Back'         , 'x')
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice("Functions")
             if   choice == 'x': return
             elif choice == 'b': functions.blackbox_menu()
             elif choice == 't': functions.typewriter_menu()
@@ -112,7 +112,7 @@ class functions():
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice("VPU")
             if   choice == 'x': return
             elif choice == 'e': vpu.enable(1)
             elif choice == 'r': vpu.rotate(45)
@@ -130,10 +130,10 @@ class functions():
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice("Engine")
             if   choice == 'x': return
             elif choice == 'e': typewriter.enqueue(f'Epoch is {blackbox.epoch()}')
-            elif choice == 'v': typewriter.enqueue(f'Version is {blackbox.version()}')
+            elif choice == 'v': typewriter.enqueue(f'Engine Version is {blackbox.version()}')
             elif choice == 'c': blackbox.ctrlc()
             if not typewriter.ready():
                 vpu.update()
@@ -149,9 +149,9 @@ class functions():
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice("TypeWriter Functions")
             if   choice == 'x': return
-            elif choice == 'c': typewriter.setcolor(255,0,0,220)
+            elif choice == 'c': options.typewriter_color()
             elif choice == 'f': typewriter.setfont(1)
             elif choice == 'p': typewriter.setposition(0,0)
             elif choice == 's': typewriter.setsize(64,64)
@@ -235,12 +235,12 @@ class test():
                 textout(f"Iteration {e}", 512,512)
                 setcolor(64,32,0)
                 fill()
-                x += (0.3141596/16);
+                x += (0.3141596/16)
                 px = int(cx+(sin(-x)*100))
                 py = int(cy+(cos(-x)*100))
                 drawanim(ani, px, py)
                 update()                
-            e+=1;
+            e+=1
     @staticmethod 
     def fade():
         while(not ctrlc()):
@@ -265,7 +265,7 @@ class test():
             r = int(random()*255)
             g = int(random()*255)
             b = int(random()*255)
-            fill();
+            fill()
             setcolor(r,g,b)          
         while(not ctrlc()):        
             fadein()
@@ -285,13 +285,13 @@ class test():
         choice = ''
         while choice=='':
             vpu.update()
-            choice = typewriter.getchoice()
+            choice = typewriter.getchoice('Choose A or B')
         if choice == '2':
-            typewriter.enqueue('CHOSEN A')
+            typewriter.enqueue('You chose A')
             while not typewriter.ready():
                 vpu.update()
         elif choice == '3':
-            typewriter.enqueue('CHOSEN B')
+            typewriter.enqueue('You chose B')
             while not typewriter.ready():
                 vpu.update()
             typewriter.addchoice('C', '5')
@@ -299,15 +299,16 @@ class test():
             choice = ''
             while choice=='':
                 vpu.update()
-                choice = typewriter.getchoice()
+                choice = typewriter.getchoice('Choose C or D')
             if choice == '5':
-                typewriter.enqueue('CHOSEN C')
+                typewriter.enqueue('You chose C')
                 while not typewriter.ready():
                     vpu.update()
             elif choice == '6':
-                typewriter.enqueue('CHOSEN D')
+                typewriter.enqueue('You chose D')
                 while not typewriter.ready():
                     vpu.update()
+
 
     @staticmethod
     def menu():
@@ -320,7 +321,7 @@ class test():
         choice = ''
         while choice=='':
             vpu.update()
-            choice = typewriter.getchoice()
+            choice = typewriter.getchoice("Available Tests")
         if   choice == '1': test.drawanim()
         elif choice == '2': test.drawsprite()
         elif choice == '3': test.drawsurf()
@@ -329,3 +330,4 @@ class test():
         elif choice == '6': test.dialog()
 
 cout('Write down "test.menu()" to discover available tests / benchmarks ')
+cout('Use F1 to toggle console')
