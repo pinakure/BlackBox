@@ -210,11 +210,13 @@ void TypeWriter::drawChoices() {
 				(TypeWriter::b >> 1) + q,
 				(TypeWriter::a)
 			);
+			/*
 			int r = rand() % 100;
 			if (r == 1)cx++;
 			else if (r == 2)cx--;
 			else if (r == 3)cy--;
 			else if (r == 4)cy++;
+			*/
 		}
 		Vpu::print(
 			it->first,
