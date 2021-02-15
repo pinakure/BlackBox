@@ -33,7 +33,7 @@ public:
 	static int active_option; //volatile 
 	static int active_choice; //volatile 
 	static std::string answer; //volatile 
-	static std::string _question; //volatile 
+	static std::string question; //volatile 
 	static std::map<std::string, std::string> choices;
 	static std::map<std::string, int&> options;
 	static int line_height;

@@ -12,7 +12,7 @@ std::vector<std::string> TypeWriter::display;
 std::queue<std::string> TypeWriter::queue;
 std::string TypeWriter::current = "";
 std::string TypeWriter::answer = "";
-std::string TypeWriter::_question = "";
+std::string TypeWriter::question = "";
 std::map<std::string, std::string> TypeWriter::choices;
 std::map<std::string, int&> TypeWriter::options;
 double	TypeWriter::current_position= 0;
@@ -131,13 +131,28 @@ void TypeWriter::drawChoices() {
 		max_height + 10
 	);
 	
-	// Draw choices
+	// Draw question//menu title
 	Vpu::pushColor();
+	Vpu::setColor(
+		255 ,
+		255 ,
+		255 ,
+		TypeWriter::a
+	);
+	Vpu::print(
+		TypeWriter::question,
+		cx - (al_get_text_width(Vpu::font, TypeWriter::question.c_str()) / 2),
+		(cy - (max_height / 2) - line_height) + 2
+	);
+
+
+	// Draw choices
 	static int q = 0;
 	q += 2;
 	q %= 128;
 	int line=0;
 	std::map<std::string, int &>::iterator oit;
+	
 	for (oit = options.begin(); oit != options.end(); oit++, line++) {
 		Vpu::setColor(
 			TypeWriter::r >> 1,
@@ -304,10 +319,13 @@ void TypeWriter::nextChoice() {
 	if (active_option < options.size())return;
 
 	if (active_choice == choices.size() - 1) {
-		active_option = 0;
-		active_choice = 0;
-	}
-	if (active_option >= options.size()) {
+		if(options.size() > 0) {
+			active_option = 0;
+			active_choice = 0;
+		} else {
+			active_choice = 0;
+		}		
+	} else if (active_option >= options.size()) {
 		active_choice++;
 		active_choice %= choices.size();
 	}
@@ -317,10 +335,14 @@ void TypeWriter::nextChoice() {
 void TypeWriter::prevChoice() {
 	if (active_option < options.size())return;
 
-	if (active_choice == 0) {
-		active_option--;
-	}
-	if (active_option >= options.size()) {
+	if((active_choice == 0)) {
+		if (options.size() > 0) {
+			active_option--;
+			active_choice = 0;
+		} else {
+			active_choice = choices.size()-1;
+		}		
+	} else if (active_option >= options.size()) {
 		active_choice--;
 		active_choice %= choices.size();
 	}
@@ -402,8 +424,6 @@ void TypeWriter::decreaseValue() {
 void TypeWriter::updateOptions(double delta) {
 	if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevOption();
 	if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextOption();
-//	if (KEYPRESS(key[ALLEGRO_KEY_LEFT]))	 return TypeWriter::decreaseValue();
-//	if (KEYPRESS(key[ALLEGRO_KEY_RIGHT])) return TypeWriter::increaseValue();
 	if (key[ALLEGRO_KEY_LEFT])	 return TypeWriter::decreaseValue();
 	if (key[ALLEGRO_KEY_RIGHT]) return TypeWriter::increaseValue();
 }
@@ -554,7 +574,7 @@ std::string TypeWriter::getAnswer() {
 		std::string ret(answer);
 		answer = "";
 		choices.clear();
-		_question = "";
+		question = "";
 		return ret;
 	}
 	return "";
