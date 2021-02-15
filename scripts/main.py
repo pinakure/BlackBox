@@ -5,8 +5,17 @@ from vpu        import *
 from blackbox   import *
 from console    import echo as cout
 from vpu        import textout
+import blackbox
 import typewriter 
 import vpu
+
+VARIABLE_TYPEWRITER_R=0,
+VARIABLE_TYPEWRITER_G=1,
+VARIABLE_TYPEWRITER_B=2,
+VARIABLE_TYPEWRITER_A=3,
+VARIABLE_TYPEWRITER_X=4,
+VARIABLE_TYPEWRITER_Y=5,
+	
 
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
@@ -14,6 +23,7 @@ def configure():
     fullscreen(False)
 
 def main():
+    menu()
     return
 
 def wait(seconds = 1, callback = None):
@@ -24,20 +34,132 @@ def wait(seconds = 1, callback = None):
         update()
         now = epoch()
 
-class test():
+def menu():
+    while(1):
+        typewriter.addchoice(' Options '        , 'o')
+        typewriter.addchoice(' Functions '      , 'f')
+        typewriter.addchoice(' Tests Menu '     , 't')
+        typewriter.addchoice('Close Menu'       , 'c')
+        typewriter.addchoice('Quit'             , 'x')
+        choice = ''
+        while choice=='':
+            vpu.update()
+            choice = typewriter.getchoice()
+        if   choice == 'c': return
+        elif choice == 'x': quit()
+        elif choice == 'f': functions.menu()
+        elif choice == 'o': options.menu()
+        elif choice == 't': test.menu()
+        if not typewriter.ready():
+                vpu.update()
+
+class options():
     @staticmethod
     def menu():
-        setcolor(255,255,255);
-        cout('~f------------------------')
-        cout('~f    Available tests')
-        cout('~f------------------------')
-        setcolor(200,200,200);
-        cout('~7drawanim~8()')
-        cout('~7drawsprite~8()')
-        cout('~7drawsurf~8()')
-        cout('~ffade~8()')
-        cout('~7benchmark~8()')
+        while(1):
+            typewriter.addchoice(' TypeWriter '     , 't')
+            typewriter.addchoice('Back'             , 'x')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if   choice == 'x': return
+            elif choice == 't': options.typewriter_color()
+            if not typewriter.ready():
+                    vpu.update()
 
+    @staticmethod
+    def typewriter_color():
+        typewriter.addoption(' R '      , 0)#VARIABLE_TYPEWRITER_R
+        typewriter.addoption(' G '      , 1)#VARIABLE_TYPEWRITER_G
+        typewriter.addoption(' B '      , 2)#VARIABLE_TYPEWRITER_B
+        typewriter.addchoice('OK'             , 'x')
+        choice = ''
+        while choice=='':
+            vpu.update()
+            choice = typewriter.getchoice()
+        if   choice == 'x': return
+        if not typewriter.ready():
+                vpu.update()
+
+
+class functions():
+    @staticmethod
+    def menu():
+        while(1):
+            typewriter.addchoice(' BlackBox '   , 'b')
+            typewriter.addchoice(' TypeWriter ' , 't')
+            typewriter.addchoice(' Vpu '        , 'v')
+            typewriter.addchoice('Back'         , 'x')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if   choice == 'x': return
+            elif choice == 'b': functions.blackbox_menu()
+            elif choice == 't': functions.typewriter_menu()
+            elif choice == 'v': functions.vpu_menu()
+            if not typewriter.ready():
+                vpu.update()
+    
+    @staticmethod
+    def vpu_menu():
+        while(1):
+            typewriter.addchoice(' enable '     , 'e')
+            typewriter.addchoice(' rotate '     , 'r')
+            typewriter.addchoice(' scale '      , 's')
+            typewriter.addchoice('Back'         , 'x')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if   choice == 'x': return
+            elif choice == 'e': vpu.enable(1)
+            elif choice == 'r': vpu.rotate(45)
+            elif choice == 's': vpu.scale(0.5, 0.5, 0.5)
+            if not typewriter.ready():
+                vpu.update()
+    
+    @staticmethod
+    def blackbox_menu():
+        while(1):
+            typewriter.addchoice(' epoch'       , 'e')
+            typewriter.addchoice(' ctrlc '      , 'c')
+            typewriter.addchoice(' version '    , 'v')
+            typewriter.addchoice('Back'         , 'x')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if   choice == 'x': return
+            elif choice == 'e': typewriter.enqueue(f'Epoch is {blackbox.epoch()}')
+            elif choice == 'v': typewriter.enqueue(f'Version is {blackbox.version()}')
+            elif choice == 'c': blackbox.ctrlc()
+            if not typewriter.ready():
+                vpu.update()
+        
+    @staticmethod
+    def typewriter_menu():
+        while(1):
+            typewriter.addchoice('setcolor'     , 'c')
+            typewriter.addchoice('setfont'      , 'f')
+            typewriter.addchoice('setposition ' , 'p')
+            typewriter.addchoice('setsize'      , 's')
+            typewriter.addchoice('Back'         , 'x')
+            choice = ''
+            while choice=='':
+                vpu.update()
+                choice = typewriter.getchoice()
+            if   choice == 'x': return
+            elif choice == 'c': typewriter.setcolor(255,0,0,220)
+            elif choice == 'f': typewriter.setfont(1)
+            elif choice == 'p': typewriter.setposition(0,0)
+            elif choice == 's': typewriter.setsize(64,64)
+            if not typewriter.ready():
+                vpu.update()
+                 
+
+class test():
     @staticmethod
     def drawanim():
         disable(0)
@@ -187,5 +309,23 @@ class test():
                 while not typewriter.ready():
                     vpu.update()
 
+    @staticmethod
+    def menu():
+        typewriter.addchoice('drawanim()'   , '1')
+        typewriter.addchoice('drawsprite()' , '2')
+        typewriter.addchoice('drawsurf()'   , '3')
+        typewriter.addchoice('fade()'       , '4')
+        typewriter.addchoice('benchmark()'  , '5')
+        typewriter.addchoice('dialog()'     , '6')
+        choice = ''
+        while choice=='':
+            vpu.update()
+            choice = typewriter.getchoice()
+        if   choice == '1': test.drawanim()
+        elif choice == '2': test.drawsprite()
+        elif choice == '3': test.drawsurf()
+        elif choice == '4': test.fade()
+        elif choice == '5': test.benchmark()
+        elif choice == '6': test.dialog()
 
 cout('Write down "test.menu()" to discover available tests / benchmarks ')

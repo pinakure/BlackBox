@@ -308,12 +308,85 @@ pythoncommand(typewriter_ready) {
 	return PyLong_FromLong(TypeWriter::next);
 }
 
+pythoncommand(typewriter_setposition) {
+	int x;
+	int y;
+	if (!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
+	TypeWriter::x = x;
+	TypeWriter::y = y;
+	return PyLong_FromLong(1);
+}
+pythoncommand(typewriter_setcolor) {
+	int r=-1;
+	int g=-1;
+	int b = -1;
+	int a = -1;
+	if (!PyArg_ParseTuple(args, "iii|i", &r, &g, &b, &a)) return NULL;
+	TypeWriter::r = r;
+	TypeWriter::g = g;
+	TypeWriter::b = b;
+	TypeWriter::a = a==-1?0:a;
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(typewriter_setfont) {
+	int font_index;
+	if (!PyArg_ParseTuple(args, "i", &font_index)) return NULL;
+	//TypeWriter::font_index = font_index %= TypeWriter::fonts.size();
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(typewriter_setsize) {
+	int width;
+	int height;
+	if (!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
+	TypeWriter::final_width = width;
+	TypeWriter::final_height = height;
+	return PyLong_FromLong(1);
+}
+
 pythoncommand(typewriter_addchoice) {
 	char* name;
 	char* value;
-	int wait = 0;
 	if (!PyArg_ParseTuple(args, "ss", &name, &value)) return NULL;
-	TypeWriter::choices.insert(std::pair < std::string, std::string>(name, value));
+	TypeWriter::choices.insert(
+		std::pair < std::string, std::string>(name, value)
+	);
+	return PyLong_FromLong(1);
+}
+
+enum Variables {
+	VARIABLE_TYPEWRITER_R,
+	VARIABLE_TYPEWRITER_G,
+	VARIABLE_TYPEWRITER_B,
+	VARIABLE_TYPEWRITER_A,
+	VARIABLE_TYPEWRITER_X,
+	VARIABLE_TYPEWRITER_Y,
+	VARIABLE_TYPEWRITER_FONT,
+};
+
+pythoncommand(typewriter_clear) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	TypeWriter::options.clear();
+	TypeWriter::choices.clear();
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(typewriter_addoption) {
+	char* name;
+	int variable_index;
+	if (!PyArg_ParseTuple(args, "si", &name, &variable_index)) return NULL;
+	switch (variable_index) {
+		default: Console::print("Unknown variable index specified");
+		break; case VARIABLE_TYPEWRITER_R:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::r));
+		break; case VARIABLE_TYPEWRITER_G:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::g));
+		break; case VARIABLE_TYPEWRITER_B:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::b));
+		break; case VARIABLE_TYPEWRITER_A:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::a));
+		break; case VARIABLE_TYPEWRITER_X:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::x));
+		break; case VARIABLE_TYPEWRITER_Y:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::y));
+		//break; case VARIABLE_TYPEWRITER_FONT:	 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::active_font));
+		break;
+	}	
 	return PyLong_FromLong(1);
 }
 
@@ -374,15 +447,17 @@ static PyMethodDef ConsoleMethods[] = {
 
 static PyMethodDef TypeWriterMethods[] = {
 	/* TBI */
-	{"setposition"	, tbi					, METH_VARARGS, "typewriter.setposition(x, y) : "},
-    {"setsize"		, tbi					, METH_VARARGS, "typewriter.setsize(w, h) : "},
-    {"setfont"		, tbi					, METH_VARARGS, "typewriter.setfont(font_handle) : "},
-    {"setcolor"		, tbi					, METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
-	/* TBI */
-
-    {"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available option array"},
+	{"setposition"	, typewriter_setposition, METH_VARARGS, "typewriter.setposition(x, y) : "},
+    {"setsize"		, typewriter_setsize    , METH_VARARGS, "typewriter.setsize(w, h) : "},
+    {"setfont"		, typewriter_setfont    , METH_VARARGS, "typewriter.setfont(font_handle) : "},
+    {"setcolor"		, typewriter_setcolor   , METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
+	
+	{"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available choice array"},
 	{"getchoice"    , typewriter_getchoice  , METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
 	{"ready"		, typewriter_ready		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},
+
+	{"addoption"    , typewriter_addoption	, METH_VARARGS, "addchoice(name, value) : Add a pair of name: pointer to integer variable to the available option array"},
+	{"clear"	    , typewriter_clear		, METH_VARARGS, "clear() : Clear option and choice list"},
 	
 	{"enqueue"		, typewriter_enqueue	, METH_VARARGS, "typewriter.enqueue(text) : Enqueue message into typewriter buffer and open if if closed"},
 	{"loadpic"		, typewriter_loadpic	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
