@@ -133,14 +133,16 @@ $(document).ready(function(){
     var text2 = Editor.nodes[Editor.addNode(Types.TEXT)];
     text1.setParent(choice1);
     text2.setParent(choice1);
+    choice1.attributes.question.value = "Choose A or B";
     choice1.attributes.choices.value[0].node = text1.id;
     choice1.attributes.choices.value[1].node = text2.id;
-    text1.attributes.lines.value[0] = 'CHOSEN A';
-    text2.attributes.lines.value[0] = 'CHOSEN B';
+    text1.attributes.lines.value[0] = 'You chose A';
+    text2.attributes.lines.value[0] = 'You chose B';
     
     var choice2 = Editor.nodes[Editor.addNode(Types.CHOICE)];
     Editor.selectNode(choice2);
     addChoice();
+    choice2.attributes.question.value = "Choose C or D";
     choice2.attributes.choices.value[0].choice = 'C';
     choice2.attributes.choices.value[1].choice = 'D';
     choice2.setParent(text2);
@@ -150,8 +152,8 @@ $(document).ready(function(){
     text4.setParent(choice2);
     choice2.attributes.choices.value[0].node = text3.id;
     choice2.attributes.choices.value[1].node = text4.id;
-    text3.attributes.lines.value[0] = 'CHOSEN C';
-    text4.attributes.lines.value[0] = 'CHOSEN D';
+    text3.attributes.lines.value[0] = 'You chose C';
+    text4.attributes.lines.value[0] = 'You chose D';
     
     Editor.selectNode(null);
 });

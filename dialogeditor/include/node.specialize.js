@@ -13,9 +13,11 @@ Node.prototype.specialize = function(args){
         case Types.CHOICE: 
             this.multiple_children = true; 
             this.max_children      = 256;            
+            this.attributes.question= new NodeAttribute(this, 'question', '', AttributeTypes.FILE);
             this.attributes.choices = new NodeAttribute(this, 'choices', [ { choice : '', node : '' } ], AttributeTypes.CHOICE);
             this.form = function(){
-                return  NavCard(this.attributes.choices) +
+                return  NavCard(this.attributes.question) +
+                        NavCard(this.attributes.choices) +
                         Button('plus', `addChoice()`);
             };
             break;

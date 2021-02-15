@@ -39,7 +39,7 @@ Node.prototype.compileChoice = function(indent=0){
     ret+= getIndent(indent)+`choice = ''\n`;
     ret+= getIndent(indent)+`while choice=='':\n`;
     ret+= getIndent(indent+1)+`vpu.update()\n`;
-    ret+= getIndent(indent+1)+`choice = typewriter.getchoice()\n`;
+    ret+= getIndent(indent+1)+`choice = typewriter.getchoice('${this.attributes.question.value}')\n`;
             
     return ret+aft;
 }
