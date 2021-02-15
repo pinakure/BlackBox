@@ -29,7 +29,7 @@ int		TypeWriter::b = 0;
 int		TypeWriter::wait_time = 0;
 int		TypeWriter::active_option = 0;
 int		TypeWriter::active_choice = 0;
-int		TypeWriter::line_height = 20;
+int		TypeWriter::line_height = 16;
 bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
 double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
@@ -142,7 +142,7 @@ void TypeWriter::drawChoices() {
 	Vpu::print(
 		TypeWriter::question,
 		cx - (al_get_text_width(Vpu::font, TypeWriter::question.c_str()) / 2),
-		(cy - (max_height / 2) - line_height) + 2
+		(cy - (max_height / 2) - line_height) - 2
 	);
 
 
@@ -263,11 +263,11 @@ void TypeWriter::drawText() {
 		alpha
 	);
 	for (int line = 0; line<int(TypeWriter::display.size()); line++) {
-		if (height > (20 * (line + 1))) {
+		if (height > (line_height * (line + 1))) {
 			Vpu::print(
 				TypeWriter::display[line].substr(0, width / 8),
 				TypeWriter::x + 2,
-				(line * 20) + 2
+				(line * line_height) + 2
 			);
 
 		}
