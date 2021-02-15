@@ -45,6 +45,10 @@ void TypeWriter::initialize() {
 	final_height = 0;
 	surface = Vpu::createSurface(Vpu::width/2, TYPEWRITER_HEIGHT);
 	overlay = Vpu::createSurface(Vpu::width/2, TYPEWRITER_HEIGHT);
+	Vpu::select(surface);
+	Vpu::clear();
+	Vpu::select(overlay);
+	Vpu::clear();
 }
 
 const int max_size = 4;
