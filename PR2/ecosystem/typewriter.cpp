@@ -296,8 +296,24 @@ void TypeWriter::drawText() {
 	}
 
 	if (!TypeWriter::next) {
-		Vpu::fillCircle(x + width - (2 + (max_size)), y + height - (2 + (max_size)), radius * float(max_size), 64.0f * radius, 128.0f * radius, 0, 32 * radius);
-		Vpu::circle(x + width - (2 + (max_size)), y + height - (2 + (max_size)), radius * float(max_size), 64.0f * radius, 128.0f * radius, 0, 32 * radius);
+		Vpu::fillCircle(
+			x + width - (2 + (max_size)), 
+			y + height - (2 + (max_size)), 
+			radius * float(max_size), 
+			(TypeWriter::r)* radius,
+			(TypeWriter::g)* radius, 
+			(TypeWriter::b)*radius,
+			(TypeWriter::a)*radius
+		);
+		Vpu::circle(
+			x + width - (2 + (max_size)), 
+			y + height - (2 + (max_size)), 
+			radius * float(max_size), 
+			(TypeWriter::r)* radius, 
+			(TypeWriter::g)* radius, 
+			(TypeWriter::b)*radius,
+			(TypeWriter::a)*radius
+		);
 	}
 	Vpu::popColor();
 
