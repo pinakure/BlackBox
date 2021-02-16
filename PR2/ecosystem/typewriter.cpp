@@ -55,6 +55,22 @@ void TypeWriter::initialize() {
 const int max_size = 4;
 static float radius = 0.0f;
 
+
+std::string _sanitizeString(std::string text) {
+	size_t endpos = text.find_last_not_of(" \t");
+	size_t startpos = text.find_first_not_of(" \t");
+	if (std::string::npos != endpos)
+	{
+		text = text.substr(0, endpos + 1);
+		text = text.substr(startpos);
+	}
+	else {
+		text.erase(std::remove(std::begin(text), std::end(text), ' '), std::end(text));
+	}
+	return text;
+}
+
+
 void TypeWriter::draw() {
 	if (GetTextBox::status == GetTextBox::STATUS_ENABLED)
 		GetTextBox::draw();
@@ -647,6 +663,7 @@ void GetTextBox::moveCaretRight() {
 }
 
 void GetTextBox::finalize() {
+	text = _sanitizeString(text);
 	status = STATUS_FINISHED;
 }
 
@@ -678,24 +695,30 @@ void GetTextBox::moveCursorRight() {
 		cursor_x = 0;
 }
 
+
+
 void GetTextBox::putchar() {
-	if (caret_pos > text.size() - 1)caret_pos == text.size() - 1;
+	// trim trailing spaces
+	text = _sanitizeString(text);
+	// Reset caret pos before any operation
+	if (caret_pos > text.size() - 1)caret_pos = text.size() - 1;
+
 	char i = chars[(40 * caps) + (cursor_y * 10) + cursor_x];
 	if (i == '.')return finalize();
 	else if (i == '<')return moveCaretLeft();
 	else if (i == '>')return moveCaretRight();
 	else {
 		int size = text.size();
-		if (!size && !caret_pos) text = i;
-		else if (size == 1 && caret_pos == 0) { text = text + i; caret_pos++; }
+		if (!size && !caret_pos) { text = i; caret_pos++; }
+		else if (size == 1 && caret_pos == 0) { text = text + i; caret_pos+=2; }
 		else if (size >  1 && caret_pos < size-1) { 
 			if (!caret_pos) text = i + text.substr(1, size - 1); 
-			else text = text.substr(0, caret_pos) + i + text.substr(caret_pos, size - caret_pos);
+			else text = text.substr(0, caret_pos) + i + text.substr(caret_pos+1, size - caret_pos+1);
 			caret_pos++;
 		} else {
 			if (caret_pos < max_length - 2) {
-				text = text + i;
-				caret_pos++;
+				text = text + i;// +" ";
+				caret_pos+=2;				
 			} else text = text.substr(0, size - 1) + i;
 		}
 	}
@@ -714,6 +737,11 @@ void GetTextBox::clear(std::string placeholder) {
 }
 
 void GetTextBox::backspace() {
+	// trim trailing spaces
+	text = _sanitizeString(text);
+	// Reset caret pos before any operation
+	if (caret_pos > text.size() - 1)caret_pos = text.size() - 1;
+
 	int size = text.size();
 	if (!size) return;
 	if (caret_pos > 0) {
@@ -781,11 +809,12 @@ void GetTextBox::draw() {
 		cx - (strl / 2),
 		6 + (cy - (max_height / 2))
 	);
+	if (caret_pos >= max_length - 2)caret_pos = max_length - 2;
 	int pos = text.size()
 		?
 		caret_pos * (strl / text.size())
 		:
-		0;
+			0;
 
 	Vpu::fillRectangle(
 		(cx - (strl / 2)) + pos,
@@ -826,7 +855,6 @@ void GetTextBox::draw() {
 					TypeWriter::a
 				);
 			}
-
 
 			std::string st = "";
 			st += chars[i + (caps * 40)];
