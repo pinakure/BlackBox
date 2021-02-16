@@ -43,6 +43,8 @@ public:
 	static void drawText();
 	static int  get_text;
 	static int	get_text_pos;
+	static int	get_text_x;
+	static int	get_text_y;
 	static std::string _get_text;
 	static void clearTextBox(size_t max_length = 255, std::string placeholder = "");
 	static void drawGetTextBox();

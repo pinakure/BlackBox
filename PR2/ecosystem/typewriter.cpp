@@ -37,6 +37,8 @@ bool	TypeWriter::needs_redraw;
 int		TypeWriter::get_text = 0;
 std::string TypeWriter::_get_text = "";
 int		TypeWriter::get_text_pos = 0;
+int		TypeWriter::get_text_x = 0;
+int		TypeWriter::get_text_y = 0;
 
 static Surface surface;
 static Surface overlay;
@@ -641,6 +643,8 @@ void TypeWriter::clearTextBox(size_t max_length, std::string placeholder) {
 		TypeWriter::_get_text = placeholder.substr(0, max_length);
 	}
 	TypeWriter::get_text_pos = _get_text.size() - 1;
+	TypeWriter::get_text_x = 0;
+	TypeWriter::get_text_y = 0;
 }
 
 static void _getTextMoveCaretLeft() {
