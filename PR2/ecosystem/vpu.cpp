@@ -107,7 +107,12 @@ bool Vpu::start() {
 }
 
 void Vpu::initializeFonts() {
-	font = al_load_ttf_font("data/fonts/mid.ttf",16, ALLEGRO_TTF_MONOCHROME  );
+	//font = al_load_ttf_font("data/fonts/devavu.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
+	//font = al_load_ttf_font("data/fonts/nk57.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
+	//font = al_load_ttf_font("data/fonts/smk.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
+	//font = al_load_ttf_font("data/fonts/ibm.ttf",-16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
+	//font = al_load_ttf_font("data/fonts/tiny.ttf", -10, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
+	font = al_load_ttf_font("data/fonts/mana.ttf", -12, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
 	if (!font){
 		Engine::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
 		font = legacy_font;
