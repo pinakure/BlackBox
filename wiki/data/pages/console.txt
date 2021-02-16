@@ -1,0 +1,37 @@
+===== Console =====
+----
+===Low Level API ===
+^command                    ^ Description                           ^
+|[[alias|]]                 | Set given alias for a command line |
+|[[aliases|]]                   | Show list of current aliases |
+|[[addtoggle|]]                 | Adds a toggle with given id and name |
+|[[concat|]]                    | Concatenate given arguments and store the value in $result |
+|[[cd|]]                    | Changes active working directory |
+|[[console:cls|cls]]                   | Clear console buffer |
+|[[cwd|]]                   | Shows active working directory |
+|[[divide|]]                    | Divide given operators and store the value in $result dir |
+|[[Shows|]]                 | files and folders in current working directory |
+|[[dump|]]                  | Dump console buffer into given filename |
+|[[echo|]]                  | Dump given text on the console buffer |
+|[[help|]]                  | Show help about requested command |
+|[[multiply|]]                  | Multiply given operators and store the value in $result |
+|[[memdump|]]                   | Dump heap blocks to the filesystem |
+|[[subtract|]]                  | Subtract given operators and store the value in $result |
+|[[sum|]]                   | Sum given operators and store the value in $result |
+|[[set|]]                   | Set or view value of given variable |
+|[[toggle|]]                    | Set or toggle given in-game toggle |
+|[[toggleconsole|]]                 | Open or close the console interface |
+|[[togglelist|]]                    | Show list of current in-game toggles |
+|[[unalias|]]                   | Unset given alias |
+|[[unset|]]                 | Unset given variable |
+|[[unsetall|]]                  | Unsets every variable set |
+|[[vars|]]                  | Show list of defined variables |
+|[[view|]]                  | Dump given filename over the console |
+|[[writeconfig|]]                   | Stores variable settings under given filename |
+|[[xor|]]                   | Apply XOR over given value and store value in $result |
+
+----
+===Scripting API===
+^command             ^ arguments                        ^ Description                                                                       ^
+|[[print|]]     | text      | Dump given text over console  |
+|[[cls  |]]     |           | Clean console buffer          |

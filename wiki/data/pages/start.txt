@@ -1,0 +1,10 @@
+=====BlackBox Engine Core=====
+Use F1 to open the console.\\ 
+Use ''help //command//'' in console for details\\
+----
+  * [[Console|]]
+  * [[BlackBox|]]
+  * [[VPU|]]
+
+----
+This black box has Py powers, being more accurate, version 3.8.5.

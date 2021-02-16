@@ -1,0 +1,7 @@
+=====BlackBox=====
+----
+===Scripting API===
+^command             ^ arguments                        ^ Description                                                                        ^
+|[[ctrlc|]]             | | Returns TRUE if CTRL+C was pressed |
+|[[version|]]               | | Return current BlackBox engine version|
+|[[epoch|]]             | | Return current engine epoch uptime|

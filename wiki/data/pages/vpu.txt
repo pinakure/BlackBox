@@ -1,0 +1,37 @@
+=====VPU=====
+
+----
+
+=== Low Level API ===
+
+----
+
+=== Scripting API ===
+^command             ^ arguments                        ^ Description                                                                        ^
+|[[createanim|]]          | width, height, sprite_handle     | Return Handle to new Animation object                                              | 
+|[[createsprite|]]        | width, height, filename          | Returns Handle to Sprite object create upon given filename                         | 
+|[[createsurf|]]          | width, height                    | Returns Handle to Surface object to be drawn arbitrarily to screen                 | 
+|[[dimensions|]]          |                                  | Returns selected bitmap [ width, height ]                                          | 
+|[[disable|]]             | layer                            | Toggle off given vpu layer                                                         | 
+|[[deleteanim|]]          | handle                           | Delete Animation identified by given Handle                                        | 
+|[[deletesprite|]]        | handle                           | Delete Sprite identified by given Handle                                           | 
+|[[deletesurf|]]          | handle                           | Delete Surface identified by given Handle                                          | 
+|[[drawanim|]]            | handle, x, y                     | Draw animation identified by given handle onto given coordinates                   | 
+|[[drawsprite|]]          | handle, x, y                     | Draw Sprite identified by given handle onto given coordinates                      | 
+|[[drawsurf|]]            | handle, x, y                     | Draw surface identified by given handle onto given coordinates                     | 
+|[[enable|]]              | layer                            | Toggle on given vpu layer                                                          | 
+|[[fadein|]]              |                                  | Fade screen from black                                                             | 
+|[[fadeout|]]             |                                  | Fade screen to black                                                               | 
+|[[fill|]]                | r, g, b, a                       | Fill selected bitmap with given color or default color                             | 
+|[[frames|]]              |                                  | Return actual frame count                                                          | 
+|[[fullscreen|]]          | enabled                          | Toggle fullscreen mode                                                             | 
+|[[print|]]               | text, x, y                       | Print given text at given coordinates                                              | 
+|[[pset|]]                | x, y                             | Draw a pixel onto selected surface onto given coordinates                          | 
+|[[restart|]]             |                                  | Restart Video Processing Unit                                                      | 
+|[[rotate|]]              | layer, angle                     | Rotate specified layer (0-11) given degrees                                        | 
+|[[scale|]]               | layer, scale_x, scale_y          | Change specified layer [0-11] given horizontal and vertical scale factor           | 
+|[[select|]]              | layer                            | Select given layer to perform next graphic operations onto it                      | 
+|[[setcolor|]]            | r, g, b, a                       | Sets current painting color                                                        | 
+|[[setrotation|]]         | layer, angle                     | Sets rotation for specified layer (0-11) at given degrees                          | 
+|[[setscale|]]            | layer, scale_x, scale_y          | Sets scale for specified layer [0-11] given horizontal and vertical values         | 
+|[[update|]]              |                                  | Allow blackbox engine to perform its rendering based input and output operations   | 

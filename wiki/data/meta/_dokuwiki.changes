@@ -1,0 +1,38 @@
+1596015328	127.0.0.1	E	wiki:welcome		external edit		1705
+1613518089	::1	D	wiki:welcome	smiker	removed		-1705
+1613518128	::1	C	start	smiker	created		3749
+1613518234	::1	E	start	smiker			77
+1613518250	::1	E	start	smiker			16
+1613518448	::1	E	start	smiker			-7
+1613518496	::1	C	vpu	smiker	created		1923
+1613518870	::1	E	vpu	smiker			2121
+1613518910	::1	E	start	smiker			-2016
+1613518950	::1	E	vpu	smiker			58
+1613518965	::1	E	vpu	smiker			5
+1613518996	::1	E	vpu	smiker			130
+1613519077	::1	E	start	smiker	[SCRIPTING API] 		-154
+1613519090	::1	C	blackbox	smiker	created		362
+1613519114	::1	E	blackbox	smiker			25
+1613519174	::1	E	start	smiker	[SCRIPTING API] 		-49
+1613519240	::1	C	console	smiker	created		298
+1613519256	::1	E	console	smiker			8
+1613519346	::1	E	start	smiker			-1392
+1613519371	::1	E	console	smiker			2062
+1613519376	::1	E	console	smiker			5
+1613519398	::1	E	console	smiker			11
+1613519432	::1	E	start	smiker			4
+1613519444	::1	E	start	smiker			2
+1613519453	::1	E	start	smiker			7
+1596015328	127.0.0.1	E	wiki:dokuwiki		external edit		2729
+1613519465	::1	D	wiki:dokuwiki	smiker	removed		-2729
+1596015328	127.0.0.1	E	wiki:syntax		external edit		22646
+1613519478	::1	E	wiki:syntax	smiker			-22613
+1613519482	::1	D	wiki:syntax	smiker	removed		-33
+1596015505	127.0.0.1	E	playground:playground		external edit		25
+1613519490	::1	D	playground:playground	smiker	removed		-25
+1613519506	::1	C	console:cls	smiker	created		12
+1613519528	::1	E	console:cls	smiker			41
+1613519540	::1	E	console:cls	smiker			9
+1613519560	::1	E	console:cls	smiker			0
+1613519565	::1	E	console:cls	smiker			-10
+1613519573	::1	E	console:cls	smiker			4
