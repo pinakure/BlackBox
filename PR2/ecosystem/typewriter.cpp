@@ -34,11 +34,6 @@ bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
 double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
 bool	TypeWriter::needs_redraw;
-int		TypeWriter::get_text = 0;
-std::string TypeWriter::_get_text = "";
-int		TypeWriter::get_text_pos = 0;
-int		TypeWriter::get_text_x = 0;
-int		TypeWriter::get_text_y = 0;
 
 static Surface surface;
 static Surface overlay;
@@ -61,8 +56,8 @@ const int max_size = 4;
 static float radius = 0.0f;
 
 void TypeWriter::draw() {
-	if (TypeWriter::get_text==1)
-		TypeWriter::drawGetTextBox();
+	if (GetTextBox::status == GetTextBox::STATUS_ENABLED)
+		GetTextBox::draw();
     else if (!enabled && choices.size() > 0) 
 		TypeWriter::drawChoices();
 	else
@@ -110,88 +105,9 @@ static void findOptionsGeometry(int& width, int& height, std::map<std::string, i
 	}
 }
 
-void TypeWriter::drawGetTextBox() {
-	// Center dialog
-	int cx = (Vpu::width / 2);
-	int cy = (Vpu::height / 4);
-	
-	// Find choice rectangle dimensions
-	int max_width = 8*20;
-	int max_height = line_height*9;
-	
-	// Draw double rectangle
-	_draw_panel(
-		(cx - (max_width / 2)) - 8,
-		(cy - (max_height / 2)) - 6,
-		max_width + 16,
-		max_height + 12
-	);
-	_draw_panel(
-		(cx - ((max_width-16) / 2)) - 8,
-		2 + (cy - (max_height / 2)),
-		max_width ,
-		20
-	);
-	Vpu::setColor(
-		255,
-		255,
-		255,
-		TypeWriter::a
-	);
-	size_t strl = al_get_text_width(Vpu::font, _get_text.c_str());
-	Vpu::print(
-		_get_text,
-		cx - (strl / 2),
-		6 + (cy - (max_height / 2))
-	);
-	int pos = get_text_pos*(strl/_get_text.size());
-	Vpu::fillRectangle(
-		(cx - (strl / 2)) + pos,
-		3 + (cy - (max_height / 2)),
-		7, line_height,
-		TypeWriter::r >> 2,
-		TypeWriter::g >> 2,
-		TypeWriter::b >> 2,
-		TypeWriter::a >> 2
-	);
-
-	char chars[] = { 
-		'0','1','2','3','4','5','6','7','8','9',
-		'Q','W','E','R','T','Y','U','I','O','P',
-		'A','S','D','F','G','H','J','K','L',' ',
-		'Z','X','C','V','B','N','M','<','>','.',
-		'0','1','2','3','4','5','6','7','8','9',
-		'q','w','e','r','t','y','u','i','o','p',
-		'a','s','d','f','g','h','j','k','l',' ',
-		'z','x','c','v','b','n','m','<','>','.'
-	};
-
-	static bool uppercase = false;
-	Vpu::pushColor();
-	int i = 0;
-	for (int iy = 0; iy <4 ; iy++) {
-		for (int ix = 0; ix < 10; ix++) {
-			Vpu::setColor(
-				TypeWriter::r,
-				TypeWriter::g,
-				TypeWriter::b,
-				TypeWriter::a
-			);
-			std::string st = "";
-			st += chars[i + (uppercase * 40)];
-			Vpu::print(
-				st,
-				4 + (cx - (max_width / 2)) + (ix * (8 * 2)),
-				(line_height * 2) +
-
-				(cy - (max_height / 2)) + (iy * (line_height * 2))
-			);
-			i++;
-		}
-	}
-}
-
 void TypeWriter::drawChoices() {
+	Vpu::pushColor();
+	
 	// Center dialog
 	int cx = (Vpu::width / 2);
 	int cy = (Vpu::height / 4);
@@ -225,7 +141,6 @@ void TypeWriter::drawChoices() {
 	);
 	
 	// Draw question//menu title
-	Vpu::pushColor();
 	Vpu::setColor(
 		255,
 		255,
@@ -321,14 +236,13 @@ void TypeWriter::drawChoices() {
 	Vpu::popColor();	
 }
 
-
 void TypeWriter::drawText() {
 	if ((!queue.size()) && (width <= 2) && (height <= 2) ) return;
 	if (!TypeWriter::needs_redraw)return;
+	Vpu::pushColor();
 
 	Vpu::select(surface);
 	Vpu::clear();
-	Vpu::pushColor();
 	Vpu::setColor(
 		TypeWriter::r,
 		TypeWriter::g,
@@ -637,34 +551,8 @@ void TypeWriter::updateText(double delta) {
 	last_position = current_position;
 }
 void TypeWriter::clearTextBox(size_t max_length, std::string placeholder) {
-	if (placeholder.size() < max_length) {
-		TypeWriter::_get_text = placeholder;
-	} else {
-		TypeWriter::_get_text = placeholder.substr(0, max_length);
-	}
-	TypeWriter::get_text_pos = _get_text.size() - 1;
-	TypeWriter::get_text_x = 0;
-	TypeWriter::get_text_y = 0;
-}
-
-static void _getTextMoveCaretLeft() {
-	TypeWriter::get_text_pos--;
-	if (TypeWriter::get_text_pos <= 0)
-		TypeWriter::get_text_pos = 0;
-}
-
-static void _getTextMoveCaretRight() {
-	TypeWriter::get_text_pos++;
-	if (TypeWriter::get_text_pos >= TypeWriter::_get_text.size())
-		TypeWriter::get_text_pos = TypeWriter::_get_text.size() - 1;
-}
-
-void TypeWriter::updateGetTextBox(double delta) {
-	//if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevOption();
-	//if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextOption();
-	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) TypeWriter::get_text = 2;
-	else if (KEYDOWN(key[ALLEGRO_KEY_LEFT] )) return _getTextMoveCaretLeft();
-	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT])) return _getTextMoveCaretRight();
+	GetTextBox::max_length = max_length+1;
+	GetTextBox::clear(placeholder);	
 }
 
 void TypeWriter::update(double delta) {	
@@ -673,7 +561,8 @@ void TypeWriter::update(double delta) {
 		return;
 	}
 
-	if (TypeWriter::get_text ==1)updateGetTextBox(delta);
+	if (GetTextBox::status == GetTextBox::STATUS_ENABLED)
+		GetTextBox::update();	
 	else if (!enabled && choices.size() > 0)
 		return TypeWriter::updateChoices(delta);		
 	else 
@@ -723,3 +612,233 @@ std::string TypeWriter::getAnswer() {
 	return "";
 }
 
+/*------------------------------------------------------------------------------------------*/
+int GetTextBox::x = 0;
+int GetTextBox::y = 0;
+int GetTextBox::cursor_x = 0;
+int GetTextBox::cursor_y = 0;
+int GetTextBox::caret_pos = 0;
+int GetTextBox::status = 0;
+int GetTextBox::max_length = 16;
+bool GetTextBox::caps = false;
+std::string GetTextBox::text = "";
+const char GetTextBox::chars[80] = {
+	'0','1','2','3','4','5','6','7','8','9',
+	'q','w','e','r','t','y','u','i','o','p',
+	'a','s','d','f','g','h','j','k','l',' ',
+	'z','x','c','v','b','n','m','<','>','.',
+	'0','1','2','3','4','5','6','7','8','9',
+	'Q','W','E','R','T','Y','U','I','O','P',
+	'A','S','D','F','G','H','J','K','L',' ',
+	'Z','X','C','V','B','N','M','<','>','.'
+};
+
+
+void GetTextBox::moveCaretLeft() {
+	caret_pos--;
+	if (caret_pos <= 0)
+		caret_pos = 0;
+}
+
+void GetTextBox::moveCaretRight() {
+	caret_pos++;
+	if (caret_pos >= text.size())
+		caret_pos = text.size() - 1;
+}
+
+void GetTextBox::finalize() {
+	status = STATUS_FINISHED;
+}
+
+void GetTextBox::moveCursorUp() {
+	if (cursor_y > 0)
+		cursor_y--;
+	else 
+		cursor_y = 3;
+}
+
+void GetTextBox::moveCursorDown() {
+	if (cursor_y < 3)
+		cursor_y++;
+	else 
+		cursor_y = 0;
+}
+
+void GetTextBox::moveCursorLeft() {
+	if (cursor_x > 0)
+		cursor_x--;
+	else 
+		cursor_x = 9;
+}
+
+void GetTextBox::moveCursorRight() {
+	if (cursor_x < 9)
+		cursor_x++;
+	else 
+		cursor_x = 0;
+}
+
+void GetTextBox::putchar() {
+	if (caret_pos > text.size() - 1)caret_pos == text.size() - 1;
+	char i = chars[(40 * caps) + (cursor_y * 10) + cursor_x];
+	if (i == '.')return finalize();
+	else if (i == '<')return moveCaretLeft();
+	else if (i == '>')return moveCaretRight();
+	else {
+		int size = text.size();
+		if (!size && !caret_pos) text = i;
+		else if (size == 1 && caret_pos == 0) { text = text + i; caret_pos++; }
+		else if (size >  1 && caret_pos < size-1) { 
+			if (!caret_pos) text = i + text.substr(1, size - 1); 
+			else text = text.substr(0, caret_pos) + i + text.substr(caret_pos, size - caret_pos);
+			caret_pos++;
+		} else {
+			if (caret_pos < max_length - 2) {
+				text = text + i;
+				caret_pos++;
+			} else text = text.substr(0, size - 1) + i;
+		}
+	}
+}
+
+void GetTextBox::clear(std::string placeholder) {
+	cursor_x = 0;
+	cursor_y = 0;
+	if (placeholder.size() < max_length-1) {
+		text = placeholder;
+		caret_pos = text.size() - 1;
+	} else {
+		text = placeholder.substr(0, max_length);
+		caret_pos = max_length - 1;
+	}	
+}
+
+void GetTextBox::backspace() {
+	int size = text.size();
+	if (!size) return;
+	if (caret_pos > 0) {
+		if (caret_pos == size - 1) {
+			text = text.substr(0, caret_pos);			
+		} else text = text.substr(0, caret_pos) + text.substr(caret_pos + 1, text.size() - (caret_pos + 1));
+		caret_pos--;
+	} else {
+		if (text.size() > 0)
+			text = text.substr(1, text.size() - 1);
+	}
+}
+
+void GetTextBox::toggleCaps() {
+	caps ^= 1;
+}
+
+void GetTextBox::update() {
+	if (key[ALLEGRO_KEY_LSHIFT] || key[ALLEGRO_KEY_RSHIFT]) {
+		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ])) return GetTextBox::moveCaretLeft();
+		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ])) return GetTextBox::moveCaretRight();
+	} else {
+		if (KEYDOWN(key[ALLEGRO_KEY_TAB		 ])) return GetTextBox::toggleCaps();
+		if (KEYDOWN(key[ALLEGRO_KEY_BACKSPACE])) return GetTextBox::backspace();
+		if (KEYDOWN(key[ALLEGRO_KEY_ENTER	 ])) return GetTextBox::putchar();
+		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ])) return GetTextBox::moveCursorLeft();
+		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ])) return GetTextBox::moveCursorRight();
+		if (KEYDOWN(key[ALLEGRO_KEY_UP		 ])) return GetTextBox::moveCursorUp();
+		if (KEYDOWN(key[ALLEGRO_KEY_DOWN	 ])) return GetTextBox::moveCursorDown();
+	}
+}
+
+void GetTextBox::draw() {
+	Vpu::pushColor();
+	// Center dialog
+	int cx = (Vpu::width / 2);
+	int cy = (Vpu::height / 4);
+
+	// Find choice rectangle dimensions
+	int max_width = 8 * 20;
+	int max_height = TypeWriter::line_height * 9;
+
+	// Draw double rectangle
+	_draw_panel(
+		(cx - (max_width / 2)) - 8,
+		(cy - (max_height / 2)) - 6,
+		max_width + 16,
+		max_height + 12
+	);
+	_draw_panel(
+		(cx - ((max_width - 16) / 2)) - 8,
+		2 + (cy - (max_height / 2)),
+		max_width,
+		20
+	);
+	Vpu::setColor(
+		255,
+		255,
+		255,
+		TypeWriter::a
+	);
+	size_t strl = al_get_text_width(Vpu::font, text.c_str());
+	Vpu::print(
+		text,
+		cx - (strl / 2),
+		6 + (cy - (max_height / 2))
+	);
+	int pos = text.size()
+		?
+		caret_pos * (strl / text.size())
+		:
+		0;
+
+	Vpu::fillRectangle(
+		(cx - (strl / 2)) + pos,
+		3 + (cy - (max_height / 2)),
+		7, TypeWriter::line_height,
+		TypeWriter::r >> 2,
+		TypeWriter::g >> 2,
+		TypeWriter::b >> 2,
+		TypeWriter::a >> 2
+	);
+	
+	int i = 0;
+	for (int iy = 0; iy < 4; iy++) {
+		for (int ix = 0; ix < 10; ix++) {
+
+			Vpu::setColor(
+				TypeWriter::r >> 1,
+				TypeWriter::g >> 1,
+				TypeWriter::b >> 1
+			);
+			Vpu::rectangle(
+				 (cx - (max_width / 2) + (cursor_x * 16)),
+				-4 + (TypeWriter::line_height * 2) + (cy - (max_height / 2) + (cursor_y * (TypeWriter::line_height * 2))),
+				16, TypeWriter::line_height
+			);
+
+			Vpu::setColor(
+				TypeWriter::r >> 1,
+				TypeWriter::g >> 1,
+				TypeWriter::b >> 1,
+				TypeWriter::a >> 2
+			);
+			if (i % 40 == (((cursor_y * 10) + cursor_x))) {
+				Vpu::setColor(
+					TypeWriter::r,
+					TypeWriter::g,
+					TypeWriter::b,
+					TypeWriter::a
+				);
+			}
+
+
+			std::string st = "";
+			st += chars[i + (caps * 40)];
+			Vpu::print(
+				st,
+				4 + (cx - (max_width / 2)) + (ix * (8 * 2)),
+				(TypeWriter::line_height * 2) +
+
+				(cy - (max_height / 2)) + (iy * (TypeWriter::line_height * 2))
+			);
+			i++;
+		}
+	}
+	Vpu::popColor();
+}

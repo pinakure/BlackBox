@@ -41,18 +41,11 @@ public:
 	static void draw();
 	static void drawChoices();
 	static void drawText();
-	static int  get_text;
-	static int	get_text_pos;
-	static int	get_text_x;
-	static int	get_text_y;
-	static std::string _get_text;
 	static void clearTextBox(size_t max_length = 255, std::string placeholder = "");
-	static void drawGetTextBox();
 	static void update(double delta);
 	static void updateChoices(double delta);
 	static void updateOptions(double delta);
 	static void updateText(double delta);
-	static void updateGetTextBox(double delta);
 	static void loadPicture(std::string filename, int x=0, int y=0, int w=-1, int h=-1);
 	static void clearPicture();
 	
@@ -67,6 +60,37 @@ public:
 	
 	static void enqueue(const char *text);	
 	static std::string getAnswer();
+};
+
+class GetTextBox {
+public:
+	static const int STATUS_DISABLED = 0;
+	static const int STATUS_ENABLED = 1;
+	static const int STATUS_FINISHED = 2;
+	static int x;
+	static int y;
+	static int cursor_x;
+	static int cursor_y;
+	static int caret_pos;
+	static int status;
+	static int max_length;
+	static bool caps;
+	static std::string text;
+	static const char chars[80];
+
+	static void draw();
+	static void moveCaretLeft();
+	static void moveCaretRight();
+	static void finalize();
+	static void moveCursorUp();
+	static void moveCursorDown();
+	static void moveCursorLeft();
+	static void moveCursorRight();
+	static void putchar();
+	static void clear(std::string placeholder = "");
+	static void toggleCaps();
+	static void backspace();
+	static void update();
 };
 
 #endif

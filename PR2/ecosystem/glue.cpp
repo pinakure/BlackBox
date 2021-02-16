@@ -332,18 +332,18 @@ pythoncommand(typewriter_setcolor) {
 pythoncommand(typewriter_prompt) {
 	char* placeholder=NULL;
 	if (!PyArg_ParseTuple(args, "|s", &placeholder)) return NULL;
-	if (TypeWriter::get_text == 0) {
+	if (GetTextBox::status == GetTextBox::STATUS_DISABLED) {
 		TypeWriter::clearTextBox(16, placeholder ? placeholder : "");
-		TypeWriter::get_text = 1;
+		GetTextBox::status = GetTextBox::STATUS_ENABLED;
 	}
 	return PyLong_FromLong(1);
 }
 
 pythoncommand(typewriter_gettext) {
-	if (TypeWriter::get_text == 2) {
-		std::string ret = TypeWriter::_get_text;
-		TypeWriter::get_text = 0;
-		TypeWriter::_get_text = "";
+	if (GetTextBox::status == GetTextBox::STATUS_FINISHED) {
+		std::string ret = GetTextBox::text;
+		GetTextBox::status = GetTextBox::STATUS_DISABLED;
+		GetTextBox::text == "";
 		return Py_BuildValue("s", ret.c_str());
 	}
 	return PyLong_FromLong(0); 
