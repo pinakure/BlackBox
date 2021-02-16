@@ -41,10 +41,16 @@ public:
 	static void draw();
 	static void drawChoices();
 	static void drawText();
+	static int  get_text;
+	static int	get_text_pos;
+	static std::string _get_text;
+	static void clearTextBox(size_t max_length = 255, std::string placeholder = "");
+	static void drawGetTextBox();
 	static void update(double delta);
 	static void updateChoices(double delta);
 	static void updateOptions(double delta);
 	static void updateText(double delta);
+	static void updateGetTextBox(double delta);
 	static void loadPicture(std::string filename, int x=0, int y=0, int w=-1, int h=-1);
 	static void clearPicture();
 	

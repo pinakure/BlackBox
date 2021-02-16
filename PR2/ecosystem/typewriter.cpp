@@ -34,6 +34,10 @@ bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
 double	TypeWriter::final_height = TYPEWRITER_HEIGHT;
 bool	TypeWriter::needs_redraw;
+int		TypeWriter::get_text = 0;
+std::string TypeWriter::_get_text = "";
+int		TypeWriter::get_text_pos = 0;
+
 static Surface surface;
 static Surface overlay;
 
@@ -55,7 +59,9 @@ const int max_size = 4;
 static float radius = 0.0f;
 
 void TypeWriter::draw() {
-	if (!enabled && choices.size() > 0) 
+	if (TypeWriter::get_text==1)
+		TypeWriter::drawGetTextBox();
+    else if (!enabled && choices.size() > 0) 
 		TypeWriter::drawChoices();
 	else
 		TypeWriter::drawText();
@@ -102,11 +108,92 @@ static void findOptionsGeometry(int& width, int& height, std::map<std::string, i
 	}
 }
 
-void TypeWriter::drawChoices() {
+void TypeWriter::drawGetTextBox() {
 	// Center dialog
 	int cx = (Vpu::width / 2);
 	int cy = (Vpu::height / 4);
 	
+	// Find choice rectangle dimensions
+	int max_width = 8*20;
+	int max_height = line_height*9;
+	
+	// Draw double rectangle
+	_draw_panel(
+		(cx - (max_width / 2)) - 8,
+		(cy - (max_height / 2)) - 6,
+		max_width + 16,
+		max_height + 12
+	);
+	_draw_panel(
+		(cx - ((max_width-16) / 2)) - 8,
+		2 + (cy - (max_height / 2)),
+		max_width ,
+		20
+	);
+	Vpu::setColor(
+		255,
+		255,
+		255,
+		TypeWriter::a
+	);
+	size_t strl = al_get_text_width(Vpu::font, _get_text.c_str());
+	Vpu::print(
+		_get_text,
+		cx - (strl / 2),
+		6 + (cy - (max_height / 2))
+	);
+	int pos = get_text_pos*(strl/_get_text.size());
+	Vpu::fillRectangle(
+		(cx - (strl / 2)) + pos,
+		3 + (cy - (max_height / 2)),
+		7, line_height,
+		TypeWriter::r >> 2,
+		TypeWriter::g >> 2,
+		TypeWriter::b >> 2,
+		TypeWriter::a >> 2
+	);
+
+	char chars[] = { 
+		'0','1','2','3','4','5','6','7','8','9',
+		'Q','W','E','R','T','Y','U','I','O','P',
+		'A','S','D','F','G','H','J','K','L',' ',
+		'Z','X','C','V','B','N','M','<','>','.',
+		'0','1','2','3','4','5','6','7','8','9',
+		'q','w','e','r','t','y','u','i','o','p',
+		'a','s','d','f','g','h','j','k','l',' ',
+		'z','x','c','v','b','n','m','<','>','.'
+	};
+
+	static bool uppercase = false;
+	Vpu::pushColor();
+	int i = 0;
+	for (int iy = 0; iy <4 ; iy++) {
+		for (int ix = 0; ix < 10; ix++) {
+			Vpu::setColor(
+				TypeWriter::r,
+				TypeWriter::g,
+				TypeWriter::b,
+				TypeWriter::a
+			);
+			std::string st = "";
+			st += chars[i + (uppercase * 40)];
+			Vpu::print(
+				st,
+				4 + (cx - (max_width / 2)) + (ix * (8 * 2)),
+				(line_height * 2) +
+
+				(cy - (max_height / 2)) + (iy * (line_height * 2))
+			);
+			i++;
+		}
+	}
+}
+
+void TypeWriter::drawChoices() {
+	// Center dialog
+	int cx = (Vpu::width / 2);
+	int cy = (Vpu::height / 4);
+
 	// Find choice rectangle dimensions
 	int max_width = 0;
 	int max_height = 0;
@@ -138,9 +225,9 @@ void TypeWriter::drawChoices() {
 	// Draw question//menu title
 	Vpu::pushColor();
 	Vpu::setColor(
-		255 ,
-		255 ,
-		255 ,
+		255,
+		255,
+		255,
 		TypeWriter::a
 	);
 	Vpu::print(
@@ -547,6 +634,34 @@ void TypeWriter::updateText(double delta) {
 	last_width = width;
 	last_position = current_position;
 }
+void TypeWriter::clearTextBox(size_t max_length, std::string placeholder) {
+	if (placeholder.size() < max_length) {
+		TypeWriter::_get_text = placeholder;
+	} else {
+		TypeWriter::_get_text = placeholder.substr(0, max_length);
+	}
+	TypeWriter::get_text_pos = _get_text.size() - 1;
+}
+
+static void _getTextMoveCaretLeft() {
+	TypeWriter::get_text_pos--;
+	if (TypeWriter::get_text_pos <= 0)
+		TypeWriter::get_text_pos = 0;
+}
+
+static void _getTextMoveCaretRight() {
+	TypeWriter::get_text_pos++;
+	if (TypeWriter::get_text_pos >= TypeWriter::_get_text.size())
+		TypeWriter::get_text_pos = TypeWriter::_get_text.size() - 1;
+}
+
+void TypeWriter::updateGetTextBox(double delta) {
+	//if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevOption();
+	//if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextOption();
+	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) TypeWriter::get_text = 2;
+	else if (KEYDOWN(key[ALLEGRO_KEY_LEFT] )) return _getTextMoveCaretLeft();
+	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT])) return _getTextMoveCaretRight();
+}
 
 void TypeWriter::update(double delta) {	
 	if (wait_time > 0) {
@@ -554,9 +669,9 @@ void TypeWriter::update(double delta) {
 		return;
 	}
 
-	if (!enabled && choices.size() > 0)
-		return TypeWriter::updateChoices(delta);
-		
+	if (TypeWriter::get_text ==1)updateGetTextBox(delta);
+	else if (!enabled && choices.size() > 0)
+		return TypeWriter::updateChoices(delta);		
 	else 
 		TypeWriter::updateText(delta);	
 }

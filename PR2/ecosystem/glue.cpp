@@ -198,8 +198,8 @@ pythoncommand(vpu_deletesprite){
 }
 pythoncommand(vpu_createsprite){
 	int priority = 0;
-	char *filename;
-	if(!PyArg_ParseTuple(args, "s|i", &filename, &priority)) return NULL;
+	char* filename;
+	if (!PyArg_ParseTuple(args, "s|i", &filename, &priority)) return NULL;
 	long int handle = Vpu::allocateSprite(filename, priority);
 	return PyLong_FromLong(handle);
 }
@@ -329,6 +329,26 @@ pythoncommand(typewriter_setcolor) {
 	return PyLong_FromLong(1);
 }
 
+pythoncommand(typewriter_prompt) {
+	char* placeholder=NULL;
+	if (!PyArg_ParseTuple(args, "|s", &placeholder)) return NULL;
+	if (TypeWriter::get_text == 0) {
+		TypeWriter::clearTextBox(16, placeholder ? placeholder : "");
+		TypeWriter::get_text = 1;
+	}
+	return PyLong_FromLong(1);
+}
+
+pythoncommand(typewriter_gettext) {
+	if (TypeWriter::get_text == 2) {
+		std::string ret = TypeWriter::_get_text;
+		TypeWriter::get_text = 0;
+		TypeWriter::_get_text = "";
+		return Py_BuildValue("s", ret.c_str());
+	}
+	return PyLong_FromLong(0); 
+}
+
 pythoncommand(typewriter_setfont) {
 	int font_index;
 	if (!PyArg_ParseTuple(args, "i", &font_index)) return NULL;
@@ -452,8 +472,10 @@ static PyMethodDef TypeWriterMethods[] = {
 	{"setposition"	, typewriter_setposition, METH_VARARGS, "typewriter.setposition(x, y) : "},
     {"setsize"		, typewriter_setsize    , METH_VARARGS, "typewriter.setsize(w, h) : "},
     {"setfont"		, typewriter_setfont    , METH_VARARGS, "typewriter.setfont(font_handle) : "},
-    {"setcolor"		, typewriter_setcolor   , METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
-	
+	{"setcolor"		, typewriter_setcolor   , METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
+	{"prompt"		, typewriter_prompt		, METH_VARARGS, "typewriter.prompt(placeholder='') : Opens prompt dialog optionally presenting given placeholder text"},
+	{"gettext"		, typewriter_gettext	, METH_VARARGS, "typewriter.gettext() : Polls text input dialog upon finished is activated, the it returns text"},
+
 	{"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available choice array"},
 	{"getchoice"    , typewriter_getchoice  , METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
 	{"ready"		, typewriter_ready		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},

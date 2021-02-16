@@ -141,16 +141,26 @@ class functions():
     @staticmethod
     def typewriter_menu():
         while(1):
-            typewriter.addchoice('setcolor'     , 'c')
-            typewriter.addchoice('setfont'      , 'f')
-            typewriter.addchoice('setposition ' , 'p')
-            typewriter.addchoice('setsize'      , 's')
-            typewriter.addchoice('Back'         , 'x')
+            typewriter.addchoice(' gettext'      , 'g')
+            typewriter.addchoice(' setcolor'     , 'c')
+            typewriter.addchoice(' setfont'      , 'f')
+            typewriter.addchoice(' setposition ' , 'p')
+            typewriter.addchoice(' setsize'      , 's')
+            typewriter.addchoice('Back'          , 'x')
             choice = ''
             while choice=='':
                 vpu.update()
                 choice = typewriter.getchoice("TypeWriter Functions")
             if   choice == 'x': return
+            elif choice == 'g': 
+                typewriter.prompt('Unnamed')
+                text = 0
+                while not text:
+                    vpu.update()
+                    text=typewriter.gettext()                    
+                typewriter.enqueue(text)
+                while not typewriter.ready():
+                    vpu.update()
             elif choice == 'c': options.typewriter_color()
             elif choice == 'f': typewriter.setfont(1)
             elif choice == 'p': typewriter.setposition(0,0)
