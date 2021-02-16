@@ -114,14 +114,18 @@ static void findOptionsGeometry(int& width, int& height, std::map<std::string, i
 	width = 0;
 	height = 0;
 	std::map<std::string, int&>::iterator it;
+	int var_width = al_get_text_width(Vpu::font, "   ");
 	for (it = choices.begin(); it != choices.end(); it++) {
-		int w = al_get_text_width(Vpu::font, it->first.c_str())+64;
+		int w = al_get_text_width(Vpu::font, it->first.c_str())+var_width;
 		width = w > width ? w : width;
 		height += TypeWriter::line_height;
 	}
 }
 
+static int padding = 16;
+
 void TypeWriter::drawChoices() {
+	// Save previous color
 	Vpu::pushColor();
 	
 	// Center dialog
@@ -144,16 +148,17 @@ void TypeWriter::drawChoices() {
 			options_max_height,
 			options
 		);
+		options_max_width += padding;
 		max_width = max_width < options_max_width ? options_max_width : max_width;
 		max_height += options_max_height;
 	}
 	
 	// Draw double rectangle
 	_draw_panel(
-		(cx - (max_width / 2)) - 8,
-		(cy - (max_height / 2)) - 6,
-		max_width + 18,
-		max_height + 10
+		(cx - (max_width / 2)) - (padding >> 1),
+		(cy - (max_height / 2)) - (padding >> 1),
+		max_width + padding,
+		max_height + padding
 	);
 	
 	// Draw question//menu title
@@ -165,12 +170,11 @@ void TypeWriter::drawChoices() {
 	);
 	Vpu::print(
 		TypeWriter::question,
-		cx - (al_get_text_width(Vpu::font, TypeWriter::question.c_str()) / 2),
-		(cy - (max_height / 2) - line_height) - 2
+		cx - (al_get_text_width(Vpu::font, TypeWriter::question.c_str()) >>1),
+		(cy - ((max_height+padding)>>1) - line_height) 
 	);
 
-
-	// Draw choices
+	// Draw options
 	static int q = 0;
 	q += 2;
 	q %= 128;
@@ -178,6 +182,7 @@ void TypeWriter::drawChoices() {
 	std::map<std::string, int &>::iterator oit;
 	
 	for (oit = options.begin(); oit != options.end(); oit++, line++) {
+		// Draw variable name
 		Vpu::setColor(
 			TypeWriter::r >> 1,
 			TypeWriter::g >> 1,
@@ -192,28 +197,28 @@ void TypeWriter::drawChoices() {
 				(TypeWriter::a)
 			);			
 		}
+		char buffer[6] = "";
+		sprintf_s(buffer, "%03d", oit->second);
+		int var_width = al_get_text_width(Vpu::font, buffer);
 		Vpu::print(
 			oit->first,
-			cx - (al_get_text_width(Vpu::font, oit->first.c_str()) + 64) / 2,
-			(cy - (max_height / 2)) + (line * line_height) + 2
+			cx - ((al_get_text_width(Vpu::font, oit->first.c_str()) + var_width)>>1),
+			(cy - (max_height / 2)) + (line * line_height)
 		);
+		// Draw variable value
 		Vpu::setColor(
 			255,
 			255,
 			255,
 			TypeWriter::a
 		);
-		char buffer[6] = "";
-		sprintf_s(buffer, "%03d", oit->second);
 		Vpu::print(
 			buffer,
-			cx + max_width - 64,
-			(cy - (max_height / 2)) + (line * line_height) + 2
+			(cx + (max_width>>1) - var_width)-(padding>>1),
+			(cy - (max_height / 2)) + (line * line_height)
 		);
-
-
 	}
-	
+	//Draw choices
 	std::map<std::string, std::string>::iterator it;
 	for (it = choices.begin(); it != choices.end(); it++, line++) {
 		Vpu::setColor(
@@ -234,18 +239,11 @@ void TypeWriter::drawChoices() {
 				(TypeWriter::b >> 1) + q,
 				(TypeWriter::a)
 			);
-			/*
-			int r = rand() % 100;
-			if (r == 1)cx++;
-			else if (r == 2)cx--;
-			else if (r == 3)cy--;
-			else if (r == 4)cy++;
-			*/
 		}
 		Vpu::print(
 			it->first,
 			cx - al_get_text_width(Vpu::font, it->first.c_str()) / 2,
-			(cy - (max_height / 2)) + (line * line_height) + 2
+			(cy - (max_height / 2)) + (line * line_height) 
 		);
 	}		
 
@@ -775,7 +773,9 @@ void GetTextBox::update() {
 }
 
 void GetTextBox::draw() {
+	// save current color
 	Vpu::pushColor();
+
 	// Center dialog
 	int cx = (Vpu::width / 2);
 	int cy = (Vpu::height / 4);
@@ -784,7 +784,7 @@ void GetTextBox::draw() {
 	int max_width = 8 * 20;
 	int max_height = TypeWriter::line_height * 9;
 
-	// Draw double rectangle
+	// Draw input panel rectangle
 	_draw_panel(
 		(cx - (max_width / 2)) - 8,
 		(cy - (max_height / 2)) - 6,
@@ -797,6 +797,8 @@ void GetTextBox::draw() {
 		max_width,
 		20
 	);
+
+	// Draw output text
 	Vpu::setColor(
 		255,
 		255,
@@ -809,13 +811,16 @@ void GetTextBox::draw() {
 		cx - (strl / 2),
 		6 + (cy - (max_height / 2))
 	);
+	
+	// Sanitize caret
 	if (caret_pos >= max_length - 2)caret_pos = max_length - 2;
+	
+	// Draw caret
 	int pos = text.size()
 		?
 		caret_pos * (strl / text.size())
 		:
 			0;
-
 	Vpu::fillRectangle(
 		(cx - (strl / 2)) + pos,
 		3 + (cy - (max_height / 2)),
@@ -826,21 +831,30 @@ void GetTextBox::draw() {
 		TypeWriter::a >> 2
 	);
 	
+	
+	// Draw cursor background
+	Vpu::fillRectangle(
+		(cx - (max_width / 2) + (cursor_x * 16))-1,
+		-4 + (TypeWriter::line_height * 2) + (cy - (max_height / 2) + (cursor_y * (TypeWriter::line_height * 2))),
+		18, TypeWriter::line_height,
+		TypeWriter::r >> 4,
+		TypeWriter::g >> 4,
+		TypeWriter::b >> 4,
+		TypeWriter::a >> 4
+	);
+	Vpu::fillRectangle(
+		(cx - (max_width / 2) + (cursor_x * 16)),
+		-5 + (TypeWriter::line_height * 2) + (cy - (max_height / 2) + (cursor_y * (TypeWriter::line_height * 2))),
+		16, TypeWriter::line_height+2,
+		TypeWriter::r >> 4,
+		TypeWriter::g >> 4,
+		TypeWriter::b >> 4,
+		TypeWriter::a >> 4
+	);
+	// Draw letter grid
 	int i = 0;
 	for (int iy = 0; iy < 4; iy++) {
 		for (int ix = 0; ix < 10; ix++) {
-
-			Vpu::setColor(
-				TypeWriter::r >> 1,
-				TypeWriter::g >> 1,
-				TypeWriter::b >> 1
-			);
-			Vpu::rectangle(
-				 (cx - (max_width / 2) + (cursor_x * 16)),
-				-4 + (TypeWriter::line_height * 2) + (cy - (max_height / 2) + (cursor_y * (TypeWriter::line_height * 2))),
-				16, TypeWriter::line_height
-			);
-
 			Vpu::setColor(
 				TypeWriter::r >> 1,
 				TypeWriter::g >> 1,
@@ -862,11 +876,12 @@ void GetTextBox::draw() {
 				st,
 				4 + (cx - (max_width / 2)) + (ix * (8 * 2)),
 				(TypeWriter::line_height * 2) +
-
 				(cy - (max_height / 2)) + (iy * (TypeWriter::line_height * 2))
 			);
 			i++;
 		}
 	}
+
+	// Restore previous color
 	Vpu::popColor();
 }
