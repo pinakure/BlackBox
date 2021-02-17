@@ -571,8 +571,8 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
 	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
-	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
+	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
     {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
 	{NULL, NULL, 0, NULL}
