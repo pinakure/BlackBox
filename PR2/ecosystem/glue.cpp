@@ -469,23 +469,20 @@ static PyMethodDef ConsoleMethods[] = {
 
 static PyMethodDef TypeWriterMethods[] = {
 	/* TBI */
-	{"setposition"	, typewriter_setposition, METH_VARARGS, "typewriter.setposition(x, y) : "},
-    {"setsize"		, typewriter_setsize    , METH_VARARGS, "typewriter.setsize(w, h) : "},
-    {"setfont"		, typewriter_setfont    , METH_VARARGS, "typewriter.setfont(font_handle) : "},
-	{"setcolor"		, typewriter_setcolor   , METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter background color or transparency"},
-	{"prompt"		, typewriter_prompt		, METH_VARARGS, "typewriter.prompt(placeholder='') : Opens prompt dialog optionally presenting given placeholder text"},
-	{"gettext"		, typewriter_gettext	, METH_VARARGS, "typewriter.gettext() : Polls text input dialog upon finished is activated, the it returns text"},
-
 	{"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available choice array"},
-	{"getchoice"    , typewriter_getchoice  , METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
-	{"ready"		, typewriter_ready		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},
-
 	{"addoption"    , typewriter_addoption	, METH_VARARGS, "addchoice(name, value) : Add a pair of name: pointer to integer variable to the available option array"},
 	{"clear"	    , typewriter_clear		, METH_VARARGS, "clear() : Clear option and choice list"},
-	
+	{"clearpic"		, typewriter_clearpic	, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
 	{"enqueue"		, typewriter_enqueue	, METH_VARARGS, "typewriter.enqueue(text) : Enqueue message into typewriter buffer and open if if closed"},
+	{"getchoice"    , typewriter_getchoice  , METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
+	{"gettext"		, typewriter_gettext	, METH_VARARGS, "typewriter.gettext() : Polls text input dialog upon finished is activated, the it returns text"},
 	{"loadpic"		, typewriter_loadpic	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
-    {"clearpic"		, typewriter_clearpic	, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
+	{"prompt"		, typewriter_prompt		, METH_VARARGS, "typewriter.prompt(placeholder='') : Opens prompt dialog optionally presenting given placeholder text"},
+	{"ready"		, typewriter_ready		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},
+	{"setposition"	, typewriter_setposition, METH_VARARGS, "typewriter.setposition(x, y) : Set the origin point for the typewriter box "},
+	{"setcolor"		, typewriter_setcolor   , METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter box color scheme"},
+	{"setfont"		, typewriter_setfont    , METH_VARARGS, "typewriter.setfont(font_handle) : Switch font to be used in typewriter box"},
+	{"setsize"		, typewriter_setsize    , METH_VARARGS, "typewriter.setsize(w, h) : Set new dimensions for the typewriter box"},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -493,51 +490,48 @@ static PyMethodDef TypeWriterMethods[] = {
 
 static PyMethodDef BlackBoxMethods[] = {
     {"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
-    {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
     {"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
+    {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
 	{NULL, NULL, 0, NULL}
 };
 
 /* Video Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef VpuMethods[] = {
-	/* TBI */
-	{"loadfont"		, tbi					, METH_VARARGS, "vpu.loadfont(filename, size) : "},
-	{"setfont"		, tbi					, METH_VARARGS, "vpu.setfont(font_handle) : "},
-	{"deletefont"	, tbi					, METH_VARARGS, "vpu.deletefont(font_handle) : "},
-    /* TBI */
-
-	{"fading"		, vpu_fading			, METH_VARARGS, "vpu.fading() : Return True is fade in / fade out is activated" },
-	{"fillrect"		, vpu_fillrect			, METH_VARARGS, "vpu.filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
-	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
-	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
-	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
-	{"drawanim"		,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
-	{"deleteanim"	, vpu_deleteanim		, METH_VARARGS, "vpu.deleteanim(handle) : Delete Animation identified by given Handle" },
 	{"createanim"	, vpu_createanim		, METH_VARARGS, "vpu.createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
-	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
-	{"deletesprite"	, vpu_deletesprite		, METH_VARARGS, "vpu.deletesprite(handle) : Delete Sprite identified by given Handle" },
 	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
-	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
-	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },
-	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
-	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
-	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
-	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
-	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
-	{"setcolor"		, vpu_setcolor			, METH_VARARGS, "vpu.setcolor(r, g, b, a) : Sets current painting color"},
-	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
-	{"scale"		, vpu_scale				, METH_VARARGS, "vpu.scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
-	{"update"		, vpu_update			, METH_VARARGS, "vpu.update() : Allow blackbox engine to perform its rendering based input and output operations"},
-	{"fill"			, vpu_fill				, METH_VARARGS, "vpu.fill(r, g, b, a) : Fill selected bitmap with given color or default color"},
+	{"deleteanim"	, vpu_deleteanim		, METH_VARARGS, "vpu.deleteanim(handle) : Delete Animation identified by given Handle" },
+	{"deletefont"	, tbi					, METH_VARARGS, "vpu.deletefont(font_handle) : Delete Font identified by given Handle"},
+	{"deletesprite"	, vpu_deletesprite		, METH_VARARGS, "vpu.deletesprite(handle) : Delete Sprite identified by given Handle" },
+	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
+	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
+	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
+	{"drawanim"		,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
+	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
+	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
+	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},
 	{"fadein"		, vpu_fadein			, METH_VARARGS, "vpu.fadein() : Fade screen from black"},
 	{"fadeout"		, vpu_fadeout			, METH_VARARGS, "vpu.fadeout() : Fade screen to black"},
-	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},
-	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
+	{"fading"		, vpu_fading			, METH_VARARGS, "vpu.fading() : Return True is fade in / fade out is activated" },
+	{"fill"			, vpu_fill				, METH_VARARGS, "vpu.fill(r, g, b, a) : Fill selected bitmap with given color or default color"},
+	{"fillrect"		, vpu_fillrect			, METH_VARARGS, "vpu.filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
+	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
+	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
+	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
+	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
+	{"loadfont"		, tbi					, METH_VARARGS, "vpu.loadfont(filename, size) : Loads a font from given filemane and prerenders it at given size "},
+	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
+	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
+	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
 	{"select"		, vpu_select			, METH_VARARGS, "vpu.select(layer) : Select given layer to perform next graphic operations onto it"},
+	{"setcolor"		, vpu_setcolor			, METH_VARARGS, "vpu.setcolor(r, g, b, a) : Sets current painting color"},
+	{"setfont"		, tbi					, METH_VARARGS, "vpu.setfont(font_handle) : Sets current font to the one identified by given handle"},
+	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
+	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
+	{"scale"		, vpu_scale				, METH_VARARGS, "vpu.scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
 	{"textout"		, vpu_textout			, METH_VARARGS, "vpu.textout(text, x, y) : Print given text at given coordinates"},
-	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
+	{"update"		, vpu_update			, METH_VARARGS, "vpu.update() : Allow blackbox engine to perform its rendering based input and output operations"},
 	{NULL, NULL, 0, NULL}
 };
 

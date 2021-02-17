@@ -1,0 +1,15 @@
+=====textout=====
+Draw given text at given x, y coordinates in the selected video surface
+
+^Argument ^Description ^
+|  text  |Text to be typed on the selected surface |
+|  x  |Horizontal coordinate |
+|  y  |Vertical coordinate |
+
+----
+====Example====
+<Code>
+vpu.select(0)
+vpu.textout("hello", 16, 16)
+vpu.update()
+</Code>

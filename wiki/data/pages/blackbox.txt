@@ -1,7 +1,12 @@
 =====BlackBox=====
 ----
 ===Scripting API===
-^command             ^ arguments                        ^ Description                                                                        ^
-|[[ctrlc|]]             | | Returns TRUE if CTRL+C was pressed |
-|[[version|]]               | | Return current BlackBox engine version|
-|[[epoch|]]             | | Return current engine epoch uptime|
+^statement                      ^arguments                   ^Description                                   ^
+|[[blackbox:createbool        ]]|                            |Create a boolean variable                     |
+|[[blackbox:createdecimal     ]]|                            |Create a decimal variable                     |
+|[[blackbox:createinteger     ]]|                            |Create a integer variable                     |
+|[[blackbox:createstring      ]]|                            |Create a string variable                      |
+|[[blackbox:ctrlc             ]]|                            |Returns TRUE if CTRL+C was pressed            |
+|[[blackbox:deletevar         ]]|                            |Delete a variable by its handle               |
+|[[blackbox:epoch             ]]|                            |Return current engine epoch uptime            |
+|[[blackbox:version           ]]|                            |Return current BlackBox engine version        |

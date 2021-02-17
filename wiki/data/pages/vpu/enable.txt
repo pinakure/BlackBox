@@ -1,0 +1,15 @@
+=====enable=====
+Toggle on specified surface handle.\\
+The single argument for this function can have diferent meaning, see below.
+
+^ layer ^Description ^
+|  0  | Default BG Layer |
+|  1  | Default FG Layer |
+|  2  | Default Overlay Layer |
+| surface_handle | Handle identifying surface to be enabled |
+
+----
+====Example====
+<Code>
+vpu.enable(1) #Foreground layer ON
+</Code>

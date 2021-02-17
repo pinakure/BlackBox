@@ -36,3 +36,219 @@
 1613519560	::1	E	console:cls	smiker			0
 1613519565	::1	E	console:cls	smiker			-10
 1613519573	::1	E	console:cls	smiker			4
+1613581760	::1	C	ctrlc	smiker	created		312
+1613581777	::1	E	ctrlc	smiker			4
+1613581943	::1	E	ctrlc	smiker			-4
+1613582011	::1	E	ctrlc	smiker			-4
+1613582204	::1	E	ctrlc	smiker			2
+1613582365	::1	E	ctrlc	smiker			217
+1613582381	::1	E	ctrlc	smiker			4
+1613582399	::1	E	ctrlc	smiker			0
+1613582408	::1	E	ctrlc	smiker			1
+1613582431	::1	E	ctrlc	smiker			8
+1613582570	::1	C	template:script	smiker	created		182
+1613582661	::1	C	version	smiker	created		248
+1613582875	::1	C	epoch	smiker	created		286
+1613582993	::1	E	console	smiker			-292
+1613583063	::1	E	vpu	smiker			-29
+1613583102	::1	E	start	smiker			20
+1613583719	::1	C	typewriter	smiker	created		1150
+1613583764	::1	E	typewriter	smiker			45
+1613584446	::1	C	createanim	smiker	created		761
+1613584780	::1	C	createsprite	smiker	created		355
+1613584797	::1	E	createsprite	smiker			23
+1613584862	::1	C	createsurf	smiker	created		182
+1613584875	::1	C	dimensions	smiker	created		182
+1613584899	::1	C	disable	smiker	created		182
+1613584908	::1	C	deleteanim	smiker	created		182
+1613584915	::1	C	deletesprite	smiker	created		182
+1613584921	::1	C	deletesurf	smiker	created		182
+1613584926	::1	C	drawanim	smiker	created		182
+1613584930	::1	C	drawsprite	smiker	created		182
+1613584934	::1	C	drawsurf	smiker	created		182
+1613584937	::1	C	enable	smiker	created		182
+1613584941	::1	C	fadein	smiker	created		182
+1613584946	::1	C	fadeout	smiker	created		182
+1613584949	::1	C	fill	smiker	created		182
+1613584954	::1	C	frames	smiker	created		182
+1613584958	::1	C	fullscreen	smiker	created		182
+1613584962	::1	C	print	smiker	created		182
+1613584966	::1	C	pset	smiker	created		182
+1613584970	::1	C	restart	smiker	created		182
+1613584975	::1	C	rotate	smiker	created		182
+1613584980	::1	C	scale	smiker	created		182
+1613585118	::1	E	createsurf	smiker			242
+1613585126	::1	E	createsurf	smiker			2
+1613585301	::1	E	createsurf	smiker			88
+1613585513	::1	E	dimensions	smiker			220
+1613585539	::1	E	createsprite	smiker			1
+1613585664	::1	E	disable	smiker			-5
+1613585683	::1	E	createanim	smiker			-3
+1613585802	::1	E	disable	smiker			61
+1613586016	::1	E	deleteanim	smiker			402
+1613586032	::1	E	deleteanim	smiker			0
+1613586055	::1	E	deleteanim	smiker			-6
+1613586086	::1	E	deleteanim	smiker			6
+1613586162	::1	E	deletesprite	smiker			162
+1613586184	::1	E	deletesprite	smiker			-92
+1613586306	::1	E	deletesurf	smiker			50
+1613586317	::1	E	deletesurf	smiker			-3
+1613586484	::1	E	drawanim	smiker			270
+1613586571	::1	E	drawsprite	smiker			215
+1613586614	::1	E	drawsurf	smiker			214
+1613586787	::1	E	enable	smiker			186
+1613586798	::1	E	enable	smiker			6
+1613586956	::1	E	fadein	smiker			413
+1613586967	::1	E	fadein	smiker			-7
+1613587019	::1	E	fadein	smiker			9
+1613587053	::1	E	fadeout	smiker			404
+1613587164	::1	E	fill	smiker			387
+1613587194	::1	E	frames	smiker	[Example] 		136
+1613587217	::1	E	frames	smiker	[Example] 		2
+1613587356	::1	E	frames	smiker			48
+1613587429	::1	E	frames	smiker			149
+1613587637	::1	E	vpu	smiker			140
+1613587795	::1	C	fillrect	smiker	created		452
+1613587918	::1	E	fullscreen	smiker			111
+1613587925	::1	E	fullscreen	smiker			0
+1613588127	::1	E	print	smiker			107
+1613588144	::1	E	print	smiker			30
+1613588206	::1	E	vpu	smiker			130
+1613588295	::1	C	line	smiker	created		345
+1613588370	::1	E	pset	smiker			182
+1613588462	::1	E	vpu	smiker			154
+1613588507	::1	C	rect	smiker	created		787
+1613588543	::1	E	rect	smiker			-312
+1613588600	::1	E	restart	smiker			-8
+1613588719	::1	E	scale	smiker			133
+1613588855	::1	E	rotate	smiker			98
+1613588911	::1	E	rotate	smiker			3
+1613588921	::1	E	scale	smiker			48
+1613589010	::1	C	select	smiker	created		396
+1613589097	::1	C	setcolor	smiker	created		301
+1613589156	::1	C	update	smiker	created		99
+1613589182	::1	E	update	smiker			48
+1613589313	::1	C	setrotation	smiker	created		303
+1613589322	::1	E	setrotation	smiker	[Example] 		6
+1613589367	::1	C	setscale	smiker	created		345
+1613589624	::1	D	setcolor	smiker	removed		-301
+1613589670	::1	E	typewriter	smiker			27
+1613589677	::1	C	typewriter:setcolor	smiker	created		300
+1613589798	::1	E	vpu	smiker			-324
+1613589814	::1	D	createanim	smiker	removed		-758
+1613589821	::1	C	vpu:createanim	smiker	created		758
+1613589853	::1	D	createsprite	smiker	removed		-379
+1613589859	::1	C	vpu:createsprite	smiker	created		379
+1613589906	::1	D	createsurf	smiker	removed		-514
+1613589931	::1	C	vpu:createsurf	smiker	created		514
+1613589955	::1	D	dimensions	smiker	removed		-402
+1613589970	::1	C	vpu:dimensions	smiker	created		402
+1613589994	::1	D	disable	smiker	removed		-238
+1613590000	::1	C	vpu:disable	smiker	created		238
+1613590012	::1	D	deleteanim	smiker	removed		-584
+1613590019	::1	C	vpu:deleteanim	smiker	created		584
+1613590033	::1	D	deletesprite	smiker	removed		-252
+1613590037	::1	C	vpu:deletesprite	smiker	created		252
+1613590047	::1	D	deletesurf	smiker	removed		-229
+1613590051	::1	C	vpu:deletesurf	smiker	created		229
+1613590059	::1	D	drawanim	smiker	removed		-452
+1613590061	::1	C	vpu:drawanim	smiker	created		452
+1613590071	::1	D	drawsprite	smiker	removed		-397
+1613590076	::1	C	vpu:drawsprite	smiker	created		397
+1613590082	::1	D	drawsurf	smiker	removed		-396
+1613590085	::1	C	vpu:drawsurf	smiker	created		396
+1613590100	::1	E	vpu:drawsurf	smiker			-5
+1613590140	::1	E	vpu	smiker			28
+1613590156	::1	D	enable	smiker	removed		-374
+1613590167	::1	C	vpu:enable	smiker	created		374
+1613590174	::1	D	fadein	smiker	removed		-597
+1613590184	::1	C	vpu:fadein	smiker	created		597
+1613590195	::1	D	fadeout	smiker	removed		-586
+1613590202	::1	C	vpu:fadeout	smiker	created		586
+1613590210	::1	D	fill	smiker	removed		-569
+1613590219	::1	C	vpu:fill	smiker	created		569
+1613590229	::1	D	fillrect	smiker	removed		-452
+1613590235	::1	C	vpu:fillrect	smiker	created		452
+1613590246	::1	D	frames	smiker	removed		-517
+1613590253	::1	C	vpu:frames	smiker	created		517
+1613590270	::1	C	vpu:fullscreen	smiker	created		293
+1613590273	::1	D	fullscreen	smiker	removed		-293
+1613590350	::1	E	vpu	smiker			-267
+1613590365	::1	D	line	smiker	removed		-345
+1613590374	::1	C	vpu:line	smiker	created		345
+1613590382	::1	D	print	smiker	removed		-319
+1613590389	::1	C	vpu:print	smiker	created		319
+1613590396	::1	D	pset	smiker	removed		-364
+1613590406	::1	C	vpu:pset	smiker	created		364
+1613590419	::1	D	rect	smiker	removed		-475
+1613590427	::1	C	vpu:rect	smiker	created		475
+1613590434	::1	D	restart	smiker	removed		-174
+1613590443	::1	C	vpu:restart	smiker	created		174
+1613590452	::1	D	rotate	smiker	removed		-283
+1613590457	::1	C	vpu:rotate	smiker	created		283
+1613590473	::1	D	scale	smiker	removed		-363
+1613590482	::1	C	vpu:scale	smiker	created		363
+1613590490	::1	D	select	smiker	removed		-396
+1613590498	::1	C	vpu:select	smiker	created		396
+1613590507	::1	D	setrotation	smiker	removed		-309
+1613590514	::1	C	vpu:setrotation	smiker	created		309
+1613590520	::1	D	setscale	smiker	removed		-345
+1613590525	::1	C	vpu:setscale	smiker	created		345
+1613590532	::1	D	update	smiker	removed		-147
+1613590537	::1	C	vpu:update	smiker	created		147
+1613590597	::1	C	vpu:setcolor	smiker	created		276
+1613590622	::1	D	ctrlc	smiker	removed		-540
+1613590633	::1	E	blackbox	smiker			9
+1613590638	::1	C	blackbox:ctrlc	smiker	created		540
+1613590652	::1	E	blackbox	smiker			18
+1613590666	::1	D	version	smiker	removed		-248
+1613590673	::1	C	blackbox:version	smiker	created		248
+1613590680	::1	D	epoch	smiker	removed		-286
+1613590684	::1	C	blackbox:epoch	smiker	created		286
+1613590769	::1	E	typewriter:setcolor	smiker			9
+1613590804	::1	E	typewriter	smiker			-26
+1613590835	::1	E	typewriter	smiker			-25
+1613590842	::1	E	typewriter	smiker			1
+1613590871	::1	E	typewriter	smiker			-19
+1613590920	::1	E	typewriter	smiker			-29
+1613590952	::1	E	template:script	smiker			1
+1613590991	::1	C	typewriter:setfont	smiker	created		177
+1613591005	::1	C	typewriter:setsize	smiker	created		177
+1613591019	::1	C	typewriter:setposition	smiker	created		181
+1613591032	::1	C	typewriter:getchoice	smiker	created		179
+1613591048	::1	C	typewriter:addchoice	smiker	created		179
+1613591057	::1	C	typewriter:enqueue	smiker	created		177
+1613591066	::1	C	typewriter:loadpic	smiker	created		177
+1613591087	::1	C	typewriter:clearpic	smiker	created		178
+1613591344	::1	E	blackbox	smiker			330
+1613591517	::1	E	typewriter	smiker			119
+1613591626	::1	E	typewriter:enqueue	smiker			57
+1613591758	::1	E	typewriter:loadpic	smiker			230
+1613591791	::1	E	typewriter:clearpic	smiker			-41
+1613591822	::1	E	typewriter:clearpic	smiker			99
+1613591897	::1	D	typewriter:getchoice	smiker	removed		-179
+1613591918	::1	D	typewriter:addchoice	smiker	removed		-179
+1613591936	::1	D	typewriter:setposition	smiker	removed		-181
+1613591943	::1	D	typewriter:setsize	smiker	removed		-177
+1613591950	::1	D	typewriter:setfont	smiker	removed		-177
+1613598712	::1	E	typewriter	smiker			428
+1613598732	::1	E	typewriter	smiker			-5
+1613598819	::1	E	blackbox	smiker			1
+1613599663	::1	E	vpu	smiker			591
+1613599684	::1	C	vpu:textout	smiker	created		319
+1613599691	::1	E	vpu:textout	smiker			2
+1613599698	::1	D	vpu:print	smiker	removed		-319
+1613599713	::1	E	vpu	smiker			-107
+1613600017	::1	E	console	smiker			306
+1613600127	::1	E	console	smiker			308
+1613600150	::1	E	console	smiker			0
+1613600163	::1	E	console	smiker			-92
+1613600249	::1	E	blackbox	smiker			289
+1613600309	::1	E	typewriter	smiker			289
+1613600361	::1	E	typewriter	smiker			-60
+1613600557	::1	E	vpu	smiker			187
+1613600748	::1	E	typewriter	smiker			0
+1613600767	::1	E	blackbox	smiker			0
+1613600791	::1	E	console	smiker			8
+1613600816	::1	E	vpu	smiker			0
+1613600838	::1	E	console	smiker			0

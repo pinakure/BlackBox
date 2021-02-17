@@ -1,0 +1,12 @@
+=====rotate=====
+Rotate specified layer or surface given degrees
+
+^Argument ^Description ^
+|  layer_or_handle  |0-2: Default layers, or surface handle|
+|  angle  |Rotation in radians|
+
+----
+====Example====
+<Code>
+vpu.rotate(0, 3.141596) #Add 180 degree of rotation to layer 0
+</Code>

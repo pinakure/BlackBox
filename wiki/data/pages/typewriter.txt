@@ -1,0 +1,20 @@
+=====TypeWriter=====
+
+----
+=== Scripting API ===
+^statement                 ^arguments            ^Description                                                            ^
+|[[typewriter:addchoice  ]]|name,value           |Add a selectable choice for the choice box                             |
+|[[typewriter:addoption  ]]|name,var_handle      |Add a configurable var into the choice box                             |
+|[[typewriter:clear      ]]|                     |clear() : Clear option and choice list                                 |
+|[[typewriter:clearpic   ]]|picture_handle       |Remove specified picture from the typewriter                           |
+|[[typewriter:enqueue    ]]|text                 |Enqueue message into typewriter buffer and open if if closed           |
+|[[typewriter:getchoice  ]]|title                |Get the choice selected on the choice box                              |
+|[[typewriter:gettext    ]]|                     |Polls text input dialog upon finished is activated, the it returns text|
+|[[typewriter:loadpic    ]]|file,x,y,width,height|Load picture from file , display it on typewriter                      |
+|[[typewriter:prompt     ]]|placeholder          |Opens prompt dialog optionally presenting given placeholder text       |
+|[[typewriter:ready      ]]|                     |Returns true once user pressed next or close button                    |
+|[[typewriter:setposition]]|x,y                  |Set the origin point for the typewriter box                            |
+|[[typewriter:setcolor   ]]|r,g,b,a              |Change typewriter box color scheme                                     |
+|[[typewriter:setfont    ]]|font_handle          |Switch font to be used in typewriter box                               |
+|[[typewriter:setsize    ]]|width,height         |Set new dimensions for the typewriter box                              |
+

@@ -1,0 +1,16 @@
+=====drawanim=====
+Draw animation identified by given handle onto given coordinates
+
+^Argument ^Description ^
+|handle|Handle identifying the animation to be drawn|
+|x     |Horizontal coordinate (in pixels) of selected surface |
+|y     |Vertical coordinate (in pixels) of selected surface |
+
+----
+====Example====
+<Code>
+spr = vpu.createsprite('bottle')
+ani = vpu.createanim(spr, 32, 32, 0, 0, 0, 7, False)
+vpu.select(0)
+vpu.drawanim(ani, 32, 32)
+</Code>

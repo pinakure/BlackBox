@@ -1,0 +1,12 @@
+=====enqueue=====
+Enqueue message into typewriter buffer and open if if closed
+
+^Argument ^Description ^
+|  text  |Text to be written|
+
+----
+====Example====
+<Code>
+typewriter.type('Hello world')
+typewriter.type('How are you?')
+</Code>

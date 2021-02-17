@@ -1,0 +1,13 @@
+=====setscale=====
+Sets scale for specified layer or surface given horizontal and vertical values
+
+^Argument ^Description ^
+|  layer_or_handle  |0-2: Default layers, or surface handle|
+|  x  |Horizontal scaling factor (default = 1.0)|
+|  y  |Vertical scaling factor (default = 1.0)|
+
+----
+====Example====
+<Code>
+vpu.setscale(0, 1.0, 1.0)
+</Code>

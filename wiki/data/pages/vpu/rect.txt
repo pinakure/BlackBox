@@ -1,0 +1,17 @@
+=====rect=====
+Draw a rectangle onto selected surface from x,y to dx,dy using selected color as border color.
+
+^  Argument  ^Description^
+|  x  |Horizontal origin, in pixels|
+|  y  |Vertical origin, in pixels|
+|  width  |Width of the rectangle to be drawn|
+|  height  |Height of the rectangle to be drawn|
+
+----
+====Example====
+<Code>
+vpu.select(0)
+vpu.setcolor(0,255,0)
+w, h = vpu.dimensions()
+vpu.rect(0,0,0+w,0+h) #Draw a rectangle around the whole selected layer 
+</Code>

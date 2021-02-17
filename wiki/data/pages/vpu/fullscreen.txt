@@ -1,0 +1,13 @@
+=====fullscreen=====
+Toggle fullscreen mode.\\
+Useless if vpu.restart() is not called somewhere.
+
+^Argument ^Description ^
+|  enabled  |True to enable fullscreen mode, False otherwise |
+
+----
+====Example====
+<Code>
+vpu.fullscreen(1)
+vpu.restart() #Call this to make the change efective
+</Code>

@@ -1,0 +1,11 @@
+=====disable=====
+Toggle off given vpu layer or surface\\ 
+
+^Argument ^Description ^
+|layer_or_handle|Default layer index or surface handle|
+
+----
+====Example====
+<Code>
+vpu.disable(0) #disable layer 0 (background would disappear)
+</Code>

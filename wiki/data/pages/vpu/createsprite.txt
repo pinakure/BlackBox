@@ -1,0 +1,17 @@
+=====createsprite=====
+Create Sprite object taking data from 'data/sprites/<filename>.png'\\ 
+Full Explanation
+
+^Argument^Description^
+|filename|relative filename to be loaded as image data (png extension)|
+
+----
+====Returns====
+  * Handle to Initialized Surface 
+  * Negative on error
+
+----
+====Example====
+<Code>
+srf = vpu.createsurf(32, 32) #Create 32x32 video surface
+</Code>

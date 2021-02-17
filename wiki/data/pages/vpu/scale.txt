@@ -1,0 +1,13 @@
+=====scale=====
+Change specified layer or surface given horizontal and vertical scale factor
+
+^Argument ^Description ^
+|  layer_or_handle  |0-2: Default layers, or surface handle|
+|  x  |Horizontal scaling factor (default = 1.0)|
+|  y  |Vertical scaling factor (default = 1.0)|
+
+----
+====Example====
+<Code>
+vpu.scale(0, 1.0, 1.0) #Set scale 1:1 to layer 0
+</Code>

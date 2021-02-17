@@ -4,6 +4,7 @@ Use ''help //command//'' in console for details\\
 ----
   * [[Console|]]
   * [[BlackBox|]]
+  * [[TypeWriter|]]
   * [[VPU|]]
 
 ----

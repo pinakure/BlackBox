@@ -1,0 +1,16 @@
+=====pset=====
+Draw a pixel onto selected surface onto given coordinates
+
+^Argument ^Description ^
+|  x  |Horizontal coordinate in selected surface to draw onto |
+|  y  |Vertical coordinate in selected surface to draw onto |
+
+----
+====Example====
+<Code>
+#Draws a diagonal line 16 pixel long
+vpu.select(0)
+for x in range(0, 16):
+	vpu.pset(x, x)
+vpu.update()
+</Code>

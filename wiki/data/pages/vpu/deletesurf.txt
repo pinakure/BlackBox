@@ -1,0 +1,12 @@
+=====deletesurf=====
+Delete Surface identified by given Handle.
+
+^Argument ^Description ^
+|handle|Handle identifying the surface to be deleted|
+
+----
+====Example====
+<Code>
+srf = vpu.createsurf(32, 32)
+vpu.deletesurf(srf)
+</Code>

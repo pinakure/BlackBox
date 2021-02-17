@@ -1,0 +1,21 @@
+=====loadpic=====
+Load picture from file to typewriter overlay
+
+^Argument ^Description ^
+|filename|description|
+|x|description|
+|y|description|
+|width|description|
+|height|description|
+
+----
+====Returns====
+  * -1 if image was loaded
+  * 0 if image could not be loaded
+  * A handle to a valid picture object, needed to remove it specifically
+
+----
+====Example====
+<Code>
+typewriter.loadpic('bottle')
+</Code>

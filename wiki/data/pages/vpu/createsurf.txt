@@ -1,0 +1,18 @@
+=====createsurf=====
+Creates a video surface object.\\
+A video surface object can perform blits((copying itself onto other surface)), therefore it is intended as target for any drawing routine.\\ 
+
+^Argument ^Description                        ^
+|width    |Desired surface width, in pixels   |
+|height   |Desired surface height, in pixels  |
+
+----
+====Returns====
+  * Handle to Initialized Surface 
+  * Negative on error
+
+----
+====Example====
+<Code>
+srf = vpu.createsurf(32, 32) #Create 32x32 video surface
+</Code>
