@@ -32,6 +32,7 @@ class CVar {
 		
 	public:
 		static std::map<std::string, CVar*>	settings;
+		static std::vector<CVar*>	variables;
 		static void initialize(void);
 		static bool initialized;
 
@@ -73,11 +74,13 @@ class Text : public CVar {
 		std::vector<std::string> dictionary;
 
 	public:
+		int max_length = 65535;
 		void showHelp(void);
 		
 		Text(std::string name, std::string help, std::string value = "");
 		void defineDictionary(int number, ...);
 		void addWordToDictionary(const char *word);
+		void setMaxLength(int max_len);
 		void parseValue(std::string value);
 		std::string toString(void);
 		void set(std::string new_value);

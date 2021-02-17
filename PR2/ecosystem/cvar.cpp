@@ -6,6 +6,7 @@
 #include <assert.h>
 
 std::map<std::string, CVar*> CVar::settings;
+std::vector<CVar*> CVar::variables;
 bool CVar::initialized = false;
 
 
@@ -124,7 +125,7 @@ void CVar::invokeCallback(void){
 Text::Text(std::string iname, std::string ihelp, std::string ivalue) : CVar(iname, ihelp) {
 	value = ivalue;	
 	type = CVAR_TEXT;
-	default_value = ivalue;
+	default_value = value;
 }
 
 void Text::parseValue(std::string val){
@@ -136,12 +137,14 @@ void Text::set(std::string new_value){
 		for(size_t i=0, o=dictionary.size(); i<o; i++){
 			if(!new_value.compare(dictionary[i])) {
 				value = new_value;
+				if (value.size() > max_length)value = value.substr(0, max_length);
 				invokeCallback();
 				return;
 			}
 		}		
 	} else {
 		value = new_value;
+		if (value.size() > max_length)value = value.substr(0, max_length);
 		invokeCallback();
 	}
 }
@@ -165,10 +168,14 @@ void Text::defineDictionary(int number, ...){
 	va_end(ap);
 }
 
-void Text::addWordToDictionary(const char *word){
+void Text::addWordToDictionary(const char* word) {
 	dictionary.push_back(std::string(word));
 }
-		
+
+void Text::setMaxLength(int max_len) {
+	max_length = max_len;
+}
+
 
 ///////////////////////
 void Floating::setMinMax(float imin, float imax){

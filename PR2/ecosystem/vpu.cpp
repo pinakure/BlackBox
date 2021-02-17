@@ -185,6 +185,11 @@ bool Vpu::initialize() {
 		font = legacy_font;	
 		if (!restart()) return false;
 		initializeFonts();
+		ALLEGRO_BITMAP *icon;
+		icon = al_load_bitmap("data/gfx/vendor.png");
+		if (icon) {
+			al_set_display_icon(display, icon);
+		}
 		return true;
 	} catch (int e) {
 		e = e;

@@ -15,7 +15,6 @@ Sprite::Sprite(const char *filename) {
 		} 
 		this->initialized = true;		
 	}
-
 }
 
 void Sprite::deinitialize() {

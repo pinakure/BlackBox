@@ -32,9 +32,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="PR2.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="ecosystem\script.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
@@ -112,6 +109,9 @@
     </ClCompile>
     <ClCompile Include="ecosystem\glue.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="blackbox.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

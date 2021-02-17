@@ -276,7 +276,7 @@ pythoncommand(vpu_fadeout){
 	int r = -1;
 	int g = -1;
 	int b = -1;
-	if(!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;	
+	if (!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;
 	Vpu::fadeout(r,g,b);
 	return PyLong_FromLong(1);
 }
@@ -293,8 +293,8 @@ pythoncommand(blackbox_epoch){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(Engine::epoch);
 }
-pythoncommand(blackbox_ctrlc){
-	if(!PyArg_ParseTuple(args, "")) return NULL;	
+pythoncommand(blackbox_ctrlc) {
+	if(!PyArg_ParseTuple(args, "")) return NULL;
 	if (InputDevice::control_c) {
 		InputDevice::control_c = false;
 		InputDevice::control = false;
@@ -302,8 +302,86 @@ pythoncommand(blackbox_ctrlc){
 	}
 	return PyBool_FromLong(0);
 }
-/* TypeWriter --------------------------------------------------------------------------- */
 
+pythoncommand(blackbox_createinteger) {
+	char* name;
+	char* help = 0;
+	int min = -65535;
+	int max = 65535;
+	int value = 0;
+	if (!PyArg_ParseTuple(args, "s|iiis", &name, &value, &min, &max, &help)) return NULL;
+	CVar::variables.push_back(
+		CVar::create<Integer>(
+			name,
+			help ? help : "",
+			value,
+			false
+			)
+	);
+	((Integer*)&CVar::variables[CVar::variables.size()])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::variables.size() - 1);
+}
+pythoncommand(blackbox_createdecimal) {
+	char* name;
+	char* help = 0;
+	float min = -65535;
+	float  max = 65535;
+	float value = 0;
+	if (!PyArg_ParseTuple(args, "s|fffs", &name, &value, &min, &max, &help)) return NULL;
+	CVar::variables.push_back(
+		CVar::create<Floating>(
+			name,
+			help ? help : "",
+			value,
+			false
+			)
+	);
+	((Floating*)&CVar::variables[CVar::variables.size()])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::variables.size() - 1);
+}
+pythoncommand(blackbox_createboolean) {
+	char* name;
+	char* help = 0;
+	int value = 0;
+	if (!PyArg_ParseTuple(args, "s|is", &name, &value, &help)) return NULL;
+	CVar::variables.push_back(
+		CVar::create<Boolean>(
+			name,
+			help ? help : "",
+			value,
+			false
+			)
+	);
+	return PyLong_FromLong(CVar::variables.size() - 1);	
+}
+pythoncommand(blackbox_createstring) {
+	char* name;
+	char* help = 0;
+	float  max_len = 65535;
+	char * value;
+	if (!PyArg_ParseTuple(args, "s|sis", &name, &value, &max_len, &help)) return NULL;
+	CVar::variables.push_back(
+		CVar::create<Text>(
+			name,
+			help ? help : "",
+			value?value:"",
+			false
+			)
+	);
+	((Text*)&CVar::variables[CVar::variables.size()])->setMaxLength(max_len);
+	return PyLong_FromLong(CVar::variables.size() - 1);
+}
+pythoncommand(blackbox_deletevar) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (handle < CVar::variables.size()) {
+		delete CVar::variables[handle];
+		CVar::variables[handle] = NULL;
+	}
+	return PyBool_FromLong(0);
+}
+
+/* TypeWriter --------------------------------------------------------------------------- */
 pythoncommand(typewriter_ready) {
 	return PyLong_FromLong(TypeWriter::next);
 }
@@ -489,8 +567,13 @@ static PyMethodDef TypeWriterMethods[] = {
 /* Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef BlackBoxMethods[] = {
-    {"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
-    {"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
+	{"createboolean", blackbox_createboolean, METH_VARARGS, "blackbox.createboolean(name,value,help) : Create a boolean variable and get handle"},
+	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
+	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
+	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
+	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
+	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
+	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
     {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
 	{NULL, NULL, 0, NULL}
 };
