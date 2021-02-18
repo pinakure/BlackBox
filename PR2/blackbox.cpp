@@ -18,6 +18,7 @@ bool initialize() {
 		std::printf("ERROR: Engine cannot run.\n\tCritical Modules could not be loaded.\n\tIt may be some files missing.\n");
 		return false;
 	}
+	Script::execute("from blackbox import *");
 	Script::execute("import blackbox");
 	Script::execute("import typewriter");
 	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");

@@ -318,7 +318,7 @@ pythoncommand(blackbox_createinteger) {
 			false
 			)
 	);
-	((Integer*)&CVar::variables[CVar::variables.size()])->setMinMax(min, max);
+	((Integer*)&CVar::variables[CVar::variables.size()-1])->setMinMax(min, max);
 	return PyLong_FromLong(CVar::variables.size() - 1);
 }
 pythoncommand(blackbox_createdecimal) {
@@ -336,7 +336,7 @@ pythoncommand(blackbox_createdecimal) {
 			false
 			)
 	);
-	((Floating*)&CVar::variables[CVar::variables.size()])->setMinMax(min, max);
+	((Floating*)&CVar::variables[CVar::variables.size()-1])->setMinMax(min, max);
 	return PyLong_FromLong(CVar::variables.size() - 1);
 }
 pythoncommand(blackbox_createboolean) {
@@ -358,7 +358,7 @@ pythoncommand(blackbox_createstring) {
 	char* name;
 	char* help = 0;
 	float  max_len = 65535;
-	char * value;
+	char * value=0;
 	if (!PyArg_ParseTuple(args, "s|sis", &name, &value, &max_len, &help)) return NULL;
 	CVar::variables.push_back(
 		CVar::create<Text>(
@@ -368,15 +368,19 @@ pythoncommand(blackbox_createstring) {
 			false
 			)
 	);
-	((Text*)&CVar::variables[CVar::variables.size()])->setMaxLength(max_len);
+	((Text*)&CVar::variables[CVar::variables.size()-1])->setMaxLength(max_len);
 	return PyLong_FromLong(CVar::variables.size() - 1);
 }
 pythoncommand(blackbox_deletevar) {
 	int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
 	if (handle < CVar::variables.size()) {
-		delete CVar::variables[handle];
-		CVar::variables[handle] = NULL;
+		if (CVar::variables[handle]) {
+			delete CVar::variables[handle];
+			CVar::variables[handle] = NULL;
+		} else {
+			Console::print("Variable not defined");
+		}
 	}
 	return PyBool_FromLong(0);
 }
