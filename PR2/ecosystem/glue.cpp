@@ -399,8 +399,8 @@ pythoncommand(typewriter_setposition) {
 	return PyLong_FromLong(1);
 }
 pythoncommand(typewriter_setcolor) {
-	int r=-1;
-	int g=-1;
+	int r = -1;
+	int g = -1;
 	int b = -1;
 	int a = -1;
 	if (!PyArg_ParseTuple(args, "iii|i", &r, &g, &b, &a)) return NULL;
@@ -625,10 +625,10 @@ static PyMethodDef VpuMethods[] = {
 /* ----------------------------------------------------------------------
 	Definir Modulos
 ---------------------------------------------------------------------- */
-static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods		,NULL, NULL, NULL, NULL};
-static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods			,NULL, NULL, NULL, NULL};
-static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods		,NULL, NULL, NULL, NULL};
-static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriterMethods	,NULL, NULL, NULL, NULL};
+static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods	  , NULL, NULL, NULL, NULL};
+static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods		  , NULL, NULL, NULL, NULL};
+static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods	  , NULL, NULL, NULL, NULL};
+static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriterMethods , NULL, NULL, NULL, NULL};
 
 static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
 static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
