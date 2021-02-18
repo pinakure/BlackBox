@@ -385,6 +385,59 @@ pythoncommand(blackbox_deletevar) {
 	return PyBool_FromLong(0);
 }
 
+pythoncommand(blackbox_findvar) {
+	char *name;
+	if (!PyArg_ParseTuple(args, "s", &name)) return NULL;
+	std::vector<CVar*>::iterator it;
+	int i = 0;
+	for (it = CVar::variables.begin(); it != CVar::variables.end(); it++, i++) {
+		if( it[0] && !(it[0]->getName().compare(name))) 
+			return PyLong_FromLong(i);
+	}
+	std::string out = "Variable ";
+	out += name;
+	out += " not defined";
+	Console::print(out);
+	return PyLong_FromLong(-1);
+}
+
+pythoncommand(blackbox_getvar) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (handle < CVar::variables.size()) {
+		CVar* var = CVar::variables[handle];
+		if (var) {
+			switch (var->getType()) {
+				default:
+				case CVAR_TEXT:		return Py_BuildValue("s", var->toString().c_str());
+				case CVAR_INTEGER:	return PyLong_FromLong(-1);
+				case CVAR_FLOATING: return PyFloat_FromDouble(((Floating*)var)->get());
+				case CVAR_BOOLEAN:  return PyBool_FromLong(((Boolean*)var)->get());
+			}
+		} else {
+			Console::print("Variable not defined");
+		}
+	}
+	return PyBool_FromLong(0);
+}
+
+pythoncommand(blackbox_setvar) {
+	char* value;
+	int handle;
+	if (!PyArg_ParseTuple(args, "is", &handle, &value)) return NULL;
+	if (handle < CVar::variables.size()) {
+		if (CVar::variables[handle]) {
+			CVar::variables[handle]->parseValue(value);
+		} else {
+			Console::print("Variable not defined");
+		}
+	}
+	return PyBool_FromLong(0);
+}
+
+
+
+
 /* TypeWriter --------------------------------------------------------------------------- */
 pythoncommand(typewriter_ready) {
 	return PyLong_FromLong(TypeWriter::next);
@@ -578,7 +631,10 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
 	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
-    {"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
+	{"findvar"		, blackbox_findvar		, METH_VARARGS, "blackbox.findvar(var_name) : Find handle for the variable matching var_name"},
+	{"getvar"		, blackbox_getvar		, METH_VARARGS, "blackbox.getvar(var_handle) : Return value of the variable identified by var_handle"},
+	{"setvar"		, blackbox_setvar		, METH_VARARGS, "blackbox.setvar(var_handle,value) : Set value of the variable identified by var_handle"},
+	{"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
 	{NULL, NULL, 0, NULL}
 };
 
