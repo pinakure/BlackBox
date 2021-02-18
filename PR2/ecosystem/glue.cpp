@@ -289,10 +289,12 @@ pythoncommand(blackbox_version){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(3);
 }
+
 pythoncommand(blackbox_epoch){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	
     return PyLong_FromLong(Engine::epoch);
 }
+
 pythoncommand(blackbox_ctrlc) {
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	if (InputDevice::control_c) {
@@ -339,6 +341,7 @@ pythoncommand(blackbox_createdecimal) {
 	((Floating*)&CVar::variables[CVar::variables.size()-1])->setMinMax(min, max);
 	return PyLong_FromLong(CVar::variables.size() - 1);
 }
+
 pythoncommand(blackbox_createboolean) {
 	char* name;
 	char* help = 0;
@@ -434,9 +437,6 @@ pythoncommand(blackbox_setvar) {
 	}
 	return PyBool_FromLong(0);
 }
-
-
-
 
 /* TypeWriter --------------------------------------------------------------------------- */
 pythoncommand(typewriter_ready) {

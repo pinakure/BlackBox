@@ -163,3 +163,6 @@ console:vars
 console:view
 console:writeconfig
 console:xor
+blackbox:getvar
+blackbox:setvar
+blackbox:findvar

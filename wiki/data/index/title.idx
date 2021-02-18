@@ -85,3 +85,11 @@ enqueue
 loadpic
 clearpic
 textout
+createbool
+createdecimal
+createinteger
+createstring
+deletevar
+getvar
+setvar
+findvar

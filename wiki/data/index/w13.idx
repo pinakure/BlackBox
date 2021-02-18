@@ -18,3 +18,4 @@ syntaxplugins
 frameskipping
 createdecimal
 createinteger
+createboolean

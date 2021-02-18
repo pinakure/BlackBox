@@ -1,0 +1,12 @@
+=====setvar=====
+Set value of var id'd by given var_handle
+
+^Argument ^Description ^
+|var_handle|Handle identifying the variable|
+
+----
+====Example====
+<Code>
+a=blackbox.createinteger('coins', 0, 0, 100, 'Current coin balance')
+blackbox.setvar(a, '0')
+</Code>

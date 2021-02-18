@@ -1,0 +1,18 @@
+=====createstring=====
+Creates a string variable.\\
+
+^Argument ^Description ^
+|name|Name of the variable.|
+|value|Initial value for the variable|
+|max_length|Maximal length allowed|
+|help|Help shown when using help command on the console|
+
+----
+====Returns====
+  * Handle to Variable\\
+
+----
+====Example====
+<Code>
+a=blackbox.createstring('name', "Unnamed", 16, 'Player name')
+</Code>

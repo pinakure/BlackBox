@@ -1,0 +1,12 @@
+=====deletevar=====
+Delete a variable by handle.\\
+
+^Argument ^Description ^
+|var_handle|Handle identifying the variable to be deleted.|
+
+----
+====Example====
+<Code>
+a=blackbox.createinteger('coins', 0, 0, 100, 'Current coin balance')
+blackbox.deletevar(a)
+</Code>

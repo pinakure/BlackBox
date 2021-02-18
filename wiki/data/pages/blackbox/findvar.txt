@@ -1,0 +1,17 @@
+=====findvar=====
+Return handle of the variable identifyied by given var_name
+
+^Argument ^Description ^
+|var_name|Name set for the variable at creation time|
+
+----
+====Returns====
+  * Handle to Variable\\
+
+----
+====Example====
+<Code>
+blackbox.createinteger('the_a', 10, 0, 100, 'First') #would return: 0
+a = blackbox.findvar('the_a')
+print(a)  # would print: 0
+</Code>

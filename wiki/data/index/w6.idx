@@ -202,3 +202,7 @@ layers
 degree
 prompt
 button
+length
+player
+getvar
+setvar

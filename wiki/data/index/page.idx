@@ -85,3 +85,11 @@ typewriter:enqueue
 typewriter:loadpic
 typewriter:clearpic
 vpu:textout
+blackbox:createbool
+blackbox:createdecimal
+blackbox:createinteger
+blackbox:createstring
+blackbox:deletevar
+blackbox:getvar
+blackbox:setvar
+blackbox:findvar
