@@ -506,16 +506,6 @@ pythoncommand(typewriter_addchoice) {
 	return PyLong_FromLong(1);
 }
 
-enum Variables {
-	VARIABLE_TYPEWRITER_R,
-	VARIABLE_TYPEWRITER_G,
-	VARIABLE_TYPEWRITER_B,
-	VARIABLE_TYPEWRITER_A,
-	VARIABLE_TYPEWRITER_X,
-	VARIABLE_TYPEWRITER_Y,
-	VARIABLE_TYPEWRITER_FONT,
-};
-
 pythoncommand(typewriter_clear) {
 	if (!PyArg_ParseTuple(args, "")) return NULL;
 	TypeWriter::options.clear();
