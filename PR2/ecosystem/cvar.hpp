@@ -57,6 +57,8 @@ class CVar {
 		virtual int increase(void) = 0;
 		virtual int decrease(void) = 0;
 		virtual int integer(void) = 0;
+		virtual void increase()=0;
+		virtual void decrease()=0;
 		virtual void parseValue(std::string value) = 0;
 		virtual std::string toString(void) = 0;
 
@@ -96,6 +98,8 @@ class Text : public CVar {
 		void parseValue(std::string value);
 		std::string toString(void);
 		void set(std::string new_value);
+		void increase() {};
+		void decrease() {};
 		std::string get(void);
 		int integer(void){ return 0; };
 		static std::string get(CVar *cvar) { return ((Text*)cvar)->get(); }
@@ -116,6 +120,8 @@ class Floating : public CVar {
 		Floating(std::string name, std::string help, float value = 0.0f);
 		void parseValue(std::string value);
 		std::string toString(void);
+		void increase() { value += 0.125f; if (value > max)value = clamped ? value - max : max; };
+		void decrease() { value -= 0.125f; if (value < min)value = clamped ? max - value : min; };
 		void setMinMax(float imin, float imax);
 		void set(float new_value);
 		float get(void);

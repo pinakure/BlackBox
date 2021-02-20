@@ -1,3 +1,6 @@
+// When a function is not expected to return any value, it should return True on sucess
+// and False on error, and preferably drop the error over the console.
+
 Surface *getLayer(int index) {
 	if (!Vpu::is_initialized) {
 		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");

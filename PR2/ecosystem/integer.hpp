@@ -12,10 +12,13 @@ class Integer : public CVar {
 		int	value;
 		
 	public:		
+		bool clamped;
 		int min;
 		int max;
 		void showHelp(void);
-		
+		void increase(); 
+		void decrease(); 
+
 		Integer(std::string name, std::string help, int value = 0);
 		std::string toString(void);
 		void parseValue(std::string value);
@@ -32,6 +35,8 @@ class Boolean : public Integer {
 		void showHelp(void);
 		
 		Boolean(std::string iname, std::string ihelp, bool ivalue);
+		void increase() { value ^= 1; };
+		void decrease() { value ^= 1; };
 		bool get(void);
 		void parseValue(std::string value);
 		std::string toString(void);

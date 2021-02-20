@@ -27,6 +27,7 @@ Integer::Integer(std::string iname, std::string ihelp, int ivalue) : CVar(iname,
 	default_value = ivalue;
 	min = INT_MIN;
 	max = INT_MAX;
+	clamped = false;
 }
 
 std::string Integer::toString(void){
@@ -80,3 +81,5 @@ void Integer::showHelp(void){
 	Console::printf("~d%s\n", help.c_str());	
 }
 
+void Integer::increase() { value += 1; if (value > max)value = clamped ? value - max : max; };
+void Integer::decrease() { value -= 1; if (value < min)value = clamped ? max - value : min; };

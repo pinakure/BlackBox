@@ -9,12 +9,10 @@ import blackbox
 import typewriter 
 import vpu
 
-VARIABLE_TYPEWRITER_R=0,
-VARIABLE_TYPEWRITER_G=1,
-VARIABLE_TYPEWRITER_B=2,
-VARIABLE_TYPEWRITER_A=3,
-VARIABLE_TYPEWRITER_X=4,
-VARIABLE_TYPEWRITER_Y=5,
+typewriter_r = None
+typewriter_g = None
+typewriter_b = None
+typewriter_a = None
 	
 def submenu(choices, caption, show_back=True):
     choice = ''
@@ -30,6 +28,10 @@ def submenu(choices, caption, show_back=True):
 def configure():
     # in this moment, this is the only way to control fullscreen right before initializing vpu
     # bear with this while we dont bring a proper vpu.restart method
+    typewriter_r = blackbox.createinteger('R', 0, 0, 255)
+    typewriter_g = blackbox.createinteger('G', 0, 0, 255)
+    typewriter_b = blackbox.createinteger('B', 0, 0, 255)
+    typewriter_a = blackbox.createinteger('A', 0, 0, 255)
     fullscreen(False)
 
 def main():
