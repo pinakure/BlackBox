@@ -312,16 +312,14 @@ pythoncommand(blackbox_createinteger) {
 	int max = 65535;
 	int value = 0;
 	if (!PyArg_ParseTuple(args, "s|iiis", &name, &value, &min, &max, &help)) return NULL;
-	CVar::variables.push_back(
-		CVar::create<Integer>(
-			name,
-			help ? help : "",
-			value,
-			false
-			)
-	);
-	((Integer*)&CVar::variables[CVar::variables.size()-1])->setMinMax(min, max);
-	return PyLong_FromLong(CVar::variables.size() - 1);
+	CVar::settings[name] = CVar::create<Integer>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Integer*)CVar::settings[name])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
 }
 pythoncommand(blackbox_createdecimal) {
 	char* name;
@@ -330,16 +328,14 @@ pythoncommand(blackbox_createdecimal) {
 	float  max = 65535;
 	float value = 0;
 	if (!PyArg_ParseTuple(args, "s|fffs", &name, &value, &min, &max, &help)) return NULL;
-	CVar::variables.push_back(
-		CVar::create<Floating>(
-			name,
-			help ? help : "",
-			value,
-			false
-			)
-	);
-	((Floating*)&CVar::variables[CVar::variables.size()-1])->setMinMax(min, max);
-	return PyLong_FromLong(CVar::variables.size() - 1);
+	CVar::settings[name] = CVar::create<Floating>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Floating*)CVar::settings[name])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
 }
 
 pythoncommand(blackbox_createboolean) {
@@ -347,56 +343,56 @@ pythoncommand(blackbox_createboolean) {
 	char* help = 0;
 	int value = 0;
 	if (!PyArg_ParseTuple(args, "s|is", &name, &value, &help)) return NULL;
-	CVar::variables.push_back(
-		CVar::create<Boolean>(
-			name,
-			help ? help : "",
-			value,
-			false
-			)
-	);
-	return PyLong_FromLong(CVar::variables.size() - 1);	
+	CVar::settings[name] = CVar::create<Boolean>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());	
 }
+
 pythoncommand(blackbox_createstring) {
 	char* name;
 	char* help = 0;
 	float  max_len = 65535;
 	char * value=0;
 	if (!PyArg_ParseTuple(args, "s|sis", &name, &value, &max_len, &help)) return NULL;
-	CVar::variables.push_back(
-		CVar::create<Text>(
-			name,
-			help ? help : "",
-			value?value:"",
-			false
-			)
-	);
-	((Text*)&CVar::variables[CVar::variables.size()-1])->setMaxLength(max_len);
-	return PyLong_FromLong(CVar::variables.size() - 1);
+	CVar::settings[name] = CVar::create<Text>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Text*)CVar::settings[name])->setMaxLength(max_len);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
 }
+
 pythoncommand(blackbox_deletevar) {
 	int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	if (handle < CVar::variables.size()) {
-		if (CVar::variables[handle]) {
-			delete CVar::variables[handle];
-			CVar::variables[handle] = NULL;
-		} else {
-			Console::print("Variable not defined");
+	CVar* cvar = CVar::findByUUID(handle);
+	if (cvar) {
+		std::map < std::string, CVar*>::iterator it;
+		for (it = CVar::settings.begin(); it != CVar::settings.end(); it++) {
+			if(it->second) {
+				if (it->second->getUUID() == handle) {
+					delete cvar;
+					CVar::settings.erase(it);
+					return PyBool_FromLong(true);
+				}
+			}
 		}
+	} else {
+		Console::print("Variable not defined");
+		return PyBool_FromLong(false);
 	}
-	return PyBool_FromLong(0);
 }
 
 pythoncommand(blackbox_findvar) {
 	char *name;
 	if (!PyArg_ParseTuple(args, "s", &name)) return NULL;
-	std::vector<CVar*>::iterator it;
-	int i = 0;
-	for (it = CVar::variables.begin(); it != CVar::variables.end(); it++, i++) {
-		if( it[0] && !(it[0]->getName().compare(name))) 
-			return PyLong_FromLong(i);
-	}
+	if (CVar::settings[name])return PyLong_FromLong(CVar::settings[name]->getUUID());
 	std::string out = "Variable ";
 	out += name;
 	out += " not defined";
@@ -407,19 +403,17 @@ pythoncommand(blackbox_findvar) {
 pythoncommand(blackbox_getvar) {
 	int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	if (handle < CVar::variables.size()) {
-		CVar* var = CVar::variables[handle];
-		if (var) {
-			switch (var->getType()) {
-				default:
-				case CVAR_TEXT:		return Py_BuildValue("s", var->toString().c_str());
-				case CVAR_INTEGER:	return PyLong_FromLong(-1);
-				case CVAR_FLOATING: return PyFloat_FromDouble(((Floating*)var)->get());
-				case CVAR_BOOLEAN:  return PyBool_FromLong(((Boolean*)var)->get());
-			}
-		} else {
-			Console::print("Variable not defined");
+	CVar* var = CVar::findByUUID(handle);
+	if (var) {
+		switch (var->getType()) {
+			default:
+			case CVAR_TEXT:		return Py_BuildValue("s", var->toString().c_str());
+			case CVAR_INTEGER:	return PyLong_FromLong(-1);
+			case CVAR_FLOATING: return PyFloat_FromDouble(((Floating*)var)->get());
+			case CVAR_BOOLEAN:  return PyBool_FromLong(((Boolean*)var)->get());
 		}
+	} else {
+		Console::print("Variable not defined");
 	}
 	return PyBool_FromLong(0);
 }
@@ -428,13 +422,12 @@ pythoncommand(blackbox_setvar) {
 	char* value;
 	int handle;
 	if (!PyArg_ParseTuple(args, "is", &handle, &value)) return NULL;
-	if (handle < CVar::variables.size()) {
-		if (CVar::variables[handle]) {
-			CVar::variables[handle]->parseValue(value);
-		} else {
-			Console::print("Variable not defined");
-		}
+	CVar* var = CVar::findByUUID(handle);
+	if (var) {
+		var->parseValue(value);
+		return PyBool_FromLong(1);
 	}
+	Console::print("Variable not defined");
 	return PyBool_FromLong(0);
 }
 

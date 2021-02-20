@@ -39,6 +39,7 @@ class CVar {
 		unsigned int uuid;
 		static unsigned int global_uuid;
 	public:
+		unsigned int getUUID() {return uuid;}
 		static CVar* findByUUID(int uuid);
 		static void setByUUID(int uuid, std::string value);
 		static std::map<std::string, CVar*>	settings;

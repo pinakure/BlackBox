@@ -448,7 +448,9 @@ void CVar::loadVars(void) {
 CVar* CVar::findByUUID(int uuid) {
 	std::map<std::string, CVar*>::iterator it;
 	for (it = settings.begin(); it != settings.end(); it++) {
-		if (it->second->uuid == uuid)return it->second;
+		if (it->second) {
+			if (it->second->uuid == uuid)return it->second;
+		}
 	}
 	return NULL;
 }
