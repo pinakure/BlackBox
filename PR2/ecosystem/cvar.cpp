@@ -8,7 +8,7 @@
 std::map<std::string, CVar*> CVar::settings;
 std::vector<CVar*> CVar::variables;
 bool CVar::initialized = false;
-
+unsigned int CVar::global_uuid;
 
 void CVar::initialize(void) {
 	if (initialized)return;
@@ -443,4 +443,19 @@ void CVar::loadVars(void) {
 	InputDevice::loadVars();
 	Vpu::loadVars();
 	sortVars();
+}
+
+CVar* CVar::findByUUID(int uuid) {
+	std::map<std::string, CVar*>::iterator it;
+	for (it = settings.begin(); it != settings.end(); it++) {
+		if (it->second->uuid == uuid)return it->second;
+	}
+	return NULL;
+}
+
+void CVar::setByUUID(int uuid, std::string value) {
+	CVar* target = findByUUID(uuid);
+	if (target) {
+		target->parseValue(value);
+	}
 }

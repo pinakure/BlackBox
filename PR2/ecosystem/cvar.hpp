@@ -27,15 +27,24 @@ class CVar {
 	protected:
 		std::string name;
 		std::string help;
-		CVar(std::string name, std::string help){ system_var = false; function = NULL; this->name = name; this->help = help; }
+		CVar(std::string name, std::string help){ 
+			system_var = false; 
+			function = NULL; 
+			this->name = name; 
+			this->help = help; 
+			this->uuid = CVar::global_uuid;
+			CVar::global_uuid++;
+		}
 		CVarType type;
-		
+		unsigned int uuid;
+		static unsigned int global_uuid;
 	public:
+		static CVar* findByUUID(int uuid);
+		static void setByUUID(int uuid, std::string value);
 		static std::map<std::string, CVar*>	settings;
 		static std::vector<CVar*>	variables;
 		static void initialize(void);
 		static bool initialized;
-
 
 		bool system_var;
 		CVarType getType(void){ return type; };
