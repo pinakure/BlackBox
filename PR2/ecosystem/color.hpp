@@ -7,8 +7,8 @@ class Color : public Integer {
 	public:
 		int lightness;
 		void showHelp(void);
-		void increase() { ; };
-		void decrease() { ; };
+		void increase() { invokeCallback(); };
+		void decrease() { invokeCallback(); };
 		Color(std::string name, std::string help, int value = 0);
 		void parseValue(std::string value);
 		std::string toString(void);

@@ -119,7 +119,7 @@ CVar* CVar::getVar(std::string iname){
 }
 
 void CVar::invokeCallback(void){
-	if(function) function();		
+	if(function) function();
 }
 
 Text::Text(std::string iname, std::string ihelp, std::string ivalue) : CVar(iname, ihelp) {

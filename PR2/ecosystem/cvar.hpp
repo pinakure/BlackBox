@@ -54,11 +54,9 @@ class CVar {
 		std::string getName(void){ return name; }
 		std::string getHelp(void){ return help; }
 		void invokeCallback(void);
-		virtual int increase(void) = 0;
-		virtual int decrease(void) = 0;
+		virtual void increase(void) = 0;
+		virtual void decrease(void) = 0;
 		virtual int integer(void) = 0;
-		virtual void increase()=0;
-		virtual void decrease()=0;
 		virtual void parseValue(std::string value) = 0;
 		virtual std::string toString(void) = 0;
 
@@ -120,8 +118,8 @@ class Floating : public CVar {
 		Floating(std::string name, std::string help, float value = 0.0f);
 		void parseValue(std::string value);
 		std::string toString(void);
-		void increase() { value += 0.125f; if (value > max)value = clamped ? value - max : max; };
-		void decrease() { value -= 0.125f; if (value < min)value = clamped ? max - value : min; };
+		void increase() { value += 0.125f; if (value > max)value = clamped ? value - max : max; invokeCallback(); };
+		void decrease() { value -= 0.125f; if (value < min)value = clamped ? max - value : min; invokeCallback(); };
 		void setMinMax(float imin, float imax);
 		void set(float new_value);
 		float get(void);

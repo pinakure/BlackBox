@@ -200,7 +200,7 @@ void TypeWriter::drawChoices() {
 			);			
 		}
 		char buffer[6] = "";
-		sprintf_s(buffer, "%03d", oit->second);
+		sprintf_s(buffer, "%03d", oit->second->integer());
 		int var_width = al_get_text_width(Vpu::font, buffer);
 		Vpu::print(
 			oit->first,

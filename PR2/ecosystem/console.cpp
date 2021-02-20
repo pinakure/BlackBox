@@ -1749,15 +1749,16 @@ static void updateUIColors() {
 
 void Console::loadVars(void) {
 	if (initialized)return;
-	CVar::settings["ui.r"] = CVar::create<Integer>("ui.r", "UI Color Red Channel"	, 0, true);
-	CVar::settings["ui.g"] = CVar::create<Integer>("ui.g", "UI Color Green Channel"	, 0, true);
-	CVar::settings["ui.b"] = CVar::create<Integer>("ui.b", "UI Color Blue Channel"	, 0, true);
+	CVar::settings["ui.r"] = CVar::create<Integer>("ui.r", "UI Color Red Channel"	, 128 + (rand() % 128), true);
+	CVar::settings["ui.g"] = CVar::create<Integer>("ui.g", "UI Color Green Channel"	, 128 + (rand() % 128), true);
+	CVar::settings["ui.b"] = CVar::create<Integer>("ui.b", "UI Color Blue Channel"	, 128 + (rand() % 128), true);
 	((Integer*)CVar::settings["ui.r"])->setMinMax(0, 255);
 	((Integer*)CVar::settings["ui.g"])->setMinMax(0, 255);
 	((Integer*)CVar::settings["ui.b"])->setMinMax(0, 255);
-	CVar::settings["ui.r"]->function = updateUIColors;
-	CVar::settings["ui.g"]->function = updateUIColors;
-	CVar::settings["ui.b"]->function = updateUIColors;
+	CVar::settings["ui.r"]->function = &updateUIColors;
+	CVar::settings["ui.g"]->function = &updateUIColors;
+	CVar::settings["ui.b"]->function = &updateUIColors;
+	updateUIColors();
 
 	CVar::settings["con_speed"] = CVar::create<Integer>("con_speed", "Console slide transition speed", 24, true);
 	((Integer*)CVar::settings["con_speed"])->setMinMax(1, 600);
