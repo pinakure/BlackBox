@@ -160,9 +160,9 @@ class options():
 
     @staticmethod
     def typewriter_color():
-        typewriter.addoption('1. R ' , findvar('ui.r'))
-        typewriter.addoption('2. G ' , findvar('ui.g'))
-        typewriter.addoption('3. B ' , findvar('ui.b'))
+        typewriter.addoption(findvar('ui.r'))
+        typewriter.addoption(findvar('ui.g'))
+        typewriter.addoption(findvar('ui.b'))
         typewriter.addchoice('< Back', 'x')
         choice = ''
         while choice=='':

@@ -36,7 +36,7 @@ public:
 	static std::string answer; //volatile 
 	static std::string question; //volatile 
 	static std::map<std::string, std::string> choices;
-	static std::map<std::string, CVar*> options;
+	static std::vector<CVar*> options;
 	static int line_height;
 	static void initialize();
 	static void draw();

@@ -14,7 +14,7 @@ std::string TypeWriter::current = "";
 std::string TypeWriter::answer = "";
 std::string TypeWriter::question = "";
 std::map<std::string, std::string> TypeWriter::choices;
-std::map<std::string, CVar*> TypeWriter::options;
+std::vector<CVar*> TypeWriter::options;
 double	TypeWriter::current_position= 0;
 int		TypeWriter::current_end = 0;
 bool	TypeWriter::enabled = false;
@@ -110,14 +110,34 @@ static void findChoicesGeometry(int& width, int& height, std::map<std::string, s
 		height += TypeWriter::line_height;
 	}
 }
-static void findOptionsGeometry(int& width, int& height, std::map<std::string, CVar *> &choices) {
+
+
+static std::string _repr(CVar* cvar) {
+	char buffer[16] = "";
+	switch (cvar->getType()) {
+	case CVAR_BOOLEAN: return cvar->integer() ? " Y " : " N ";
+	case CVAR_INTEGER:
+		sprintf_s(buffer, "%03d", cvar->integer());
+		return buffer;
+	case CVAR_FLOATING:
+		sprintf_s(buffer, "%03.2f", ((Floating*)cvar)->get());
+		return buffer;
+	default:
+	case CVAR_COLOR:
+	case CVAR_TEXT:
+		return cvar->toString();
+	}
+}
+
+static void findOptionsGeometry(int& width, int& height, std::vector<CVar *> &options) {
 	width = 0;
 	height = 0;
-	std::map<std::string, CVar*>::iterator it;
-	for (it = choices.begin(); it != choices.end(); it++) {
-		if(it->second) {
-			int var_width = al_get_text_width(Vpu::font, it->second->toString().c_str());
-			int w = al_get_text_width(Vpu::font, it->first.c_str()) + var_width;
+	std::vector<CVar*>::iterator it;
+	for (it = options.begin(); it != options.end(); it++) {
+		CVar* var = *it;
+		if(var) {
+			int var_width = al_get_text_width(Vpu::font, _repr(var).c_str());					
+			int w = al_get_text_width(Vpu::font, var->getName().c_str()) + var_width+8;
 			width = w > width ? w : width;
 			height += TypeWriter::line_height;
 		}
@@ -176,15 +196,16 @@ void TypeWriter::drawChoices() {
 		(cy - ((max_height+padding)>>1) - line_height) 
 	);
 
-	// Draw options
 	static int q = 0;
 	q += 2;
 	q %= 128;
-	int line=0;
-	std::map<std::string, CVar *>::iterator oit;
-	
-	for (oit = options.begin(); oit != options.end(); oit++, line++) {
+	int line = 0;
+
+	// Draw options
+	std::vector<CVar *>::iterator oit;
+	for (oit = options.begin(); oit != options.end(); oit++) {
 		// Draw variable name
+		CVar* var = *oit;
 		Vpu::setColor(
 			TypeWriter::r >> 1,
 			TypeWriter::g >> 1,
@@ -199,12 +220,12 @@ void TypeWriter::drawChoices() {
 				(TypeWriter::a)
 			);			
 		}
-		char buffer[6] = "";
-		sprintf_s(buffer, "%03d", oit->second->integer());
-		int var_width = al_get_text_width(Vpu::font, buffer);
+		std::string name = var->getName();
+		std::string value = _repr(var);
+		int var_width = al_get_text_width(Vpu::font, value.c_str());
 		Vpu::print(
-			oit->first,
-			cx - ((al_get_text_width(Vpu::font, oit->first.c_str()) + var_width)>>1),
+			name.c_str(),
+			cx - ((al_get_text_width(Vpu::font, name.c_str()) + var_width)>>1),
 			(cy - (max_height / 2)) + (line * line_height)
 		);
 		// Draw variable value
@@ -215,11 +236,13 @@ void TypeWriter::drawChoices() {
 			TypeWriter::a
 		);
 		Vpu::print(
-			buffer,
+			value.c_str(),
 			(cx + (max_width>>1) - var_width)-(padding>>1),
 			(cy - (max_height / 2)) + (line * line_height)
 		);
+		line++;
 	}
+
 	//Draw choices
 	std::map<std::string, std::string>::iterator it;
 	for (it = choices.begin(); it != choices.end(); it++, line++) {
@@ -443,23 +466,25 @@ void TypeWriter::nextOption() {
 }
 
 void TypeWriter::increaseValue() {
-	std::map<std::string, CVar*>::iterator it;
+	std::vector<CVar*>::iterator it;
 	int i;
 	for (i = 0, it = options.begin(); it != options.end(); it++, i++) {
 		if (active_option == i) {
-			if(it->second)
-				it->second->increase();
+			CVar* var = *it;
+			if (var)
+				var->increase();
 		}
 	}
 }
 
 void TypeWriter::decreaseValue() {
-	std::map<std::string, CVar*>::iterator it;
+	std::vector<CVar*>::iterator it;
 	int i;
 	for (i = 0, it = options.begin(); it != options.end(); it++, i++) {
 		if (active_option == i) {
-			if(it->second)
-				it->second->decrease();
+			CVar* var = *it;
+			if (var)
+				var->decrease();
 		}
 	}
 }
@@ -694,8 +719,6 @@ void GetTextBox::moveCursorRight() {
 	else 
 		cursor_x = 0;
 }
-
-
 
 void GetTextBox::putchar() {
 	// trim trailing spaces

@@ -514,12 +514,11 @@ pythoncommand(typewriter_clear) {
 }
 
 pythoncommand(typewriter_addoption) {
-	char* caption;
 	int variable_index;
-	if (!PyArg_ParseTuple(args, "si", &caption, &variable_index)) return NULL;
+	if (!PyArg_ParseTuple(args, "i", &variable_index)) return NULL;
 	CVar* var = CVar::findByUUID(variable_index);
 	if (var) {
-		TypeWriter::options.insert(std::pair < std::string, CVar*>(caption, var));
+		TypeWriter::options.push_back(var);
 		return PyBool_FromLong(1);
 	}
 	return PyBool_FromLong(0);
@@ -585,7 +584,7 @@ static PyMethodDef ConsoleMethods[] = {
 static PyMethodDef TypeWriterMethods[] = {
 	/* TBI */
 	{"addchoice"    , typewriter_addchoice  , METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available choice array"},
-	{"addoption"    , typewriter_addoption	, METH_VARARGS, "addchoice(name, value) : Add a pair of name: pointer to integer variable to the available option array"},
+	{"addoption"    , typewriter_addoption	, METH_VARARGS, "addoption(var_handle) : Add a variable which can be modified at the menu"},
 	{"clear"	    , typewriter_clear		, METH_VARARGS, "clear() : Clear option and choice list"},
 	{"clearpic"		, typewriter_clearpic	, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
 	{"enqueue"		, typewriter_enqueue	, METH_VARARGS, "typewriter.enqueue(text) : Enqueue message into typewriter buffer and open if if closed"},
