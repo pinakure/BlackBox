@@ -6,7 +6,6 @@
 #include <assert.h>
 
 std::map<std::string, CVar*> CVar::settings;
-std::vector<CVar*> CVar::variables;
 bool CVar::initialized = false;
 unsigned int CVar::global_uuid;
 

@@ -43,7 +43,6 @@ class CVar {
 		static CVar* findByUUID(int uuid);
 		static void setByUUID(int uuid, std::string value);
 		static std::map<std::string, CVar*>	settings;
-		static std::vector<CVar*>	variables;
 		static void initialize(void);
 		static bool initialized;
 
