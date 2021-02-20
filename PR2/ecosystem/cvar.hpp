@@ -54,6 +54,8 @@ class CVar {
 		std::string getName(void){ return name; }
 		std::string getHelp(void){ return help; }
 		void invokeCallback(void);
+		virtual int increase(void) = 0;
+		virtual int decrease(void) = 0;
 		virtual int integer(void) = 0;
 		virtual void parseValue(std::string value) = 0;
 		virtual std::string toString(void) = 0;

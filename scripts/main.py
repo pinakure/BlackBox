@@ -140,8 +140,6 @@ class debug():
         def status():
             pass
 
-
-
     @staticmethod
     def menu():
         while(1):
@@ -169,10 +167,10 @@ class options():
 
     @staticmethod
     def typewriter_color():
-        typewriter.addoption('1. R '      , 0)#VARIABLE_TYPEWRITER_R
-        typewriter.addoption('2. G '      , 1)#VARIABLE_TYPEWRITER_G
-        typewriter.addoption('3. B '      , 2)#VARIABLE_TYPEWRITER_B
-        typewriter.addchoice('OK'             , 'x')
+        typewriter.addoption('1. R ' , findvar('ui.red'  ))#VARIABLE_TYPEWRITER_R
+        typewriter.addoption('2. G ' , findvar('ui.green'))#VARIABLE_TYPEWRITER_G
+        typewriter.addoption('3. B ' , findvar('ui.blue' ))#VARIABLE_TYPEWRITER_B
+        typewriter.addchoice('< Back', 'x')
         choice = ''
         while choice=='':
             vpu.update()

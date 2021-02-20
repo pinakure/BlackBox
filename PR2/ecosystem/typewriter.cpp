@@ -14,7 +14,7 @@ std::string TypeWriter::current = "";
 std::string TypeWriter::answer = "";
 std::string TypeWriter::question = "";
 std::map<std::string, std::string> TypeWriter::choices;
-std::map<std::string, int&> TypeWriter::options;
+std::map<std::string, CVar*> TypeWriter::options;
 double	TypeWriter::current_position= 0;
 int		TypeWriter::current_end = 0;
 bool	TypeWriter::enabled = false;
@@ -23,9 +23,11 @@ double	TypeWriter::height = 0;
 int		TypeWriter::x = 0;
 int		TypeWriter::y = 0;
 int		TypeWriter::a = 220;
+
 int		TypeWriter::r = 200;
 int		TypeWriter::g = 255;
 int		TypeWriter::b = 0;
+
 int		TypeWriter::wait_time = 0;
 int		TypeWriter::active_option = 0;
 int		TypeWriter::active_choice = 0;
@@ -59,12 +61,10 @@ static float radius = 0.0f;
 std::string _sanitizeString(std::string text) {
 	size_t endpos = text.find_last_not_of(" \t");
 	size_t startpos = text.find_first_not_of(" \t");
-	if (std::string::npos != endpos)
-	{
+	if (std::string::npos != endpos) {
 		text = text.substr(0, endpos + 1);
 		text = text.substr(startpos);
-	}
-	else {
+	} else {
 		text.erase(std::remove(std::begin(text), std::end(text), ' '), std::end(text));
 	}
 	return text;
@@ -110,15 +110,17 @@ static void findChoicesGeometry(int& width, int& height, std::map<std::string, s
 		height += TypeWriter::line_height;
 	}
 }
-static void findOptionsGeometry(int& width, int& height, std::map<std::string, int &> &choices) {
+static void findOptionsGeometry(int& width, int& height, std::map<std::string, CVar *> &choices) {
 	width = 0;
 	height = 0;
-	std::map<std::string, int&>::iterator it;
-	int var_width = al_get_text_width(Vpu::font, "   ");
+	std::map<std::string, CVar*>::iterator it;
 	for (it = choices.begin(); it != choices.end(); it++) {
-		int w = al_get_text_width(Vpu::font, it->first.c_str())+var_width;
-		width = w > width ? w : width;
-		height += TypeWriter::line_height;
+		if(it->second) {
+			int var_width = al_get_text_width(Vpu::font, it->second->toString().c_str());
+			int w = al_get_text_width(Vpu::font, it->first.c_str()) + var_width;
+			width = w > width ? w : width;
+			height += TypeWriter::line_height;
+		}
 	}
 }
 
@@ -179,7 +181,7 @@ void TypeWriter::drawChoices() {
 	q += 2;
 	q %= 128;
 	int line=0;
-	std::map<std::string, int &>::iterator oit;
+	std::map<std::string, CVar *>::iterator oit;
 	
 	for (oit = options.begin(); oit != options.end(); oit++, line++) {
 		// Draw variable name
@@ -441,23 +443,23 @@ void TypeWriter::nextOption() {
 }
 
 void TypeWriter::increaseValue() {
-	std::map<std::string, int&>::iterator it;
+	std::map<std::string, CVar*>::iterator it;
 	int i;
 	for (i = 0, it = options.begin(); it != options.end(); it++, i++) {
 		if (active_option == i) {
-			(it->second)++;
-			if (it->second > 255)it->second = 255;
+			if(it->second)
+				it->second->increase();
 		}
 	}
 }
 
 void TypeWriter::decreaseValue() {
-	std::map<std::string, int&>::iterator it;
+	std::map<std::string, CVar*>::iterator it;
 	int i;
 	for (i = 0, it = options.begin(); it != options.end(); it++, i++) {
 		if (active_option == i) {
-			(it->second)--;
-			if (it->second < 0)it->second = 0;
+			if(it->second)
+				it->second->decrease();
 		}
 	}
 }

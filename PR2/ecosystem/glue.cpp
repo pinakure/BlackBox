@@ -521,21 +521,15 @@ pythoncommand(typewriter_clear) {
 }
 
 pythoncommand(typewriter_addoption) {
-	char* name;
+	char* caption;
 	int variable_index;
-	if (!PyArg_ParseTuple(args, "si", &name, &variable_index)) return NULL;
-	switch (variable_index) {
-		default: Console::print("Unknown variable index specified");
-		break; case VARIABLE_TYPEWRITER_R:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::r));
-		break; case VARIABLE_TYPEWRITER_G:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::g));
-		break; case VARIABLE_TYPEWRITER_B:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::b));
-		break; case VARIABLE_TYPEWRITER_A:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::a));
-		break; case VARIABLE_TYPEWRITER_X:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::x));
-		break; case VARIABLE_TYPEWRITER_Y:		 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::y));
-		//break; case VARIABLE_TYPEWRITER_FONT:	 TypeWriter::options.insert(std::pair < std::string, int&>(name, TypeWriter::active_font));
-		break;
-	}	
-	return PyLong_FromLong(1);
+	if (!PyArg_ParseTuple(args, "si", &caption, &variable_index)) return NULL;
+	CVar* var = CVar::findByUUID(variable_index);
+	if (var) {
+		TypeWriter::options.insert(std::pair < std::string, CVar*>(caption, var));
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
 }
 
 pythoncommand(typewriter_getchoice) {
