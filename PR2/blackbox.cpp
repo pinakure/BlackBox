@@ -22,7 +22,7 @@ bool initialize() {
 	Script::execute("import blackbox");
 	Script::execute("import typewriter");
 	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
-	
+	Engine::download("1GB.zip");
 	if (s.isLoaded()) s.call("main");
 	return true;
 }

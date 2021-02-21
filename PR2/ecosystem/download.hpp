@@ -2,6 +2,8 @@
 #define _DOWNLOAD_HPP
 
 #include <windows.h>
+#include <string>
+
 class Download : public IBindStatusCallback{
 private:
     int progress, filesize;
@@ -21,6 +23,8 @@ public:
         return E_NOTIMPL;
     }
 
+    void draw(std::string msg="Downloading");
+
     STDMETHOD(GetProgress)(){ return progress; }
     
     STDMETHOD(GetFileSize)(){ return filesize; }
@@ -28,7 +32,6 @@ public:
     STDMETHOD(GetPriority)(LONG __RPC_FAR* pnPriority){return E_NOTIMPL;}
 
     STDMETHOD(OnLowResource)(DWORD reserved){return E_NOTIMPL;}
-
     STDMETHOD(OnProgress)(
         /* [in] */ ULONG ulProgress,
         /* [in] */ ULONG ulProgressMax,

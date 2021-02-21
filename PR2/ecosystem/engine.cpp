@@ -71,7 +71,6 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		Hud::initialize();
-		download("googlelogo_color_272x92dp.png");
 		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();
@@ -138,7 +137,7 @@ void Engine::render() {
 		// -----------------------
 		showcase->draw();
 		Hud::draw();
-		InputDevice::draw(11);
+		InputDevice::draw(0);
 		Console::draw(16);
 		Vpu::render();		
 		Vpu::frames++;
@@ -233,12 +232,45 @@ void Engine::scale(float x, float y, float z) {
 	
 	std::printf("Vpu::setScale(%f,%f,%f)\n", Vpu::target->scale[0],Vpu::target->scale[1],Vpu::target->scale[2]);
 }
-
 #include "download.hpp"
+#include <wininet.h>
+#pragma comment(lib, "wininet.lib")
 void Engine::download(const char* file) {
+	Vpu::console.enabled = false;
+	Vpu::foreground.enabled = false;
+	Vpu::background.enabled = false;
+	Vpu::overlay.enabled = true;
+	
 	std::string filename = file;
-	std::string src = "https://www.google.com/images/branding/googlelogo/1x/"+filename;
+	std::string src = "http://ipv4.download.thinkbroadband.com/"+filename;
 	std::string dst = "data\\downloads\\"+filename;
 	Download ds;
+	
+	/*
+	INTERNET_CACHE_ENTRY_INFOA info;
+	info.dwStructSize = sizeof(INTERNET_CACHE_ENTRY_INFOA);
+	info.CacheEntryType = 0xFFFFFFFF;
+	info.dwUseCount = 0;
+	info.dwHitRate = 0;
+	info.dwSizeLow = 0;
+	info.dwSizeHigh = 0;
+	DWORD size=1024;
+	HANDLE cache = FindFirstUrlCacheEntryA(NULL, &info, &size);
+	while (cache) {
+		std::string status = "Cleaning cache ";
+		status += info.lpszSourceUrlName;
+		status = status.substr(0, status.size() - 1);
+		status += "\n";
+		printf(status.c_str());
+		ds.draw(status.c_str());
+		//DeleteUrlCacheEntryA(info.lpszSourceUrlName);
+		if (!FindNextUrlCacheEntryA(cache, &info, &size))
+		//	break;
+	}
+	*/
+	ds.draw("Preparing download '"+filename+"'");
 	URLDownloadToFileA(NULL, src.c_str(), dst.c_str(), 0, &ds);
+	Vpu::console.enabled = true;
+	Vpu::foreground.enabled = true;
+	Vpu::background.enabled = true;
 }

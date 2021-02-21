@@ -1,5 +1,4 @@
 #include "input.hpp"
-#include "input.hpp"
 #include "engine.hpp"
 #include "console.hpp"
 bool					InputDevice::control_c = false;

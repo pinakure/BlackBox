@@ -1,8 +1,74 @@
 #include "download.hpp"
+#include "engine.hpp"
+#include "typewriter.hpp"
+#include "vpu.hpp"
+
+static char _buffer[4096];
+
+#include "input.hpp"
+extern char key[256];
+
+void Download::draw(std:: string msg) {
+	int w = Vpu::width / 2;
+	int h = 24;
+	int y = (Vpu::height / 4) - (h / 2);;
+	int x = (Vpu::width / 2);// - (w / 2);
+	float q = (float(progress >> 1) / float((filesize+ 2) >> 1));
+	float bar = q * float(w);
+	const int bar_height = 6;
+
+	al_set_target_bitmap(Vpu::buffer);
+	int right = Vpu::width - (Vpu::width >> 2);
+	Vpu::paint(TypeWriter::r >> 3, TypeWriter::g >> 3, TypeWriter::b >> 3, 255);
+	Vpu::setColor(255, 255, 0, 255);
+	if (filesize == 0) {
+		int pc = int(q * 100);
+		if (pc == 100)
+			sprintf_s(_buffer, "Checking downloaded data");
+		else
+			sprintf_s(_buffer, "%s: %d/100", msg.c_str(), pc);
+		printf(_buffer, '%');
+		printf("      \r");
+		Vpu::print(_buffer	  , x, 20, ALLEGRO_ALIGN_CENTER);
+	} else {
+		Vpu::print(msg.c_str(), x, 20, ALLEGRO_ALIGN_CENTER);
+	}
+	// Draw BAR background rectangle
+	Vpu::fillRectangle(
+		(x / 2) + bar, y,
+		w - bar, bar_height,
+		TypeWriter::r >> 1, TypeWriter::g >> 1, TypeWriter::b >> 1, TypeWriter::a
+	);
+	// Antialiase BAR background 
+	Vpu::fillRectangle(
+		(x / 2) + bar, y - 1,
+		w - bar - 1, bar_height + 2,
+		TypeWriter::r >> 1, TypeWriter::g >> 1, TypeWriter::b >> 1, TypeWriter::a
+	);
+	// Draw BAR foreground (progress) rectangle
+	Vpu::fillRectangle(
+		(x / 2), y,
+		bar, bar_height,
+		TypeWriter::r, TypeWriter::g, TypeWriter::b, TypeWriter::a
+	);
+	// Antialiase BAR foreground 
+	Vpu::fillRectangle(
+		(x / 2) + 1, y - 1,
+		bar - 1, bar_height + 2,
+		TypeWriter::r, TypeWriter::g, TypeWriter::b, TypeWriter::a
+	);
+	// Copy to VRAM
+	Engine::update();
+}
 
 HRESULT Download::OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR wszStatusText){
 	progress = ulProgress;
 	filesize = ulProgressMax;
+	
+	draw();
+
+	if (key[ALLEGRO_KEY_ESCAPE])
+		AbortDownload = true;
 	if (AbortDownload) return E_ABORT;
 	return S_OK;
 }

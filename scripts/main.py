@@ -414,7 +414,7 @@ class test():
             elif choice == '4': test.fade()
             elif choice == '5': test.benchmark()
             elif choice == '6': test.dialog()
-            if not vpu.ready():
+            if not typewriter.ready():
                 vpu.update()
 
 cout('Write down "test.menu()" to discover available tests / benchmarks ')

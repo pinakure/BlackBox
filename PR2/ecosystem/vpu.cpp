@@ -313,15 +313,17 @@ ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, flo
 	return ret;
 }
 
+static char _buffer[65535];
+
+
 void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
-	char buffer[2048];
 	va_list ap;
 	va_start(ap, fmt);
-	vsprintf_s(buffer, 2048, fmt, ap);
+	vsprintf_s(_buffer, 2048, fmt, ap);
 	va_end(ap);
 
-	al_draw_textf(font, shadow, x + 1, y + 1, flags, buffer);
-	al_draw_textf(font, color, x, y, flags, buffer);
+	al_draw_textf(font, shadow, x + 1, y + 1, flags, _buffer);
+	al_draw_textf(font, color, x, y, flags, _buffer);
 	
 }
 
@@ -407,8 +409,8 @@ void Vpu::render() {
 		renderlayer(background);
 		renderlayer(foreground);
 	#undef renderlayer	
-
-	Curtain::draw();
+	
+	//Curtain::draw();
 	
 	al_draw_scaled_rotated_bitmap(					
 		overlay.bitmap,							
