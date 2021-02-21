@@ -4,6 +4,9 @@
 #include "console.hpp"
 #include "world.hpp"
 #include "camera.hpp"
+#include <iostream>
+#include<Windows.h>
+#pragma comment(lib, "urlmon.lib")
 
 #define WORLD_SIZE					65535
 #define NPC_COUNT					128
@@ -68,6 +71,7 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		Hud::initialize();
+		download("googlelogo_color_272x92dp.png");
 		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();
@@ -206,8 +210,6 @@ void Engine::print(std::string text) {
 	fprintf(stdout, "%s\n", text.c_str());
 }
 
-
-
 float Engine::_rotation = 0.0f;
 void Engine::rotate(float r) {
 	Vpu::select(Vpu::background);
@@ -231,3 +233,111 @@ void Engine::scale(float x, float y, float z) {
 	
 	std::printf("Vpu::setScale(%f,%f,%f)\n", Vpu::target->scale[0],Vpu::target->scale[1],Vpu::target->scale[2]);
 }
+
+void Engine::download(const char* file) {
+	std::string filename = file;
+	std::string src = "https://www.google.com/images/branding/googlelogo/1x/"+filename;
+	std::string dst = "data\\downloads\\"+filename;
+	URLDownloadToFileA(NULL, src.c_str(), dst.c_str(), 0, NULL);
+}
+
+/*
+
+private:
+	int progress, filesize;
+	int AbortDownload;
+
+public:
+
+STDMETHOD(OnStartBinding)(
+	{
+		AbortDownload=0;
+		progress=0;
+		filesize=0;
+		return E_NOTIMPL; }
+
+	STDMETHOD(GetProgress)()
+		{ return progress; }
+
+	STDMETHOD(GetFileSize)()
+		{ return filesize; }
+STDMETHOD(AbortDownl)()
+	{
+		AbortDownload=1;
+		return E_NOTIMPL; }
+
+HRESULT DownloadStatus::OnProgress ( ULONG ulProgress, ULONG ulProgressMax,ULONG ulStatusCode, LPCWSTR wszStatusText )
+{
+	progress=ulProgress;
+	filesize=ulProgressMax;
+	if (AbortDownload) return E_ABORT;
+	return S_OK;
+}
+
+/*
+
+Probably function immediatelly returns because of error.
+URLDownloadToFile() is definitely syncronous function, if you set LPBINDSTATUSCALLBACK lpfnCB as NULL.
+It is so "syncronous", what it will never end until its download completion, 
+even if network connection fails and will block your thread. 
+
+Killing thread with URLDownloadToFile() in progress by TerminateThread() function will cause 
+resources leak and child calls to system dlls unfinished and after couple of times URLDownloadToFile() 
+will refuse to work in context of current process.
+
+The only way of reliable usage of URLDownloadToFile() without callback function is to fork separate 
+process to it and kill that process if download stalls which is resource consuming.
+
+URLDownloadToFile() download behaviours exactly the same way as IE, all IE proxy and network settings 
+in user profile in which context this function is running will apply to this function also.
+
+Also URLDownloadToFile() doesn't return immediately even with callback function. 
+I consider to start URLDownloadToFile() in separate thread to safely control and abort network download.
+
+There is simple example of callback function at https://github.com/choptastic/OldCode-Public/blob/master/URLDownloadToFile/URLDownloadToFile.cpp
+
+To get safe download you should upgrade code at least with something like:
+
+private:
+	int progress, filesize;
+	int AbortDownload;
+
+public:
+
+STDMETHOD(OnStartBinding)(
+	{
+		AbortDownload=0;
+		progress=0;
+		filesize=0;
+		return E_NOTIMPL; }
+
+	STDMETHOD(GetProgress)()
+		{ return progress; }
+
+	STDMETHOD(GetFileSize)()
+		{ return filesize; }
+STDMETHOD(AbortDownl)()
+	{
+		AbortDownload=1;
+		return E_NOTIMPL; }
+
+HRESULT DownloadStatus::OnProgress ( ULONG ulProgress, ULONG ulProgressMax,ULONG ulStatusCode, LPCWSTR wszStatusText )
+{
+	progress=ulProgress;
+	filesize=ulProgressMax;
+	if (AbortDownload) return E_ABORT;
+	return S_OK;
+}
+So you can always abort download and check progress of download.
+Even after download have been indicated as completed by S_OK returned 
+by URLDownloadToFile() function you have to compare progress==filesize values, 
+because URLDownloadToFile() can drop download with S_OK by mistake, 
+for example 
+if connection is made via network bridge of local network interfaces 
+and bridge have fallen down for some reason.
+
+Also you have to pay attention to DeleteUrlCacheEntry() function in pair 
+with URLDownloadToFile() to free disk space after download, because all downloaded 
+content is cached at disk by default according to IE caching policy.
+
+*/

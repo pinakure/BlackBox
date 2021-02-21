@@ -31,6 +31,8 @@ public:
 	static void print(std::string text);
 	static void printf(const char *fmt, ...);
 
+	static void download(const char *file);
+
 	static void scale(float, float, float);
 	static void rotate(float);
 	static float _scale[3];
