@@ -25,7 +25,7 @@ Surface Vpu::background;
 Surface Vpu::foreground;
 
 std::vector<ALLEGRO_COLOR> Vpu::color_stack;
-std::vector<ALLEGRO_FONT*> Vpu::font_stack;
+std::vector<Font*> Vpu::font_stack;
 Surface* Vpu::target = NULL;
 ALLEGRO_BITMAP *Vpu::buffer= NULL;
 int Vpu::frames = 0;
@@ -44,8 +44,8 @@ bool Vpu::ready= true;
 ALLEGRO_COLOR Vpu::transparent;
 std::vector<Font*> Vpu::fonts;
 
-ALLEGRO_FONT* Vpu::font = NULL;
-ALLEGRO_FONT* Vpu::legacy_font = NULL;
+Font* Vpu::font = NULL;
+Font* Vpu::legacy_font = NULL;
 
 
 void prepareTests() {
@@ -135,7 +135,7 @@ void Vpu::initializeFonts() {
 		}
 	}
 	for (int i = 0; i < fonts.size(); i++) {
-		font = fonts[i]->data;
+		font = fonts[i];
 		if (font)return;
 	}
 	Engine::printf("WARNING: Failed to initialize system font.\nUsing default font.\n");
@@ -205,7 +205,7 @@ bool Vpu::initialize() {
 		if (!al_init_ttf_addon()) return false;
 		if (!al_init_primitives_addon())return false;
 		if (!al_init_image_addon())return false;		
-		legacy_font = al_create_builtin_font();
+		legacy_font = new Font("legacy");
 		font = legacy_font;	
 		if (!restart()) return false;
 		initializeFonts();
@@ -235,7 +235,8 @@ void Vpu::select(Surface &target) {
 }
 
 void Vpu::deinitialize() {
-	if(  font ) al_destroy_font(font);
+	if (font) delete font;
+	font = legacy_font;
 	if(display) al_destroy_display(display);
 	destroySurface(console);
 	for (int i = 0; i < 4; i++) {		
@@ -323,30 +324,30 @@ void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
 	vsprintf_s(_buffer, 2048, fmt, ap);
 	va_end(ap);
 
-	al_draw_textf(font, shadow, x + 1, y + 1, flags, _buffer);
-	al_draw_textf(font, color, x, y, flags, _buffer);
+	al_draw_textf(font->data, shadow, x + 1, y + 1, flags, _buffer);
+	al_draw_textf(font->data, color, x, y, flags, _buffer);
 	
 }
 
 void Vpu::print(std::string text, int  x, int y, int flags) {
-	al_draw_textf(font, shadow, x+1, y+1, flags, text.c_str());	
-	al_draw_textf(font, color , x  , y  , flags, text.c_str());	
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, text.c_str());
+	al_draw_textf(font->data, color , x  , y  , flags, text.c_str());
 }
 void Vpu::printInteger(std::string text, int d, int  x, int y, int flags) {
-	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%d").c_str(), d);
-	al_draw_textf(font, color , x  , y  , flags, (text + "%d").c_str(), d);
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, (text + "%d").c_str(), d);
+	al_draw_textf(font->data, color , x  , y  , flags, (text + "%d").c_str(), d);
 }
 void Vpu::printFloat(std::string text, float d, int  x, int y, int flags) {
-	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
-	al_draw_textf(font, color , x  , y  , flags, (text + "%f").c_str(), d);
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
+	al_draw_textf(font->data, color , x  , y  , flags, (text + "%f").c_str(), d);
 }
 void Vpu::printDouble(std::string text, double d, int  x, int y, int flags) {
-	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
-	al_draw_textf(font, color , x  , y  , flags, (text + "%f").c_str(), d);
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, (text + "%f").c_str(), d);
+	al_draw_textf(font->data, color , x  , y  , flags, (text + "%f").c_str(), d);
 }
 void Vpu::printBool(std::string text,bool d, int  x, int y, int flags) {
-	al_draw_textf(font, shadow, x+1, y+1, flags, (text + "%b").c_str(), d);
-	al_draw_textf(font, color , x  , y  , flags, (text + "%b").c_str(), d);
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, (text + "%b").c_str(), d);
+	al_draw_textf(font->data, color , x  , y  , flags, (text + "%b").c_str(), d);
 }
 
 void Vpu::fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha) {
@@ -620,7 +621,6 @@ void Vpu::deallocateSurface(long int handle) {
 	}
 }
 
-void Vpu::setFont(Font *font) {
-	// TODO: hold Vpu obj
-	Vpu::font = font->data;
+void Vpu::setFont(Font *fnt) {
+	Vpu::font = fnt;
 }

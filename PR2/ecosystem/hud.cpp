@@ -20,8 +20,8 @@ void Hud::drawDebugInfo() {
 	int y = Vpu::target->height >> 4;
 	int right = Vpu::overlay.width - (Vpu::overlay.width >> 2);
 	Vpu::printf(right,  0, ALLEGRO_ALIGN_RIGHT, "FPS %#6d", Vpu::fps);
-	Vpu::printf(right, TypeWriter::line_height, ALLEGRO_ALIGN_RIGHT, "CPS %#6d", Engine::cycles);
-	Vpu::printf(right, TypeWriter::line_height<<1, ALLEGRO_ALIGN_RIGHT, " T  %#6d", Vpu::total_frames);
+	Vpu::printf(right, Vpu::font->height, ALLEGRO_ALIGN_RIGHT, "CPS %#6d", Engine::cycles);
+	Vpu::printf(right, Vpu::font->height<< 1, ALLEGRO_ALIGN_RIGHT, " T  %#6d", Vpu::total_frames);
 }
 
 void Hud::update(float delta) {

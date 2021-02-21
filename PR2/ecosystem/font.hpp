@@ -10,7 +10,7 @@ class Font {
 public:	
 	ALLEGRO_FONT* data = NULL;
 	std::string name;
-	int size;
+	int height;
 	Font(std::string filename, int size = 12);
 	~Font();
 };

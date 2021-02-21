@@ -108,7 +108,7 @@ static void findChoicesGeometry(int& width, int& height, std::map<std::string, s
 	height = 0;
 	std::map<std::string, std::string>::iterator it;
 	for (it = choices.begin(); it != choices.end(); it++) {
-		int w = al_get_text_width(Vpu::font, it->first.c_str());
+		int w = al_get_text_width(Vpu::font->data, it->first.c_str());
 		width = w > width ? w : width;
 		height += TypeWriter::line_height;
 	}
@@ -139,8 +139,8 @@ static void findOptionsGeometry(int& width, int& height, std::vector<CVar *> &op
 	for (it = options.begin(); it != options.end(); it++) {
 		CVar* var = *it;
 		if(var) {
-			int var_width = al_get_text_width(Vpu::font, _repr(var).c_str());					
-			int w = al_get_text_width(Vpu::font, var->getName().c_str()) + var_width+8;
+			int var_width = al_get_text_width(Vpu::font->data, _repr(var).c_str());
+			int w = al_get_text_width(Vpu::font->data, var->getName().c_str()) + var_width+8;
 			width = w > width ? w : width;
 			height += TypeWriter::line_height;
 		}
@@ -154,7 +154,7 @@ void TypeWriter::drawChoices() {
 	Vpu::pushColor();
 	Vpu::pushFont();
 	if(font)
-		Vpu::font = font->data;
+		Vpu::font = font;
 	
 	// Center dialog
 	int cx = (Vpu::width / 2);
@@ -198,7 +198,7 @@ void TypeWriter::drawChoices() {
 	);
 	Vpu::print(
 		TypeWriter::question,
-		cx - (al_get_text_width(Vpu::font, TypeWriter::question.c_str()) >>1),
+		cx - (al_get_text_width(Vpu::font->data, TypeWriter::question.c_str()) >>1),
 		(cy - ((max_height+padding)>>1) - line_height) 
 	);
 
@@ -228,10 +228,10 @@ void TypeWriter::drawChoices() {
 		}
 		std::string name = var->getName();
 		std::string value = _repr(var);
-		int var_width = al_get_text_width(Vpu::font, value.c_str());
+		int var_width = al_get_text_width(Vpu::font->data, value.c_str());
 		Vpu::print(
 			name.c_str(),
-			cx - ((al_get_text_width(Vpu::font, name.c_str()) + var_width)>>1),
+			cx - ((al_get_text_width(Vpu::font->data, name.c_str()) + var_width)>>1),
 			(cy - (max_height / 2)) + (line * line_height)
 		);
 		// Draw variable value
@@ -273,7 +273,7 @@ void TypeWriter::drawChoices() {
 		}
 		Vpu::print(
 			it->first,
-			cx - al_get_text_width(Vpu::font, it->first.c_str()) / 2,
+			cx - al_get_text_width(Vpu::font->data, it->first.c_str()) / 2,
 			(cy - (max_height / 2)) + (line * line_height) 
 		);
 	}		
@@ -286,8 +286,7 @@ void TypeWriter::drawText() {
 	if (!TypeWriter::needs_redraw)return;
 	Vpu::pushColor();
 	Vpu::pushFont();
-	if(font)
-		Vpu::font = font->data;
+	if(font) Vpu::font = font;
 
 	Vpu::select(surface);
 	Vpu::clear();
@@ -818,8 +817,7 @@ void GetTextBox::draw() {
 	// save current color
 	Vpu::pushColor();
 	Vpu::pushFont();
-	if(GetTextBox::font)
-		Vpu::font = GetTextBox::font->data;
+	if(GetTextBox::font) Vpu::font = GetTextBox::font;
 
 	// Center dialog
 	int cx = (Vpu::width / 2);
@@ -850,7 +848,7 @@ void GetTextBox::draw() {
 		255,
 		TypeWriter::a
 	);
-	size_t strl = al_get_text_width(Vpu::font, text.c_str());
+	size_t strl = al_get_text_width(Vpu::font->data, text.c_str());
 	Vpu::print(
 		text,
 		cx - (strl / 2),

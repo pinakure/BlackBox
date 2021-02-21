@@ -215,11 +215,11 @@ class functions():
                 if background_status: 
                     background_status = False
                     vpu.select(0)
-                    vpu.fill(128,0,0,255)
+                    vpu.fill(50,100,25,255)
                 else: 
                     background_status = True
                     vpu.select(0)
-                    vpu.fill(128,128,0,255)
+                    vpu.fill(100,50,25,255)
                 print("Opening")
                 vpu.transition()
                 while not vpu.update():
