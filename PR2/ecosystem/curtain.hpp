@@ -14,6 +14,8 @@ typedef enum E_CurtainStatus {
 class Curtain {
 private:
 public:
+	static bool forward;
+	static bool enabled;
 	static int time;
 	static int *grid;
 	static Surface *begin_surface;
@@ -25,6 +27,7 @@ public:
 	static void prepare(Surface* target);
 	static CurtainStatus run(double delta);
 	static void render();
+	static void reset();
 	static void draw();	
 };
 

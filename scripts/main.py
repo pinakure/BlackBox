@@ -190,16 +190,43 @@ class functions():
     
     @staticmethod
     def vpu_menu():
+        background_status = False
         while(1):
             choice = submenu([
-                [ 'enable'  , 'e' ],
-                [ 'rotate'  , 'r' ],
-                [ 'scale'   , 's' ],
+                [ 'enable'      , 'e' ],
+                [ 'rotate'      , 'r' ],
+                [ 'scale'       , 's' ],
+                [ 'transition'  , 't' ],
             ], "Functions")
             if choice == '<': return
             elif choice == 'e': vpu.enable(1)
             elif choice == 'r': vpu.rotate(45)
             elif choice == 's': vpu.scale(0.5, 0.5, 0.5)
+            elif choice == 't':                 
+                progress = 0
+                print("Close")
+                vpu.transition()
+                while not vpu.update():
+                    print("Closing", end=('.'*(int(progress/10)%4))+"   \r")
+                    progress += 1
+                print("Closed        ")                    
+                # change screen content here
+                print("Change Screen contents here")
+                if background_status: 
+                    background_status = False
+                    vpu.select(0)
+                    vpu.fill(128,0,0,255)
+                else: 
+                    background_status = True
+                    vpu.select(0)
+                    vpu.fill(128,128,0,255)
+                print("Opening")
+                vpu.transition()
+                while not vpu.update():
+                    print("Opening", end=('.'*(int(progress/10)%4))+"   \r")
+                    progress += 1
+                print("Opened        ")                    
+                
             if not typewriter.ready():
                 vpu.update()
     

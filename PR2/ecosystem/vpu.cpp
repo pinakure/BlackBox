@@ -40,6 +40,7 @@ ALLEGRO_DISPLAY *Vpu::display = NULL;
 ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
 bool Vpu::fullscreen = false;
+bool Vpu::ready= true;
 ALLEGRO_COLOR Vpu::transparent;
 std::vector<Font*> Vpu::fonts;
 
@@ -410,7 +411,7 @@ void Vpu::render() {
 		renderlayer(foreground);
 	#undef renderlayer	
 	
-	//Curtain::draw();
+	Curtain::draw();
 	
 	al_draw_scaled_rotated_bitmap(					
 		overlay.bitmap,							

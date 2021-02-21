@@ -94,7 +94,10 @@ pythoncommand(vpu_update){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	Engine::update();
 	if (!Engine::run) exit(-1);
-	return PyBool_FromLong(1);
+	static bool ready = false;
+	ready = Vpu::ready;
+	Vpu::ready = false;
+	return PyBool_FromLong(ready);
 }
 pythoncommand(vpu_enable){
 	int index;
@@ -220,6 +223,14 @@ pythoncommand(vpu_deleteanim) {
 	Vpu::deallocateAnimation(handle);
 	return PyLong_FromLong(1);
 }
+
+#include "curtain.hpp"
+pythoncommand(vpu_transition) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	Curtain::enabled = true;
+	return PyBool_FromLong(true);
+}
+
 pythoncommand(vpu_createanim){
 	int width;
 	int height;
@@ -277,9 +288,9 @@ pythoncommand(vpu_fill){
 	int g = -1;
 	int b = -1;
 	int a = -1;
-	if(!PyArg_ParseTuple(args, "|rgba", &r, &g, &b, &a)) return NULL;
-	Vpu::paint(r, g, b, a);
-	return PyLong_FromLong(1);	
+	if(!PyArg_ParseTuple(args, "|iiii", &r, &g, &b, &a)) return NULL;
+	Vpu::paint(r>=0?r:0, g>=0 ? g : 0, b>=0? b : 0, a>=0 ? a : 255);
+	return PyBool_FromLong(true);	
 }
 pythoncommand(vpu_fadein){
 	int r = -1;
@@ -650,6 +661,7 @@ static PyMethodDef BlackBoxMethods[] = {
 /* Video Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef VpuMethods[] = {
+	{"transition"	, vpu_transition		, METH_VARARGS, "vpu.transition(surface_handle) : Performs an interactive transition bewtween active surface and another one" },
 	{"createanim"	, vpu_createanim		, METH_VARARGS, "vpu.createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
 	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },

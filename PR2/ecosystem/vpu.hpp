@@ -26,7 +26,8 @@ public:
 	static ALLEGRO_COLOR				color;
 	static ALLEGRO_DISPLAY				*display;
 	static bool							is_initialized;
-	static bool							fullscreen;	
+	static bool							fullscreen;
+	static bool							ready;
 	static long int						animation_handle;
 	static long int						surface_handle;
 	static long int						sprite_handle;

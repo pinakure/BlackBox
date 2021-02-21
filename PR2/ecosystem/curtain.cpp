@@ -13,6 +13,8 @@ const unsigned long int compressed_curtain_frames[10] = {
 	0xFFFFFFFF  //frame 9
 };
 
+int Curtain::time=0;
+
 int* Curtain::grid = NULL;
 Surface Curtain::frames[10] = {
 	NULL, NULL, NULL, NULL, NULL,
@@ -22,7 +24,8 @@ Surface		   *Curtain::begin_surface = NULL;
 Surface	 	   *Curtain::end_surface = NULL;
 int				Curtain::delay = 25;
 CurtainStatus	Curtain::status = CURTAIN_STATUS_NOTREADY;
-
+bool			Curtain::forward = true;
+bool			Curtain::enabled= false;
 #include "vpu.hpp"
 
 void Curtain::render() {	
@@ -70,24 +73,53 @@ void Curtain::render() {
 	}
 }
 
+void Curtain::reset() {
+	int map_position = 0;
+	for (int y = 0; y < Vpu::height >> 4; y++) {
+		for (int x = 0; x < Vpu::width >> 4; x++) {
+			grid[map_position] = 9;
+			/*grid[map_position] = (
+				((float(x) / float(Vpu::width >> 4)) * 5.0f) +
+				((float(y) / float(Vpu::height >> 4)) * 5.0f)
+				) * 2.5f;*/
+			map_position++;
+		}
+	}
+	Vpu::ready = false;
+}
+
 void Curtain::draw() {
+	if (!enabled) return;
 	Vpu::select(Vpu::overlay);
 	int origin_x = (Vpu::overlay.width / 4);
 	int map_position = 0;
 	int iy = 0;
 	float delay = 25;
-	bool flip = (Vpu::total_frames % 200) > 100;
-	if ((Vpu::total_frames % 200) == 0) {
-		for (int y = 0; y < Vpu::height >> 4; y++) {
-			for (int x = 0; x < Vpu::width >> 4; x++) {
-				grid[map_position] = (
-					((float(x) / float(Vpu::width >> 4)) * 5.0f) +
-					((float(y) / float(Vpu::height >> 4)) * 5.0f)
-					) * 2.5f;
-				map_position++;
-			}
+	
+	if (forward) {
+		//Closing
+		if (time == 0) reset();
+		if (time < 200) {
+			time++;
+			Vpu::ready = false;
+		} else {
+			Vpu::ready = true;
+			forward = false;
+			enabled = true;
+		}
+	} else {
+		//Opening
+		if (time > 0) {
+			time--;
+			Vpu::ready = false;
+		} else {
+			reset();
+			Vpu::ready = true;
+			enabled = false;
+			forward = true;
 		}
 	}
+
 	map_position = 0;
 	for (int y = 0; y < Vpu::height >> 4; y++) {
 		int dy = y * 8;
@@ -96,17 +128,17 @@ void Curtain::draw() {
 			int dx = origin_x + (x * 8);
 			int q = (grid[map_position] / delay);
 			Vpu::drawSurface(
-				frames[q % 10],
+				frames[9-(q % 10)],
 				0, 0,
 				8, 8,
 				dx, dy
 			);
-			if (flip) {
-				if (q > 0) grid[map_position] -= 4;
+			if (!forward) {
+				if (q > 0) grid[map_position] -= 2;
 				else grid[map_position] = 0;
 			}
 			else {
-				if (q < 9) grid[map_position] += 4;
+				if (q < 9) grid[map_position] += 2;
 				else grid[map_position] = 9 * delay;
 			}
 			map_position++;
