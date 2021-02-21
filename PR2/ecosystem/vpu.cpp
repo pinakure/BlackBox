@@ -1,3 +1,4 @@
+#include "utils.hpp"
 #include "vpu.hpp"
 #include "curtain.hpp"
 #include "engine.hpp"
@@ -15,7 +16,6 @@ float								Vpu::fade_target_level=0.0f;
 float								Vpu::fade_level=0.0f;
 float								Vpu::fade_delta=1.5f;
 int									Vpu::fade_color[3] = {0, 0, 0};
-	
 
 int Vpu::pixel_format = 0;
 
@@ -25,6 +25,7 @@ Surface Vpu::background;
 Surface Vpu::foreground;
 
 std::vector<ALLEGRO_COLOR> Vpu::color_stack;
+std::vector<ALLEGRO_FONT*> Vpu::font_stack;
 Surface* Vpu::target = NULL;
 ALLEGRO_BITMAP *Vpu::buffer= NULL;
 int Vpu::frames = 0;
@@ -40,8 +41,11 @@ ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
 bool Vpu::fullscreen = false;
 ALLEGRO_COLOR Vpu::transparent;
-ALLEGRO_FONT *Vpu::font = NULL;
-ALLEGRO_FONT *Vpu::legacy_font = NULL;
+std::vector<Font*> Vpu::fonts;
+
+ALLEGRO_FONT* Vpu::font = NULL;
+ALLEGRO_FONT* Vpu::legacy_font = NULL;
+
 
 void prepareTests() {
 	Vpu::foreground.enabled = false;
@@ -107,16 +111,34 @@ bool Vpu::start() {
 }
 
 void Vpu::initializeFonts() {
-	//font = al_load_ttf_font("data/fonts/devavu.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	//font = al_load_ttf_font("data/fonts/nk57.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	//font = al_load_ttf_font("data/fonts/smk.ttf", -16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	//font = al_load_ttf_font("data/fonts/ibm.ttf",-16, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	//font = al_load_ttf_font("data/fonts/tiny.ttf", -10, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	font = al_load_ttf_font("data/fonts/mana.ttf", -12, ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING);
-	if (!font){
-		Engine::printf("WARNING: Failed to initialize font 'data/fonts/small.ttf'.\nUsing default font.\n");
-		font = legacy_font;
+	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("data/fonts/");
+	if (al_open_directory(e)) {
+		ALLEGRO_FS_ENTRY* file;
+		while (file = al_read_directory(e)){
+			std::string name = al_get_fs_entry_name(file);
+			std::vector<std::string> temp  = explode(name, '\\');
+			if(temp.size()>0)
+				name = temp[temp.size() - 1];
+			std::vector<std::string> parts = explode(name, '.');
+			al_destroy_fs_entry(file);
+			if (parts.size() == 2) {
+				if (!parts[1].compare("ttf")) {
+					fonts.push_back(new Font(parts[0], 16));
+				}
+			} else if (parts.size() == 3) {
+				if (!parts[2].compare("ttf")) {
+					int i = atoi(parts[1].c_str());
+					fonts.push_back(new Font(parts[0] + "." + parts[1], i));
+				}
+			};
+		}
 	}
+	for (int i = 0; i < fonts.size(); i++) {
+		font = fonts[i]->data;
+		if (font)return;
+	}
+	Engine::printf("WARNING: Failed to initialize system font.\nUsing default font.\n");
+	font = legacy_font;	
 }
 
 bool Vpu::restart() {
@@ -417,16 +439,24 @@ void Vpu::render() {
 	redraw = false;
 }
 
+
+void Vpu::pushFont() {
+	Vpu::font_stack.push_back(font);
+}
+void Vpu::popFont() {
+	if (Vpu::font_stack.size()) {
+		font = Vpu::font_stack[0];
+		Vpu::font_stack.pop_back();
+	}
+}
 void Vpu::pushColor() {
 	Vpu::color_stack.push_back(color);
 	Vpu::color_stack.push_back(shadow);
 }
-
 void Vpu::popColor() {
 	if (Vpu::color_stack.size()) {
 		color  = Vpu::color_stack[0];
 		shadow = Vpu::color_stack[1];
-		Vpu::color_stack.pop_back();
 		Vpu::color_stack.pop_back();
 	}
 }
@@ -585,4 +615,9 @@ void Vpu::deallocateSurface(long int handle) {
 		destroySurface(surfaces.at(handle));
 		surfaces.erase(handle);
 	}
+}
+
+void Vpu::setFont(Font *font) {
+	// TODO: hold Vpu obj
+	Vpu::font = font->data;
 }

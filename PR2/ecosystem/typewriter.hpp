@@ -7,6 +7,7 @@
 #include <queue>
 #include <string>
 #include "cvar.hpp"
+#include "font.hpp"
 
 class TypeWriter {
 private:
@@ -19,6 +20,7 @@ public:
 	static int r;
 	static int g;
 	static int b;
+	static Font* font;
 	static bool enabled;
 	static double width;
 	static double height;
@@ -78,7 +80,8 @@ public:
 	static bool caps;
 	static std::string text;
 	static const char chars[80];
-
+	static Font* font;
+	static void initialize();
 	static void draw();
 	static void moveCaretLeft();
 	static void moveCaretRight();

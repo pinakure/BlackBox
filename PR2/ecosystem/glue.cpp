@@ -214,7 +214,7 @@ pythoncommand(vpu_drawsprite){
 	Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
 	return PyLong_FromLong(1);	
 }
-pythoncommand(vpu_deleteanim){
+pythoncommand(vpu_deleteanim) {
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
 	Vpu::deallocateAnimation(handle);
@@ -241,6 +241,20 @@ pythoncommand(vpu_drawanim){
 	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
 	Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
 	return PyLong_FromLong(1);	
+}
+pythoncommand(vpu_setfont) {
+	char* fontname;
+	if (!PyArg_ParseTuple(args, "s", &fontname)) return NULL;
+	std::vector<Font*>::iterator it;
+	bool found = false;
+	for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
+		Font* font = *it;
+		if (!font->name.compare(fontname)) {
+			Vpu::setFont(font);
+			return PyBool_FromLong(true);
+		}
+	}
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_dimensions){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
@@ -481,10 +495,26 @@ pythoncommand(typewriter_gettext) {
 }
 
 pythoncommand(typewriter_setfont) {
-	int font_index;
-	if (!PyArg_ParseTuple(args, "i", &font_index)) return NULL;
-	//TypeWriter::font_index = font_index %= TypeWriter::fonts.size();
-	return PyLong_FromLong(1);
+	char* font_typewriter;
+	char* font_gettextbox=NULL;
+	if (!PyArg_ParseTuple(args, "s|s", &font_typewriter, &font_gettextbox)) return NULL;
+	if (!font_gettextbox) font_gettextbox = font_typewriter;
+	std::vector<Font*>::iterator it;
+	bool found = false;
+	for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
+		Font* font = *it;
+		if (!font->name.compare(font_typewriter)) {
+			TypeWriter::font = font;
+			if (found)return PyBool_FromLong(true);
+			else found = true;
+		}
+		if (!font->name.compare(font_gettextbox)) {
+			GetTextBox::font = font;
+			if (found)return PyBool_FromLong(true);
+			else found = true;
+		}
+	}
+	return PyBool_FromLong(false);	
 }
 
 pythoncommand(typewriter_setsize) {
@@ -624,7 +654,6 @@ static PyMethodDef VpuMethods[] = {
 	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },
 	{"deleteanim"	, vpu_deleteanim		, METH_VARARGS, "vpu.deleteanim(handle) : Delete Animation identified by given Handle" },
-	{"deletefont"	, tbi					, METH_VARARGS, "vpu.deletefont(font_handle) : Delete Font identified by given Handle"},
 	{"deletesprite"	, vpu_deletesprite		, METH_VARARGS, "vpu.deletesprite(handle) : Delete Sprite identified by given Handle" },
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
@@ -642,13 +671,12 @@ static PyMethodDef VpuMethods[] = {
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
 	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
 	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
-	{"loadfont"		, tbi					, METH_VARARGS, "vpu.loadfont(filename, size) : Loads a font from given filemane and prerenders it at given size "},
 	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
 	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
 	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
 	{"select"		, vpu_select			, METH_VARARGS, "vpu.select(layer) : Select given layer to perform next graphic operations onto it"},
 	{"setcolor"		, vpu_setcolor			, METH_VARARGS, "vpu.setcolor(r, g, b, a) : Sets current painting color"},
-	{"setfont"		, tbi					, METH_VARARGS, "vpu.setfont(font_handle) : Sets current font to the one identified by given handle"},
+	{"setfont"		, vpu_setfont			, METH_VARARGS, "vpu.setfont(font_handle) : Sets current font to the one identified by given handle"},
 	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
 	{"scale"		, vpu_scale				, METH_VARARGS, "vpu.scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},

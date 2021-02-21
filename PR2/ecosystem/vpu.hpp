@@ -7,6 +7,7 @@
 #include "surface.hpp"
 #include "sprite.hpp"
 #include "animation.hpp"
+#include "font.hpp"
 
 #define VPU_OVERSCAN 0
 
@@ -16,7 +17,9 @@ private:
 	static ALLEGRO_COLOR				shadow;
 	static ALLEGRO_COLOR				transparent;
 	static std::vector<ALLEGRO_COLOR>	color_stack;
+	static std::vector<ALLEGRO_FONT*>	font_stack;
 public:
+	static std::vector<Font*>			fonts;
 	static ALLEGRO_FONT					*font;
 	static Surface						*target;	
 	static ALLEGRO_BITMAP				*buffer;	
@@ -77,6 +80,8 @@ public:
 	static void setColor(ALLEGRO_COLOR color);
 	static void pushColor();
 	static void popColor();
+	static void pushFont();
+	static void popFont();
 	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
 
 	// Surface manipulation
@@ -117,6 +122,9 @@ public:
 	static void subdivide(int r, int g, int b, int alpha=255);
 	static void fadeout(int r = -1, int g = -1, int b = -1);
 	static void fadein( int r = -1, int g = -1, int b = -1);
+
+	//Font routines
+	static void setFont(Font* font);
 
 	static int   fade_color[3];
 	static float fade_target_level;

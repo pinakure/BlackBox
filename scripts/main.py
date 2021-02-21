@@ -239,7 +239,7 @@ class functions():
                 while not typewriter.ready():
                     vpu.update()
             elif choice == 'c': options.typewriter_color()
-            elif choice == 'f': typewriter.setfont(1)
+            elif choice == 'f': typewriter.setfont('mana', 'nk57')
             elif choice == 'p': typewriter.setposition(0,0)
             elif choice == 's': typewriter.setsize(64,64)
             if not typewriter.ready():

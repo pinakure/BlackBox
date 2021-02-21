@@ -39,8 +39,11 @@ bool	TypeWriter::needs_redraw;
 
 static Surface surface;
 static Surface overlay;
+Font	*TypeWriter::font = NULL;
 
 void TypeWriter::initialize() {
+	if(Vpu::fonts.size())
+		font = Vpu::fonts[Vpu::fonts.size()-1];
 	current = "";
 	current_position = 0;
 	current_end = 0;
@@ -149,6 +152,9 @@ static int padding = 16;
 void TypeWriter::drawChoices() {
 	// Save previous color
 	Vpu::pushColor();
+	Vpu::pushFont();
+	if(font)
+		Vpu::font = font->data;
 	
 	// Center dialog
 	int cx = (Vpu::width / 2);
@@ -271,7 +277,7 @@ void TypeWriter::drawChoices() {
 			(cy - (max_height / 2)) + (line * line_height) 
 		);
 	}		
-
+	Vpu::popFont();
 	Vpu::popColor();	
 }
 
@@ -279,6 +285,9 @@ void TypeWriter::drawText() {
 	if ((!queue.size()) && (width <= 2) && (height <= 2) ) return;
 	if (!TypeWriter::needs_redraw)return;
 	Vpu::pushColor();
+	Vpu::pushFont();
+	if(font)
+		Vpu::font = font->data;
 
 	Vpu::select(surface);
 	Vpu::clear();
@@ -362,6 +371,7 @@ void TypeWriter::drawText() {
 		);
 	}
 	Vpu::popColor();
+	Vpu::popFont();
 
 	Vpu::drawSurface(
 		overlay,
@@ -662,6 +672,8 @@ int GetTextBox::caret_pos = 0;
 int GetTextBox::status = 0;
 int GetTextBox::max_length = 16;
 bool GetTextBox::caps = false;
+Font* GetTextBox::font = NULL;
+
 std::string GetTextBox::text = "";
 const char GetTextBox::chars[80] = {
 	'0','1','2','3','4','5','6','7','8','9',
@@ -797,9 +809,17 @@ void GetTextBox::update() {
 	}
 }
 
+void GetTextBox::initialize() {
+	if (Vpu::fonts.size())
+		font = Vpu::fonts[0];
+}
+
 void GetTextBox::draw() {
 	// save current color
 	Vpu::pushColor();
+	Vpu::pushFont();
+	if(GetTextBox::font)
+		Vpu::font = GetTextBox::font->data;
 
 	// Center dialog
 	int cx = (Vpu::width / 2);
@@ -909,4 +929,5 @@ void GetTextBox::draw() {
 
 	// Restore previous color
 	Vpu::popColor();
+	Vpu::popFont();
 }

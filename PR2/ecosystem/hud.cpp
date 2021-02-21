@@ -4,9 +4,10 @@
 #include <string>
 
 bool Hud::initialize() {
+	TypeWriter::initialize();
+	GetTextBox::initialize();
 	return true;
 }
-
 
 void Hud::draw() {
 	drawDebugInfo();

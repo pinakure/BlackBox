@@ -67,7 +67,7 @@ bool Engine::initialize() {
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
 		al_start_timer(clock);
-		TypeWriter::initialize();		
+		Hud::initialize();
 		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();
