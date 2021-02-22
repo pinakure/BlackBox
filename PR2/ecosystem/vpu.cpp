@@ -523,7 +523,7 @@ Surface Vpu::createSurface(int width, int height) {
 
 Surface Vpu::loadBitmap(std::string filename) {
 	Surface s;
-	s.bitmap = al_load_bitmap(("./"+filename).c_str());	
+	s.bitmap = al_load_bitmap((filename).c_str());	
 	s.enabled = s.bitmap != NULL;
 	if (s.enabled) {
 		s.width  = al_get_bitmap_width(s.bitmap);

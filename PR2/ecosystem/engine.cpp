@@ -60,12 +60,12 @@ Showcase *showcase =
 bool Engine::initialize() {
 	try{
 		al_init();
-		al_set_physfs_file_interface();
-
+		
 		clock   = al_create_timer(1.0);
 		timer	= al_create_timer(1.0 / 120.0);
 		queue	= al_create_event_queue();
 		
+		al_set_physfs_file_interface();
 		if (!Vpu::initialize()) return false;
 		CVar::initialize();
 		Console::initialize();

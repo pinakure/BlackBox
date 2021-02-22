@@ -14,14 +14,14 @@ Font::Font(std::string filename, int size) {
 	else name = filename;
 	if (parts.size() > 1) height = atoi(parts[1].c_str());
 	else height = 16;
-	std::string file = "data/fonts/" + filename +".ttf";
+	std::string file = "" + filename +".ttf";
 	data = al_load_ttf_font(
 		file.c_str(), 
 		-height, 
 		ALLEGRO_TTF_MONOCHROME | ALLEGRO_TTF_NO_KERNING
 	);
 	if (!data) {
-		Engine::printf("WARNING: Failed to initialize font 'data/fonts/%s.ttf'.\n", filename.c_str());
+		Engine::printf("WARNING: Failed to initialize font '%s.ttf'.\n", filename.c_str());
 		return;
 	}
 }
