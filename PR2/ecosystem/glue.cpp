@@ -411,10 +411,9 @@ pythoncommand(blackbox_deletevar) {
 				}
 			}
 		}
-	} else {
-		Console::print("Variable not defined");
-		return PyBool_FromLong(false);
 	}
+	Console::print("Variable not defined");
+	return PyBool_FromLong(false);
 }
 
 pythoncommand(blackbox_findvar) {
@@ -499,7 +498,7 @@ pythoncommand(typewriter_gettext) {
 	if (GetTextBox::status == GetTextBox::STATUS_FINISHED) {
 		std::string ret = GetTextBox::text;
 		GetTextBox::status = GetTextBox::STATUS_DISABLED;
-		GetTextBox::text == "";
+		GetTextBox::text = "";
 		return Py_BuildValue("s", ret.c_str());
 	}
 	return PyLong_FromLong(0); 

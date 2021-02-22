@@ -1,3 +1,5 @@
+#include <physfs.h>
+#include <allegro5/allegro_physfs.h>
 #include "pch.h"
 #include <stdio.h>
 #include <conio.h>
@@ -34,8 +36,12 @@ static int waitForEnter(int return_code) {
 	return return_code;
 }
 
+
 int main(int argc, char **argv)
 {
+	PHYSFS_init(argv[0]);
+	PHYSFS_addToSearchPath("data/foo.zip", 1);
+
 	if(! Script::initialize()	) return waitForEnter(100);	
 	if(! initialize()			) return waitForEnter(200);
 		

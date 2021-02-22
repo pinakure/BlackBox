@@ -500,7 +500,7 @@ void InputDevice::drawKeyboard(int x, int y) {
 	Vpu::select(Vpu::overlay);
 	al_draw_tinted_bitmap_region(keyboard_bitmap[0].bitmap, alpha, 0, 0, keyboard_bitmap[0].width, keyboard_bitmap[0].height, x, y, 0);
 	
-	for (size_t i = 0; i<255; i++) {
+	for (int i = 0; i<255; i++) {
 		if(key[i] && (bitmap_keys.find(i) != bitmap_keys.end())) {
 			KeyInfo ki = bitmap_keys[i];
 			al_draw_tinted_bitmap_region(

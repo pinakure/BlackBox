@@ -15,13 +15,13 @@ typedef enum E_EvalTypes {
 	EVAL_EXPRESSION
 }EvalType;
 
-enum CVarType {
+typedef enum  E_CVarType {
 	CVAR_INTEGER,
 	CVAR_FLOATING,
 	CVAR_BOOLEAN,
 	CVAR_TEXT,
 	CVAR_COLOR
-};
+}CVarType;
 
 class CVar {
 	protected:

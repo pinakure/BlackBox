@@ -26,15 +26,15 @@ public:
 	static double height;
 	static double final_width;
 	static double final_height;
-	static int current_end;
+	static size_t current_end;
 	static double current_position;
 	static bool needs_redraw;
 	static int bullet_radius;
 	static std::vector<std::string> display;
 	static std::string current;
 	static std::queue<std::string> queue;
-	static int active_option; //volatile 
-	static int active_choice; //volatile 
+	static size_t active_option; //volatile 
+	static size_t active_choice; //volatile 
 	static std::string answer; //volatile 
 	static std::string question; //volatile 
 	static std::map<std::string, std::string> choices;
@@ -74,9 +74,9 @@ public:
 	static int y;
 	static int cursor_x;
 	static int cursor_y;
-	static int caret_pos;
 	static int status;
-	static int max_length;
+	static size_t caret_pos;
+	static size_t max_length;
 	static bool caps;
 	static std::string text;
 	static const char chars[80];

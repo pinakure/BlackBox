@@ -6,8 +6,8 @@
 
 class Download : public IBindStatusCallback{
 private:
-    int progress, filesize;
-    int AbortDownload;
+    int progress=0, filesize=0;
+    int AbortDownload=false;
 public:
 
 

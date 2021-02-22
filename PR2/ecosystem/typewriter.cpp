@@ -16,7 +16,7 @@ std::string TypeWriter::question = "";
 std::map<std::string, std::string> TypeWriter::choices;
 std::vector<CVar*> TypeWriter::options;
 double	TypeWriter::current_position= 0;
-int		TypeWriter::current_end = 0;
+size_t  TypeWriter::current_end = 0;
 bool	TypeWriter::enabled = false;
 double	TypeWriter::width = 0;
 double	TypeWriter::height = 0;
@@ -29,8 +29,8 @@ int		TypeWriter::g = 255;
 int		TypeWriter::b = 0;
 
 int		TypeWriter::wait_time = 0;
-int		TypeWriter::active_option = 0;
-int		TypeWriter::active_choice = 0;
+size_t  TypeWriter::active_option = 0;
+size_t  TypeWriter::active_choice = 0;
 int		TypeWriter::line_height = 16;
 bool	TypeWriter::next = false;
 double	TypeWriter::final_width = 0;
@@ -667,9 +667,9 @@ int GetTextBox::x = 0;
 int GetTextBox::y = 0;
 int GetTextBox::cursor_x = 0;
 int GetTextBox::cursor_y = 0;
-int GetTextBox::caret_pos = 0;
+size_t GetTextBox::caret_pos = 0;
 int GetTextBox::status = 0;
-int GetTextBox::max_length = 16;
+size_t GetTextBox::max_length = 16;
 bool GetTextBox::caps = false;
 Font* GetTextBox::font = NULL;
 
@@ -742,7 +742,7 @@ void GetTextBox::putchar() {
 	else if (i == '<')return moveCaretLeft();
 	else if (i == '>')return moveCaretRight();
 	else {
-		int size = text.size();
+		size_t size = text.size();
 		if (!size && !caret_pos) { text = i; caret_pos++; }
 		else if (size == 1 && caret_pos == 0) { text = text + i; caret_pos+=2; }
 		else if (size >  1 && caret_pos < size-1) { 
@@ -776,7 +776,7 @@ void GetTextBox::backspace() {
 	// Reset caret pos before any operation
 	if (caret_pos > text.size() - 1)caret_pos = text.size() - 1;
 
-	int size = text.size();
+	size_t size = text.size();
 	if (!size) return;
 	if (caret_pos > 0) {
 		if (caret_pos == size - 1) {
@@ -851,7 +851,7 @@ void GetTextBox::draw() {
 	size_t strl = al_get_text_width(Vpu::font->data, text.c_str());
 	Vpu::print(
 		text,
-		cx - (strl / 2),
+		cx - (int(strl)>>1),
 		6 + (cy - (max_height / 2))
 	);
 	
@@ -860,12 +860,10 @@ void GetTextBox::draw() {
 	
 	// Draw caret
 	int pos = text.size()
-		?
-		caret_pos * (strl / text.size())
-		:
-			0;
+		?	int(caret_pos) * (int(strl)/ int(text.size()))
+		:	0;
 	Vpu::fillRectangle(
-		(cx - (strl / 2)) + pos,
+		(cx - (int(strl) / 2)) + pos,
 		3 + (cy - (max_height / 2)),
 		7, TypeWriter::line_height,
 		TypeWriter::r >> 2,

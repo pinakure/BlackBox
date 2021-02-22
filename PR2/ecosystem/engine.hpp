@@ -40,8 +40,7 @@ public:
 };
 
 #define TRUERAND(a) (((float(rand())/float(RAND_MAX)) * float(a)))
-#define min(a, b) (a>b?b:a)
-#define max(a, b) (a>b?a:b)
+
 #define ENGINE_FPS					60
 
 #endif

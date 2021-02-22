@@ -34,6 +34,8 @@ ALLEGRO_EVENT Engine::event;
 
 */
 #include "showcase.cpp"
+#include <physfs.h>
+#include <allegro5/allegro_physfs.h>
 
 Showcase *showcase = 
 	&dummy_showcase
@@ -58,6 +60,8 @@ Showcase *showcase =
 bool Engine::initialize() {
 	try{
 		al_init();
+		al_set_physfs_file_interface();
+
 		clock   = al_create_timer(1.0);
 		timer	= al_create_timer(1.0 / 120.0);
 		queue	= al_create_event_queue();

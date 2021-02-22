@@ -1,8 +1,10 @@
 #include "engine.hpp"
+#include "vpu.hpp"
 #include "camera.hpp"
 #include "world.hpp"
 #include "sector.hpp"
-
+#define min(a, b) (a>b?b:a)
+#define max(a, b) (a>b?a:b)
 double Camera::x = 32767.0;
 double Camera::y = 32767.0;
 double Camera::z = 32767.0;
@@ -48,7 +50,7 @@ void Camera::update(float delta) {
 	// Exit if no target is set
 	if((Camera::target_x == -1.0)
 	|| (Camera::target_y == -1.0)
-	|| (Camera::target_y == -1.0)
+	|| (Camera::target_z == -1.0)
 	) {
 		return;
 	}

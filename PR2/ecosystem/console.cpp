@@ -226,8 +226,8 @@ Command *Console::findCommand(std::string name){
 }
 
 bool Console::autoCompletionCheck(std::string candidate, std::string autocomplete){
-	int candlen = candidate.length();
-	int autolen = autocomplete.length();
+	size_t candlen = candidate.length();
+	size_t autolen = autocomplete.length();
 	char *c = (char*)candidate.c_str();
 	char *a = (char*)autocomplete.c_str();
 	
@@ -278,7 +278,7 @@ std::string Console::autoCompletionMinMatch(std::vector <std::string> &candidate
 void Console::autoCompletion(void){
 	std::vector <std::string> candidates;
 	
-	int count;
+	size_t  count;
 	
 	std::string candidate;
 	std::string prefix;		// Part prepended to the autocompleted text
@@ -326,7 +326,7 @@ void Console::autoCompletion(void){
 		std::string minmatch = autoCompletionMinMatch(candidates);
 		command.append(minmatch);
 		
-		for (int i = 0, o = candidates.size(); i < o; i++) {
+		for (size_t  i = 0, o = candidates.size(); i < o; i++) {
 			candidate = candidates[i];
 			print(candidate.c_str());
 		}
@@ -589,7 +589,7 @@ void Console::clearPrompt(void){
 }
 
 void Console::clear(void){
-	for(int i=lines.size(); i>0; i--){
+	for(size_t  i=lines.size(); i>0; i--){
 		lines.erase(lines.begin());
 	}
 	while(lines.size() < (unsigned)height){
@@ -733,7 +733,7 @@ void Console::draw(int h){
 
 void Console::render(int h, bool drawCursor){
 	
-	unsigned int n = consoleHistoryCursor;
+	size_t n = consoleHistoryCursor;
 	Vpu::select(bitmap);
 	Vpu::clear();
 	// If edit point is not first, move cursor...
@@ -779,7 +779,7 @@ void Console::render(int h, bool drawCursor){
 				std::string templine(li.c_str());
 				std::stringstream cmdstream(templine.c_str());
 				std::string piece;
-				int x = 0;
+				size_t x = 0;
 				bool firstPiece = true;
 				int color = Color::get(fgc);
 				while(!cmdstream.eof()){
@@ -793,7 +793,7 @@ void Console::render(int h, bool drawCursor){
 							((color & 0x000000ff)		),
 							((color & 0xff000000)	>>24)
 						);
-						Vpu::print(std::string(data), x, u);
+						Vpu::print(std::string(data), (int)x, u);
 								
 						x += 8*strlen(piece.c_str());//replace by font width//x += Vpu::current_font->width(data);
 					}
@@ -809,7 +809,7 @@ void Console::render(int h, bool drawCursor){
 		}
 	}
 
-	height = n;
+	height = (int)n;
 
 	n++;
 	
@@ -924,7 +924,7 @@ std::string Console::stripColorCodes(const std::string &l){
 }
 
 std::string Console::translateVariables(std::string cmd){
-	int l = cmd.length();
+	size_t  l = cmd.length();
 	std::string newCommand = "";
 	char c[2];
 	for(int i=0; i < l; i++) {
@@ -1193,7 +1193,7 @@ std::vector<std::string> split(std::string &text, char sep) {
 std::string Console::stripColors(const char *colored_string) {
 	std::string s = "";
 
-	for (int i = 0, o = strlen(colored_string); i < o; i++) {
+	for (size_t  i = 0, o = strlen(colored_string); i < o; i++) {
 		if (colored_string[i] == '~')i++;
 		else s += colored_string[i];
 	}
@@ -1339,7 +1339,7 @@ COMMAND_CALLBACK(dump) {
 
 	FILE *fp = 0x00000000;
 	fopen_s(&fp, file.c_str(), "w");
-	for (int i = Console::lines.size() - 1; i >= 0; i--) {
+	for (size_t  i = Console::lines.size() - 1; i >= 0; i--) {
 		std::string st = Console::lines[i];
 		if (st.empty())continue;
 		if (!st.compare("\n"))continue;
@@ -1463,7 +1463,7 @@ COMMAND_CALLBACK(debug_addtoggle) {
 COMMAND_CALLBACK(toggleCmd) {
 	Toggle *t;
 	int id = atoi(args[0].c_str());
-	for (int i = 0, o = Console::toggles.size(); i<o; i++) {
+	for (size_t  i = 0, o = Console::toggles.size(); i<o; i++) {
 		t = Console::toggles[i];
 		if (t->id == id) {
 			t->status ^= 1;
@@ -1479,7 +1479,7 @@ COMMAND_CALLBACK(toggle_list) {
 }
 
 COMMAND_CALLBACK(memDumpCommand) {
-
+	/*
 	//	LEAK_Detect();
 	if (!args.size())return 0;
 
@@ -1495,6 +1495,8 @@ COMMAND_CALLBACK(memDumpCommand) {
 		b.append(buffer);
 	}
 	Console::printf("%s", b.c_str());
+	*/
+	Console::printf("Not Implemented");
 	return 0;
 }
 
@@ -1653,7 +1655,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 	std::string output = "";
 
 	int i = 0;
-	int o = strlen(fmt);
+	size_t  o = strlen(fmt);
 	va_list ap;
 	va_start(ap, fmt);
 
@@ -1662,7 +1664,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 	bool boolean;
 	char number[16];
 
-	int lack = 0;
+	size_t  lack = 0;
 	std::string ss;
 
 	while (i<o) {
