@@ -14,7 +14,7 @@ const unsigned long int compressed_curtain_frames[10] = {
 };
 
 int Curtain::time=0;
-
+CurtainType Curtain::type = CURTAIN_TYPE_DIAGONAL_NW;
 int* Curtain::grid = NULL;
 Surface Curtain::frames[10] = {
 	NULL, NULL, NULL, NULL, NULL,
@@ -75,15 +75,44 @@ void Curtain::render() {
 
 void Curtain::reset() {
 	int map_position = 0;
-	for (int y = 0; y < Vpu::height >> 4; y++) {
-		for (int x = 0; x < Vpu::width >> 4; x++) {
-			grid[map_position] = 9;
-			/*grid[map_position] = (
-				((float(x) / float(Vpu::width >> 4)) * 5.0f) +
-				((float(y) / float(Vpu::height >> 4)) * 5.0f)
-				) * 2.5f;*/
-			map_position++;
-		}
+
+	switch (type) {
+		default:
+		case CURTAIN_TYPE_DIAGONAL_SE:
+		case CURTAIN_TYPE_DIAGONAL_NE:
+		case CURTAIN_TYPE_DIAGONAL_SW:
+		case CURTAIN_TYPE_VERTICAL_S:
+		case CURTAIN_TYPE_VERTICAL_N:
+		case CURTAIN_TYPE_VERTICAL_IN:
+		case CURTAIN_TYPE_VERTICAL_OUT:
+		case CURTAIN_TYPE_HORIZONTAL_E:
+		case CURTAIN_TYPE_HORIZONTAL_W:
+		case CURTAIN_TYPE_HORIZONTAL_OUT:
+		case CURTAIN_TYPE_HORIZONTAL_IN:
+		case CURTAIN_TYPE_VERTICAL_STRIPS:
+		case CURTAIN_TYPE_HORIZONTAL_STRIPS:
+		case CURTAIN_TYPE_SQUARE_IN:
+		case CURTAIN_TYPE_SQUARE_OUT:
+		case CURTAIN_TYPE_CIRCLE_IN:
+		case CURTAIN_TYPE_CIRCLE_OUT:
+		case CURTAIN_TYPE_CHECKER:
+		case CURTAIN_TYPE_DIAGONAL_IN_VERTICAL:
+		case CURTAIN_TYPE_DIAGONAL_IN_HORIZONTAL:
+		case CURTAIN_TYPE_DIAGONAL_OUT_VERTICAL:
+		case CURTAIN_TYPE_DIAGONAL_OUT_HORIZONTAL:
+		case CURTAIN_TYPE_SPIRAL:
+		case CURTAIN_TYPE_DIAGONAL_NW:
+			for (int y = 0; y < Vpu::height >> 4; y++) {
+				for (int x = 0; x < Vpu::width >> 4; x++) {
+					grid[map_position] = 9;
+					/*grid[map_position] = (
+						((float(x) / float(Vpu::width >> 4)) * 5.0f) +
+						((float(y) / float(Vpu::height >> 4)) * 5.0f)
+						) * 2.5f;*/
+					map_position++;
+				}
+			}
+			break;
 	}
 	Vpu::ready = false;
 }

@@ -9,8 +9,6 @@
 
 #include "ecosystem.h"
 
-
-
 bool initialize() {
 	Script s("main");
 	if(s.isLoaded()) s.call("configure");	
