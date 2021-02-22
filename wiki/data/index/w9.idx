@@ -104,3 +104,5 @@ deletevar
 addoption
 activated
 statement
+occlusion
+dithering

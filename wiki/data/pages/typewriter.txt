@@ -15,6 +15,6 @@
 |[[typewriter:ready      ]]|                     |Returns true once user pressed next or close button                    |
 |[[typewriter:setposition]]|x,y                  |Set the origin point for the typewriter box                            |
 |[[typewriter:setcolor   ]]|r,g,b,a              |Change typewriter box color scheme                                     |
-|[[typewriter:setfont    ]]|font_handle          |Switch font to be used in typewriter box                               |
+|[[typewriter:setfont    ]]|f_name, gtf_name     |Switch font to be used in typewriter and optionally the gettextbox     |
 |[[typewriter:setsize    ]]|width,height         |Set new dimensions for the typewriter box                              |
 

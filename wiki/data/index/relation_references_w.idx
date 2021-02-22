@@ -166,3 +166,4 @@ console:xor
 blackbox:getvar
 blackbox:setvar
 blackbox:findvar
+vpu:transition
