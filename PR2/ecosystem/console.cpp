@@ -40,7 +40,7 @@ Surface						Console::bitmap;
 float						Console::opacity=1.0f;
 
 bool						Console::redirect = false;	//!< true when console cannot use graphical routines and must send output to stdout (WIP)
-bool						Console::enabled = true;// false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
+bool						Console::enabled = false;	//!< true if console is visible and manipulable, false if hidden, and oneliner will show in top line of the screen
 bool						Console::redraw = true;		//!< true if the console buffer must be redrawn (so render would be called)
 bool						Console::echo = true;		//!< true if inputted console commands are shown ingame
 bool						Console::ctrlc = false; 	//!< true if was pressed
@@ -732,8 +732,8 @@ void Console::draw(int h){
 }
 
 void Console::render(int h, bool drawCursor){
-	
 	size_t n = consoleHistoryCursor;
+	if (!bitmap.enabled)return;
 	Vpu::select(bitmap);
 	Vpu::clear();
 	// If edit point is not first, move cursor...

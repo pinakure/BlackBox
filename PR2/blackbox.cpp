@@ -38,7 +38,7 @@ static int waitForEnter(int return_code) {
 int main(int argc, char **argv)
 {
 	PHYSFS_init(argv[0]);
-	PHYSFS_addToSearchPath("data/system.pak", 1);
+	PHYSFS_addToSearchPath("data/system.zip", 1);
 
 	if(! Script::initialize()	) return waitForEnter(100);	
 	if(! initialize()			) return waitForEnter(200);
