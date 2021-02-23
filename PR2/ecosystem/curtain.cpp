@@ -26,6 +26,7 @@ int				Curtain::delay = 25;
 CurtainStatus	Curtain::status = CURTAIN_STATUS_NOTREADY;
 bool			Curtain::forward = true;
 bool			Curtain::enabled= false;
+float			Curtain::scale = 25.0f;
 #include "vpu.hpp"
 
 void Curtain::render() {	
@@ -73,46 +74,137 @@ void Curtain::render() {
 	}
 }
 
-void Curtain::reset() {
+void Curtain::reset(bool invert) {
 	int map_position = 0;
-
+	int w = Vpu::width >> 4;
+	int h = Vpu::height >> 4;
+	int total = w * h;
+	const int transition_frame_size = 10;
+	float frames = float(transition_frame_size) / 2.0f;
+	float q = 2.5f;
+	float hi, lo;
+	if (invert) {
+		hi = 9*scale;
+		lo = 8.5f*scale; 
+	} else {
+		hi = 0.5f * scale;
+		lo = 0;
+	}
 	switch (type) {
-		default:
-		case CURTAIN_TYPE_DIAGONAL_SE:
-		case CURTAIN_TYPE_DIAGONAL_NE:
-		case CURTAIN_TYPE_DIAGONAL_SW:
-		case CURTAIN_TYPE_VERTICAL_S:
-		case CURTAIN_TYPE_VERTICAL_N:
 		case CURTAIN_TYPE_VERTICAL_IN:
 		case CURTAIN_TYPE_VERTICAL_OUT:
-		case CURTAIN_TYPE_HORIZONTAL_E:
-		case CURTAIN_TYPE_HORIZONTAL_W:
 		case CURTAIN_TYPE_HORIZONTAL_OUT:
 		case CURTAIN_TYPE_HORIZONTAL_IN:
-		case CURTAIN_TYPE_VERTICAL_STRIPS:
-		case CURTAIN_TYPE_HORIZONTAL_STRIPS:
-		case CURTAIN_TYPE_SQUARE_IN:
-		case CURTAIN_TYPE_SQUARE_OUT:
-		case CURTAIN_TYPE_CIRCLE_IN:
-		case CURTAIN_TYPE_CIRCLE_OUT:
-		case CURTAIN_TYPE_CHECKER:
 		case CURTAIN_TYPE_DIAGONAL_IN_VERTICAL:
 		case CURTAIN_TYPE_DIAGONAL_IN_HORIZONTAL:
 		case CURTAIN_TYPE_DIAGONAL_OUT_VERTICAL:
 		case CURTAIN_TYPE_DIAGONAL_OUT_HORIZONTAL:
 		case CURTAIN_TYPE_SPIRAL:
-		case CURTAIN_TYPE_DIAGONAL_NW:
-			for (int y = 0; y < Vpu::height >> 4; y++) {
-				for (int x = 0; x < Vpu::width >> 4; x++) {
-					grid[map_position] = 9;
-					/*grid[map_position] = (
-						((float(x) / float(Vpu::width >> 4)) * 5.0f) +
-						((float(y) / float(Vpu::height >> 4)) * 5.0f)
-						) * 2.5f;*/
-					map_position++;
+		case CURTAIN_TYPE_SQUARE_IN:
+		case CURTAIN_TYPE_SQUARE_OUT:
+		case CURTAIN_TYPE_CIRCLE_IN:
+		case CURTAIN_TYPE_CIRCLE_OUT:
+			break;
+		default:
+		case CURTAIN_TYPE_PLAIN:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					grid[map_position] = lo;
 				}
 			}
 			break;
+		case CURTAIN_TYPE_DIAGONAL_NW:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(  x  ) / float(w);
+					float qy = float(  y  ) / float(h);
+					grid[map_position] = ((qx * frames) + (qy * frames)) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_DIAGONAL_SW:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(  x  ) / float(w);
+					float qy = float(h - y) / float(h);
+					grid[map_position] = ((qx * frames) + (qy * frames)) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_DIAGONAL_NE:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(w - x) / float(w);
+					float qy = float(h - y) / float(h);
+					grid[map_position] = ((qx * frames) + (qy * frames)) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_DIAGONAL_SE:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(w - x) / float(w);
+					float qy = float(y) / float(h);
+					grid[map_position] = ((qx * frames) + (qy * frames)) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_VERTICAL_S:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qy = float(y) / float(h);
+					grid[map_position] = ((qy * frames) * 2) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_VERTICAL_N:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qy = float(h-y) / float(h);
+					grid[map_position] = ((qy * frames) * 2) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_HORIZONTAL_E:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(x) / float(w);
+					grid[map_position] = ((qx * frames) * 2) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_HORIZONTAL_W:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float(w - x) / float(w);
+					grid[map_position] = ((qx * frames) * 2) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_VERTICAL_STRIPS:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qy = float((x % 2) ? (h - y) : y) / float(h);
+					grid[map_position] = ((qy * frames) ) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_HORIZONTAL_STRIPS:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					float qx = float((y % 2) ? (w - x) : x) / float(w);
+					grid[map_position] = ((qx * frames) ) * q;
+				}
+			}
+			break;
+		case CURTAIN_TYPE_CHECKER:
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++, map_position++) {
+					grid[map_position] = ((map_position+y)%2)?hi:lo;
+				}
+			}
+			break;
+		
 	}
 	Vpu::ready = false;
 }
@@ -123,11 +215,11 @@ void Curtain::draw() {
 	int origin_x = (Vpu::overlay.width / 4);
 	int map_position = 0;
 	int iy = 0;
-	float delay = 25;
+	
 	
 	if (forward) {
 		//Closing
-		if (time == 0) reset();
+		if (time == 0) reset(false);
 		if (time < 200) {
 			time++;
 			Vpu::ready = false;
@@ -142,7 +234,7 @@ void Curtain::draw() {
 			time--;
 			Vpu::ready = false;
 		} else {
-			reset();
+			reset(true);
 			Vpu::ready = true;
 			enabled = false;
 			forward = true;
@@ -155,7 +247,8 @@ void Curtain::draw() {
 		iy += dy ? dy : 16;
 		for (int x = 0; x < Vpu::width >> 4; x++) {
 			int dx = origin_x + (x * 8);
-			int q = (grid[map_position] / delay);
+			int q = float(grid[map_position]) / scale;
+			if (q < 0) q = 0; else if (q > 9) q = 9;
 			Vpu::drawSurface(
 				frames[9-(q % 10)],
 				0, 0,
@@ -168,7 +261,7 @@ void Curtain::draw() {
 			}
 			else {
 				if (q < 9) grid[map_position] += 2;
-				else grid[map_position] = 9 * delay;
+				else grid[map_position] = 9 * scale;
 			}
 			map_position++;
 		}

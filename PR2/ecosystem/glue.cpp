@@ -226,8 +226,13 @@ pythoncommand(vpu_deleteanim) {
 
 #include "curtain.hpp"
 pythoncommand(vpu_transition) {
-	if (!PyArg_ParseTuple(args, "")) return NULL;
+	int type=-1;
+	if (!PyArg_ParseTuple(args, "|i", &type)) return NULL;
 	Curtain::enabled = true;
+	if (type >= 0) {
+		type %= CURTAIN_TYPE_SIZE;
+		Curtain::type = (CurtainType)type;
+	}
 	return PyBool_FromLong(true);
 }
 
@@ -660,7 +665,7 @@ static PyMethodDef BlackBoxMethods[] = {
 /* Video Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef VpuMethods[] = {
-	{"transition"	, vpu_transition		, METH_VARARGS, "vpu.transition(surface_handle) : Performs an interactive transition bewtween active surface and another one" },
+	{"transition"	, vpu_transition		, METH_VARARGS, "vpu.transition(type) : Performs half of an interactive transition and wait for user to change screen to continue" },
 	{"createanim"	, vpu_createanim		, METH_VARARGS, "vpu.createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
 	{"createsprite"	, vpu_createsprite		, METH_VARARGS, "vpu.createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
 	{"createsurf"	, vpu_createsurf		, METH_VARARGS, "vpu.createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },

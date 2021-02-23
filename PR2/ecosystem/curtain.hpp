@@ -12,6 +12,7 @@ typedef enum E_CurtainStatus {
 }CurtainStatus;
 
 typedef enum E_CurtainType {
+	CURTAIN_TYPE_PLAIN,
 	CURTAIN_TYPE_DIAGONAL_NW,
 	CURTAIN_TYPE_DIAGONAL_SE,
 	CURTAIN_TYPE_DIAGONAL_NE,
@@ -45,6 +46,7 @@ public:
 	static bool forward;
 	static bool enabled;
 	static int time;
+	static float scale;
 	static CurtainType type;
 	static int *grid;
 	static Surface *begin_surface;
@@ -56,7 +58,7 @@ public:
 	static void prepare(Surface* target);
 	static CurtainStatus run(double delta);
 	static void render();
-	static void reset();
+	static void reset(bool invert = false);
 	static void draw();	
 };
 

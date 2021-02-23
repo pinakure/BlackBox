@@ -172,7 +172,11 @@ class options():
         if not typewriter.ready():
                 vpu.update()
 
+
+            
 class functions():
+    background_status = False
+
     @staticmethod
     def menu():
         while(1):
@@ -188,9 +192,103 @@ class functions():
             if not typewriter.ready():
                 vpu.update()
     
+        
     @staticmethod
     def vpu_menu():
-        background_status = False
+        def transition_menu():
+            def do_transition(transition_type):            
+                progress = 0
+                print("Close")
+                vpu.transition(transition_type)
+                while not vpu.update():
+                    print("Closing", end=('.'*(int(progress/10)%4))+"   \r")
+                    progress += 1
+                print("Closed        ")                    
+                # change screen content here
+                vpu.enable(1)
+                print("Change Screen contents here")
+                if functions.background_status: 
+                    functions.background_status = False
+                    vpu.select(1)
+                    vpu.fill(50,100,25,32)
+                else: 
+                    functions.background_status = True
+                    vpu.select(1)
+                    vpu.fill(100,50,25,32)
+                print("Opening")
+                vpu.transition(transition_type)
+                while not vpu.update():
+                    print("Opening", end=('.'*(int(progress/10)%4))+"   \r")
+                    progress += 1
+                print("Opened        ")                    
+                
+            def diagonal_menu():
+                while(1):
+                    choice = submenu([
+                        [ 'SE'    , '1' ],
+                        [ 'SW'    , '2' ],
+                        [ 'NW'    , '3' ],
+                        [ 'NE'    , '4' ],                        
+                    ], "Diagonal Sweep Transition")
+                    if choice == '<': return
+                    do_transition(int(choice))
+            
+            def horizontal_menu():
+                while(1):
+                    choice = submenu([
+                        [ 'S to N'      , '5' ],
+                        [ 'N to S'      , '6' ],
+                        [ 'N&S to MID'  , '7' ],
+                        [ 'MID to N&S'  , '8' ],
+                        [ 'STRIPS'      , '14'],
+                        [ 'DIAGONAL IN' , '21'],
+                        [ 'DIAGONAL OUT', '23'],
+                        
+                    ], "Horizontal Sweep Transition")
+                    if choice == '<': return                    
+                    do_transition(int(choice))
+
+            def vertical_menu():
+                while(1):
+                    choice = submenu([
+                        [ 'E to W'      , '9'  ],
+                        [ 'W to E'      , '10' ],
+                        [ 'W&E to MID'  , '11' ],
+                        [ 'MID to W&E'  , '12' ], 
+                        [ 'STRIPS'      , '13' ],
+                        [ 'DIAGONAL IN' , '20' ],
+                        [ 'DIAGONAL OUT', '22' ],
+                    ], "Vertical Sweep Transition")
+                    if choice == '<': return                    
+                    do_transition(int(choice))
+
+            def shaped_menu():
+                while(1):
+                    choice = submenu([
+                        [ 'PLAIN'       , '0'  ],
+                        [ 'SQUARE IN'   , '15' ],
+                        [ 'SQUARE OUT'  , '16' ],
+                        [ 'CIRCLE IN'   , '17' ],
+                        [ 'CIRCLE_OUT'  , '18' ], 
+                        [ 'CHECKERS'    , '19' ],
+                        [ 'SPIRAL'      , '24' ],
+                    ], "Vertical Sweep Transition")
+                    if choice == '<': return
+                    do_transition(int(choice))                    
+
+            while(1):
+                choice = submenu([
+                    [ 'diagonal'    , 'd' ],
+                    [ 'horizontal'  , 'h' ],
+                    [ 'vertical'    , 'v' ],
+                    [ 'shaped'      , 's' ],
+                ], "Transitions")
+                if choice == '<': return
+                elif choice == 'd': diagonal_menu()
+                elif choice == 'h': horizontal_menu()
+                elif choice == 'v': vertical_menu()
+                elif choice == 's': shaped_menu()            
+
         while(1):
             choice = submenu([
                 [ 'enable'      , 'e' ],
@@ -202,31 +300,7 @@ class functions():
             elif choice == 'e': vpu.enable(1)
             elif choice == 'r': vpu.rotate(45)
             elif choice == 's': vpu.scale(0.5, 0.5, 0.5)
-            elif choice == 't':                 
-                progress = 0
-                print("Close")
-                vpu.transition()
-                while not vpu.update():
-                    print("Closing", end=('.'*(int(progress/10)%4))+"   \r")
-                    progress += 1
-                print("Closed        ")                    
-                # change screen content here
-                print("Change Screen contents here")
-                if background_status: 
-                    background_status = False
-                    vpu.select(0)
-                    vpu.fill(50,100,25,255)
-                else: 
-                    background_status = True
-                    vpu.select(0)
-                    vpu.fill(100,50,25,255)
-                print("Opening")
-                vpu.transition()
-                while not vpu.update():
-                    print("Opening", end=('.'*(int(progress/10)%4))+"   \r")
-                    progress += 1
-                print("Opened        ")                    
-                
+            elif choice == 't': transition_menu()                
             if not typewriter.ready():
                 vpu.update()
     
