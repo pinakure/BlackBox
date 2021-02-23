@@ -37,6 +37,10 @@ void Curtain::render() {
 		grid = NULL;
 	}
 	grid = (int*)malloc(sizeof(int) * w * h);
+	if (!grid) {
+		printf("Out of memory @ Curtain::render()\nAborting Execution.\n");
+		exit(-1);
+	}
 	memset(grid, 0, sizeof(int) * w * h);
 	int i = 0;
 	for (int y = 0; y < h; y++) {
