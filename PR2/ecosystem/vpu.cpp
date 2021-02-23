@@ -120,7 +120,13 @@ void Vpu::initializeFonts() {
 			std::vector<std::string> temp  = explode(name, '\\');
 			if(temp.size()>0)
 				name = temp[temp.size() - 1];
-			std::vector<std::string> parts = explode(name, '.');
+			// Remove slashes
+			std::vector<std::string> parts = explode(name, '/');
+			if (parts.size() > 0) {
+				name = parts[parts.size() - 1];
+			}
+			// Extract extension
+			parts = explode(name, '.');
 			al_destroy_fs_entry(file);
 			if (parts.size() == 2) {
 				if (!parts[1].compare("ttf")) {
@@ -326,7 +332,6 @@ void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
 
 	al_draw_textf(font->data, shadow, x + 1, y + 1, flags, _buffer);
 	al_draw_textf(font->data, color, x, y, flags, _buffer);
-	
 }
 
 void Vpu::print(std::string text, int  x, int y, int flags) {
