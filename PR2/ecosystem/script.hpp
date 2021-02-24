@@ -20,6 +20,7 @@ class Script {
 		bool loaded		= false;
 		bool finalized	= false;
 		std::string path;
+		std::string basename = "scripts";
 		std::vector<std::string> err;
 		std::vector<std::string> out;
 		std::vector<std::string> code;		
@@ -29,7 +30,7 @@ class Script {
 		bool load();
 		
 	public:
-		Script(std::string path);
+		Script(std::string path,std::string basename = "scripts");
 		~Script();
 		bool isLoaded();
 		bool call(std::string function_name);

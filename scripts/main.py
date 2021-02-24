@@ -86,6 +86,7 @@ def menu():
             [ ' Functions '    , 'f' ],
             [ ' Debugging '    , 'd' ],
             [ ' Tests '        , 't' ],
+            [ ' Update '       , 'u' ],
             [ 'Close'          , 'c' ],
             [ 'Quit'           , 'x' ],
         ], "BlackBox Menu", False)
@@ -93,6 +94,7 @@ def menu():
         elif choice == 'x': quit()
         elif choice == 'f': functions.menu()
         elif choice == 'd': debug.menu()
+        elif choice == 'u': blackbox.update()
         elif choice == 'o': options.menu()
         elif choice == 't': test.menu()
         if not typewriter.ready():
@@ -434,6 +436,8 @@ class test():
             wait(1)
             fadeout()
             wait(1)
+            vpu.enable(1)
+            vpu.fill(255,0,128)        
             select(0)
             r = int(random()*255)
             g = int(random()*255)

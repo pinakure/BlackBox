@@ -125,6 +125,9 @@
     <ClCompile Include="ecosystem\download.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\dashboard.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -133,6 +136,9 @@
     </None>
     <None Include="..\scripts\main.py">
       <Filter>Archivos de origen\Scripts</Filter>
+    </None>
+    <None Include="..\server\deploy\currentVersion\toc.py">
+      <Filter>Archivos de origen\ecosystem</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

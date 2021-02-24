@@ -4,6 +4,7 @@
 #include "console.hpp"
 #include "vpu.hpp"
 #include "typewriter.hpp"
+#include "dashboard.hpp"
 #include "glue.cpp"
 
 bool Script::initialize() {
@@ -27,7 +28,8 @@ void Script::deinitialize() {
 	Py_Finalize();
 }
 
-Script::Script(std::string path) {
+Script::Script(std::string path, std::string basename) {
+	this->basename = basename;
 	this->path = path;
 	this->loaded = this->load();
 }
@@ -52,7 +54,7 @@ bool Script::run_sentence() {
 }
 
 bool Script::load() {
-	std::string pythonfile = "scripts." + this->path;
+	std::string pythonfile = this->basename+"." + this->path;
 	PyObject *name = PyUnicode_DecodeFSDefault(pythonfile.c_str());
 	__module__ = PyImport_Import(name);
 	Py_DECREF(name);// ya no necesitamos name, dereferenciarlo

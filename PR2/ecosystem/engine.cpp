@@ -4,6 +4,7 @@
 #include "console.hpp"
 #include "world.hpp"
 #include "camera.hpp"
+#include "dashboard.hpp"
 #include <iostream>
 #include<Windows.h>
 #pragma comment(lib, "urlmon.lib")
@@ -140,6 +141,7 @@ void Engine::render() {
 		Vpu::paint(0, 0, 0, 16);	
 		// -----------------------
 		showcase->draw();
+		Dashboard::draw();
 		Hud::draw();
 		InputDevice::draw(0);
 		Console::draw(16);
@@ -175,6 +177,7 @@ void Engine::update() {
 	Camera::update(fElapsedTime);
 	Hud::update(fElapsedTime);
 	InputDevice::update(fElapsedTime);
+	Dashboard::update(fElapsedTime);
 	Console::update();//!!!
 	render();
 	handleEvents();
@@ -244,10 +247,10 @@ void Engine::download(const char* file) {
 	Vpu::foreground.enabled = false;
 	Vpu::background.enabled = false;
 	Vpu::overlay.enabled = true;
-	
+
 	std::string filename = file;
-	std::string src = "http://ipv4.download.thinkbroadband.com/"+filename;
-	std::string dst = "data\\downloads\\"+filename;
+	std::string src = Download::getServerUrl() + filename;
+	std::string dst = "data\\" + filename;
 	Download ds;
 	
 	/*

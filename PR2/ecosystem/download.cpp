@@ -3,6 +3,10 @@
 #include "typewriter.hpp"
 #include "vpu.hpp"
 
+std::string Download::server = "http://server1.blackbox.com/";
+std::string Download::update_url = "deploy/currentVersion/";
+std::string Download::toc_file = "toc.py";
+
 static char _buffer[4096];
 
 #include "input.hpp"

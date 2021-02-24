@@ -318,8 +318,21 @@ pythoncommand(vpu_frames){
     return PyLong_FromLong(Vpu::total_frames);
 }
 /* BlackBox ----------------------------------------------------------------------------- */
-pythoncommand(blackbox_version){
-	if(!PyArg_ParseTuple(args, "")) return NULL;	
+pythoncommand(blackbox_update) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	Engine::download("toc.py");
+	return PyBool_FromLong(true);
+}
+
+pythoncommand(blackbox_download) {
+	char* file;
+	if (!PyArg_ParseTuple(args, "s", &file)) return NULL;
+	Engine::download(file);
+	return PyBool_FromLong(true);
+}
+
+pythoncommand(blackbox_version) {
+	if(!PyArg_ParseTuple(args, "")) return NULL;
     return PyLong_FromLong(3);
 }
 
@@ -369,6 +382,46 @@ pythoncommand(blackbox_createdecimal) {
 		);
 	((Floating*)CVar::settings[name])->setMinMax(min, max);
 	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+
+#include "dashboard.hpp"
+
+pythoncommand(blackbox_addtitle) {
+	char*	name; 
+	char*	url;
+	char*	picture;
+	char*	genre;
+	bool	multiplayer=false;
+	bool	cooperative=false;
+	bool	joystick=false;
+	bool	mouse=false;
+	bool	keyboard=false;
+	int		rating=5;
+	char* released = 0;
+	char*	parent = 0;
+	
+	if (!
+		PyArg_ParseTuple(
+			args, 
+			"ssssbbbbbiss",
+			&name, &url, &picture, &genre, &multiplayer, &cooperative, &joystick, &mouse, &keyboard, &rating, &released, &parent
+		)
+	) return NULL;
+	Dashboard::addTitle(
+		name,
+		url,
+		picture,
+		genre,
+		multiplayer,
+		cooperative,
+		joystick,
+		mouse,
+		keyboard,
+		rating,
+		released ? released : "01-01-2022",
+		parent
+	);
+	return PyBool_FromLong(true);
 }
 
 pythoncommand(blackbox_createboolean) {
@@ -648,16 +701,19 @@ static PyMethodDef TypeWriterMethods[] = {
 /* Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef BlackBoxMethods[] = {
+	{"addtitle"		, blackbox_addtitle		, METH_VARARGS, "blackbox.addtitle(name,url,picture,genre,multiplayer,cooperative,joystick,mouse,keyboard,rating,released,parent) : Add given title to the dashboard."},
 	{"createboolean", blackbox_createboolean, METH_VARARGS, "blackbox.createboolean(name,value,help) : Create a boolean variable and get handle"},
 	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
 	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
 	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
+	{"download"		, blackbox_download		, METH_VARARGS, "blackbox.download(filename) : Download file from current version repository."},
 	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{"findvar"		, blackbox_findvar		, METH_VARARGS, "blackbox.findvar(var_name) : Find handle for the variable matching var_name"},
 	{"getvar"		, blackbox_getvar		, METH_VARARGS, "blackbox.getvar(var_handle) : Return value of the variable identified by var_handle"},
 	{"setvar"		, blackbox_setvar		, METH_VARARGS, "blackbox.setvar(var_handle,value) : Set value of the variable identified by var_handle"},
+	{"update"		, blackbox_update		, METH_VARARGS, "blackbox.update() : Update Table of Contents up to latest version."},
 	{"version"		, blackbox_version		, METH_VARARGS, "blackbox.version() : Return current BlackBox engine version"},
 	{NULL, NULL, 0, NULL}
 };
@@ -674,7 +730,7 @@ static PyMethodDef VpuMethods[] = {
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
 	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
-	{"drawanim"		,   vpu_drawanim		, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
+	{"drawanim"		, vpu_drawanim			, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
 	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},

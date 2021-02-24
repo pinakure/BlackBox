@@ -9,7 +9,10 @@ private:
     int progress=0, filesize=0;
     int AbortDownload=false;
 public:
-
+    static std::string server;
+    static std::string update_url ;
+    static std::string toc_file;
+    static std::string getServerUrl() { return Download::server + Download::update_url; }
 
     STDMETHOD(OnStartBinding)(DWORD dwReserved,IBinding __RPC_FAR* pib){
         AbortDownload = 0;
