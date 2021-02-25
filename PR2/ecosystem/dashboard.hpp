@@ -20,7 +20,8 @@ public:
 	DashboardTitle* parent  = NULL;
 	
 	DashboardTitle() {};
-		
+	void draw(int x, int y, int width, int height, bool active = false);
+
 	DashboardTitle(std::string name, std::string url, std::string picture, std::string genre,
 				    bool multiplayer,bool cooperative,bool joystick,bool mouse,bool keyboard,
 					int rating, std::string released,char* parent);
@@ -29,6 +30,11 @@ public:
 class Dashboard {
 public:
 	static bool enabled;
+	static int active_index;
+	static int cursor_x;
+	static int cursor_y;
+	static int columns;
+	static int rows;
 	static std::vector<DashboardTitle> titles;
 	static void addTitle(
 		std::string name,

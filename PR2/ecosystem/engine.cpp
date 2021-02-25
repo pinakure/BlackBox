@@ -176,8 +176,8 @@ void Engine::update() {
 	showcase->update(fElapsedTime);
 	Camera::update(fElapsedTime);
 	Hud::update(fElapsedTime);
-	InputDevice::update(fElapsedTime);
 	Dashboard::update(fElapsedTime);
+	InputDevice::update(fElapsedTime);
 	Console::update();//!!!
 	render();
 	handleEvents();
