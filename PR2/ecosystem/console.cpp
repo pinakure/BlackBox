@@ -1664,7 +1664,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 	bool boolean;
 	char number[16];
 
-	size_t  lack = 0;
+	int  lack = 0;
 	std::string ss;
 
 	while (i<o) {
