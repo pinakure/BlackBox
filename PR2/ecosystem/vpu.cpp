@@ -45,6 +45,8 @@ ALLEGRO_COLOR Vpu::transparent;
 std::vector<Font*> Vpu::fonts;
 
 Font* Vpu::font = NULL;
+Font* Vpu::biggest_font = NULL;
+Font* Vpu::smallest_font = NULL;
 Font* Vpu::legacy_font = NULL;
 
 
@@ -112,7 +114,7 @@ bool Vpu::start() {
 }
 
 void Vpu::initializeFonts() {
-	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("data/fonts/");
+	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("fonts/");
 	if (al_open_directory(e)) {
 		ALLEGRO_FS_ENTRY* file;
 		while (file = al_read_directory(e)){
@@ -130,7 +132,7 @@ void Vpu::initializeFonts() {
 			al_destroy_fs_entry(file);
 			if (parts.size() == 2) {
 				if (!parts[1].compare("ttf")) {
-					fonts.push_back(new Font(parts[0], 16));
+					fonts.push_back(new Font(parts[0], 16));					
 				}
 			} else if (parts.size() == 3) {
 				if (!parts[2].compare("ttf")) {
@@ -138,6 +140,14 @@ void Vpu::initializeFonts() {
 					fonts.push_back(new Font(parts[0] + "." + parts[1], i));
 				}
 			};
+			// Reassign smallest and biggest font pointers 
+			if (fonts.size()) {
+				Font* last = fonts[fonts.size() - 1];
+				if (!biggest_font)biggest_font = last;
+				else if (biggest_font->height < last->height) biggest_font = last;
+				if (!smallest_font)smallest_font = last;
+				else if (smallest_font->height > last->height) smallest_font = last;
+			}
 		}
 	}
 	for (int i = 0; i < fonts.size(); i++) {
@@ -216,7 +226,7 @@ bool Vpu::initialize() {
 		if (!restart()) return false;
 		initializeFonts();
 		ALLEGRO_BITMAP *icon;
-		icon = al_load_bitmap("data/gfx/vendor.png");
+		icon = al_load_bitmap("gfx/vendor.png");
 		if (icon) {
 			al_set_display_icon(display, icon);
 		}

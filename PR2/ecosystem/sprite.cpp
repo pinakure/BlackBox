@@ -4,7 +4,7 @@
 
 Sprite::Sprite(const char *filename) {	
 	if (filename != nullptr) {
-		std::string file("data/sprites/");
+		std::string file("sprites/");
 		file.append(filename);
 		file.append(".png");
 		filename = file.c_str();

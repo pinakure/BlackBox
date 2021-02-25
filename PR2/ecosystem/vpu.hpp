@@ -21,6 +21,8 @@ private:
 public:
 	static std::vector<Font*>			fonts;
 	static Font							*font;
+	static Font*						smallest_font;
+	static Font*						biggest_font;
 	static Surface						*target;	
 	static ALLEGRO_BITMAP				*buffer;	
 	static ALLEGRO_COLOR				color;

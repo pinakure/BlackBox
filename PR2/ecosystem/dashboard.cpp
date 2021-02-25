@@ -75,12 +75,7 @@ void Dashboard::draw(){
 
 
 	Vpu::clear();
-	// Draw title art graphic
-	Vpu::fillRectangle(
-		left, top, 
-		width, bar_height, 
-		0, 255, 0, 128
-	);
+	
 	// Draw title boxes area
 	Vpu::fillRectangle(
 		title_area_left	 , title_area_top,
@@ -92,6 +87,7 @@ void Dashboard::draw(){
 	);
 	// Draw titles area
 	int title_index = 0;
+	DashboardTitle* selected = NULL;
 	if (titles.size()) {
 		for (int y = 0; y < title_rows; y++) {
 			for (int x = 0; x < title_columns; x++, title_index++) {
@@ -100,9 +96,35 @@ void Dashboard::draw(){
 				DashboardTitle* title = &Dashboard::titles[title_index];
 				int dx = title_area_left + (x * title_width) + (title_area_padding * x);
 				title->draw(dx, dy, title_width, title_height, title_index == active_index);
+				if (title_index == active_index)selected = title;
 			}
 			if (title_index >= Dashboard::titles.size())break;
 		}
+	}
+	if (selected) {
+		// Draw title art graphic
+		Vpu::fillRectangle(
+			left, top,
+			width, bar_height,
+			TypeWriter::r >> 4,
+			TypeWriter::g >> 4,
+			TypeWriter::b >> 4,
+			TypeWriter::a >> 4
+		);
+		Vpu::pushFont();
+		Vpu::pushColor();
+		Vpu::setFont(Vpu::biggest_font);
+		Vpu::setColor(al_map_rgb(255, 255, 255));
+		std::string msg = "Welcome to the Dashboard";
+		static float offset = 0.0f;
+		size_t max_offset = al_get_text_width(Vpu::font->data, msg.c_str());
+		offset += 0.25f;
+		if (int(offset) >= int(max_offset)) {
+			offset = -width;
+		}
+		Vpu::print(selected->name, left+(width/2), top, ALLEGRO_ALIGN_CENTER);
+		Vpu::popColor();
+		Vpu::popFont();
 	}
 
 	// Draw information scrolling marquee
