@@ -251,11 +251,14 @@ void Vpu::select(Surface &target) {
 }
 
 void Vpu::deinitialize() {
-	if (font) delete font;
 	font = legacy_font;
+	for (int i = 0; i < fonts.size(); i++) {
+		delete fonts[i];
+	}
+	fonts.clear();
 	if(display) al_destroy_display(display);
 	destroySurface(console);
-	for (int i = 0; i < 4; i++) {		
+	for (int i = 0; i < 4; i++) {
 		destroySurface(overlay);
 		destroySurface(foreground);
 		destroySurface(background);		
