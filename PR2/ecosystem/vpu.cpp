@@ -156,6 +156,8 @@ void Vpu::initializeFonts() {
 	}
 	Engine::printf("WARNING: Failed to initialize system font.\nUsing default font.\n");
 	font = legacy_font;	
+	if (!biggest_font) biggest_font = legacy_font;
+	if (!smallest_font) smallest_font = legacy_font;
 }
 
 bool Vpu::restart() {

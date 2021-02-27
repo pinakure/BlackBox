@@ -28,7 +28,7 @@ static void checkupdate() {
 	}
 	else {
 		printf("TOC File Missing. Trying to download...\n");
-		Engine::download("toc.py");
+		Engine::download("toc.py");		
 	}
 }
 
@@ -72,10 +72,18 @@ static int waitForEnter(int return_code) {
 	return return_code;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
+	
 	PHYSFS_init(argv[0]);
-	PHYSFS_addToSearchPath("data/system.zip", 1);
+	ALLEGRO_FILE *f = al_fopen("data/system.zip", "r");
+	if (!f) {
+		_mkdir("data");
+		Engine::download("system.zip");
+		PHYSFS_addToSearchPath("data/system.zip", 1);		
+	} else {
+		al_fclose(f);
+		PHYSFS_addToSearchPath("data/system.zip", 1);		
+	}	
 	PHYSFS_addToSearchPath("data/", 1);
 
 	if(! Script::initialize()	) return waitForEnter(100);	

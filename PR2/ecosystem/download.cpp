@@ -13,6 +13,7 @@ static char _buffer[4096];
 extern char key[256];
 
 void Download::draw(std:: string msg) {
+	if (!Vpu::is_initialized)return;
 	int w = Vpu::width / 2;
 	int h = 24;
 	int y = (Vpu::height / 4) - (h / 2);;
