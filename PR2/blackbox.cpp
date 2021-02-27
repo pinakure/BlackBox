@@ -8,6 +8,17 @@
 #include <iostream>
 
 #include "ecosystem.h"
+#include "ecosystem/dashboard.hpp"
+
+static bool fileExists(std::string filename) {
+	ALLEGRO_FILE* f; 
+	f = al_fopen(filename.c_str(), "r");
+	if (f) {
+		al_fclose(f);
+		return true;
+	}
+	return false;
+}
 
 static void checkupdate() {
 	ALLEGRO_FILE* f = al_fopen("toc.py", "r");
@@ -33,11 +44,17 @@ bool initialize() {
 		return false;
 	}
 	
-	// Check TOC.py
-	checkupdate();
+	// Update TOC.py
+	if (!fileExists("toc.py")) {
+		checkupdate();
+	}
 	// Build dashboard titles described on TOC file data/toc.py (if present also)
-	Script t("toc", "data");
-	if (t.isLoaded())t.call("load");
+	Dashboard::enabled = false;
+	if(fileExists("toc.py")) {
+		Script t("toc", "data");
+		if (t.isLoaded()) t.call("load");
+		else printf("Error parsing TOC File; Dashboard will be disabled.\n");
+	} else printf("Cannot load TOC File. Dashboard will be disabled.\n");
 	
 	// Run default scripts
 	Script::execute("from blackbox import *");

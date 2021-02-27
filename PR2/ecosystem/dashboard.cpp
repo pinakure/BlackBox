@@ -11,18 +11,28 @@ int Dashboard::cursor_x = 0;
 int Dashboard::cursor_y = 0;
 int Dashboard::columns = 4;
 int Dashboard::rows = 3;
-
+float Dashboard::offset = -16.0f;
+size_t Dashboard::max_offset = 0;
+DashboardTitle* Dashboard::selected = NULL;
 std::vector<DashboardTitle> Dashboard::titles;
 
-void Dashboard::addTitle(std::string name,std::string url,std::string picture,std::string genre,
+using namespace std;
+void Dashboard::addTitle(string name,string description, string developer, string url,string picture,string genre,string font,
 						bool multiplayer,bool cooperative,bool joystick,bool mouse,bool keyboard,
-						int rating, std::string released, char* parent) {
+						int rating, string released, char* parent) {
+	if (titles.size() == 0) {
+		printf("Titles found at data/toc.py, dashboard enabled.\n");
+		Dashboard::enabled = true;
+	}
 	Dashboard::titles.push_back(
 		DashboardTitle(
 			name,
+			description,
+			developer,
 			url,
 			picture,
 			genre,
+			font,
 			multiplayer,
 			cooperative,
 			joystick,
@@ -33,20 +43,19 @@ void Dashboard::addTitle(std::string name,std::string url,std::string picture,st
 			parent
 		)
 	);
-	if (titles.size() == 0) {
-		printf("Titles found at data/toc.py, dashboard enabled.\n");
-		Dashboard::enabled = true;
-	}
 	printf(" * Added Title '%s' to the dashboard.\n", name.c_str());
 }
 
-DashboardTitle::DashboardTitle(std::string name, std::string url, std::string picture, std::string genre,
+DashboardTitle::DashboardTitle(string name, string description, string developer,string url, string picture_url, string genre,string font,
 								bool  multiplayer, bool	cooperative, bool joystick,	bool mouse,bool	keyboard,
-								int	rating, std::string released, char* parent){
+								int	rating, string released, char* parent){
 	this->name = name;
+	this->description = description;
+	this->developer = developer;
 	this->url = url;
-	this->picture = picture;
+	this->picturename = picture_url;
 	this->genre = genre;
+	this->font = font;
 	this->multiplayer = multiplayer;
 	this->cooperative = cooperative;
 	this->joystick = joystick;
@@ -54,9 +63,14 @@ DashboardTitle::DashboardTitle(std::string name, std::string url, std::string pi
 	this->keyboard = keyboard;
 	this->rating = rating;
 	this->parent = NULL;//TODO: create hierarchy
+
+	this->picture = Vpu::loadBitmap("titles/"+picturename+".png");
+	if(!this->picture.enabled)
+		this->picture = Vpu::loadBitmap("gfx/vendor.png");
 }
 
 void Dashboard::draw(){
+	if (!enabled)return;
 	const int bar_height = 32;
 	const int left = Vpu::width / 4;
 	const int footer = (Vpu::height / 2) - TypeWriter::line_height;
@@ -72,8 +86,6 @@ void Dashboard::draw(){
 	const int title_width  = (title_area_width  - (title_area_padding * (title_columns - 1))) / title_columns;
 	const int title_height = (title_area_height - (title_area_padding * (title_rows - 1))) / title_rows;
 
-
-
 	Vpu::clear();
 	
 	// Draw title boxes area
@@ -87,7 +99,7 @@ void Dashboard::draw(){
 	);
 	// Draw titles area
 	int title_index = 0;
-	DashboardTitle* selected = NULL;
+	selected = NULL;
 	if (titles.size()) {
 		for (int y = 0; y < title_rows; y++) {
 			for (int x = 0; x < title_columns; x++, title_index++) {
@@ -115,63 +127,80 @@ void Dashboard::draw(){
 		Vpu::pushColor();
 		Vpu::setFont(Vpu::biggest_font);
 		Vpu::setColor(al_map_rgb(255, 255, 255));
-		std::string msg = "Welcome to the Dashboard";
-		static float offset = 0.0f;
-		size_t max_offset = al_get_text_width(Vpu::font->data, msg.c_str());
+		Vpu::print(selected->name, left+(width/2), top, ALLEGRO_ALIGN_CENTER);
+		Vpu::popColor();
+		Vpu::popFont();
+
+		// Draw information scrolling marquee
+		Vpu::fillRectangle(
+			left, footer,
+			width, bar_height,
+			0, 0, 0, 255
+		);
+		Vpu::pushColor();
+		Vpu::setColor(al_map_rgb(255, 255, 255));
+		max_offset = al_get_text_width(Vpu::font->data, selected->description.c_str());
 		offset += 0.25f;
 		if (int(offset) >= int(max_offset)) {
 			offset = -width;
 		}
-		Vpu::print(selected->name, left+(width/2), top, ALLEGRO_ALIGN_CENTER);
+		Vpu::print(selected->description, (left)-offset, footer , 0);
 		Vpu::popColor();
-		Vpu::popFont();
 	}
-
-	// Draw information scrolling marquee
-	Vpu::fillRectangle(
-		left, footer,
-		width, bar_height,
-		0, 0, 0, 255
-	);
-	Vpu::pushColor();
-	Vpu::setColor(al_map_rgb(255, 255, 255));
-	std::string msg = "Welcome to the Dashboard";
-	static float offset = 0.0f;
-	size_t max_offset = al_get_text_width(Vpu::font->data, msg.c_str());
-	offset += 0.25f;
-	if (int(offset) >= int(max_offset)) {
-		offset = -width;
-	}
-	Vpu::print(msg, (left)-offset, footer , 0);
-	Vpu::popColor();
 }
 
 void Dashboard::update(double delta) {
 	int temp_x = cursor_x;
 	int temp_y = cursor_y;
 	int temp_i = active_index;
-	if (Console::enabled)return;
+	float temp_o = offset;
+	
+	// Dont update input if any of the interfaces is enabled
+	if (Console::enabled 
+	|| !enabled 
+	|| TypeWriter::enabled 
+	|| (TypeWriter::choices.size() > 0)
+	|| (TypeWriter::options.size() > 0)
+	|| (GetTextBox::status!=GetTextBox::STATUS_DISABLED)
+	) return;
+
+	if (KEYDOWN(key[ALLEGRO_KEY_ESCAPE])) {
+		Script::execute("menu()");
+	}
 	if (KEYDOWN(key[ALLEGRO_KEY_LEFT])) {
+		offset = -16.0f;
 		cursor_x--;
-		if (cursor_x < 0)cursor_x = columns - 1; 		
+		if (cursor_x < 0)cursor_x = columns - 1;		
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT])) {
+		offset = -16.0f;
 		cursor_x++;
-		if (cursor_x > columns)cursor_x = 0;		
+		if (cursor_x >= columns)cursor_x = 0;		
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_UP])) {
+		offset = -16.0f;
 		cursor_y--;
-		if (cursor_x < 0)cursor_y = rows - 1;		
+		if (cursor_y < 0)cursor_y = rows - 1;		
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_DOWN])) {
+		offset = -16.0f;
 		cursor_y++;
-		if (cursor_y > rows)cursor_y = 0;		
+		if (cursor_y >= rows)cursor_y = 0;
 	}
+	// Calculate new active_index
 	active_index = (cursor_y * columns) + cursor_x;
+	// If the movement is forbidden, restore variables to previous values
 	if (active_index >= titles.size()) {
 		cursor_x = temp_x;
 		cursor_y = temp_y;
 		active_index = temp_i;
+		offset = temp_o;
+	}
+	// Update selected 
+	if(titles.size()>0)
+		selected = &titles[active_index];
+	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+		if (selected)selected->download();
 	}
 	printf("Updating Dashboard %f                    \r", delta);
 }
@@ -193,4 +222,24 @@ void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
 		width, height+2,
 		r, g, b, a
 	);
+	if(picture.enabled)
+		al_draw_tinted_scaled_bitmap(
+			picture.bitmap, 
+			al_map_rgba(128,128,128,200), 
+			0, 0, 
+			picture.width, picture.height,
+			x + 1, y + 1,
+			width - 2, height - 2,
+			0
+		);
+		
 }
+
+void DashboardTitle::download() {
+	
+}
+
+void DashboardTitle::load() {
+	
+}
+

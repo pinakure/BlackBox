@@ -387,31 +387,37 @@ pythoncommand(blackbox_createdecimal) {
 #include "dashboard.hpp"
 
 pythoncommand(blackbox_addtitle) {
-	char*	name; 
-	char*	url;
-	char*	picture;
-	char*	genre;
-	bool	multiplayer=false;
-	bool	cooperative=false;
-	bool	joystick=false;
-	bool	mouse=false;
-	bool	keyboard=false;
-	int		rating=5;
+	char* name;
+	char* description;
+	char* developer;
+	char* url;
+	char* picture;
+	char* genre;
+	char* font;
+	bool  multiplayer = false;
+	bool  cooperative = false;
+	bool  joystick	  = false;
+	bool  mouse		  = false;
+	bool  keyboard	  = false;
+	int	  rating=5;
 	char* released = 0;
-	char*	parent = 0;
+	char* parent = 0;
 	
 	if (!
 		PyArg_ParseTuple(
 			args, 
-			"ssssbbbbbiss",
-			&name, &url, &picture, &genre, &multiplayer, &cooperative, &joystick, &mouse, &keyboard, &rating, &released, &parent
+			"sssssssbbbbbiss",
+			&name, &description, &developer, &url, &picture, &genre, &font, &multiplayer, &cooperative, &joystick, &mouse, &keyboard, &rating, &released, &parent
 		)
 	) return NULL;
 	Dashboard::addTitle(
 		name,
+		description,
+		developer,
 		url,
 		picture,
 		genre,
+		font,
 		multiplayer,
 		cooperative,
 		joystick,
@@ -701,7 +707,7 @@ static PyMethodDef TypeWriterMethods[] = {
 /* Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef BlackBoxMethods[] = {
-	{"addtitle"		, blackbox_addtitle		, METH_VARARGS, "blackbox.addtitle(name,url,picture,genre,multiplayer,cooperative,joystick,mouse,keyboard,rating,released,parent) : Add given title to the dashboard."},
+	{"addtitle"		, blackbox_addtitle		, METH_VARARGS, "blackbox.addtitle(name,description,developer,url,picture,genre,font,multiplayer,cooperative,joystick,mouse,keyboard,rating,released,parent) : Add given title to the dashboard."},
 	{"createboolean", blackbox_createboolean, METH_VARARGS, "blackbox.createboolean(name,value,help) : Create a boolean variable and get handle"},
 	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},

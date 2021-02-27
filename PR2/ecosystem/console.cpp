@@ -1696,7 +1696,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 		case 'i':
 			integer = va_arg(ap, int);
 			_itoa_s(integer, number, 16, 10);
-			lack = tabsize - strlen(number);
+			lack = tabsize - int(strlen(number));
 			output.append(number);
 			break;
 		}
