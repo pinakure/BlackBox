@@ -1,8 +1,0 @@
-^3CHANGE LIST
-^2+^6Console History(up/down)
-^2+^6type ^2container sample
-^2+^6Console color input
-^2+^6Console kill command
-^2+^6Program loading from db
-^7Press ^2ESC^7 to alternate console and viewport modes
-
