@@ -339,8 +339,8 @@ static void _deleteFolder(std::string path, std::string folder) {
 			}
 		}
 	}
-	printf(("Deleting folder data/" + path + folder + "\n").c_str());
-	_rmdir(("data/"+path+folder).c_str());
+	printf(("Deleting folder data/" + dir + "\n").c_str());
+	_rmdir(("data/"+dir).c_str());
 }
 
 static void _deleteScripts() {
