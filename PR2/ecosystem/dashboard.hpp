@@ -30,6 +30,7 @@ public:
 	void draw(int x, int y, int width, int height, bool active = false);
 	
 	void download();
+	void execute();
 	void load();
 
 	DashboardTitle(
@@ -54,6 +55,7 @@ public:
 class Dashboard {
 public:
 	static bool enabled;
+	static bool downloading;
 	static int active_index;
 	static int cursor_x;
 	static int cursor_y;

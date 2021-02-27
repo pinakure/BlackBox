@@ -7,6 +7,7 @@ extern char key[256];
 
 int  Dashboard::active_index = 0;
 bool Dashboard::enabled = false;
+bool Dashboard::downloading= false;
 int Dashboard::cursor_x = 0;
 int Dashboard::cursor_y = 0;
 int Dashboard::columns = 4;
@@ -47,7 +48,7 @@ void Dashboard::addTitle(string name,string description, string developer, strin
 }
 
 void Dashboard::draw(){
-	if (!enabled)return;
+	if (!enabled || downloading )return;
 	const int bar_height = 32;
 	const int left = Vpu::width / 4;
 	const int footer = (Vpu::height / 2) - TypeWriter::line_height;
@@ -126,20 +127,30 @@ void Dashboard::draw(){
 	}
 }
 
+#include "input.hpp"
+
 void Dashboard::update(double delta) {
 	int temp_x = cursor_x;
 	int temp_y = cursor_y;
 	int temp_i = active_index;
 	float temp_o = offset;
-	
+	static bool return_lock = false;
 	// Dont update input if any of the interfaces is enabled
-	if (Console::enabled 
-	|| !enabled 
-	|| TypeWriter::enabled 
-	|| (TypeWriter::choices.size() > 0)
-	|| (TypeWriter::options.size() > 0)
-	|| (GetTextBox::status!=GetTextBox::STATUS_DISABLED)
-	) return;
+	if (Console::enabled
+		|| !enabled
+		|| downloading
+		|| TypeWriter::enabled
+		|| (TypeWriter::choices.size() > 0)
+		|| (TypeWriter::options.size() > 0)
+		|| (GetTextBox::status != GetTextBox::STATUS_DISABLED)
+		) {
+		return_lock = true;
+		return;
+	}
+	if (return_lock) {
+		InputDevice::update(1);
+		return_lock = false;
+	}
 
 	if (KEYDOWN(key[ALLEGRO_KEY_ESCAPE])) {
 		Script::execute("menu()");
@@ -177,13 +188,15 @@ void Dashboard::update(double delta) {
 	if(titles.size()>0)
 		selected = &titles[active_index];
 	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
-		if (selected)selected->download();
+		if (selected) selected->load();
 	}
 	printf("Updating Dashboard %f                    \r", delta);
 }
 
 
 /*---------------------------------------------------------------------------------------------------------*/
+extern bool fileExists(std::string filename);
+#include "engine.hpp"
 
 DashboardTitle::DashboardTitle(string name, string description, string developer, string url, string picture_url, string genre, string font,
 	bool  multiplayer, bool	cooperative, bool joystick, bool mouse, bool	keyboard,
@@ -215,7 +228,8 @@ DashboardTitle::DashboardTitle(string name, string description, string developer
 	if (!this->font)this->font = Vpu::biggest_font;
 
 	// Check if game files are present and set up downloaded attribute
-	downloaded = false;
+	downloaded = false; 
+	if (fileExists(this->url)) downloaded = true;	
 }
 
 void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
@@ -238,7 +252,12 @@ void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
 	if(picture.enabled)
 		al_draw_tinted_scaled_bitmap(
 			picture.bitmap, 
-			al_map_rgba(128,128,128,200), 
+			al_map_rgba(
+				downloaded ? 128 : 32,
+				downloaded ? 128 : 32,
+				downloaded ? 128 : 128,
+				downloaded ? 240 : 200
+			),
 			0, 0, 
 			picture.width, picture.height,
 			x + 1, y + 1,
@@ -249,10 +268,139 @@ void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
 }
 
 void DashboardTitle::download() {
-	
+	Dashboard::downloading = true;
+	Engine::download((url).c_str());
+	printf("\n");
+	if (fileExists(url)) {
+		downloaded = true;
+	}
+	Dashboard::downloading = false;
+}
+
+#include "utils.hpp"
+
+
+static void _extractScript(std::string name) {
+	ALLEGRO_FILE* f = al_fopen(("scripts/" + name).c_str(), "r");
+	if (!f) {
+		printf("Cannot execute. main function or game.py not present.\n");
+	}
+	else {
+		printf(("Reading " + name + " from datafile...\n").c_str());
+		al_fseek(f, SEEK_SET, SEEK_END);
+		size_t size = al_ftell(f);
+		al_fseek(f, SEEK_SET, 0);
+		char* contents;
+		contents = (char*)malloc(sizeof(char) * size);
+		if (contents) {
+			memset(contents, sizeof(char) * size, 0);
+			al_fread(f, contents, size);
+		}
+		al_fclose(f);
+		if (contents) {
+			printf(("Writing data/scripts/" + name+"...\n").c_str());
+			FILE* output = 0;
+			fopen_s(&output, ("data/scripts/" + name).c_str(), "w");
+			if (output) {
+				fwrite(contents, size, 1, output);
+				fclose(output);
+			}
+		}
+	}
+}
+
+static void _deleteFolder(std::string path, std::string folder) {
+	std::string dir = path + folder + "/";
+	printf(("Deleting folder " + dir + " contents...\n").c_str());
+	ALLEGRO_FS_ENTRY* e = al_create_fs_entry(dir.c_str());
+	if (al_open_directory(e)) {
+		ALLEGRO_FS_ENTRY* file;
+		while (file = al_read_directory(e)) {
+			std::string name = al_get_fs_entry_name(file);
+			std::vector<std::string> temp = explode(name, '\\');
+			if (temp.size() > 0)
+				name = temp[temp.size() - 1];
+			// Remove slashes
+			std::vector<std::string> parts = explode(name, '/');
+			if (parts.size() > 0) {
+				name = parts[parts.size() - 1];
+			}
+			// Extract extension
+			parts = explode(name, '.');
+			al_destroy_fs_entry(file);
+			std::string filename = "data/" + dir +  name;
+			if (parts.size() == 1) {
+				_deleteFolder(dir, name);
+			}
+			else {
+				printf(("Deleting "+filename+"\n").c_str());
+				_unlink(filename.c_str());
+			}
+		}
+	}
+	printf(("Deleting folder data/" + path + folder + "\n").c_str());
+	_rmdir(("data/"+path+folder).c_str());
+}
+
+static void _deleteScripts() {
+	_deleteFolder("", "scripts");
+}
+
+static void _extractScripts() {
+	_mkdir("data\\scripts");
+	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("scripts/");
+	if (al_open_directory(e)) {
+		ALLEGRO_FS_ENTRY* file;
+		while (file = al_read_directory(e)) {
+			std::string name = al_get_fs_entry_name(file);
+			std::vector<std::string> temp = explode(name, '\\');
+			if (temp.size() > 0)
+				name = temp[temp.size() - 1];
+			// Remove slashes
+			std::vector<std::string> parts = explode(name, '/');
+			if (parts.size() > 0) {
+				name = parts[parts.size() - 1];
+			}
+			// Extract extension
+			parts = explode(name, '.');
+			al_destroy_fs_entry(file);
+			if (parts.size() == 2) {
+				if (!parts[1].compare("py")) {
+					_extractScript(name);
+				}
+			}			
+		}
+	}
+}
+
+#include <physfs.h>
+void DashboardTitle::execute() {
+	PHYSFS_addToSearchPath(("data/" + url).c_str(), 1);
+	// Run game.py ( NOTE: It MUST be located at 'data/scripts/game.py' )
+	_extractScripts();
+	Script s = Script("game", "data.scripts");
+	if (s.isLoaded()) {
+		Dashboard::enabled = false;
+		s.call("main");
+		Dashboard::enabled = true;
+	} else {
+		printf("ERROR: Cannot call game.main\n");
+	}
+	_deleteScripts();
+	PHYSFS_removeFromSearchPath(("data/" + url).c_str());
 }
 
 void DashboardTitle::load() {
-	
+	if (!downloaded) {
+		download();
+		if (downloaded) {
+			execute();
+			return;
+		} else {
+			printf(("Cannot execute " + name + " :Title is not downloaded. ").c_str());
+			return;
+		}
+	}
+	execute();
 }
 

@@ -519,7 +519,7 @@ Surface &Vpu::destroySurface(Surface &surface) {
 Font* Vpu::getFontByName(std::string name) {
 	std::vector<Font*>::iterator it;
 	for (it = fonts.begin(); it != fonts.end(); it++) {
-		if ((*it)->name.compare(name))return *it;
+		if (!(*it)->name.compare(name))return *it;
 	}
 	return NULL;
 }

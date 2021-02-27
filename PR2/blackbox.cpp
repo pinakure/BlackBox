@@ -10,7 +10,7 @@
 #include "ecosystem.h"
 #include "ecosystem/dashboard.hpp"
 
-static bool fileExists(std::string filename) {
+bool fileExists(std::string filename) {
 	ALLEGRO_FILE* f; 
 	f = al_fopen(filename.c_str(), "r");
 	if (f) {
