@@ -13,14 +13,16 @@ public:
 	std::string url			= "nourl";
 	std::string picturename	= "nopicture";
 	std::string genre		= "nogenre";
-	std::string font 		= "nofont";
+	Font *font 				= NULL;
 	bool		multiplayer = false;
 	bool		cooperative = false;
 	bool		joystick	= false;
 	bool		mouse		= false;
 	bool		keyboard	= false;
 	int			rating		= 5;
+	bool		downloaded	= false;
 	Surface		picture;
+	std::vector<Surface>	snapshots;
 	std::string released	= "01-01-2022";
 	DashboardTitle* parent  = NULL;
 	

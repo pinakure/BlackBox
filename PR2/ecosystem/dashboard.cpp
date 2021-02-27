@@ -46,29 +46,6 @@ void Dashboard::addTitle(string name,string description, string developer, strin
 	printf(" * Added Title '%s' to the dashboard.\n", name.c_str());
 }
 
-DashboardTitle::DashboardTitle(string name, string description, string developer,string url, string picture_url, string genre,string font,
-								bool  multiplayer, bool	cooperative, bool joystick,	bool mouse,bool	keyboard,
-								int	rating, string released, char* parent){
-	this->name = name;
-	this->description = description;
-	this->developer = developer;
-	this->url = url;
-	this->picturename = picture_url;
-	this->genre = genre;
-	this->font = font;
-	this->multiplayer = multiplayer;
-	this->cooperative = cooperative;
-	this->joystick = joystick;
-	this->mouse = mouse;
-	this->keyboard = keyboard;
-	this->rating = rating;
-	this->parent = NULL;//TODO: create hierarchy
-
-	this->picture = Vpu::loadBitmap("titles/"+picturename+".png");
-	if(!this->picture.enabled)
-		this->picture = Vpu::loadBitmap("gfx/vendor.png");
-}
-
 void Dashboard::draw(){
 	if (!enabled)return;
 	const int bar_height = 32;
@@ -203,6 +180,42 @@ void Dashboard::update(double delta) {
 		if (selected)selected->download();
 	}
 	printf("Updating Dashboard %f                    \r", delta);
+}
+
+
+/*---------------------------------------------------------------------------------------------------------*/
+
+DashboardTitle::DashboardTitle(string name, string description, string developer, string url, string picture_url, string genre, string font,
+	bool  multiplayer, bool	cooperative, bool joystick, bool mouse, bool	keyboard,
+	int	rating, string released, char* parent) {
+	this->name = name;
+	this->description = description;
+	this->developer = developer;
+	this->url = url;
+	this->picturename = picture_url;
+	this->genre = genre;
+	this->multiplayer = multiplayer;
+	this->cooperative = cooperative;
+	this->joystick = joystick;
+	this->mouse = mouse;
+	this->keyboard = keyboard;
+	this->rating = rating;
+	this->parent = NULL;//TODO: create hierarchy
+
+	// Load title picture
+	this->picture = Vpu::loadBitmap("titles/" + picturename + ".png");
+	if (!this->picture.enabled)
+		this->picture = Vpu::loadBitmap("gfx/vendor.png");
+
+	// Load title snapshots
+	// todo
+
+	// Load (initialize) font by name
+	this->font = Vpu::getFontByName(font);
+	if (!this->font)this->font = Vpu::biggest_font;
+
+	// Check if game files are present and set up downloaded attribute
+	downloaded = false;
 }
 
 void DashboardTitle::draw(int x, int y, int width, int height, bool active) {

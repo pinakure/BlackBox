@@ -85,6 +85,7 @@ public:
 	static void popColor();
 	static void pushFont();
 	static void popFont();
+	static Font *getFontByName(std::string name);
 	static ALLEGRO_COLOR alter(ALLEGRO_COLOR _color, float qr=1.0f, float qg=1.0f, float qb=1.0f, float qa=1.0f);
 
 	// Surface manipulation

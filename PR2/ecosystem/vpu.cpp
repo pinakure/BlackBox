@@ -514,6 +514,14 @@ Surface &Vpu::destroySurface(Surface &surface) {
 	return surface;
 }
 
+Font* Vpu::getFontByName(std::string name) {
+	std::vector<Font*>::iterator it;
+	for (it = fonts.begin(); it != fonts.end(); it++) {
+		if ((*it)->name.compare(name))return *it;
+	}
+	return NULL;
+}
+
 void Vpu::drawSurface(Surface &surface,float sx, float sy, float sw, float sh, float dx, float dy) {
 	al_draw_bitmap_region(surface.bitmap, sx, sy, sw, sh, dx, dy, 0);
 	//al_draw_bitmap(surface.bitmap, 0, 0, 0);

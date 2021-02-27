@@ -1683,7 +1683,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 				}
 			}
 
-			lack = tabsize - strlen(str);
+			lack = tabsize - int(strlen(str));
 			output.append(str);
 			break;
 		case 'b':
