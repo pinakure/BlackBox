@@ -67,14 +67,14 @@ void Dashboard::draw(){
 	Vpu::clear();
 	
 	// Draw title boxes area
-	Vpu::fillRectangle(
+	/*Vpu::fillRectangle(
 		title_area_left	 , title_area_top,
 		title_area_width , title_area_height,
 		TypeWriter::r >> 3,
 		TypeWriter::g >> 3,
 		TypeWriter::b >> 3,
 		TypeWriter::a >> 3
-	);
+	);*/
 	// Draw titles area
 	int title_index = 0;
 	selected = NULL;
@@ -281,6 +281,7 @@ void DashboardTitle::download() {
 
 
 static void _extractScript(std::string name) {
+	_mkdir("data\\scripts");
 	ALLEGRO_FILE* f = al_fopen(("scripts/" + name).c_str(), "r");
 	if (!f) {
 		printf("Cannot execute. main function or game.py not present.\n");
@@ -347,7 +348,6 @@ static void _deleteScripts() {
 }
 
 static void _extractScripts() {
-	_mkdir("data\\scripts");
 	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("scripts/");
 	if (al_open_directory(e)) {
 		ALLEGRO_FS_ENTRY* file;
@@ -386,8 +386,8 @@ void DashboardTitle::execute() {
 	} else {
 		printf("ERROR: Cannot call game.main\n");
 	}
-	_deleteScripts();
 	PHYSFS_removeFromSearchPath(("data/" + url).c_str());
+	_deleteScripts();
 }
 
 void DashboardTitle::load() {
