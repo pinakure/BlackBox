@@ -22,8 +22,9 @@ int Animation::extractFrames(Sprite &sprite, int source_x, int source_y, int des
 	if (read_vertically) {
 		for (int y = source_y; y <= dest_y; y++) {
 			for (int x = source_x; x <= dest_x;x++) {
-				ALLEGRO_BITMAP *bitmap = al_create_bitmap(this->width, this->height);											
+				ALLEGRO_BITMAP *bitmap = al_create_bitmap(this->width, this->height);
 				al_set_target_bitmap(bitmap);																					
+				al_clear_to_color(al_map_rgba(0, 0, 0, 0));
 				al_draw_bitmap_region(sprite.picture.bitmap, x*this->width, y*this->height, this->width, this->height, 0, 0, 0);
 				this->frame.push_back(bitmap);	
 			}
@@ -33,6 +34,7 @@ int Animation::extractFrames(Sprite &sprite, int source_x, int source_y, int des
 			for (int y = source_y; y <= dest_y; y++) {
 				ALLEGRO_BITMAP *bitmap = al_create_bitmap(this->width, this->height);											
 				al_set_target_bitmap(bitmap);																					
+				al_clear_to_color(al_map_rgba(0, 0, 0, 0));
 				al_draw_bitmap_region(sprite.picture.bitmap, x*this->width, y*this->height, this->width, this->height, 0, 0, 0);
 				this->frame.push_back(bitmap);	
 	
