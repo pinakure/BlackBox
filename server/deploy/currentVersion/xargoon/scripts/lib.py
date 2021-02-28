@@ -230,6 +230,7 @@ class Token:
     TYPE_BOMB   = 0x04
     TYPE_POWERUP= 0x05
     TYPE_BONUS  = 0x06
+    TYPE_MAX    = 0x07
     game = None
     tileset = {}
     sprite = None
@@ -242,34 +243,31 @@ class Token:
         Token.sprite = vpu.createsprite("tokens",15)
         if not Token.sprite:
             print("ERROR: Cannot load Token tileset!")        
-        """
-        Token.tileset[0] = vpu.subsprite(Token.sprite)
-        print(f"Created duplicate from {Token.sprite} to {Token.tileset[0]}.")
-        Token.tileset[1] = vpu.subsprite(Token.sprite)
-        print(f"Created duplicate from {Token.sprite} to {Token.tileset[1]}.")
-        Token.tileset[2] = vpu.subsprite(Token.sprite)
-        print(f"Created duplicate from {Token.sprite} to {Token.tileset[2]}.")
-        Token.tileset[3] = vpu.subsprite(Token.sprite)
-        print(f"Created duplicate from {Token.sprite} to {Token.tileset[3]}.")
+        print(f"Creating subsprites...")
+        Token.tileset[ Token.TYPE_A      ] = vpu.subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_B      ] = vpu.subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_C      ] = vpu.subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_D      ] = vpu.subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_BOMB   ] = vpu.subsprite(Token.sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_POWERUP] = vpu.subsprite(Token.sprite, 0, 32, 128, 48)
+        Token.tileset[ Token.TYPE_BONUS  ] = vpu.subsprite(Token.sprite, 0, 48, 128, 64)
         print("Tinting Tokens SpriteSheet 0...", end="\r")
-        vpu.tintsprite(Token.tileset[0], original_colors, palettes[0])
+        vpu.tintsprite(Token.tileset[ Token.TYPE_A ], original_colors, palettes[0])
         print("Tinting Tokens SpriteSheet 1...", end="\r")
-        vpu.tintsprite(Token.tileset[1], original_colors, palettes[1])
+        vpu.tintsprite(Token.tileset[ Token.TYPE_B ], original_colors, palettes[1])
         print("Tinting Tokens SpriteSheet 2...", end="\r")
-        vpu.tintsprite(Token.tileset[2], original_colors, palettes[2])
+        vpu.tintsprite(Token.tileset[ Token.TYPE_C ], original_colors, palettes[2])
         print("Tinting Tokens SpriteSheet 3...", end="\n")
-        vpu.tintsprite(Token.tileset[3], original_colors, palettes[3])
-        """
+        vpu.tintsprite(Token.tileset[ Token.TYPE_D ], original_colors, palettes[3])
         Token.initialized = True
         
-    def __init__(self, x=0, y=0, type=TYPE_A):
+    def __init__(self, x=0, y=0, token_type=TYPE_A):
         self.time = 0
         self.x = x
         self.y = y
         self.alive = True
-        self.type = type
-        #self.anim = vpu.createanim(16, 16,Token.tileset[0])
-        self.anim = vpu.createanim(16, 16,Token.sprite, 0, 0, 7, 0, False)
+        self.token_type = token_type
+        self.anim = vpu.createanim(16, 16, Token.tileset[self.token_type], 0, 0, 7, 0, False)
 
     def draw(self):
         if not self.alive: 

@@ -8,7 +8,7 @@ class Game:
     width = 0
     height = 0
     dims = {}
-    token = None
+    tokens = {}
 
     @staticmethod
     def setup():
@@ -44,8 +44,8 @@ class Game:
         Ship.initialize(Game)
         print("GAME: Ready!")
         ###
-        Game.token = Token(320,120)
-        
+        for i in range(0, Token.TYPE_MAX):
+            Game.tokens[i] = Token(320-(i*16),120, i)
         
     @staticmethod
     def update():
@@ -55,8 +55,9 @@ class Game:
         
     @staticmethod
     def draw():
-        #HudIcon.draw()
-        Game.token.draw()
+        HudIcon.draw()
+        for i in range(0, Token.TYPE_MAX):
+            Game.tokens[i].draw()
         vpu.update()
         
 def main():

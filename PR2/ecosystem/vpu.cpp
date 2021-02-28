@@ -666,17 +666,23 @@ void Vpu::tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>
 		return;
 	}
 	select(sprite.picture);
-	Vpu::lock();
+	al_lock_bitmap(sprite.picture.bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
 	for (int y = 0; y < sprite.picture.height; y++) {
 		for (int x = 0; x < sprite.picture.width; x++) {
 			ALLEGRO_COLOR c = al_get_pixel(sprite.picture.bitmap, x, y);
+			Pixel p = {
+				c.r * 255,
+				c.g * 255,
+				c.b * 255
+			};
+			if ((p.r == 0) && (p.g == 0) && (p.b == 0))continue;
 			std::vector<Pixel>::iterator it = src.begin();
 			int i = 0;
 			while(it != src.end()) {
 				Pixel* s = &src[i], * d = &dst[i];
-				if (s->r == c.r) {
-					if (s->g == c.g) {
-						if (s->b == c.b) {
+				if (s->r == p.r) {
+					if (s->g == p.g) {
+						if (s->b == p.b) {
 							al_put_pixel(x, y, al_map_rgb(d->r, d->g, d->b));
 							break;
 						}
@@ -687,5 +693,5 @@ void Vpu::tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>
 			}
 		}
 	}
-	Vpu::unlock();
+	al_unlock_bitmap(sprite.picture.bitmap);
 }
