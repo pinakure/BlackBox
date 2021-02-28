@@ -61,14 +61,23 @@ pythoncommand(vpu_subsprite) {
 	printf("ERROR: sprite_handle out of range\n");
 	return PyBool_FromLong(false);	
 }
+
+extern std::vector<Pixel> listToPalette(PyObject* incoming);
 pythoncommand(vpu_tintsprite) {
 	long int handle;
 	PyObject* original; //list
 	PyObject* updated; //list
 	if (!PyArg_ParseTuple(args, "iOO", &handle, &original, &updated)) return NULL;
 	// Get palettes
+	std::vector<Pixel> pal_o = listToPalette(original);
+	std::vector<Pixel> pal_u = listToPalette(updated);
 	// Colorize sprite data
-	return PyBool_FromLong(true);
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Sprite* s = &Vpu::sprites.at(handle);
+		Vpu::tintSprite(*s, pal_o, pal_u);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_pset) {
 	int x;
@@ -297,7 +306,7 @@ pythoncommand(vpu_createanim){
 	if(!PyArg_ParseTuple(args, "iii|iiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
 	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
 		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
-		return PyBool_FromLong(true);
+		return PyLong_FromLong(handle);
 	} 
 	printf("ERROR: sprite_handle out of range\n");
 	return PyBool_FromLong(false);
