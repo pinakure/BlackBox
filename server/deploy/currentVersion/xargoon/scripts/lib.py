@@ -232,35 +232,50 @@ class Token:
     TYPE_BONUS  = 0x06
     game = None
     tileset = {}
+    sprite = None
     initialized = False
 
     @staticmethod
     def initialize(game):
         Token.game = game
         print("Initializing Tokens...")
-        sprite = vpu.createsprite("tokens")
-        Token.tileset[0] = vpu.subsprite(sprite)
-        Token.tileset[1] = vpu.subsprite(sprite)
-        Token.tileset[2] = vpu.subsprite(sprite)
-        Token.tileset[3] = vpu.subsprite(sprite)
+        Token.sprite = vpu.createsprite("tokens",15)
+        if not Token.sprite:
+            print("ERROR: Cannot load Token tileset!")        
+        """
+        Token.tileset[0] = vpu.subsprite(Token.sprite)
+        print(f"Created duplicate from {Token.sprite} to {Token.tileset[0]}.")
+        Token.tileset[1] = vpu.subsprite(Token.sprite)
+        print(f"Created duplicate from {Token.sprite} to {Token.tileset[1]}.")
+        Token.tileset[2] = vpu.subsprite(Token.sprite)
+        print(f"Created duplicate from {Token.sprite} to {Token.tileset[2]}.")
+        Token.tileset[3] = vpu.subsprite(Token.sprite)
+        print(f"Created duplicate from {Token.sprite} to {Token.tileset[3]}.")
+        print("Tinting Tokens SpriteSheet 0...", end="\r")
         vpu.tintsprite(Token.tileset[0], original_colors, palettes[0])
+        print("Tinting Tokens SpriteSheet 1...", end="\r")
         vpu.tintsprite(Token.tileset[1], original_colors, palettes[1])
+        print("Tinting Tokens SpriteSheet 2...", end="\r")
         vpu.tintsprite(Token.tileset[2], original_colors, palettes[2])
+        print("Tinting Tokens SpriteSheet 3...", end="\n")
         vpu.tintsprite(Token.tileset[3], original_colors, palettes[3])
+        """
         Token.initialized = True
         
     def __init__(self, x=0, y=0, type=TYPE_A):
+        self.time = 0
         self.x = x
         self.y = y
         self.alive = True
         self.type = type
-        self.anim = vpu.createanim(Token.tileset[0], 16, 16)
+        #self.anim = vpu.createanim(16, 16,Token.tileset[0])
+        self.anim = vpu.createanim(16, 16,Token.sprite, 0, 0, 7, 0, False)
 
     def draw(self):
         if not self.alive: 
             return
         self.time+=1
-        vpu.drawanim(self.anim, x, y)
+        vpu.drawanim(self.anim, self.x, self.y)
         if self.time > 16:
             self.alive = True
 

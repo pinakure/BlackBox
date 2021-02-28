@@ -5,5 +5,4 @@
 #include <vector>
 
 std::vector<std::string> explode(std::string const& s, char delim);
-
 #endif 

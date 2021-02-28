@@ -11,6 +11,12 @@
 
 #define VPU_OVERSCAN 0
 
+typedef struct s_Pixel {
+	int r = 0;
+	int g = 0;
+	int b = 0;
+}Pixel;
+
 class Vpu {
 private:
 	static Font							*legacy_font;
@@ -111,7 +117,8 @@ public:
 	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static Sprite &destroySprite(Sprite &sprite);
 	static Animation &destroyAnimation(Animation &animation);
-	static void drawSprite(Sprite &sprite, float dx, float dy);
+	static void drawSprite(Sprite& sprite, float dx, float dy);
+	static void tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>& dst);
 	static void drawAnimation(Animation &animation, float dx, float dy);
 
 	/* High Level API */

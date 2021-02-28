@@ -8,6 +8,7 @@ class Game:
     width = 0
     height = 0
     dims = {}
+    token = None
 
     @staticmethod
     def setup():
@@ -35,13 +36,16 @@ class Game:
         # initialize subcomponents
         print("GAME: Initializing subcomponents...")
         HudIcon.initialize(Game)
+        Token.initialize(Game)
         BigExplosion.initialize(Game)
         SmallExplosion.initialize(Game)
         #Flame.initialize(Game)
         #Projectile.initialize(Game)
-        Token.initialize(Game)
         Ship.initialize(Game)
         print("GAME: Ready!")
+        ###
+        Game.token = Token(320,120)
+        
         
     @staticmethod
     def update():
@@ -51,11 +55,13 @@ class Game:
         
     @staticmethod
     def draw():
-        HudIcon.draw()
+        #HudIcon.draw()
+        Game.token.draw()
         vpu.update()
         
 def main():
     Game.setup()
+    
     while Game.running:
         Game.update()
         Game.draw()

@@ -658,3 +658,34 @@ void Vpu::deallocateSurface(long int handle) {
 void Vpu::setFont(Font *fnt) {
 	Vpu::font = fnt;
 }
+
+void Vpu::tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>& dst) {
+	// Change colors from src to colors in dst over picture in sprite
+	if (src.size() != dst.size()) {
+		Console::printf("ERROR: Cannot tint Sprite, unmatched palette sizes: (%d != %d)\n", src.size(), dst.size());
+		return;
+	}
+	select(sprite.picture);
+	Vpu::lock();
+	for (int y = 0; y < sprite.picture.height; y++) {
+		for (int x = 0; x < sprite.picture.width; x++) {
+			ALLEGRO_COLOR c = al_get_pixel(sprite.picture.bitmap, x, y);
+			std::vector<Pixel>::iterator it = src.begin();
+			int i = 0;
+			while(it != src.end()) {
+				Pixel* s = &src[i], * d = &dst[i];
+				if (s->r == c.r) {
+					if (s->g == c.g) {
+						if (s->b == c.b) {
+							al_put_pixel(x, y, al_map_rgb(d->r, d->g, d->b));
+							break;
+						}
+					}
+				}
+				i++;
+				it++;
+			}
+		}
+	}
+	Vpu::unlock();
+}
