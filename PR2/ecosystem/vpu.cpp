@@ -599,6 +599,12 @@ Sprite Vpu::createSprite(std::string filename) {
 	return Sprite(filename.c_str());
 }
 
+long int Vpu::createSubSprite(Sprite& s, int left, int top, int right, int bottom) {
+	sprite_handle++;
+	sprites.insert(std::pair<long int, Sprite>(sprite_handle, Sprite(s, left, top, right, bottom)));
+	return sprite_handle;	
+}
+
 Animation Vpu::createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical) {
 	return Animation(s, width, height, sx, sy, dx, dy, vertical);	
 }

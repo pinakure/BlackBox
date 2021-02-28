@@ -66,3 +66,5 @@ data/downloads/
 server/deploy/currentVersion/test.zip
 
 server/deploy/currentVersion/xargoon/scripts/.vscode/
+
+data/__pycache__/

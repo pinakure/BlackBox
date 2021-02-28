@@ -25,17 +25,49 @@ Surface *getLayer(int index) {
 /* ------------------------------------------------------------------------------------ */
 #include "curtain.hpp"
 
+
 pythoncommand(vpu_fading) {
 	if(!PyArg_ParseTuple(args, "")) return NULL;
 	return PyBool_FromLong(Vpu::fade_level==Vpu::fade_target_level);
 }
 
 pythoncommand(vpu_textout) {
-	char *text;
+	char* text;
 	int x;
 	int y;
-	if(!PyArg_ParseTuple(args, "sii", &text, &x, &y)) return NULL;
+	if (!PyArg_ParseTuple(args, "sii", &text, &x, &y)) return NULL;
 	Vpu::print(std::string(text), x, y);
+	return PyBool_FromLong(true);
+}
+pythoncommand(vpu_subsprite) {
+	long int handle;
+	int left=-1;
+	int top=-1;
+	int right=-1;
+	int bottom=-1;
+	if (!PyArg_ParseTuple(args, "i|iiii", &handle, &left, &top, &right, &bottom)) return NULL;
+	// Get sprite object
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Sprite *s = &Vpu::sprites.at(handle);
+		// Fill empty variables (-1) with sprite geometry (to allow a 1:1 copy if not specified)
+		if (left   == -1) left   = 0;
+		if (top    == -1) top	 = 0;
+		if (right  == -1) right  = s->picture.width  - 1;
+		if (bottom == -1) bottom = s->picture.height - 1;
+		// Return handle from new sprite
+		handle = Vpu::createSubSprite(*s, left, top, right, bottom);
+		return PyLong_FromLong(handle);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);	
+}
+pythoncommand(vpu_tintsprite) {
+	long int handle;
+	PyObject* original; //list
+	PyObject* updated; //list
+	if (!PyArg_ParseTuple(args, "iOO", &handle, &original, &updated)) return NULL;
+	// Get palettes
+	// Colorize sprite data
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_pset) {
@@ -789,7 +821,9 @@ static PyMethodDef VpuMethods[] = {
 	{"setrotation"	, vpu_setrotation		, METH_VARARGS, "vpu.setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, vpu_setscale			, METH_VARARGS, "vpu.setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
 	{"scale"		, vpu_scale				, METH_VARARGS, "vpu.scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
+	{"subsprite"	, vpu_subsprite			, METH_VARARGS, "vpu.subsprite(sprite_handle|, left, top, right, bottom) : Create sprite region or full copy from original sprite"},
 	{"textout"		, vpu_textout			, METH_VARARGS, "vpu.textout(text, x, y) : Print given text at given coordinates"},
+	{"tintsprite"	, vpu_tintsprite		, METH_VARARGS, "vpu.tintsprite(sprite_handle, original_palette, new_palette) : Change colors in sprite from original_palette to new_palette"},
 	{"update"		, vpu_update			, METH_VARARGS, "vpu.update() : Allow blackbox engine to perform its rendering based input and output operations"},
 	{NULL, NULL, 0, NULL}
 };

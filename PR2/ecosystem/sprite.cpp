@@ -2,6 +2,16 @@
 #include "engine.hpp"
 #include "vpu.hpp"
 
+Sprite::Sprite(const Sprite& o, int left, int top, int right, int bottom) {
+	int w = right - left;
+	int h = bottom - top;
+	this->picture = Vpu::createSurface(w, h);
+	Vpu::select(this->picture);
+	Vpu::paint(0,0,0,0);	
+	Vpu::drawSurface(((Sprite*)&o)->picture, left, top, w, h, 0, 0);
+	this->initialized = true;
+}
+
 Sprite::Sprite(const char *filename) {	
 	if (filename != nullptr) {
 		std::string file("sprites/");

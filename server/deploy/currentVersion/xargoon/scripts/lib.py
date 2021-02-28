@@ -130,7 +130,98 @@ class Projectile:
     TYPE_B = 0x01
     TYPE_C = 0x02
     TYPE_D = 0x03
-    
+
+original_colors = [
+    [0, 0, 0],
+    [36, 36, 36],
+    [48, 48, 48],
+    [26, 26, 26],
+    [76, 76, 76],
+    [145, 145, 145],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [255, 122, 122],
+    [255, 92, 92],
+    [255, 71, 71],
+    [202, 73, 73],
+    [125, 44, 44],
+    [87, 30, 30],
+]
+
+palettes = [
+    [
+        [24, 30, 40],
+        [42, 53, 71],
+        [58, 73, 98],
+        [78, 98, 132],
+        [112, 141, 191],
+        [149, 188, 255],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [255, 211, 204],
+        [255, 162, 154],
+        [255, 112, 112],
+        [227, 96, 91],
+        [219, 59, 79],
+        [162, 52, 65],
+    ],[
+        [24, 30, 40],
+        [42, 53, 71],
+        [58, 73, 98],
+        [78, 98, 132],
+        [112, 141, 191],
+        [149, 188, 255],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [190, 255, 255],
+        [94, 255, 255],
+        [35, 228, 216],
+        [71, 202, 228],
+        [43, 123, 218],
+        [78, 40, 255],
+    ],[
+        [24, 30, 0],
+        [42, 53, 0],
+        [58, 73, 0],
+        [78, 98, 0],
+        [112, 141, 0],
+        [149, 188, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [255, 255, 180],
+        [247, 255, 127],
+        [221, 202, 24],
+        [205, 123, 14],
+        [196, 80, 9],
+        [165, 75, 18],
+    ],[
+        [24, 30, 0],
+        [42, 53, 0],
+        [58, 73, 0],
+        [78, 98, 0],
+        [112, 141, 12],
+        [149, 188, 101],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [190, 255, 101],
+        [94, 255, 101],
+        [35, 228, 55],
+        [71, 202, 71],
+        [43, 123, 58],
+        [30, 87, 41]
+    ]
+]
+
 class Token:
     TYPE_A      = 0x00
     TYPE_B      = 0x01
@@ -140,14 +231,22 @@ class Token:
     TYPE_POWERUP= 0x05
     TYPE_BONUS  = 0x06
     game = None
-    tileset = None
+    tileset = {}
     initialized = False
 
     @staticmethod
     def initialize(game):
         Token.game = game
         print("Initializing Tokens...")
-        Token.tileset = vpu.createsprite("tokens")
+        sprite = vpu.createsprite("tokens")
+        Token.tileset[0] = vpu.subsprite(sprite)
+        Token.tileset[1] = vpu.subsprite(sprite)
+        Token.tileset[2] = vpu.subsprite(sprite)
+        Token.tileset[3] = vpu.subsprite(sprite)
+        vpu.tintsprite(Token.tileset[0], original_colors, palettes[0])
+        vpu.tintsprite(Token.tileset[1], original_colors, palettes[1])
+        vpu.tintsprite(Token.tileset[2], original_colors, palettes[2])
+        vpu.tintsprite(Token.tileset[3], original_colors, palettes[3])
         Token.initialized = True
         
     def __init__(self, x=0, y=0, type=TYPE_A):
@@ -155,7 +254,7 @@ class Token:
         self.y = y
         self.alive = True
         self.type = type
-        self.anim = vpu.createanim(Token.tileset, 16, 16)
+        self.anim = vpu.createanim(Token.tileset[0], 16, 16)
 
     def draw(self):
         if not self.alive: 

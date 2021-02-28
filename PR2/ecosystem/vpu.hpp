@@ -107,6 +107,7 @@ public:
 	
 	/* Sprite and animations*/
 	static Sprite createSprite(std::string filename);
+	static long int createSubSprite(Sprite& s, int left, int top, int right, int bottom);
 	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
 	static Sprite &destroySprite(Sprite &sprite);
 	static Animation &destroyAnimation(Animation &animation);
