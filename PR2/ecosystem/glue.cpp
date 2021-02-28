@@ -18,10 +18,12 @@ Surface *getLayer(int index) {
 	
 }
 
-/* ----------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------
 	Definicion de funciones pegamento C++ 
----------------------------------------------------------------------- */
+--------------------------------------------------------------------------------------- */
 #define pythoncommand(name) static PyObject *name(PyObject *self, PyObject *args)
+/* ------------------------------------------------------------------------------------ */
+#include "curtain.hpp"
 
 pythoncommand(vpu_fading) {
 	if(!PyArg_ParseTuple(args, "")) return NULL;
@@ -160,7 +162,7 @@ pythoncommand(vpu_setscale){
 	if(!layer) return PyBool_FromLong(1);
 	(*layer).scale[0] = scale_x;
 	(*layer).scale[1] = scale_y;	
-	return PyBool_FromLong(1);
+	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_setcolor){
 	int r;
@@ -175,8 +177,12 @@ pythoncommand(vpu_deletesurf){
 	// Must subtract 3 units from handle (3 system layers to be selected which are not in <Vpu::surfaces>)
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Vpu::deallocateSurface(handle-3);
-	return PyLong_FromLong(1);
+	if (Vpu::surfaces.find(handle-3) != Vpu::surfaces.end()) {
+		Vpu::deallocateSurface(handle - 3);
+		return PyBool_FromLong(true);
+	} 
+	printf("ERROR: surface_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_createsurf){
 	// Must add 3 units to handle (3 system layers to be selected which are not in <Vpu::surfaces> )
@@ -199,8 +205,12 @@ pythoncommand(vpu_drawsurf){
 pythoncommand(vpu_deletesprite){
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Vpu::deallocateSprite(handle);
-	return PyLong_FromLong(1);
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Vpu::deallocateSprite(handle);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_createsprite){
 	int priority = 0;
@@ -209,22 +219,29 @@ pythoncommand(vpu_createsprite){
 	long int handle = Vpu::allocateSprite(filename, priority);
 	return PyLong_FromLong(handle);
 }
+
 pythoncommand(vpu_drawsprite){
 	int handle;
 	int x;
 	int y;
 	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
-	Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
-	return PyLong_FromLong(1);	
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_deleteanim) {
 	long int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Vpu::deallocateAnimation(handle);
-	return PyLong_FromLong(1);
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Vpu::deallocateAnimation(handle);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
 }
-
-#include "curtain.hpp"
 pythoncommand(vpu_transition) {
 	int type=-1;
 	if (!PyArg_ParseTuple(args, "|i", &type)) return NULL;
@@ -235,7 +252,6 @@ pythoncommand(vpu_transition) {
 	}
 	return PyBool_FromLong(true);
 }
-
 pythoncommand(vpu_createanim){
 	int width;
 	int height;
@@ -247,30 +263,45 @@ pythoncommand(vpu_createanim){
 	bool vertical=false;
 	int flags = 0;
 	if(!PyArg_ParseTuple(args, "iii|iiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
-	long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
-	return PyLong_FromLong(handle);
+	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
+		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
+		return PyBool_FromLong(true);
+	} 
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_drawanim){
 	int handle;
 	int x;
 	int y;
 	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
-	Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
-	return PyLong_FromLong(1);	
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
+		return PyBool_FromLong(true);
+	} 
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_setfont) {
 	char* fontname;
 	if (!PyArg_ParseTuple(args, "s", &fontname)) return NULL;
 	std::vector<Font*>::iterator it;
 	bool found = false;
-	for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
+	Font *f = Vpu::getFontByName(fontname);
+	if (f) {
+		Vpu::setFont(f);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: font '%s' not found\n", fontname);
+	return PyBool_FromLong(false);
+	/*for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
 		Font* font = *it;
 		if (!font->name.compare(fontname)) {
 			Vpu::setFont(font);
 			return PyBool_FromLong(true);
 		}
 	}
-	return PyBool_FromLong(false);
+	return PyBool_FromLong(false);*/
 }
 pythoncommand(vpu_dimensions){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
@@ -303,7 +334,7 @@ pythoncommand(vpu_fadein){
 	int b = -1;
 	if(!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;	
 	Vpu::fadein(r,g,b);
-    return PyLong_FromLong(1);
+	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_fadeout){
 	int r = -1;
@@ -311,7 +342,7 @@ pythoncommand(vpu_fadeout){
 	int b = -1;
 	if (!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;
 	Vpu::fadeout(r,g,b);
-	return PyLong_FromLong(1);
+	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_frames){
 	if(!PyArg_ParseTuple(args, "")) return NULL;	

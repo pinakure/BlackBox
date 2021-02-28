@@ -61,7 +61,7 @@ bool initialize() {
 	Script::execute("import blackbox");
 	Script::execute("import typewriter");
 	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
-	if (s.isLoaded()) s.call("main");
+	if (s.isLoaded()) if(!Dashboard::enabled) s.call("main");
 	return true;
 }
 

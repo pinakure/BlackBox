@@ -384,14 +384,14 @@ class test():
     
     @staticmethod
     def drawsurf():
-        disable(0);
-        disable(1);
+        disable(0)
+        disable(1)
         disable(2)
-        enable(0);
+        enable(0)
         select(0)
         img = createsurf(64,64)
         select(img)
-        setcolor(255,255,0,255);
+        setcolor(255,255,0,255)
         fill()
         run = True
 

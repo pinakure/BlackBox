@@ -137,8 +137,6 @@ void Engine::handleEvents() {
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		// Clean before drawing HUD
-		Vpu::select(Vpu::overlay);
-		Vpu::paint(0, 0, 0, 16);	
 		// -----------------------
 		showcase->draw();
 		Dashboard::draw();
@@ -146,6 +144,8 @@ void Engine::render() {
 		InputDevice::draw(0);
 		Console::draw(16);
 		Vpu::render();		
+		Vpu::select(Vpu::overlay);
+		Vpu::paint(0, 0, 0, 16);
 		Vpu::frames++;
 		Vpu::total_frames++;
 		cycles = 0;

@@ -434,7 +434,7 @@ void Vpu::render() {
 	
 	Curtain::draw();
 	
-	al_draw_scaled_rotated_bitmap(					
+	al_draw_scaled_rotated_bitmap(
 		overlay.bitmap,							
 		overlay.width/2, overlay.height/2,	
 		overlay.width/2, overlay.height,	

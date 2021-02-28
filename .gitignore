@@ -64,3 +64,5 @@ wiki/data/cache/
 data/downloads/
 
 server/deploy/currentVersion/test.zip
+
+server/deploy/currentVersion/xargoon/scripts/.vscode/
