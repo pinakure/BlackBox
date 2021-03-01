@@ -381,7 +381,12 @@ void DashboardTitle::execute() {
 	Script s = Script("game", "data.scripts");
 	if (s.isLoaded()) {
 		Dashboard::enabled = false;
-		s.call("main");
+		s.execute("from data.scripts.game import Game");
+		InputDevice::control_c = false;
+		s.execute("Game.setup()");
+		s.execute("Game.loop()");
+		InputDevice::control_c = false;
+		s.execute("Game.destroy()");
 		Dashboard::enabled = true;
 	} else {
 		printf("ERROR: Cannot call game.main\n");

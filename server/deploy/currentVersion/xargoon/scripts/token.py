@@ -1,0 +1,163 @@
+from vpu import *
+
+original_colors = [
+    [0, 0, 0],
+    [36, 36, 36],
+    [48, 48, 48],
+    [26, 26, 26],
+    [76, 76, 76],
+    [145, 145, 145],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [255, 122, 122],
+    [255, 92, 92],
+    [255, 71, 71],
+    [202, 73, 73],
+    [125, 44, 44],
+    [87, 30, 30],
+]
+
+palettes = [
+    [
+        [24, 30, 40],
+        [42, 53, 71],
+        [58, 73, 98],
+        [78, 98, 132],
+        [112, 141, 191],
+        [149, 188, 255],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [255, 211, 204],
+        [255, 162, 154],
+        [255, 112, 112],
+        [227, 96, 91],
+        [219, 59, 79],
+        [162, 52, 65],
+    ],[
+        [24, 30, 40],
+        [42, 53, 71],
+        [58, 73, 98],
+        [78, 98, 132],
+        [112, 141, 191],
+        [149, 188, 255],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [190, 255, 255],
+        [94, 255, 255],
+        [35, 228, 216],
+        [71, 202, 228],
+        [43, 123, 218],
+        [78, 40, 255],
+    ],[
+        [24, 30, 0],
+        [42, 53, 0],
+        [58, 73, 0],
+        [78, 98, 0],
+        [112, 141, 0],
+        [149, 188, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [255, 255, 180],
+        [247, 255, 127],
+        [221, 202, 24],
+        [205, 123, 14],
+        [196, 80, 9],
+        [165, 75, 18],
+    ],[
+        [24, 30, 0],
+        [42, 53, 0],
+        [58, 73, 0],
+        [78, 98, 0],
+        [112, 141, 12],
+        [149, 188, 101],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [190, 255, 101],
+        [94, 255, 101],
+        [35, 228, 55],
+        [71, 202, 71],
+        [43, 123, 58],
+        [30, 87, 41]
+    ]
+]
+
+class Token:
+    TYPE_A      = 0x00
+    TYPE_B      = 0x01
+    TYPE_C      = 0x02
+    TYPE_D      = 0x03
+    TYPE_BOMB   = 0x04
+    TYPE_POWERUP= 0x05
+    TYPE_BONUS  = 0x06
+    TYPE_MAX    = 0x07
+    game = None
+    tileset = {}
+    sprite = None
+    initialized = False
+
+    @staticmethod
+    def initialize(game):
+        Token.game = game
+        print("Initializing Tokens...")
+        Token.sprite = createsprite("tokens",15)
+        if not Token.sprite:
+            print("ERROR: Cannot load Token tileset!")        
+        print(f"Creating subsprites...")
+        Token.tileset[ Token.TYPE_A      ] = subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_B      ] = subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_C      ] = subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_D      ] = subsprite(Token.sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_BOMB   ] = subsprite(Token.sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_POWERUP] = subsprite(Token.sprite, 0, 32, 128, 48)
+        Token.tileset[ Token.TYPE_BONUS  ] = subsprite(Token.sprite, 0, 48, 128, 64)
+        print("Tinting Tokens SpriteSheet 0...", end="\r")
+        tintsprite(Token.tileset[ Token.TYPE_A ], original_colors, palettes[0])
+        print("Tinting Tokens SpriteSheet 1...", end="\r")
+        tintsprite(Token.tileset[ Token.TYPE_B ], original_colors, palettes[1])
+        print("Tinting Tokens SpriteSheet 2...", end="\r")
+        tintsprite(Token.tileset[ Token.TYPE_C ], original_colors, palettes[2])
+        print("Tinting Tokens SpriteSheet 3...", end="\n")
+        tintsprite(Token.tileset[ Token.TYPE_D ], original_colors, palettes[3])
+        Token.initialized = True
+
+    @staticmethod
+    def destroy():
+        for i in range(0, Token.TYPE_MAX):
+            if Token.tileset[i]:
+                deletesprite(Token.tileset[i])
+                Token.tileset[i] = None
+        if Token.sprite: 
+            deletesprite(Token.sprite)
+            Token.sprite = None
+        Token.tileset.clean()
+        Token.initialized = False
+        
+    def __init__(self, x=0, y=0, token_type=TYPE_A):
+        self.time = 0
+        self.x = x
+        self.y = y
+        self.alive = True
+        self.token_type = token_type
+        self.anim = createanim(16, 16, Token.tileset[self.token_type], 0, 0, 7, 0, False)
+
+    def __del__(self):
+        if self.anim: deleteanim(self.anim)
+        self.anim = None
+
+    def draw(self):
+        if not self.alive: 
+            return
+        self.time+=1
+        drawanim(self.anim, self.x, self.y)
+        if self.time > 16:
+            self.alive = True
