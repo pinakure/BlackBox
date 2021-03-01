@@ -15,6 +15,7 @@ bool Script::initialize() {
 		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
 		PyImport_AppendInittab("console"	, &PyInit_console);
 		PyImport_AppendInittab("typewriter" , &PyInit_typewriter);
+		Py_SetPath(L".\\;.\\data\\system.zip");
 		Py_Initialize();
 		Py_LoadCommands();
 	}catch (int e) {

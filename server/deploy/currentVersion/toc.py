@@ -180,9 +180,9 @@ titles = [
         'developer' : 'Black Hat Cat Studio',
         'title_key' : 0x81818181818181818187885858585858, 
     },{
-        'name' : 'Poopman',
-        'description' : "It's Just a Pacman clone",
-        'url' : 'pooman.zip',
+        'name' : 'Pookman',
+        'description' : "It's Just a Dirty Pacman clone",
+        'url' : 'pookman.zip',
         'picture' : 'pooman' ,
         'genre' : 'arcade',
         'font' : 'sega',
