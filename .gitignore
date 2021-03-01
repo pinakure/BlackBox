@@ -68,3 +68,11 @@ server/deploy/currentVersion/test.zip
 server/deploy/currentVersion/xargoon/scripts/.vscode/
 
 data/__pycache__/
+
+data/scripts/
+
+data/toc.py
+
+data/system.zip
+
+data/xargoon.zip
