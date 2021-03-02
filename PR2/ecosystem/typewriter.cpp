@@ -284,12 +284,16 @@ void TypeWriter::drawChoices() {
 void TypeWriter::drawText() {
 	if ((!queue.size()) && (width <= 2) && (height <= 2) ) return;
 	if (!TypeWriter::needs_redraw)return;
+
+	Vpu::select(surface);
+	Vpu::paint(0, 0, 0, 0);
 	Vpu::pushColor();
 	Vpu::pushFont();
 	if(font) Vpu::font = font;
 
 	Vpu::select(surface);
 	Vpu::clear();
+
 	Vpu::setColor(
 		TypeWriter::r,
 		TypeWriter::g,

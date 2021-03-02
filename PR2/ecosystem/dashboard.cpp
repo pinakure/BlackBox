@@ -63,7 +63,7 @@ void Dashboard::draw(){
 	const int title_rows = rows;
 	const int title_width  = (title_area_width  - (title_area_padding * (title_columns - 1))) / title_columns;
 	const int title_height = (title_area_height - (title_area_padding * (title_rows - 1))) / title_rows;
-
+	Vpu::select(Vpu::overlay);
 	Vpu::clear();
 	
 	// Draw title boxes area

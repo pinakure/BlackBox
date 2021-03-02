@@ -13,6 +13,7 @@ public:
 	int			width			= 0;
 	int			height			= 0;
 	int			last_frame		= 0;
+	float		speed			= 1.0f;
 	double		current_frame	= 0;
 	Direction	direction		= Direction::UP;
 	std::vector<ALLEGRO_BITMAP*> frame;

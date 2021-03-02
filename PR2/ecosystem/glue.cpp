@@ -127,6 +127,15 @@ pythoncommand(vpu_select){
 	Vpu::select(*layer);
 	return PyBool_FromLong(true);
 }
+pythoncommand(vpu_selectsprite) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (handle < Vpu::sprites.size()) {
+		Vpu::select(Vpu::sprites.at(handle).picture);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
 pythoncommand(vpu_fullscreen){
 	bool fullscreen;
 	if(!PyArg_ParseTuple(args, "b", &fullscreen)) return NULL;
@@ -302,10 +311,13 @@ pythoncommand(vpu_createanim){
 	int sx=1;
 	int sy=0;
 	bool vertical=false;
+	float speed = 1.0f;
 	int flags = 0;
-	if(!PyArg_ParseTuple(args, "iii|iiiib", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical)) return NULL;
+	if(!PyArg_ParseTuple(args, "iii|iiiibf", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed)) return NULL;
 	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
 		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
+		Vpu::animations.at(handle).speed = speed;
+		Vpu::animations.at(handle).bidirectional = false;
 		return PyLong_FromLong(handle);
 	} 
 	printf("ERROR: sprite_handle out of range\n");
@@ -819,6 +831,7 @@ static PyMethodDef VpuMethods[] = {
 	{"fillrect"		, vpu_fillrect			, METH_VARARGS, "vpu.filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
 	{"frames"		, vpu_frames			, METH_VARARGS, "vpu.frames() : Return actual frame count"},
 	{"fullscreen"	, vpu_fullscreen		, METH_VARARGS, "vpu.fullscreen(enabled) : Toggle fullscreen mode"},
+	{"selectsprite"	, vpu_selectsprite		, METH_VARARGS, "vpu.selectsprite(sprite_handle) : Select surface bound to given sprite"},
 	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
 	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
 	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },

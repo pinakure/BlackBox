@@ -534,7 +534,7 @@ void Vpu::drawSprite(Sprite &sprite, float dx, float dy) {
 }
 
 void Vpu::drawAnimation(Animation &animation, float dx, float dy) {
-	animation.run(1.0);
+	animation.run(animation.speed);
 	animation.qdraw(dx, dy);	
 }
 
