@@ -3,7 +3,7 @@
 
 class TiledMap {
 public:
-	TiledMap(int w. int h, int layer_count, int tile_width, int tile_height);
+	TiledMap(int w, int h, int layer_count, int tile_width, int tile_height);
 };
 
 #endif
