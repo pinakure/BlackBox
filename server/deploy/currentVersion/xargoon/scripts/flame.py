@@ -38,7 +38,7 @@ class Flame:
         self.flame_type = flame_type
         self.x = x
         self.y = y
-        self.anim = createanim(8, 16, Flame.tileset, 0, 0, 7, 0, False)
+        self.anim = createanim(8, 16, Flame.tileset, 0, 0, 7, 0, False, 0.25)
 
     def __del__(self):
         if self.anim: deleteanim(self.anim)

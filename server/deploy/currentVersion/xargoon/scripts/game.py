@@ -16,14 +16,15 @@ class Game:
     dims = {}
     tokens = []
     explosions = []
-    mini_explosions = []
     projectiles = []
     foes = []
     bigfoes = []
     ship = None
+    last_recycled_projectile = 0
 
     @staticmethod
     def setup():
+        #gc.disable()
         print("GAME: Setting up...")
         Game.running = True
         # disable rendering
@@ -59,36 +60,59 @@ class Game:
         print("GAME: Ready!")
         #################################################
         ### Create test tokens
-        for i in range(0, Token.TYPE_MAX):
-            Game.tokens.append(Token(int(Game.dims[1][0]/2)-(i*16),int(Game.dims[1][1]/2), i))
+        for i in range(0, 16):
+            Game.randomToken()
         #################################################
         ### Create test explosions
         for i in range(0, 32):
-            x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
-            y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
-            Game.explosions.append(BigExplosion(x,y))
+            Game.randomExplosion(BigExplosion)
         #################################################
         ### Create test small explosions
         for i in range(0, 32):
-            x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
-            y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
-            Game.mini_explosions.append(SmallExplosion(x,y))
+            Game.randomExplosion(SmallExplosion)
         #################################################
-        ### Create test projectiles
+        ### Create projectile pool
         w = int(Game.dims[1][0]/2)
         h = int(Game.dims[1][1]/2)
-        for i in range(0, 64):
-            x = int(Game.dims[1][0]/2) + int(random()*(Game.dims[1][0]/4))-16
-            y = int(Game.dims[1][1]/2) + int(random()*(Game.dims[1][1]/4))-16
-            t = int(random()*1)
-            l = int(random()*1)
-            Game.projectiles.append(Projectile(x,y,t,l))
+        for i in range(0, 512):
+            Game.projectiles.append(Projectile(0,0,0,0))
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
         # Spawn the player
         Game.spawn()
         
+    @staticmethod
+    def recycle_projectile(x,y,t,l,angle=0):
+        if Game.last_recycled_projectile == len(Game.projectiles)-1: Game.last_recycled_projectile = 0
+        for key, projectile in enumerate(Game.projectiles, Game.last_recycled_projectile):
+            if not projectile.alive:
+                projectile.alive = True
+                projectile.x = x
+                projectile.y = y
+                projectile.t = t
+                projectile.l = l
+                #calculate delta based on original position & angle
+                projectile.delta_x = 0.0
+                projectile.delta_y = 1.0
+                Game.last_recycled_projectile = key
+                return
+
+    @staticmethod
+    def randomExplosion(baseclass):
+        x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
+        y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
+        s = baseclass(x,y)
+        s.time += int(random()*30)
+        Game.explosions.append(s)
+    
+    @staticmethod
+    def randomToken():
+        x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
+        y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
+        token_type = int(random()*(Token.TYPE_MAX))
+        Game.tokens.append(Token(x, y, token_type))        
+
     @staticmethod
     def spawn():
         w = int(Game.dims[1][0]/2)-16
@@ -97,9 +121,9 @@ class Game:
 
     @staticmethod
     def destroy():
+        #gc.enable()
         Game.tokens = []
         Game.explosions = []
-        Game.mini_explosions = []
         Game.projectiles = []
         Game.foes = []
         Game.bigfoes = []
@@ -117,30 +141,29 @@ class Game:
         
     @staticmethod
     def loop():
+        delta = 1.0
         while Game.running:
             Game.draw()
+            Game.update(delta)
             if blackbox.ctrlc():
                 print("Control+C pressed.")
                 Game.destroy()
                 Game.running = False
-        
+            
     @staticmethod
-    def drawTokens():
-        for i in range(0, Token.TYPE_MAX):
-            Game.tokens[i].draw()
-    
-    @staticmethod
-    def drawExplosions():
+    def update(delta):
+        HudIcon.update(delta)
+        for token in Game.tokens:
+            if token.alive: token.update(delta)
+            else: token.spawn()
         for explosion in Game.explosions:
-            explosion.draw()
-        for explosion in Game.mini_explosions:
-            explosion.draw()
-    
-    @staticmethod
-    def drawProjectiles():
+            if explosion.alive: explosion.update(delta)
+            else: explosion.spawn()
         for projectile in Game.projectiles:
-            projectile.draw()
-
+            if projectile.alive: projectile.update(delta)
+            #else: Game.recycle_projectile(x,y,t,l)
+        Game.ship.update(delta)
+        
     @staticmethod
     def draw():
         # Draw hud (drawn on self-managed layer)
@@ -148,13 +171,23 @@ class Game:
         # pre-clean foreground layer
         vpu.select(1)
         vpu.fill(0,0,0,0)
-        # Draw tokens (drawn on foreground layer)        
-        Game.drawTokens()
-        # Draw explosions (drawn on foreground layer)       
-        Game.drawExplosions()
-        # Draw Particles (drawn on foreground layer)       
-        Game.drawProjectiles()
+        for token in Game.tokens:            
+            if token.alive: token.draw()
+        for explosion in Game.explosions:            
+            if explosion.alive:explosion.draw()
+        for projectile in Game.projectiles:
+            projectile.draw()        
         # Draw Ship (drawn on foreground layer)       
         Game.ship.draw()
         # raster screen and update input
         vpu.update()
+
+
+def setup():
+    return Game.setup()
+
+def loop():
+    return Game.loop()
+
+def destroy():
+    return Game.destroy()

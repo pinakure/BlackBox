@@ -69,6 +69,10 @@ class HudIcon:
         HudIcon.weapon_type = weapon_type
     
     @staticmethod
+    def update(delta):
+        pass
+
+    @staticmethod
     def draw():
         select( HudIcon.layer_index )
         drawanim( 

@@ -1,4 +1,5 @@
 from vpu import *
+from random import random
 
 original_colors = [
     [0, 0, 0],
@@ -139,25 +140,44 @@ class Token:
         if Token.sprite: 
             deletesprite(Token.sprite)
             Token.sprite = None
-        Token.tileset.clean()
+        Token.tileset = {}
         Token.initialized = False
         
     def __init__(self, x=0, y=0, token_type=TYPE_A):
         self.time = 0
         self.x = x
         self.y = y
+        self.delta_x = ((random()*200)/200)-1.0
+        self.delta_y = ((random()*200)/200)-1.0
         self.alive = True
         self.token_type = token_type
-        self.anim = createanim(16, 16, Token.tileset[self.token_type], 0, 0, 7, 0, False)
+        self.anim = createanim(16, 16, Token.tileset[self.token_type], 0, 0, 7, 0, False,0.125)
 
     def __del__(self):
-        if self.anim: deleteanim(self.anim)
+        if self.anim: 
+            deleteanim(self.anim)
         self.anim = None
+
+    def update(self, delta):
+        if not self.alive: 
+            return
+        self.x += self.delta_x
+        self.y += self.delta_y
+        if self.x < 0: self.alive = False
+        elif self.y < 0: self.alive = False
+        elif self.x > int(Token.game.dims[1][0]): self.alive = False
+        elif self.y > int(Token.game.dims[1][1]): self.alive = False
+
+    def spawn(self):
+        self.delta_x = ((random()*200)/200)-1.0
+        self.delta_y = ((random()*200)/200)-1.0
+        self.x = int(Token.game.dims[1][0]/4) + int(random()*(Token.game.dims[1][0]/2))-16
+        self.y = int(Token.game.dims[1][1]/4) + int(random()*(Token.game.dims[1][1]/2))-16
+        self.token_type = int(random() * Token.TYPE_MAX)
+        self.alive = True
 
     def draw(self):
         if not self.alive: 
             return
-        self.time+=1
-        drawanim(self.anim, self.x, self.y)
-        if self.time > 16:
-            self.alive = True
+        drawanim(self.anim, int(self.x), int(self.y))
+        

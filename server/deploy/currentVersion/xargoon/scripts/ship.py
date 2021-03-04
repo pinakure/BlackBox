@@ -1,5 +1,7 @@
 from vpu import *
 from data.scripts.flame import Flame
+from data.scripts.projectile import Projectile
+from random import random
 
 class Ship:
     TYPE_A = 0x01
@@ -23,28 +25,54 @@ class Ship:
             Ship.tileset = None
         Ship.initialized = False
 
-    def __init__(self,x=0, y=0, type=TYPE_A):
+    def __init__(self,x=0, y=0, ship_type=TYPE_A):
         self.x = x
         self.y = y
         self.w = 32
         self.h = 32
-        self.type = type
+        self.ship_type = ship_type
         self.status = 0
+        self.alive = True
+        self.delta_x = 0
+        self.delta_y = 0
+        self.thrust = False
         self.shooting = False
+        self.rapid_fire = 3
+        self.weapon_type = int(random()*Projectile.TYPE_MAX)
+        self.weapon_level = int(random()*4)
         self.anim = createanim(self.w, self.h, Ship.tileset, 0, 0, 3, 1)
-        self.flame = Flame(self.x, self.y + self.h)
+        self.flames =  [
+            Flame(self.x, self.y + self.h),
+            Flame(self.x, self.y + self.h),
+        ]
         
     def __del__(self):
         if self.anim: deleteanim(self.anim)
         self.anim = None
-        if self.flame: 
-            self.flame = None
+        if len(self.flames)>0: 
+            self.flames = []
 
+    def update(self, delta):
+        if not self.alive: return
+        self.x -= self.delta_x
+        self.y -= self.delta_y
+        
+        self.flames[0].x = self.x
+        self.flames[0].y = self.y + self.h - 2
+        self.flames[1].x = self.x + self.w - 8 
+        self.flames[1].y = self.y + self.h - 2
+        #divide operator to get rapid fire bonus        
+        if frames() % (64 >> self.rapid_fire) == 0: self.shooting = True
+                
+        if self.shooting:
+            self.weapon_type = int(random()*Projectile.TYPE_MAX)
+            self.weapon_level = int(random()*4)%4
+            Ship.game.recycle_projectile( self.x + 4          , self.y + 12 , self.weapon_type , self.weapon_level) 
+            Ship.game.recycle_projectile( self.x + self.w - 4 , self.y + 12 , self.weapon_type , self.weapon_level) 
+            self.shooting = False
+        
     def draw(self):
         drawanim(self.anim, self.x, self.y)
-        self.flame.x = self.x
-        self.flame.y = self.y + self.h - 2
-        self.flame.draw()
-        self.flame.x = self.x+self.w-8 
-        self.flame.y = self.y + self.h - 2
-        self.flame.draw()
+        self.flames[0].draw()
+        self.flames[1].draw()
+            
