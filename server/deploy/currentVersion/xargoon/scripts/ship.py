@@ -59,10 +59,10 @@ class Ship:
         self.delta_x += .125 if int(random() * 100)<50 else -.125        
         if self.x > 800-self.w:self.delta_x = -0.1
         if self.x < 480:self.delta_x = 0.1
-        self.flames[0].x = self.x
-        self.flames[0].y = self.y + self.h - 2
-        self.flames[1].x = self.x + self.w - 8 
-        self.flames[1].y = self.y + self.h - 2
+        self.flames[0].x = int(self.x)
+        self.flames[0].y = int(self.y + self.h - 2)
+        self.flames[1].x = int(self.x + self.w - 8)
+        self.flames[1].y = int(self.y + self.h - 2)
         #divide operator to get rapid fire bonus        
         if frames() % (64 >> self.rapid_fire) == 0: self.shooting = True
                 
@@ -75,6 +75,6 @@ class Ship:
         
     def draw(self):
         drawanim(self.anim, int(self.x), int(self.y))
-        #self.flames[0].draw()
-        #self.flames[1].draw()
+        self.flames[0].draw()
+        self.flames[1].draw()
             
