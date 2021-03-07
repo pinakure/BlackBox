@@ -1,0 +1,8 @@
+=====TileMap=====
+----
+===Scripting API===
+^statement                      ^arguments                          ^Description                               ^
+|[[tiledmap:create            ]]|width,height,layer_count,tile_width,tile_height| |
+|[[tiledmap:destroy           ]]|handle                  | |
+|[[tiledmap:draw              ]]|handle,x,y              | |
+|[[tiledmap:update            ]]|handle,delta            | |

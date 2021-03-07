@@ -93,3 +93,4 @@ blackbox:deletevar
 blackbox:getvar
 blackbox:setvar
 blackbox:findvar
+tiledmap

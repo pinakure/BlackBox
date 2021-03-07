@@ -749,6 +749,24 @@ pythoncommand(tbi) {
 	return PyLong_FromLong(1);
 }
 
+/* TiledMap glue functions -------------------------------------------------------------- */
+pythoncommand(tm_create) {
+	int handle = 1;
+	return PyLong_FromLong(handle);
+}
+
+pythoncommand(tm_destroy) {
+	return PyBool_FromLong(1);
+}
+
+pythoncommand(tm_draw) {
+	return PyBool_FromLong(1);
+}
+
+pythoncommand(tm_update) {
+	return PyBool_FromLong(1);
+}
+
 /* Console methods ---------------------------------------------------------------------- */
 pythoncommand(console_print) {
 	char *buffer;
@@ -808,6 +826,16 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
+/* Tiled Map internal methods ------------------------------------------------------------------------- */
+static PyMethodDef TiledMapMethods[] = {
+	{"create"		, tm_create				, METH_VARARGS, "tiledmap.create(width,height,layer_count=1,tile_width=8,tile_height=8) : " },
+	{"destroy"		, tm_destroy			, METH_VARARGS, "tiledmap.destroy(tiledmap_handle) : " },
+	{"draw"			, tm_draw				, METH_VARARGS, "tiledmap.destroy(handle,x=0,y=0) : " },
+	{"update"		, tm_update				, METH_VARARGS, "tiledmap.update(handle,delta=1.0) : " },
+	{NULL, NULL, 0, NULL}
+};
+
+
 /* Video Engine internal methods ---------------------------------------------------------------------- */
 
 static PyMethodDef VpuMethods[] = {
@@ -853,6 +881,7 @@ static PyMethodDef VpuMethods[] = {
 /* ----------------------------------------------------------------------
 	Definir Modulos
 ---------------------------------------------------------------------- */
+static PyModuleDef TiledMapModule	= {PyModuleDef_HEAD_INIT, "tiledmap"	, NULL, -1, TiledMapMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods		  , NULL, NULL, NULL, NULL};
 static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods	  , NULL, NULL, NULL, NULL};

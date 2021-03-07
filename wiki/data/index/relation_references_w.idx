@@ -167,3 +167,12 @@ blackbox:getvar
 blackbox:setvar
 blackbox:findvar
 vpu:transition
+vpu:selectsprite
+vpu:tintsprite
+blackbox:addtitle
+blackbox:download
+tiledmap:create
+tiledmap:destroy
+tiledmap:draw
+tiledmap:update
+tiledmap

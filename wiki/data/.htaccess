@@ -1,7 +1,6 @@
-<IfModule mod_authz_core.c>
-    Require all denied
-</IfModule>
-<IfModule !mod_authz_core.c>
-    Order allow,deny
-    Deny from all
-</IfModule>
+<Directory /mnt/c/www/ >
+	Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+ </Directory>

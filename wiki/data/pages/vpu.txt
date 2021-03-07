@@ -28,6 +28,7 @@
 |[[vpu:restart     ]]|                            |Restart Video Processing Unit                                                   | 
 |[[vpu:rotate      ]]|layer, angle                |Rotate specified layer (0-11) given degrees                                     | 
 |[[vpu:select      ]]|layer                       |Select given layer to perform next graphic operations onto it                   | 
+|[[vpu:selectsprite]]|sprite_handle               || 
 |[[vpu:setcolor    ]]|r, g, b, a                  |Sets current painting color                                                     | 
 |[[vpu:setfont     ]]|font_name                   |Sets current font                                                               | 
 |[[vpu:setrotation ]]|layer, angle                |Sets rotation for specified layer (0-11) at given degrees                       | 
@@ -35,4 +36,5 @@
 |[[vpu:scale       ]]|layer, scale_x, scale_y     |Change specified layer [0-11] given horizontal and vertical scale factor        | 
 |[[vpu:textout     ]]|text, x, y                  |Print given text at given coordinates                                           | 
 |[[vpu:transition  ]]|                            |Start occlusion or dissolution of the dithering transition curtain              | 
+|[[vpu:tintsprite  ]]|                            || 
 |[[vpu:update      ]]|                            |Allow blackbox engine to perform its rendering based input and output operations| 

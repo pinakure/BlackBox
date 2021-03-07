@@ -76,3 +76,13 @@ data/toc.py
 data/system.zip
 
 data/xargoon.zip
+
+alpha/data/__pycache__/
+
+alpha/scripts/__pycache__/
+
+alpha/scripts/__init__.py
+
+alpha/scripts/games/
+
+alpha/scripts/stress.py

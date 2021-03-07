@@ -93,3 +93,4 @@ deletevar
 getvar
 setvar
 findvar
+TileMap
