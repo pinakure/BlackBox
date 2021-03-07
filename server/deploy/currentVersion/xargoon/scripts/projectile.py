@@ -74,10 +74,21 @@ class Projectile:
         if not self.alive: return
         self.x -= self.delta_x
         self.y -= self.delta_y
-        if self.x < 0: self.alive = False
-        elif self.y < 0: self.alive = False
+        if self.x <= 0: self.alive = False
+        elif self.y <= 0: self.alive = False
         elif self.x > int(Projectile.game.dims[1][0]): self.alive = False
         elif self.y > int(Projectile.game.dims[1][1]): self.alive = False
+
+    @staticmethod
+    def spawn(x,y,projectile_type,level):
+        for projectile in Projectile.game.projectiles:
+            if projectile.alive: continue
+            projectile.level = level
+            projectile.projectile_type = projectile_type
+            projectile.x = x
+            projectile.y = y
+            projectile.alive = True
+            return
 
     def draw(self):
         if not self.alive: return

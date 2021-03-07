@@ -40,7 +40,7 @@ class Ship:
         self.rapid_fire = 3
         self.weapon_type = int(random()*Projectile.TYPE_MAX)
         self.weapon_level = int(random()*4)
-        self.anim = createanim(self.w, self.h, Ship.tileset, 0, 0, 3, 1)
+        self.anim = createanim(self.w, self.h, Ship.tileset, 0, 0, 3, 1, False, 0.125)
         self.flames =  [
             Flame(self.x, self.y + self.h),
             Flame(self.x, self.y + self.h),
@@ -54,9 +54,11 @@ class Ship:
 
     def update(self, delta):
         if not self.alive: return
-        self.x -= self.delta_x
-        self.y -= self.delta_y
-        
+        self.x += self.delta_x
+        self.y += self.delta_y
+        self.delta_x += .125 if int(random() * 100)<50 else -.125        
+        if self.x > 800-self.w:self.delta_x = -0.1
+        if self.x < 480:self.delta_x = 0.1
         self.flames[0].x = self.x
         self.flames[0].y = self.y + self.h - 2
         self.flames[1].x = self.x + self.w - 8 
@@ -67,12 +69,12 @@ class Ship:
         if self.shooting:
             self.weapon_type = int(random()*Projectile.TYPE_MAX)
             self.weapon_level = int(random()*4)%4
-            Ship.game.recycle_projectile( self.x + 4          , self.y + 12 , self.weapon_type , self.weapon_level) 
-            Ship.game.recycle_projectile( self.x + self.w - 4 , self.y + 12 , self.weapon_type , self.weapon_level) 
+            Projectile.spawn(self.x + 4 , self.y+12, self.weapon_type, self.weapon_level)
+            Projectile.spawn(self.x + 28, self.y+12, self.weapon_type, self.weapon_level)
             self.shooting = False
         
     def draw(self):
-        drawanim(self.anim, self.x, self.y)
-        self.flames[0].draw()
-        self.flames[1].draw()
+        drawanim(self.anim, int(self.x), int(self.y))
+        #self.flames[0].draw()
+        #self.flames[1].draw()
             

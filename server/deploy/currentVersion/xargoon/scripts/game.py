@@ -20,7 +20,6 @@ class Game:
     foes = []
     bigfoes = []
     ship = None
-    last_recycled_projectile = 0
 
     @staticmethod
     def setup():
@@ -74,7 +73,7 @@ class Game:
         ### Create projectile pool
         w = int(Game.dims[1][0]/2)
         h = int(Game.dims[1][1]/2)
-        for i in range(0, 512):
+        for i in range(0, 256):
             Game.projectiles.append(Projectile(0,0,0,0))
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
@@ -82,22 +81,6 @@ class Game:
         # Spawn the player
         Game.spawn()
         
-    @staticmethod
-    def recycle_projectile(x,y,t,l,angle=0):
-        if Game.last_recycled_projectile == len(Game.projectiles)-1: Game.last_recycled_projectile = 0
-        for key, projectile in enumerate(Game.projectiles, Game.last_recycled_projectile):
-            if not projectile.alive:
-                projectile.alive = True
-                projectile.x = x
-                projectile.y = y
-                projectile.t = t
-                projectile.l = l
-                #calculate delta based on original position & angle
-                projectile.delta_x = 0.0
-                projectile.delta_y = 1.0
-                Game.last_recycled_projectile = key
-                return
-
     @staticmethod
     def randomExplosion(baseclass):
         x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
@@ -161,7 +144,7 @@ class Game:
             else: explosion.spawn()
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
-            #else: Game.recycle_projectile(x,y,t,l)
+            #else: projectile.spawn()
         Game.ship.update(delta)
         
     @staticmethod
@@ -176,7 +159,7 @@ class Game:
         for explosion in Game.explosions:            
             if explosion.alive:explosion.draw()
         for projectile in Game.projectiles:
-            projectile.draw()        
+            projectile.draw()
         # Draw Ship (drawn on foreground layer)       
         Game.ship.draw()
         # raster screen and update input

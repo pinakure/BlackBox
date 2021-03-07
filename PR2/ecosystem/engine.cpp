@@ -114,6 +114,11 @@ void Engine::handleEvents() {
 			run = false;
 			break;
 		
+		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:
+			printf("Got HALT_DRAWING event. Maybe this is the cause for the engine to randomly freeze.");
+			while (1) { ; };
+			break;
+
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 			al_acknowledge_resize(Vpu::display);
 			Engine::width = event.display.width;
