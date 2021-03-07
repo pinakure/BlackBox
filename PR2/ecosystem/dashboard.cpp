@@ -281,7 +281,7 @@ void DashboardTitle::download() {
 
 
 static void _extractScript(std::string name) {
-	_mkdir("data\\scripts");
+	int ret = _mkdir("data\\scripts");
 	ALLEGRO_FILE* f = al_fopen(("scripts/" + name).c_str(), "r");
 	if (!f) {
 		printf("Cannot execute. main function or game.py not present.\n");
@@ -294,7 +294,7 @@ static void _extractScript(std::string name) {
 		char* contents;
 		contents = (char*)malloc(sizeof(char) * size);
 		if (contents) {
-			memset(contents, sizeof(char) * size, 0);
+			memset(contents, int(size) * sizeof(char), 0);
 			al_fread(f, contents, size);
 		}
 		al_fclose(f);
@@ -340,7 +340,7 @@ static void _deleteFolder(std::string path, std::string folder) {
 		}
 	}
 	printf(("Deleting folder data/" + dir + "\n").c_str());
-	_rmdir(("data/"+dir).c_str());
+	int ret = _rmdir(("data/"+dir).c_str());
 }
 
 static void _deleteScripts() {
