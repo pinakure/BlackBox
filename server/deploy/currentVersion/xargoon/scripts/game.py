@@ -38,7 +38,7 @@ class Game:
         print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
         print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
         # prepare initial layer state
-        vpu.select(0); vpu.fill(128,64,0,255)
+        vpu.select(0); vpu.fill(8,16,32,255)
         vpu.select(1); vpu.fill(0,0,0,0)
         vpu.select(2); vpu.fill(255,255,0,255)
         # enable rendering back

@@ -40,7 +40,7 @@ class Ship:
         self.rapid_fire = 3
         self.weapon_type = int(random()*Projectile.TYPE_MAX)
         self.weapon_level = int(random()*4)
-        self.anim = createanim(self.w, self.h, Ship.tileset, 0, 0, 3, 1, False, 0.125)
+        self.anim = createanim(self.w, self.h, Ship.tileset, 0, 0, 3, 0, False, 0.125)
         self.flames =  [
             Flame(self.x, self.y + self.h),
             Flame(self.x, self.y + self.h),
