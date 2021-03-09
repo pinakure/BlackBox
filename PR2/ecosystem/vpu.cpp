@@ -524,13 +524,18 @@ Font* Vpu::getFontByName(std::string name) {
 	return NULL;
 }
 
-void Vpu::drawSurface(Surface &surface,float sx, float sy, float sw, float sh, float dx, float dy) {
+void Vpu::drawSurface(Surface& surface, float sx, float sy, float sw, float sh, float dx, float dy) {
 	al_draw_bitmap_region(surface.bitmap, sx, sy, sw, sh, dx, dy, 0);
 	//al_draw_bitmap(surface.bitmap, 0, 0, 0);
 }
 
+void Vpu::drawSurfaceRotated(Surface& surface, float dx, float dy, float angle){
+	al_draw_rotated_bitmap(surface.bitmap, surface.width/2, surface.height/2, dx, dy, angle, 0);
+}
+
 void Vpu::drawSprite(Sprite &sprite, float dx, float dy) {
-	sprite.draw(dx, dy);	
+	Vpu::drawSurfaceRotated(sprite.picture, dx, dy, sprite.picture.rotation[0]);
+	//sprite.draw(dx, dy);	
 }
 
 void Vpu::drawAnimation(Animation &animation, float dx, float dy) {

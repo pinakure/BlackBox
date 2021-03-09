@@ -1,5 +1,6 @@
 from vpu import *
-
+from math import atan2
+        
 class Foe:
     TYPE_A = 0x00
     TYPE_B = 0x01
@@ -38,19 +39,25 @@ class Foe:
         self.foe_type = foe_type
         self.x = x
         self.y = y
+        self.angle = 0
         self.alive = True
         self.target = None
 
     def update(self, delta):
         if not self.alive: return
         self.target = Foe.game.ship
-
+        if self.target is not None:
+            dx = int(self.target.x - self.x)
+            dy = int(self.target.y - self.y)
+            self.angle = atan2(dx, dy)*-1
+            
+        
     def draw(self):
         if not self.alive: return
-        drawsprite(Foe.gfx[self.foe_type], int(self.x)-(Foe.width>>1), int(self.y)-(Foe.height>>1))
-        if self.target is not None:
+        if self.target is not None:            
             setcolor(255,0,0,128)
             line(int(self.x), int(self.y), int(self.target.x), int(self.target.y))
+        drawsprite(Foe.gfx[self.foe_type], int(self.x), int(self.y), self.angle)
         
     def find_target(self):
         pass

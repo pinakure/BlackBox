@@ -7,7 +7,7 @@ Surface *getLayer(int index) {
 		return NULL;
 	}
 	if (index >= 3) {
-		if(Vpu::surfaces.find(index)!=Vpu::surfaces.end())
+		if(Vpu::surfaces.find(index-3)!=Vpu::surfaces.end())
 			return &(Vpu::surfaces.at(index-3));
 		else index %= 3;
 	}	
@@ -194,13 +194,13 @@ pythoncommand(vpu_scale){
 	(*layer).scale[1] += scale_y;	
 	return PyBool_FromLong(1);
 }
-pythoncommand(vpu_setrotation){
+pythoncommand(vpu_setrotation) {
 	int index;
 	float rotation;
-	if(!PyArg_ParseTuple(args, "if", &index, &rotation)) return NULL;
-	Surface *layer = getLayer(index);
-	if(!layer) return PyBool_FromLong(1);
-	(*layer).rotation[0] = rotation;	
+	if (!PyArg_ParseTuple(args, "if", &index, &rotation)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(1);
+	(*layer).rotation[0] = rotation;
 	return PyBool_FromLong(1);
 }
 pythoncommand(vpu_setscale){
@@ -274,9 +274,12 @@ pythoncommand(vpu_drawsprite){
 	int handle;
 	int x;
 	int y;
-	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	float angle=0.0f;
+	if(!PyArg_ParseTuple(args, "iii|f", &handle, &x, &y, &angle)) return NULL;
 	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
-		Vpu::drawSprite(Vpu::sprites.at(handle), x, y);
+		Sprite* spr = &Vpu::sprites.at(handle);
+		spr->picture.rotation[0] = angle;
+		Vpu::drawSprite(*spr, x, y);
 		return PyBool_FromLong(true);
 	}
 	printf("ERROR: sprite_handle out of range\n");

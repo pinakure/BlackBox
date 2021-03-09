@@ -157,10 +157,10 @@ class Game:
             else: token.spawn()
         for explosion in Game.explosions:
             if explosion.alive: explosion.update(delta)
-            else: explosion.spawn()
+            #else: explosion.spawn()
         for foe in Game.foes:
             if foe.alive: foe.update(delta)
-            #else: explosion.spawn()
+            #else: foe.spawn()
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
             #else: projectile.spawn()
@@ -177,6 +177,9 @@ class Game:
             if token.alive: token.draw()
         for foe in Game.foes:            
             if foe.alive: foe.draw()
+        vpu.select(1)
+        vpu.setrotation(1, 0)
+        
         for explosion in Game.explosions:            
             if explosion.alive:explosion.draw()
         for projectile in Game.projectiles:
@@ -185,8 +188,12 @@ class Game:
         Game.ship.draw()
         # raster screen and update input
         vpu.setscale(1,Game.scale, Game.scale)
-        if Game.scale>.5:
-            Game.scale -= 0.0005
+        if vpu.frames()%6000 < 3000:
+            if Game.scale>.5:
+                Game.scale -= 0.0005
+        else:
+            if Game.scale<2.0:
+                Game.scale += 0.0005
         vpu.update()
 
 

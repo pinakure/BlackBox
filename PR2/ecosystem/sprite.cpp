@@ -35,9 +35,11 @@ void Sprite::deinitialize() {
 }
 
 void Sprite::draw(int x, int y) {
-	Vpu::drawSurface(this->picture, 
+	/*Vpu::drawSurface(this->picture, 
 		0, 0, 
 		this->picture.width, this->picture.height,
 		x, y
 	);
+	*/
+	Vpu::drawSurfaceRotated(this->picture, x, y, this->picture.rotation[0]);
 }

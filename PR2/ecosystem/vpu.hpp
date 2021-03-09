@@ -106,7 +106,8 @@ public:
 	static void select(Surface &target);	
 	static void lock();
 	static void unlock();	
-	static void drawSurface(Surface &surface, float sx, float sy, float sw, float sh, float dx=0, float dy=0);
+	static void drawSurface(Surface& surface, float sx, float sy, float sw, float sh, float dx = 0, float dy = 0);
+	static void drawSurfaceRotated(Surface& surface, float dx, float dy, float angle = 0);
 	static Surface &destroySurface(Surface &surface);
 	static Surface loadBitmap(std::string filename);
 	static Surface createSurface(int width, int height);
