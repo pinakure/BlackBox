@@ -106,7 +106,7 @@ class Ship:
             self.weapon_type = int(random()*Projectile.TYPE_MAX)
             self.weapon_level = int(random()*4)%4
             delta_y = -1.5 + (self.delta_y) if self.delta_y < 0 else -1.5
-            delta_x = .025
+            delta_x = .05
             Projectile.spawn(self.x+2-(Ship.width>>1), self.y-2, self.weapon_type, self.weapon_level,  delta_x , delta_y)
             Projectile.spawn(self.x+(Ship.width>>1)-2, self.y-2, self.weapon_type, self.weapon_level, -delta_x , delta_y)
             self.shooting = False
