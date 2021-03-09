@@ -101,6 +101,8 @@ class Token:
     TYPE_POWERUP= 0x05
     TYPE_BONUS  = 0x06
     TYPE_MAX    = 0x07
+    width       = 16
+    height      = 16
     game = None
     tileset = {}
     sprite = None
@@ -113,7 +115,7 @@ class Token:
         Token.sprite = createsprite("tokens",15)
         if not Token.sprite:
             print("ERROR: Cannot load Token tileset!")        
-        print(f"Creating subsprites...")
+        print(f"Creating subsprites...")        
         Token.tileset[ Token.TYPE_A      ] = subsprite(Token.sprite, 0,  0, 128, 16)
         Token.tileset[ Token.TYPE_B      ] = subsprite(Token.sprite, 0,  0, 128, 16)
         Token.tileset[ Token.TYPE_C      ] = subsprite(Token.sprite, 0,  0, 128, 16)
@@ -163,16 +165,16 @@ class Token:
             return
         self.x += self.delta_x
         self.y += self.delta_y
-        if self.x < 0: self.alive = False
-        elif self.y < 0: self.alive = False
+        if self.x < -Token.width: self.alive = False
+        elif self.y < -Token.height: self.alive = False
         elif self.x > int(Token.game.dims[1][0]): self.alive = False
         elif self.y > int(Token.game.dims[1][1]): self.alive = False
 
     def spawn(self):
-        self.delta_x = ((random()*200)/200)-1.0
-        self.delta_y = ((random()*200)/200)-1.0
-        self.x = int(Token.game.dims[1][0]/4) + int(random()*(Token.game.dims[1][0]/2))-16
-        self.y = int(Token.game.dims[1][1]/4) + int(random()*(Token.game.dims[1][1]/2))-16
+        self.delta_x = ((random()*250)/250)*(-1 if int(random()*2)==1 else 1)
+        self.delta_y = ((random()*250)/250)*(-1 if int(random()*2)==1 else 1)
+        self.x = int(random()*Token.game.dims[1][0])-16
+        self.y = int(random()*Token.game.dims[1][1])-16
         self.token_type = int(random() * Token.TYPE_MAX)
         self.alive = True
 

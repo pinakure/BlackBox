@@ -3,9 +3,9 @@ from vpu import *
 
 class Flame:
     TYPE_A = 0x00
-    TYPE_B = 0x04
-    TYPE_C = 0x08
-    TYPE_D = 0x0C
+    TYPE_B = 0x01
+    TYPE_C = 0x02
+    TYPE_D = 0x03
     #-------------#
     game = None
     initialized = False
@@ -17,17 +17,19 @@ class Flame:
         Flame.game = game
         print("Initializing Flames...")
         Flame.tileset = createsprite("particles",10)
+        Flame.gfx[ Flame.TYPE_A ] = createanim(8,16, Flame.tileset, 0, 0, 3, 0, False,0.05)
+        Flame.gfx[ Flame.TYPE_B ] = createanim(8,16, Flame.tileset, 4, 0, 7, 0, False,0.125)
+        Flame.gfx[ Flame.TYPE_C ] = createanim(8,16, Flame.tileset, 8, 0,11, 0, False,0.125)
+        Flame.gfx[ Flame.TYPE_D ] = createanim(8,16, Flame.tileset,12, 0,15, 0, False,0.125)
         Flame.initialized = True
     
     @staticmethod
     def destroy():
         if len(Flame.gfx) > 0:
             for o in range(0,4):
-                for i in range(0,4):
-                    if Flame.gfx[o][i]:
-                        deleteanim(Flame.gfx[o][i])
-                        Flame.gfx[o][i] = None
-                Flame.gfx[o] = {}
+                if Flame.gfx[o]:
+                    deleteanim(Flame.gfx[o])
+                    Flame.gfx[o] = None
             Flame.gfx = {}
         if Flame.tileset:
             deletesprite(Flame.tileset)
@@ -38,12 +40,11 @@ class Flame:
         self.flame_type = flame_type
         self.x = x
         self.y = y
-        self.anim = createanim(8, 16, Flame.tileset, 0, 0, 7, 0, False, 0.25)
-
+        
     def __del__(self):
         if self.anim: deleteanim(self.anim)
         self.anim = None
 
     def draw(self):
-        drawanim(self.anim, self.x, self.y)
+        drawanim(Flame.gfx[self.flame_type], self.x, self.y)
         

@@ -62,7 +62,7 @@ class Projectile:
         self.y = y
         self.projectile_type = projectile_type
         self.delta_x = 0.0
-        self.delta_y = 1.5
+        self.delta_y = -1.5
         self.alive = True
         self.rotation = 0.0
         self.level = level
@@ -72,21 +72,23 @@ class Projectile:
 
     def update(self, delta):
         if not self.alive: return
-        self.x -= self.delta_x
-        self.y -= self.delta_y
+        self.x += self.delta_x
+        self.y += self.delta_y
         if self.x <= 0: self.alive = False
         elif self.y <= 0: self.alive = False
         elif self.x > int(Projectile.game.dims[1][0]): self.alive = False
         elif self.y > int(Projectile.game.dims[1][1]): self.alive = False
 
     @staticmethod
-    def spawn(x,y,projectile_type,level):
+    def spawn(x,y,projectile_type,level,delta_x=0.0, delta_y=-1.5):
         for projectile in Projectile.game.projectiles:
             if projectile.alive: continue
             projectile.level = level
             projectile.projectile_type = projectile_type
             projectile.x = x
             projectile.y = y
+            projectile.delta_x = delta_x
+            projectile.delta_y = delta_y
             projectile.alive = True
             return
 

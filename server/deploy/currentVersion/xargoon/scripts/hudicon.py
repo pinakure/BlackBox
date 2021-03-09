@@ -76,6 +76,6 @@ class HudIcon:
     def draw():
         select( HudIcon.layer_index )
         drawanim( 
-            HudIcon.gfx[HudIcon.weapon_type][HudIcon.level], 
+            HudIcon.gfx[HudIcon.game.ship.weapon_type][HudIcon.game.ship.weapon_level], 
             HudIcon.x+160, HudIcon.y
         )        

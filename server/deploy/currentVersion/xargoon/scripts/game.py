@@ -4,6 +4,8 @@ from data.scripts.projectile        import Projectile
 from data.scripts.bigexplosion      import BigExplosion
 from data.scripts.smallexplosion    import SmallExplosion
 from data.scripts.token             import Token
+from data.scripts.foe               import Foe
+from data.scripts.bigfoe            import BigFoe
 from data.scripts.hudicon           import HudIcon
 from random                         import random
 import blackbox
@@ -18,8 +20,8 @@ class Game:
     explosions = []
     projectiles = []
     foes = []
-    bigfoes = []
     ship = None
+    scale = 2.0
 
     @staticmethod
     def setup():
@@ -46,7 +48,7 @@ class Game:
         vpu.enable(1)
         vpu.enable(2)
         # initialize subcomponents
-        print("GAME: Initializing subcomponents...")
+        print("GAME: Initializing classes...")
         HudIcon.initialize(Game)
         Token.initialize(Game)
         BigExplosion.initialize(Game)
@@ -54,23 +56,31 @@ class Game:
         Flame.initialize(Game)
         Projectile.initialize(Game)
         Ship.initialize(Game)
-        #Foe::initialize(Game)
-        #BigFoe::initialize(Game)
-        print("GAME: Ready!")
+        Foe.initialize(Game)
+        BigFoe.initialize(Game)
+        print("GAME: Initializing object pools...")
         #################################################
-        ### Create test tokens
+        # Create token pool
         for i in range(0, 16):
             Game.randomToken()
         #################################################
-        ### Create test explosions
+        # Create small foe pool
+        for i in range(0, 32):
+            Game.randomFoe(Foe)
+        #################################################
+        # Create big foe pool
+        for i in range(0, 32):
+            Game.randomFoe(BigFoe)
+        #################################################
+        # Create big explosion pool
         for i in range(0, 32):
             Game.randomExplosion(BigExplosion)
         #################################################
-        ### Create test small explosions
+        # Create small explosion pool
         for i in range(0, 32):
             Game.randomExplosion(SmallExplosion)
         #################################################
-        ### Create projectile pool
+        # Create projectile pool
         w = int(Game.dims[1][0]/2)
         h = int(Game.dims[1][1]/2)
         for i in range(0, 256):
@@ -90,6 +100,14 @@ class Game:
         Game.explosions.append(s)
     
     @staticmethod
+    def randomFoe(baseclass):
+        x = int(random() * Game.dims[1][0] ) - 16
+        y = int(random() * Game.dims[1][1] ) - 16
+        foe_type = int(random()*(Foe.TYPE_MAX))
+        s = baseclass(x,y,foe_type)
+        Game.foes.append(s)
+    
+    @staticmethod
     def randomToken():
         x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
         y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
@@ -104,12 +122,10 @@ class Game:
 
     @staticmethod
     def destroy():
-        #gc.enable()
         Game.tokens = []
         Game.explosions = []
         Game.projectiles = []
         Game.foes = []
-        Game.bigfoes = []
         Game.ship = None
 
         Token.destroy()
@@ -119,8 +135,8 @@ class Game:
         Projectile.destroy()
         Flame.destroy()
         Ship.destroy()
-        #Foe.destroy()
-        #BigFoe.destroy()
+        Foe.destroy()
+        BigFoe.destroy()
         
     @staticmethod
     def loop():
@@ -142,6 +158,9 @@ class Game:
         for explosion in Game.explosions:
             if explosion.alive: explosion.update(delta)
             else: explosion.spawn()
+        for foe in Game.foes:
+            if foe.alive: foe.update(delta)
+            #else: explosion.spawn()
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
             #else: projectile.spawn()
@@ -156,6 +175,8 @@ class Game:
         vpu.fill(0,0,0,0)
         for token in Game.tokens:            
             if token.alive: token.draw()
+        for foe in Game.foes:            
+            if foe.alive: foe.draw()
         for explosion in Game.explosions:            
             if explosion.alive:explosion.draw()
         for projectile in Game.projectiles:
@@ -163,6 +184,9 @@ class Game:
         # Draw Ship (drawn on foreground layer)       
         Game.ship.draw()
         # raster screen and update input
+        vpu.setscale(1,Game.scale, Game.scale)
+        if Game.scale>.5:
+            Game.scale -= 0.0005
         vpu.update()
 
 

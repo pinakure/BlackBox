@@ -36,8 +36,10 @@ class SmallExplosion:
         self.anim = None
 
     def spawn(self):
-        self.x = int(SmallExplosion.game.dims[1][0]/4) + int(random()*(SmallExplosion.game.dims[1][0]/2))-16
-        self.y = int(SmallExplosion.game.dims[1][1]/4) + int(random()*(SmallExplosion.game.dims[1][1]/2))-16
+        # self.x = int(SmallExplosion.game.dims[1][0]/4) + int(random()*(SmallExplosion.game.dims[1][0]/2))-16
+        # self.y = int(SmallExplosion.game.dims[1][1]/4) + int(random()*(SmallExplosion.game.dims[1][1]/2))-16
+        self.x = int(random() * SmallExplosion.game.dims[1][0] )-16
+        self.y = int(random() * SmallExplosion.game.dims[1][1] )-16
         self.time = 0
         self.alive = True
 
