@@ -771,23 +771,31 @@ pythoncommand(tm_update) {
 }
 
 /* Joypad methods ---------------------------------------------------------------------- */
-pythoncommand(joypad_menu)	{ return PyBool_FromLong(InputDevice::controller[INPUT_START] & InputDevice::controller[INPUT_SELECT]); }
-pythoncommand(joypad_start) { return PyBool_FromLong(InputDevice::controller[INPUT_START]); }
-pythoncommand(joypad_select){ return PyBool_FromLong(InputDevice::controller[INPUT_SELECT]);}
-pythoncommand(joypad_up)	{ return PyBool_FromLong(InputDevice::controller[INPUT_UP]); }
-pythoncommand(joypad_down)	{ return PyBool_FromLong(InputDevice::controller[INPUT_DOWN]); }
-pythoncommand(joypad_left)	{ return PyBool_FromLong(InputDevice::controller[INPUT_LEFT]); }
-pythoncommand(joypad_right) { return PyBool_FromLong(InputDevice::controller[INPUT_RIGHT]); }
-pythoncommand(joypad_a)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CIRCLE]); }
-pythoncommand(joypad_b)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CROSS]); }
-pythoncommand(joypad_x)		{ return PyBool_FromLong(InputDevice::controller[INPUT_TRIANGLE]); }
-pythoncommand(joypad_y)		{ return PyBool_FromLong(InputDevice::controller[INPUT_SQUARE]); }
-pythoncommand(joypad_l1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L1]); }
-pythoncommand(joypad_l2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L2]); }
-pythoncommand(joypad_l3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L3]); }
-pythoncommand(joypad_r1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R1]); }
-pythoncommand(joypad_r2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R2]); }
-pythoncommand(joypad_r3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R3]); }
+extern char key[256];
+
+pythoncommand(joypad_menu)	{ 
+	return PyBool_FromLong(
+		(InputDevice::controller[INPUT_START] & InputDevice::controller[INPUT_SELECT])
+		|| 
+		key[ALLEGRO_KEY_ESCAPE]
+	); 
+}
+pythoncommand(joypad_start) { return PyBool_FromLong(InputDevice::controller[INPUT_START	] || key[ALLEGRO_KEY_ENTER		]); }
+pythoncommand(joypad_select){ return PyBool_FromLong(InputDevice::controller[INPUT_SELECT	] || key[ALLEGRO_KEY_BACKSPACE	]); }
+pythoncommand(joypad_up)	{ return PyBool_FromLong(InputDevice::controller[INPUT_UP		] || key[ALLEGRO_KEY_UP			]); }
+pythoncommand(joypad_down)	{ return PyBool_FromLong(InputDevice::controller[INPUT_DOWN		] || key[ALLEGRO_KEY_DOWN		]); }
+pythoncommand(joypad_left)	{ return PyBool_FromLong(InputDevice::controller[INPUT_LEFT		] || key[ALLEGRO_KEY_LEFT		]); }
+pythoncommand(joypad_right) { return PyBool_FromLong(InputDevice::controller[INPUT_RIGHT	] || key[ALLEGRO_KEY_RIGHT		]); }
+pythoncommand(joypad_a)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CIRCLE	] || key[ALLEGRO_KEY_C			]); }
+pythoncommand(joypad_b)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CROSS	] || key[ALLEGRO_KEY_X			]); }
+pythoncommand(joypad_x)		{ return PyBool_FromLong(InputDevice::controller[INPUT_TRIANGLE	] || key[ALLEGRO_KEY_D			]); }
+pythoncommand(joypad_y)		{ return PyBool_FromLong(InputDevice::controller[INPUT_SQUARE	] || key[ALLEGRO_KEY_S			]); }
+pythoncommand(joypad_l1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L1		] || key[ALLEGRO_KEY_Z			]); }
+pythoncommand(joypad_l2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L2		] || key[ALLEGRO_KEY_A			]); }
+pythoncommand(joypad_l3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L3		] || key[ALLEGRO_KEY_Q			]); }
+pythoncommand(joypad_r1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R1		] || key[ALLEGRO_KEY_V			]); }
+pythoncommand(joypad_r2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R2		] || key[ALLEGRO_KEY_F			]); }
+pythoncommand(joypad_r3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R3		] || key[ALLEGRO_KEY_R			]); }
 /* Console methods ---------------------------------------------------------------------- */
 pythoncommand(console_print) {
 	char* buffer;

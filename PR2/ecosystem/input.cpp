@@ -523,7 +523,7 @@ int InputDevice::waitForJoystick(void){
 
 	updateJoystick();
 
-	for (int i = 0; i < INPUT_SELECT; i++){
+	for (int i = 0; i < INPUT_MAX; i++){
 		if (controller[i])return i;
 	}
 	return INPUT_MAX;

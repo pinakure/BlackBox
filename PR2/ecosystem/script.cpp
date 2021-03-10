@@ -60,6 +60,8 @@ bool Script::load() {
 	std::string pythonfile = this->basename+"." + this->path;
 	PyObject *name = PyUnicode_DecodeFSDefault(pythonfile.c_str());
 	__module__ = PyImport_Import(name);
+	__module__ = PyImport_ReloadModule(__module__);
+
 	Py_DECREF(name);// ya no necesitamos name, dereferenciarlo
 	if (!__module__) {
 		PyErr_Print();

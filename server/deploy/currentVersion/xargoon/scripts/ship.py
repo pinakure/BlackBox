@@ -103,7 +103,7 @@ class Ship:
 
     def brake(self):
         self.delta_x *= .96
-        self.delta_y *= .96
+        self.delta_y *= .9
 
     def update(self, delta):
         if not self.alive: return

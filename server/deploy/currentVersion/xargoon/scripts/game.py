@@ -10,6 +10,7 @@ from data.scripts.hudicon           import HudIcon
 from random                         import random
 import blackbox
 import vpu
+import joypad
 
 class Game:
     running = True
@@ -144,7 +145,7 @@ class Game:
             if blackbox.ctrlc():
                 print("Control+C pressed.")
                 Game.destroy()
-                Game.running = False
+                Game.running = False        
             
     @staticmethod
     def update(delta):
@@ -162,6 +163,9 @@ class Game:
             if projectile.alive: projectile.update(delta)
             #else: projectile.spawn()
         Game.ship.update(delta)
+        if joypad.menu():
+            from data.scripts.main import menu
+            menu()
         
     @staticmethod
     def draw():
