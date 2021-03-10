@@ -2,6 +2,7 @@ from vpu import *
 from data.scripts.flame import Flame
 from data.scripts.projectile import Projectile
 from random import random
+import joypad
 
 class Ship:
     TYPE_A = 0x01
@@ -39,6 +40,7 @@ class Ship:
         self.delta_y = 0
         self.thrust = False
         self.shooting = False
+        self.shoot_intent = False
         self.rapid_fire = 3
         self.weapon_type = int(random()*Projectile.TYPE_MAX)
         self.weapon_level = int(random()*4)
@@ -91,24 +93,39 @@ class Ship:
             self.flames[0].flame_type = Flame.TYPE_A
             self.flames[1].flame_type = Flame.TYPE_A 
         
+    def update_input(self):
+        if joypad.left(): self.west()
+        elif joypad.right(): self.east()
+        elif joypad.up(): self.north()
+        elif joypad.down(): self.south()
+        else: self.brake()
+        self.shoot_intent = True if joypad.b() else False
+
+    def brake(self):
+        self.delta_x *= .96
+        self.delta_y *= .96
+
     def update(self, delta):
-        Ship.timer += 1
         if not self.alive: return
         
-        self.randomize()
+        #self.randomize()
+        self.update_input()
+
         self.move()
         self.update_flame()
         
         #divide operator to get rapid fire bonus        
-        if Ship.timer % (64 >> self.rapid_fire) == 0: self.shooting = True
+        if self.shoot_intent:
+            Ship.timer += 1
+            if Ship.timer % (64 >> self.rapid_fire) == 0: self.shooting = True
                 
         if self.shooting:
             self.weapon_type = int(random()*Projectile.TYPE_MAX)
             self.weapon_level = int(random()*4)%4
             delta_y = -1.5 + (self.delta_y) if self.delta_y < 0 else -1.5
-            delta_x = .05
-            Projectile.spawn(self.x+2-(Ship.width>>1), self.y-2, self.weapon_type, self.weapon_level,  delta_x , delta_y)
-            Projectile.spawn(self.x+(Ship.width>>1)-2, self.y-2, self.weapon_type, self.weapon_level, -delta_x , delta_y)
+            delta_x = .25
+            Projectile.spawn(self.x+2-(Ship.width>>1), self.y-2, self.weapon_type, self.weapon_level,  delta_x , delta_y, Ship)
+            Projectile.spawn(self.x+(Ship.width>>1)-2, self.y-2, self.weapon_type, self.weapon_level, -delta_x , delta_y, Ship)
             self.shooting = False
     
     def west(self):

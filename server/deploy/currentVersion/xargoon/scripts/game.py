@@ -22,6 +22,9 @@ class Game:
     foes = []
     ship = None
     scale = 2.0
+    projectile_pool_size    = 512
+    foe_pool_size           = 16
+    score = 0
 
     @staticmethod
     def setup():
@@ -59,32 +62,26 @@ class Game:
         Foe.initialize(Game)
         BigFoe.initialize(Game)
         print("GAME: Initializing object pools...")
-        #################################################
         # Create token pool
         for i in range(0, 16):
             Game.randomToken()
-        #################################################
         # Create small foe pool
-        for i in range(0, 32):
+        for i in range(0, Game.foe_pool_size>>1):
             Game.randomFoe(Foe)
-        #################################################
         # Create big foe pool
-        for i in range(0, 32):
+        for i in range(0, Game.foe_pool_size>>1):
             Game.randomFoe(BigFoe)
-        #################################################
         # Create big explosion pool
         for i in range(0, 32):
             Game.randomExplosion(BigExplosion)
-        #################################################
         # Create small explosion pool
         for i in range(0, 32):
             Game.randomExplosion(SmallExplosion)
-        #################################################
         # Create projectile pool
-        w = int(Game.dims[1][0]/2)
-        h = int(Game.dims[1][1]/2)
-        for i in range(0, 256):
-            Game.projectiles.append(Projectile(0,0,0,0))
+        for i in range(0, Game.foe_pool_size):
+            Game.projectiles.append(Projectile(0,0,0,0,Foe))
+        for i in range(0, Game.projectile_pool_size - Game.foe_pool_size):
+            Game.projectiles.append(Projectile(0,0,0,0,Ship))
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
@@ -160,7 +157,7 @@ class Game:
             #else: explosion.spawn()
         for foe in Game.foes:
             if foe.alive: foe.update(delta)
-            #else: foe.spawn()
+            else: foe.spawn()
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
             #else: projectile.spawn()

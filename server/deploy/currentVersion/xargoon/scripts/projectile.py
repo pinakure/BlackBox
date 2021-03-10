@@ -16,7 +16,7 @@ class Projectile:
     @staticmethod
     def initialize(game):
         Projectile.game = game
-        print("Initializing Ship...")
+        print("Initializing Particles...")
         sprite = createsprite("particles",10)
         tileset = subsprite(sprite,0, 16, 128, 32)
         deletesprite(sprite)
@@ -38,13 +38,14 @@ class Projectile:
             Projectile.gfx = {}
         Projectile.initialized = False
 
-    def __init__(self, x, y, projectile_type=TYPE_A, level=0):
+    def __init__(self, x, y, projectile_type=TYPE_A, level=0, owner=None):
         self.x = x
         self.y = y
         self.projectile_type = projectile_type
         self.delta_x = 0.0
         self.delta_y = -1.5
         self.alive = True
+        self.owner = owner
         self.angle = 0.0
         self.level = level
         
@@ -63,8 +64,9 @@ class Projectile:
         if self.delta_x > -.1 and self.delta_x < .1 and self.delta_y > -.1 and self.delta_y < .1: self.alive = False
             
     @staticmethod
-    def spawn(x,y,projectile_type,level,delta_x=0.0, delta_y=-1.5):
+    def spawn(x,y,projectile_type,level,delta_x=0.0, delta_y=-1.5, owner=None):
         for projectile in Projectile.game.projectiles:
+            if projectile.owner != owner: continue
             if projectile.alive: continue
             projectile.level = level
             projectile.projectile_type = projectile_type

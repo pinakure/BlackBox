@@ -14,7 +14,9 @@ bool Script::initialize() {
 		PyImport_AppendInittab("blackbox"	, &PyInit_blackbox);
 		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
 		PyImport_AppendInittab("console"	, &PyInit_console);
-		PyImport_AppendInittab("typewriter" , &PyInit_typewriter);
+		PyImport_AppendInittab("typewriter"	, &PyInit_typewriter);
+		PyImport_AppendInittab("tiledmap"	, &PyInit_tiledmap);
+		PyImport_AppendInittab("joypad"		, &PyInit_joypad);
 		Py_SetPath(L".\\;.\\data\\system.zip");
 		Py_Initialize();
 		Py_LoadCommands();

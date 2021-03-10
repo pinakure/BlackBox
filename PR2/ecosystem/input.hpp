@@ -21,10 +21,10 @@ enum E_InputButton {
 	INPUT_R2,		// button7
 	INPUT_SELECT,	// button8
 	INPUT_START,	// button9
-	INPUT_UP,		// hat_y--
-	INPUT_DOWN,		// hat_y++
-	INPUT_LEFT,		// hat_x--
 	INPUT_RIGHT,	// hat_x++
+	INPUT_LEFT,		// hat_x--
+	INPUT_DOWN,		// hat_y++
+	INPUT_UP,		// hat_y--
 	INPUT_L3,		// button10
 	INPUT_R3,		// button11
 	INPUT_MAX

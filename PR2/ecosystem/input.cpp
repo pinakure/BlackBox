@@ -375,7 +375,7 @@ void matrixmode_callback(int i) {};
 void walk_callback(int i) {};
 
 void InputDevice::updateController(void){
-	
+	/*
 	//PROFILE_START();
 	int sens = InputDevice::in_joysens->get();
 	if (aim_swap_axis->get()){
@@ -416,43 +416,12 @@ void InputDevice::updateController(void){
 	//
 
 	//PROFILE_END("joystick");
-	
+	*/
 }
 
 
 void InputDevice::updateJoystick(void){
-	/*
-	PROFILE_START();
-
-	if(!in_joystick->get())return;
-
-	poll_joystick();
-
-	controller[remap[INPUT_CROSS]   ] = joy[0].button[2].b>0;
-	controller[remap[INPUT_CIRCLE  ]] = joy[0].button[1].b>0;
-	controller[remap[INPUT_TRIANGLE]] = joy[0].button[0].b>0;
-	controller[remap[INPUT_SQUARE]] = joy[0].button[3].b>0;
-	controller[remap[INPUT_L1]] = joy[0].button[4].b>0;
-	controller[remap[INPUT_R1]] = joy[0].button[5].b>0;
-	controller[remap[INPUT_L2]] = joy[0].button[6].b>0;
-	controller[remap[INPUT_R2]] = joy[0].button[7].b>0;
-	controller[INPUT_SELECT  ] = joy[0].button[8].b>0;
-	controller[INPUT_START	 ] = joy[0].button[9].b>0;
-	controller[INPUT_UP		 ] = joy[0].stick[2].axis[1].pos<0;
-	controller[INPUT_DOWN	 ] = joy[0].stick[2].axis[1].pos>0;
-	controller[INPUT_LEFT	 ] = joy[0].stick[2].axis[0].pos<0;
-	controller[INPUT_RIGHT	 ] = joy[0].stick[2].axis[0].pos>0;
-	controller[INPUT_L3		 ] = joy[0].button[10].b>0;
-	controller[INPUT_R3		 ] = joy[0].button[11].b>0;
-	axis_x[0] = joy[0].stick[0].axis[0].pos+128;
-	axis_y[0] = joy[0].stick[0].axis[1].pos+128;
-	axis_x[1] = joy[0].stick[0].axis[2].pos + 128;
-	axis_y[1] = joy[0].stick[1].axis[0].pos;
-
-	updateController();
-
-	PROFILE_END("joystick");
-	*/
+	// =)
 }
 
 

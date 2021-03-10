@@ -70,7 +70,7 @@ bool Engine::initialize() {
 		if (!Vpu::initialize()) return false;
 		CVar::initialize();
 		Console::initialize();
-		if (!InputDevice::initialize())return false;
+		if (!InputDevice::initialize(true, false, true))return false;
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_register_event_source(queue, al_get_timer_event_source(clock));
 		al_start_timer(timer);
@@ -119,6 +119,14 @@ void Engine::handleEvents() {
 			while (1) { ; };
 			break;
 
+		case ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN:
+			InputDevice::controller[event.joystick.button] = 1;
+			break;
+
+		case ALLEGRO_EVENT_JOYSTICK_BUTTON_UP:
+			InputDevice::controller[event.joystick.button] = 0;
+			break;
+
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 			al_acknowledge_resize(Vpu::display);
 			Engine::width = event.display.width;
@@ -146,7 +154,7 @@ void Engine::render() {
 		showcase->draw();
 		Dashboard::draw();
 		Hud::draw();
-		InputDevice::draw(0);
+		InputDevice::draw(2);
 		Console::draw(16);
 		Vpu::render();		
 		Vpu::select(Vpu::overlay);

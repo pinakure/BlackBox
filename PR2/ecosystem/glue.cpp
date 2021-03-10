@@ -770,10 +770,28 @@ pythoncommand(tm_update) {
 	return PyBool_FromLong(1);
 }
 
+/* Joypad methods ---------------------------------------------------------------------- */
+pythoncommand(joypad_menu)	{ return PyBool_FromLong(InputDevice::controller[INPUT_START] & InputDevice::controller[INPUT_SELECT]); }
+pythoncommand(joypad_start) { return PyBool_FromLong(InputDevice::controller[INPUT_START]); }
+pythoncommand(joypad_select){ return PyBool_FromLong(InputDevice::controller[INPUT_SELECT]);}
+pythoncommand(joypad_up)	{ return PyBool_FromLong(InputDevice::controller[INPUT_UP]); }
+pythoncommand(joypad_down)	{ return PyBool_FromLong(InputDevice::controller[INPUT_DOWN]); }
+pythoncommand(joypad_left)	{ return PyBool_FromLong(InputDevice::controller[INPUT_LEFT]); }
+pythoncommand(joypad_right) { return PyBool_FromLong(InputDevice::controller[INPUT_RIGHT]); }
+pythoncommand(joypad_a)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CIRCLE]); }
+pythoncommand(joypad_b)		{ return PyBool_FromLong(InputDevice::controller[INPUT_CROSS]); }
+pythoncommand(joypad_x)		{ return PyBool_FromLong(InputDevice::controller[INPUT_TRIANGLE]); }
+pythoncommand(joypad_y)		{ return PyBool_FromLong(InputDevice::controller[INPUT_SQUARE]); }
+pythoncommand(joypad_l1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L1]); }
+pythoncommand(joypad_l2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L2]); }
+pythoncommand(joypad_l3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_L3]); }
+pythoncommand(joypad_r1)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R1]); }
+pythoncommand(joypad_r2)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R2]); }
+pythoncommand(joypad_r3)	{ return PyBool_FromLong(InputDevice::controller[INPUT_R3]); }
 /* Console methods ---------------------------------------------------------------------- */
 pythoncommand(console_print) {
-	char *buffer;
-	if(!PyArg_ParseTuple(args, "s", &buffer)) return NULL;	
+	char* buffer;
+	if (!PyArg_ParseTuple(args, "s", &buffer)) return NULL;
 	Engine::print(buffer);
 	return PyLong_FromLong(1);
 }
@@ -837,6 +855,20 @@ static PyMethodDef TiledMapMethods[] = {
 	{"update"		, tm_update				, METH_VARARGS, "tiledmap.update(handle,delta=1.0) : " },
 	{NULL, NULL, 0, NULL}
 };
+static PyMethodDef JoypadMethods[] = {
+	{"menu"			, joypad_menu		, METH_VARARGS, "joypad.menu() : " },
+	{"select"		, joypad_select		, METH_VARARGS, "joypad.select() : " },
+	{"start"		, joypad_start		, METH_VARARGS, "joypad.start() : " },
+	{"left"			, joypad_left		, METH_VARARGS, "joypad.left() : " },
+	{"right"		, joypad_right		, METH_VARARGS, "joypad.right() : " },
+	{"up"			, joypad_up			, METH_VARARGS, "joypad.up() : " },
+	{"down"			, joypad_down		, METH_VARARGS, "joypad.down() : " },
+	{"a"			, joypad_a			, METH_VARARGS, "joypad.a() : " },
+	{"b"			, joypad_b			, METH_VARARGS, "joypad.b() : " },
+	{"x"			, joypad_x			, METH_VARARGS, "joypad.x() : " },
+	{"y"			, joypad_y			, METH_VARARGS, "joypad.y() : " },
+	{NULL, NULL, 0, NULL}
+};
 
 
 /* Video Engine internal methods ---------------------------------------------------------------------- */
@@ -887,9 +919,12 @@ static PyMethodDef VpuMethods[] = {
 static PyModuleDef TiledMapModule	= {PyModuleDef_HEAD_INIT, "tiledmap"	, NULL, -1, TiledMapMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods		  , NULL, NULL, NULL, NULL};
+static PyModuleDef JoypadModule		= {PyModuleDef_HEAD_INIT, "joypad"		, NULL, -1, JoypadMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriterMethods , NULL, NULL, NULL, NULL};
 
+static PyObject *PyInit_joypad(void) { return PyModule_Create(&JoypadModule); }
+static PyObject *PyInit_tiledmap(void) { return PyModule_Create(&TiledMapModule); }
 static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
 static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
 static PyObject *PyInit_console(void){ return PyModule_Create(&ConsoleModule); }
