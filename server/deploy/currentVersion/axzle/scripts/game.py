@@ -16,14 +16,17 @@ class Game:
 
     @staticmethod
     def setup():
-        print("GAME: Setting up...")
-        Game.running = True
-        
-        # disable rendering
+        # prepare transition
         vpu.disable(0)
         vpu.disable(1)
         vpu.disable(2)
+        vpu.transition() 
+        while not vpu.update():pass
+        # change screen content here
+        print("GAME: Setting up...")
         
+        Game.running = True
+               
         # get layer dimensions
         vpu.select(0); Game.dims[0] = vpu.dimensions()
         vpu.select(1); Game.dims[1] = vpu.dimensions()

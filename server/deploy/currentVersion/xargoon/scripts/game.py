@@ -26,16 +26,30 @@ class Game:
     projectile_pool_size    = 512
     foe_pool_size           = 16
     score = 0
+    timer = 0
+
+    @staticmethod
+    def prepare_background(index=0):
+        vpu.select(0)
+        if index==0:
+            vpu.fill(8,16,32,255)
+            vpu.perlin(0,16,32,255)
+        vpu.select(1)
+        
+
 
     @staticmethod
     def setup():
-        #gc.disable()
-        print("GAME: Setting up...")
-        Game.running = True
-        # disable rendering
+        # prepare transition
         vpu.disable(0)
         vpu.disable(1)
         vpu.disable(2)
+        vpu.transition() 
+        while not vpu.update():pass
+        # change screen content here
+        print("GAME: Setting up...")
+        Game.running = True
+        # disable rendering
         # get layer dimensions
         vpu.select(0); Game.dims[0] = vpu.dimensions()
         vpu.select(1); Game.dims[1] = vpu.dimensions()
@@ -44,13 +58,9 @@ class Game:
         print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
         print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
         # prepare initial layer state
-        vpu.select(0); vpu.fill(8,16,32,255)
+        Game.prepare_background(0)
         vpu.select(1); vpu.fill(0,0,0,0)
         vpu.select(2); vpu.fill(255,255,0,255)
-        # enable rendering back
-        vpu.enable(0)
-        vpu.enable(1)
-        vpu.enable(2)
         # initialize subcomponents
         print("GAME: Initializing classes...")
         HudIcon.initialize(Game)
@@ -86,7 +96,12 @@ class Game:
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
-        # Spawn the player
+        # enable rendering 
+        vpu.enable(0)
+        vpu.enable(1)
+        vpu.enable(2)
+        
+        #Spawn ship
         Game.spawn()
         
     @staticmethod
@@ -95,6 +110,7 @@ class Game:
         y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
         s = baseclass(x,y)
         s.time += int(random()*30)
+        s.alive = False
         Game.explosions.append(s)
     
     @staticmethod
@@ -139,7 +155,9 @@ class Game:
     @staticmethod
     def loop():
         delta = 1.0
+        Game.timer = 0
         while Game.running:
+            Game.timer+=1        
             Game.draw()
             Game.update(delta)
             if blackbox.ctrlc():
@@ -164,7 +182,7 @@ class Game:
             #else: projectile.spawn()
         Game.ship.update(delta)
         if joypad.menu():
-            from data.scripts.main import menu
+            from scripts.main import menu
             menu()
         
     @staticmethod

@@ -82,9 +82,20 @@ pythoncommand(vpu_tintsprite) {
 pythoncommand(vpu_pset) {
 	int x;
 	int y;
-	if(!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
+	if (!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
 	Vpu::putpixel(x, y);
 	return PyBool_FromLong(true);
+}
+pythoncommand(vpu_perlin) {
+	int handle;
+	int r=255,g=255,b=255;
+	if (!PyArg_ParseTuple(args, "i|iii", &handle, &r, &g, &b)) return NULL;
+	Surface* l = getLayer(handle);
+	if (l) {
+		Vpu::perlin(*l, r, g, b);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_line) {
 	int x;
@@ -905,6 +916,7 @@ static PyMethodDef VpuMethods[] = {
 	{"selectsprite"	, vpu_selectsprite		, METH_VARARGS, "vpu.selectsprite(sprite_handle) : Select surface bound to given sprite"},
 	{"rect"			, vpu_rect				, METH_VARARGS, "vpu.rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
 	{"line"			, vpu_line				, METH_VARARGS, "vpu.line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
+	{"perlin"		, vpu_perlin			, METH_VARARGS, "vpu.perlin(surface_handle, r, g, b) : Generate perlin noise using given color along given surface" },
 	{"pset"			, vpu_pset				, METH_VARARGS, "vpu.pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
 	{"restart"		, vpu_restart			, METH_VARARGS, "vpu.restart() : Restart Video Processing Unit"},
 	{"rotate"		, vpu_rotate			, METH_VARARGS, "vpu.rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},

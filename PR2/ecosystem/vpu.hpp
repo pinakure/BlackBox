@@ -99,6 +99,7 @@ public:
 	static bool scale	(float sx=0.0f, float sy=0.0f, float sz=0.0f);
 	static bool setRotation(float sa=0.0f);
 	static bool rotate	(float sa=0.0f);
+	static void perlin(Surface& surface, int r=255, int g=255, int b=255);
 
 	// Blitting and Surfaces
 	static void clear();

@@ -96,14 +96,19 @@ class Ship:
     def update_input(self):
         if joypad.left(): self.west()
         elif joypad.right(): self.east()
-        elif joypad.up(): self.north()
+        else: self.brake_x()
+            
+        if joypad.up(): self.north()
         elif joypad.down(): self.south()
-        else: self.brake()
+        else: self.brake_y()
         self.shoot_intent = True if joypad.b() else False
 
-    def brake(self):
-        self.delta_x *= .96
+    def brake_y(self):
         self.delta_y *= .9
+
+    def brake_x(self):
+        self.delta_x *= .96
+        
 
     def update(self, delta):
         if not self.alive: return

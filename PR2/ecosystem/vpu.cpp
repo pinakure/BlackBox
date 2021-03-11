@@ -40,7 +40,7 @@ ALLEGRO_DISPLAY *Vpu::display = NULL;
 ALLEGRO_COLOR Vpu::color;
 ALLEGRO_COLOR Vpu::shadow;
 bool Vpu::fullscreen = false;
-bool Vpu::ready= true;
+bool Vpu::ready= false;
 ALLEGRO_COLOR Vpu::transparent;
 std::vector<Font*> Vpu::fonts;
 
@@ -552,6 +552,93 @@ Surface Vpu::createSurface(int width, int height) {
 		s.height = height;
 	}
 	return s;
+}
+
+void Vpu::perlin(Surface& surface, int r, int g, int b) {
+	const int w				= surface.width;
+	const int h				= surface.height;
+	int		  area			= w * h;
+	static float* noise_seed	= nullptr;
+	static float* perlin_noise	= nullptr;
+	int		  octave		= 4;
+	float	  scaling_bias	= 2.0f;
+	static Surface* last	= nullptr;
+	
+	// Initialize buffers (use cache if same surface is used recurrently)
+	if (&surface != last) {
+		if(perlin_noise) delete perlin_noise;
+		if(noise_seed) delete noise_seed;
+		noise_seed = new float[area];
+		perlin_noise = new float[area];
+		last = &surface;
+	}
+	for (int i = 0; i < area; i++) 
+		noise_seed[i] = (float)rand() / (float)RAND_MAX;
+	
+	// Calculate perlin noise
+	Surface* push = Vpu::target;
+	Vpu::select(surface);
+	al_lock_bitmap(surface.bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			float fNoise = 0.0f;
+			float fScaleAcc = 0.0f;
+			float fScale = 1.0f;
+
+			for (int o = 0; o < octave; o++) {
+				int nPitch = w >> o;
+				int nSampleX1 = (x / nPitch) * nPitch;
+				int nSampleY1 = (y / nPitch) * nPitch;
+
+				int nSampleX2 = (nSampleX1 + nPitch) % w;
+				int nSampleY2 = (nSampleY1 + nPitch) % w;
+
+				float fBlendX = (float)(x - nSampleX1) / (float)nPitch;
+				float fBlendY = (float)(y - nSampleY1) / (float)nPitch;
+
+				float fSampleT = (1.0f - fBlendX) * noise_seed[(nSampleY1 * w + nSampleX1)%area] + fBlendX * noise_seed[(nSampleY1 * w + nSampleX2)%area];
+				float fSampleB = (1.0f - fBlendX) * noise_seed[(nSampleY2 * w + nSampleX1)%area] + fBlendX * noise_seed[(nSampleY2 * w + nSampleX2)%area];
+
+				fScaleAcc += fScale;
+				fNoise += (fBlendY * (fSampleB - fSampleT) + fSampleT) * fScale;
+				fScale = fScale / scaling_bias;
+			}
+
+			// Scale to seed range
+			perlin_noise[y * w + x] = fNoise / fScaleAcc;
+			int pixel_bw = (int)(perlin_noise[y * w + x] * 16.0f);
+			al_put_pixel(
+				x, y,
+				al_map_rgb(
+					(float(r) / 16.0f) * float(pixel_bw),
+					(float(g) / 16.0f) * float(pixel_bw),
+					(float(b) / 16.0f) * float(pixel_bw)
+				)
+			);		
+		}
+	}
+	// Draw perlin noise
+	/*
+	Surface* push = Vpu::target;
+	Vpu::select(surface);
+	al_lock_bitmap(surface.bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+	for (int x = 0; x < w; x++){
+		for (int y = 0; y < h; y++){
+			int pixel_bw = (int)(perlin_noise[y * w + x] * 16.0f);
+			al_put_pixel(
+				x, y,
+				al_map_rgb(
+					(float(r) / 16.0f) * float(pixel_bw),
+					(float(g) / 16.0f) * float(pixel_bw),
+					(float(b) / 16.0f) * float(pixel_bw)
+				)
+			);			
+		}
+	}
+	*/
+	al_unlock_bitmap(surface.bitmap);
+	Vpu::select(*push);		
 }
 
 Surface Vpu::loadBitmap(std::string filename) {
