@@ -13,6 +13,7 @@ class Game:
     dims = {}
     scale = 2.0
     score = 0
+    lock = False
 
     @staticmethod
     def setup():
@@ -36,9 +37,9 @@ class Game:
         print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
         
         # prepare initial layer state
-        vpu.select(0); vpu.fill(8,16,32,255)
+        vpu.select(0); vpu.fill(0,0,0)
         vpu.select(1); vpu.fill(0,0,0,0)
-        vpu.select(2); vpu.fill(255,255,0,255)
+        vpu.select(2); vpu.fill(0,0,0,0)
         
         # enable rendering back
         vpu.enable(0)
@@ -66,8 +67,35 @@ class Game:
         pass
 
     @staticmethod
+    def title():
+        vpu.select(0)
+        vpu.fill(0,0,0)
+        vpu.perlin(0, 160, 80,0)
+        vpu.setfont('magic')
+        vpu.setcolor(255,255,255)
+        vpu.textout("AXZLE", int(Game.dims[0][0]/2)-64,  int(Game.dims[0][1]/2)-64 )
+        while not vpu.update():pass        
+        while not joypad.start():
+            vpu.select(1)
+            vpu.fill(0,0,0,0)
+            if vpu.frames()%20>10:
+                vpu.setfont('mana')        
+                vpu.setcolor(255,255,255)
+                vpu.textout("PRESS START BUTTON", int(Game.dims[1][0]/2)-72,  int(Game.dims[1][1]/2)+64 )
+            vpu.update()
+        vpu.transition() 
+        while not vpu.update():pass
+        vpu.select(0);vpu.fill(0,0,0)
+        vpu.select(1);vpu.fill(0,0,0,0)
+        vpu.select(2);vpu.fill(0,0,0,0)        
+        vpu.setfont('ibm')
+        return        
+        
+
+    @staticmethod
     def loop():
         delta = 1.0
+        Game.title()
         while Game.running:
             Game.draw()
             Game.update(delta)            
@@ -77,7 +105,7 @@ class Game:
         # do stuff
         # ...
 
-        # required stuff
+        # required stuff (DEBUG ONLY)        
         if blackbox.ctrlc():
             print("Control+C pressed.")
             Game.destroy()
@@ -97,7 +125,7 @@ class Game:
 
         # raster screen and update input
         vpu.setscale(1,Game.scale, Game.scale)
-        vpu.update()
+        Game.lock = not vpu.update()
 
 def setup():
     return Game.setup()
