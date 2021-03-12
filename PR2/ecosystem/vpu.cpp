@@ -538,9 +538,24 @@ void Vpu::drawSprite(Sprite &sprite, float dx, float dy) {
 	//sprite.draw(dx, dy);	
 }
 
-void Vpu::drawAnimation(Animation &animation, float dx, float dy) {
-	animation.run(animation.speed);
-	animation.qdraw(dx, dy);	
+void Vpu::drawAnimation(Animation& animation, float dx, float dy) {
+	if (animation.autoupdate)
+		animation.run(animation.speed);
+	animation.qdraw(dx, dy);
+}
+
+void Vpu::drawAnimationRotated(Animation& animation, float dx, float dy, float angle) {
+	if (animation.autoupdate)
+		animation.run(animation.speed);
+	if (animation.frame.size() > 0)
+		al_draw_rotated_bitmap(
+			animation.frame[animation.current_frame], 
+			animation.width >> 1,
+			animation.height >> 1,
+			dx, dy, 
+			angle, 
+			0
+		);
 }
 
 Surface Vpu::createSurface(int width, int height) {
@@ -560,7 +575,7 @@ void Vpu::perlin(Surface& surface, int r, int g, int b) {
 	int		  area			= w * h;
 	static float* noise_seed	= nullptr;
 	static float* perlin_noise	= nullptr;
-	int		  octave		= 4;
+	int		  octave		= 7;
 	float	  scaling_bias	= 2.0f;
 	static Surface* last	= nullptr;
 	
@@ -588,6 +603,7 @@ void Vpu::perlin(Surface& surface, int r, int g, int b) {
 
 			for (int o = 0; o < octave; o++) {
 				int nPitch = w >> o;
+				if (nPitch <= 0)nPitch = 1;
 				int nSampleX1 = (x / nPitch) * nPitch;
 				int nSampleY1 = (y / nPitch) * nPitch;
 
@@ -697,8 +713,8 @@ long int Vpu::createSubSprite(Sprite& s, int left, int top, int right, int botto
 	return sprite_handle;	
 }
 
-Animation Vpu::createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical) {
-	return Animation(s, width, height, sx, sy, dx, dy, vertical);	
+Animation Vpu::createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical, bool autoupdate) {
+	return Animation(s, width, height, sx, sy, dx, dy, vertical, autoupdate);	
 }
 	
 long int Vpu::allocateSprite(std::string filename, int priority){
@@ -719,9 +735,9 @@ void Vpu::deallocateSprite(long int handle) {
 	}
 }
 
-long int Vpu::allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical) {
+long int Vpu::allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical, bool autoupdate) {
 	animation_handle++;
-	animations.insert( std::pair<long int, Animation>(animation_handle, createAnimation(width, height, s,sx,sy,dx,dy, vertical)) );
+	animations.insert( std::pair<long int, Animation>(animation_handle, createAnimation(width, height, s,sx,sy,dx,dy, vertical, autoupdate)) );
 	return animation_handle;
 }
 

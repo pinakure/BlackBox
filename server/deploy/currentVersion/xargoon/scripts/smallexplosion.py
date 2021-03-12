@@ -54,6 +54,7 @@ class SmallExplosion:
         if not self.alive: 
             return
         self.time+=1
+        updateanim(self.anim)
         drawanim(self.anim, int(self.x), int(self.y))
         if self.time > 30:
             self.alive = False

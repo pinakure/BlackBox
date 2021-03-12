@@ -17,10 +17,10 @@ class Flame:
         Flame.game = game
         print("Initializing Flames...")
         Flame.tileset = createsprite("particles",10)
-        Flame.gfx[ Flame.TYPE_A ] = createanim(8,16, Flame.tileset, 0, 0, 3, 0, False,0.05)
-        Flame.gfx[ Flame.TYPE_B ] = createanim(8,16, Flame.tileset, 4, 0, 7, 0, False,0.125)
-        Flame.gfx[ Flame.TYPE_C ] = createanim(8,16, Flame.tileset, 8, 0,11, 0, False,0.125)
-        Flame.gfx[ Flame.TYPE_D ] = createanim(8,16, Flame.tileset,12, 0,15, 0, False,0.125)
+        Flame.gfx[ Flame.TYPE_A ] = createanim(8,16, Flame.tileset, 0, 0, 3, 0, False,0.1)
+        Flame.gfx[ Flame.TYPE_B ] = createanim(8,16, Flame.tileset, 4, 0, 7, 0, False,0.25)
+        Flame.gfx[ Flame.TYPE_C ] = createanim(8,16, Flame.tileset, 8, 0,11, 0, False,0.25)
+        Flame.gfx[ Flame.TYPE_D ] = createanim(8,16, Flame.tileset,12, 0,15, 0, False,0.25)
         Flame.initialized = True
     
     @staticmethod
@@ -40,11 +40,12 @@ class Flame:
         self.flame_type = flame_type
         self.x = x
         self.y = y
+        self.rotation = 0.0
         
     def __del__(self):
         if self.anim: deleteanim(self.anim)
         self.anim = None
 
     def draw(self):
-        drawanim(Flame.gfx[self.flame_type], self.x, self.y)
+        drawanim(Flame.gfx[self.flame_type], self.x, self.y, self.rotation)
         

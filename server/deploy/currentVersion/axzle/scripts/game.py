@@ -83,7 +83,7 @@ class Game:
                 vpu.setcolor(255,255,255)
                 vpu.textout("PRESS START BUTTON", int(Game.dims[1][0]/2)-72,  int(Game.dims[1][1]/2)+64 )
             vpu.update()
-        vpu.transition() 
+        vpu.transition(int(random()*20)) 
         while not vpu.update():pass
         vpu.select(0);vpu.fill(0,0,0)
         vpu.select(1);vpu.fill(0,0,0,0)

@@ -1,6 +1,7 @@
 from vpu import *
-from data.scripts.flame import Flame
-from data.scripts.projectile import Projectile
+from data.scripts.flame         import Flame
+from data.scripts.projectile    import Projectile
+from data.scripts.shield        import Shield
 from random import random
 import joypad
 
@@ -14,14 +15,17 @@ class Ship:
     timer = 0
     tileset = None
     initialized = False
+    shield = None
 
     @staticmethod
     def initialize(game):
         Ship.game = game
+        Ship.shield = Shield
         print("Initializing Ship...")
         Ship.tileset = createsprite("ship01",10)
         Ship.initialized = True
         Ship.timer = 0
+        Shield.initialize(game)
 
     @staticmethod
     def destroy():
@@ -29,6 +33,7 @@ class Ship:
             deletesprite(Ship.tileset)
             Ship.tileset = None
         Ship.initialized = False
+        Shield.destroy()
 
     def __init__(self,x=0, y=0, ship_type=TYPE_A):
         self.x = x
@@ -49,6 +54,8 @@ class Ship:
             Flame(self.x, self.y + Ship.height),
             Flame(self.x, self.y + Ship.height),
         ]
+        self.flames[0].rotation =  0.125
+        self.flames[1].rotation = -0.125
         
     def __del__(self):
         if self.anim: deleteanim(self.anim)
@@ -75,10 +82,10 @@ class Ship:
         else: self.south()        
 
     def update_flame(self):
-        self.flames[0].x = int(self.x) - (Ship.width>>1)
-        self.flames[0].y = int(self.y) + (Ship.height>>1)- 2
-        self.flames[1].x = int(self.x) + (Ship.width>>1)- 8
-        self.flames[1].y = int(self.y) + (Ship.height>>1)- 2
+        self.flames[0].x = int(self.x) - (Ship.width>>1)+6
+        self.flames[0].y = int(self.y) + (Ship.height>>1)+6
+        self.flames[1].x = int(self.x) + (Ship.width>>1)-6 
+        self.flames[1].y = int(self.y) + (Ship.height>>1)+6
         #select flame frame depending on vertical velocity
         if self.delta_y < -1.5: 
             self.flames[0].flame_type = Flame.TYPE_D
@@ -86,7 +93,7 @@ class Ship:
         elif self.delta_y < -0.75: 
             self.flames[0].flame_type = Flame.TYPE_C
             self.flames[1].flame_type = Flame.TYPE_C 
-        elif self.delta_y < 0: 
+        elif self.delta_y <= 0.1: 
             self.flames[0].flame_type = Flame.TYPE_B
             self.flames[1].flame_type = Flame.TYPE_B 
         else:
@@ -112,7 +119,7 @@ class Ship:
 
     def update(self, delta):
         if not self.alive: return
-        
+        Shield.update(delta)
         #self.randomize()
         self.update_input()
 
@@ -150,7 +157,10 @@ class Ship:
         self.delta_y = 2.0 if self.delta_y > 2.0 else self.delta_y       
 
     def draw(self):
-        drawanim(self.anim, int(self.x)-(Ship.width>>1), int(self.y)-(Ship.height>>1))
+        if not Shield.alive:
+            Shield.alive = True
+        drawanim(self.anim, int(self.x), int(self.y))
+        Shield.draw()
         self.flames[0].draw()
         self.flames[1].draw()
             

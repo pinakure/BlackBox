@@ -51,5 +51,6 @@ class BigExplosion:
     def draw(self):
         if not self.alive: 
             return
+        updateanim(self.anim)        
         drawanim(self.anim, int(self.x), int(self.y))
         
