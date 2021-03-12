@@ -10,9 +10,11 @@ class HudIcon:
     LEVEL_1 = [ 0x04, 0x00 ]
     LEVEL_2 = [ 0x00, 0x01 ]
     LEVEL_3 = [ 0x04, 0x01 ]
+    footer = None
     gfx = {}
     weapon_type = TYPE_A
     level = 0
+    timer = 0
     tileset = None
     x = 0
     y = 0
@@ -21,6 +23,7 @@ class HudIcon:
     def initialize(game):
         HudIcon.game = game
         print("Initializing HudIcon...")
+        HudIcon.footer = createsprite("hud_low")
         HudIcon.tileset = createsprite("hud",16)
         if not HudIcon.tileset:
             print("Cannot load HudIcon tileset!")
@@ -59,6 +62,9 @@ class HudIcon:
                         HudIcon.gfx[o][i] = None
                 HudIcon.gfx[o] = {}
             HudIcon.gfx = {}
+        if HudIcon.footer:
+            deletesprite(HudIcon.footer)
+            HudIcon.footer = None
         if HudIcon.tileset:
             deletesprite(HudIcon.tileset)
             HudIcon.tileset = None
@@ -70,12 +76,27 @@ class HudIcon:
     
     @staticmethod
     def update(delta):
+        HudIcon.timer+=1
         pass
 
     @staticmethod
     def draw():
         select( HudIcon.layer_index )
+        
+        fill(0,0,0,0)
+        fx = int(HudIcon.game.dims[HudIcon.layer_index][0]/2)
+        fy = int(HudIcon.game.dims[HudIcon.layer_index][1]/2)-8
+        o = 5
+        if HudIcon.timer % 20 < 10:
+            setcolor(32,32,0,8)
+            if   o == 0: fillrect(fx-153,fy-4,42,8)
+            elif o == 1: fillrect(fx-105,fy-4,50,8)
+            elif o == 2: fillrect(fx-49,fy-4,58,8)
+            elif o == 3: fillrect(fx+15,fy-4,50,8)
+            elif o == 4: fillrect(fx+71,fy-4,34,8)
+            elif o == 5: fillrect(fx+111,fy-4,42,8)
+        drawsprite(HudIcon.footer,fx,fy)
         drawanim( 
             HudIcon.gfx[HudIcon.game.ship.weapon_type][HudIcon.game.ship.weapon_level], 
-            HudIcon.x+160, HudIcon.y
+            HudIcon.x+160, HudIcon.y-8
         )        

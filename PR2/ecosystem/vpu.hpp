@@ -116,19 +116,20 @@ public:
 	/* Sprite and animations*/
 	static Sprite createSprite(std::string filename);
 	static long int createSubSprite(Sprite& s, int left, int top, int right, int bottom);
-	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
+	static Animation createAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical=false,bool autoupdate = false);
 	static Sprite &destroySprite(Sprite &sprite);
 	static Animation &destroyAnimation(Animation &animation);
 	static void drawSprite(Sprite& sprite, float dx, float dy);
 	static void tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>& dst);
-	static void drawAnimation(Animation &animation, float dx, float dy);
+	static void drawAnimation(Animation& animation, float dx, float dy);
+	static void drawAnimationRotated(Animation& animation, float dx, float dy, float angle=0.0f);
 
 	/* High Level API */
 	static long int allocateSurface(int width, int height);
 	static void deallocateSurface(long int handle);
 	static long int allocateSprite(std::string filename, int priority=0);
 	static void deallocateSprite(long int handle);
-	static long int allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical);
+	static long int allocateAnimation(int width, int height, Sprite &s, int sx, int sy, int dx, int dy, bool vertical=false, bool autoupdate = false);
 	static void deallocateAnimation(long int handle);
 	
 	// Surface effects

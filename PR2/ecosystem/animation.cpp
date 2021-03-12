@@ -8,7 +8,8 @@ Animation::Animation() {
 	this->height = 0;
 }
 
-Animation::Animation(Sprite &sprite, int width, int height, int sx, int sy, int dx, int dy, bool vertical) {
+Animation::Animation(Sprite &sprite, int width, int height, int sx, int sy, int dx, int dy, bool vertical, bool autoupdate) {
+	this->autoupdate = autoupdate;
 	this->width  = width;
 	this->height = height;
 	this->extractFrames(sprite, sx, sy, dx, dy, vertical);

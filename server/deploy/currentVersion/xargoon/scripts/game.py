@@ -166,6 +166,14 @@ class Game:
                 Game.running = False        
             
     @staticmethod
+    def animate():
+        for i in range(0, Token.TYPE_MAX):
+            vpu.updateanim(Token.gfx[i])
+        for i in range(0, 4):
+            vpu.updateanim(Flame.gfx[i])
+        vpu.updateanim(Game.ship.anim)
+        
+    @staticmethod
     def update(delta):
         HudIcon.update(delta)
         for token in Game.tokens:
@@ -187,6 +195,7 @@ class Game:
         
     @staticmethod
     def draw():
+        Game.animate()
         # Draw hud (drawn on self-managed layer)
         HudIcon.draw()
         # pre-clean foreground layer
@@ -207,12 +216,6 @@ class Game:
         Game.ship.draw()
         # raster screen and update input
         vpu.setscale(1,Game.scale, Game.scale)
-        if vpu.frames()%6000 < 3000:
-            if Game.scale>.5:
-                Game.scale -= 0.0005
-        else:
-            if Game.scale<2.0:
-                Game.scale += 0.0005
         vpu.update()
 
 

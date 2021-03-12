@@ -97,52 +97,65 @@ class Token:
     TYPE_B      = 0x01
     TYPE_C      = 0x02
     TYPE_D      = 0x03
-    TYPE_BOMB   = 0x04
-    TYPE_POWERUP= 0x05
-    TYPE_BONUS  = 0x06
-    TYPE_MAX    = 0x07
+    TYPE_BOMB_A = 0x04
+    TYPE_BOMB_B = 0x05
+    TYPE_BOMB_C = 0x06
+    TYPE_BOMB_D = 0x07
+    TYPE_POWERUP= 0x08
+    TYPE_BONUS  = 0x09
+    TYPE_MAX    = 0x0A
     width       = 16
     height      = 16
     game = None
     tileset = {}
-    sprite = None
+    gfx = {}
     initialized = False
 
     @staticmethod
     def initialize(game):
         Token.game = game
         print("Initializing Tokens...")
-        Token.sprite = createsprite("tokens",15)
-        if not Token.sprite:
+        sprite = createsprite("tokens",15)
+        if not sprite:
             print("ERROR: Cannot load Token tileset!")        
         print(f"Creating subsprites...")        
-        Token.tileset[ Token.TYPE_A      ] = subsprite(Token.sprite, 0,  0, 128, 16)
-        Token.tileset[ Token.TYPE_B      ] = subsprite(Token.sprite, 0,  0, 128, 16)
-        Token.tileset[ Token.TYPE_C      ] = subsprite(Token.sprite, 0,  0, 128, 16)
-        Token.tileset[ Token.TYPE_D      ] = subsprite(Token.sprite, 0,  0, 128, 16)
-        Token.tileset[ Token.TYPE_BOMB   ] = subsprite(Token.sprite, 0, 16, 128, 32)
-        Token.tileset[ Token.TYPE_POWERUP] = subsprite(Token.sprite, 0, 32, 128, 48)
-        Token.tileset[ Token.TYPE_BONUS  ] = subsprite(Token.sprite, 0, 48, 128, 64)
-        print("Tinting Tokens SpriteSheet 0...", end="\r")
+        Token.tileset[ Token.TYPE_A      ] = subsprite(sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_B      ] = subsprite(sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_C      ] = subsprite(sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_D      ] = subsprite(sprite, 0,  0, 128, 16)
+        Token.tileset[ Token.TYPE_BOMB_A ] = subsprite(sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_BOMB_B ] = subsprite(sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_BOMB_C ] = subsprite(sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_BOMB_D ] = subsprite(sprite, 0, 16, 128, 32)
+        Token.tileset[ Token.TYPE_POWERUP] = subsprite(sprite, 0, 32, 128, 48)
+        Token.tileset[ Token.TYPE_BONUS  ] = subsprite(sprite, 0, 48, 128, 64)
         tintsprite(Token.tileset[ Token.TYPE_A ], original_colors, palettes[0])
-        print("Tinting Tokens SpriteSheet 1...", end="\r")
         tintsprite(Token.tileset[ Token.TYPE_B ], original_colors, palettes[1])
-        print("Tinting Tokens SpriteSheet 2...", end="\r")
         tintsprite(Token.tileset[ Token.TYPE_C ], original_colors, palettes[2])
-        print("Tinting Tokens SpriteSheet 3...", end="\n")
         tintsprite(Token.tileset[ Token.TYPE_D ], original_colors, palettes[3])
+        tintsprite(Token.tileset[ Token.TYPE_BOMB_A ], original_colors, palettes[0])
+        tintsprite(Token.tileset[ Token.TYPE_BOMB_B ], original_colors, palettes[1])
+        tintsprite(Token.tileset[ Token.TYPE_BOMB_C ], original_colors, palettes[2])
+        tintsprite(Token.tileset[ Token.TYPE_BOMB_D ], original_colors, palettes[3])
+        Token.gfx = {}
+        for i in range(0, Token.TYPE_MAX):  
+            Token.gfx[ i ] = createanim(16, 16, Token.tileset[ i ], 0, 0, 7, 0, False,0.125)        
         Token.initialized = True
 
     @staticmethod
     def destroy():
-        for i in range(0, Token.TYPE_MAX):
-            if Token.tileset[i]:
-                deletesprite(Token.tileset[i])
-                Token.tileset[i] = None
+        for t in Token.gfx: 
+            deleteanim(t)
+        Token.gfx = {}
+        
+        for t in Token.tileset: 
+            deletesprite(t)
+        Token.tileset = {}
+        
         if Token.sprite: 
             deletesprite(Token.sprite)
-            Token.sprite = None
-        Token.tileset = {}
+        Token.sprite = None
+        
         Token.initialized = False
         
     def __init__(self, x=0, y=0, token_type=TYPE_A):
@@ -153,12 +166,9 @@ class Token:
         self.delta_y = ((random()*200)/200)-1.0
         self.alive = True
         self.token_type = token_type
-        self.anim = createanim(16, 16, Token.tileset[self.token_type], 0, 0, 7, 0, False,0.125)
-
+        
     def __del__(self):
-        if self.anim: 
-            deleteanim(self.anim)
-        self.anim = None
+        pass
 
     def update(self, delta):
         if not self.alive: 
@@ -181,5 +191,5 @@ class Token:
     def draw(self):
         if not self.alive: 
             return
-        drawanim(self.anim, int(self.x), int(self.y))
+        drawanim(Token.gfx[self.token_type], int(self.x), int(self.y))
         

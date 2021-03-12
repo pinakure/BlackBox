@@ -14,12 +14,13 @@ public:
 	int			height			= 0;
 	int			last_frame		= 0;
 	float		speed			= 1.0f;
+	bool		autoupdate		= false;
 	double		current_frame	= 0;
 	Direction	direction		= Direction::UP;
 	std::vector<ALLEGRO_BITMAP*> frame;
 
 	Animation();
-	Animation(Sprite &sprite, int width, int height,int sx=0, int sy=0, int dx=1, int dy=1, bool vertical=false);
+	Animation(Sprite &sprite, int width, int height,int sx=0, int sy=0, int dx=1, int dy=1, bool vertical=false, bool autoupdate=false);
 	int		extractFrames(Sprite &sprite, int source_x=0, int source_y=0, int dest_x=1, int dest_y=1, bool read_vertically = false);
 	void	draw(Surface &surface, int x, int y, ALLEGRO_COLOR &color);
 	void	qdraw(int x, int y);

@@ -324,12 +324,13 @@ pythoncommand(vpu_createanim){
 	int dy=0;
 	int sx=1;
 	int sy=0;
+	bool autoupdate=false;
 	bool vertical=false;
 	float speed = 1.0f;
 	int flags = 0;
-	if(!PyArg_ParseTuple(args, "iii|iiiibf", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed)) return NULL;
+	if(!PyArg_ParseTuple(args, "iii|iiii|bfb", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed, &autoupdate)) return NULL;
 	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
-		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical);
+		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical, autoupdate);
 		Vpu::animations.at(handle).speed = speed;
 		Vpu::animations.at(handle).bidirectional = false;
 		return PyLong_FromLong(handle);
@@ -337,13 +338,25 @@ pythoncommand(vpu_createanim){
 	printf("ERROR: sprite_handle out of range\n");
 	return PyBool_FromLong(false);
 }
+pythoncommand(vpu_updateanim) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Animation* a = &(Vpu::animations.at(handle));
+		a->run(a->speed);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
+}
 pythoncommand(vpu_drawanim){
 	int handle;
 	int x;
 	int y;
-	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	float rotation = 0.0f;
+	if(!PyArg_ParseTuple(args, "iii|f", &handle, &x, &y, &rotation)) return NULL;
 	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
-		Vpu::drawAnimation(Vpu::animations.at(handle), x, y);
+		Vpu::drawAnimationRotated(Vpu::animations.at(handle), x, y, rotation);
 		return PyBool_FromLong(true);
 	} 
 	printf("ERROR: anim_handle out of range\n");
@@ -902,8 +915,9 @@ static PyMethodDef VpuMethods[] = {
 	{"deletesurf"	, vpu_deletesurf		, METH_VARARGS, "vpu.deletesurf(handle) : Delete Surface identified by given Handle" },
 	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
 	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
-	{"drawanim"		, vpu_drawanim			, METH_VARARGS, "vpu.drawanim(handle, x, y) : Draw animation identified by given handle onto given coordinates" },
-	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y) : Draw Sprite identified by given handle onto given coordinates" },
+	{"drawanim"		, vpu_drawanim			, METH_VARARGS, "vpu.drawanim(handle, x, y, rotation) : Draw animation identified by given handle onto given coordinates" },
+	{"updateanim"	, vpu_updateanim		, METH_VARARGS, "vpu.updateanim() : Draw animation identified by given handle onto given coordinates" },
+	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y, rotation) : Draw Sprite identified by given handle onto given coordinates" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},
 	{"fadein"		, vpu_fadein			, METH_VARARGS, "vpu.fadein() : Fade screen from black"},
