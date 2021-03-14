@@ -8,6 +8,8 @@ class BigFoe:
     game = None
     tileset = None
     gfx = {}
+    width  = 32
+    height = 32
 
     @staticmethod
     def initialize(game):
@@ -22,6 +24,7 @@ class BigFoe:
         self.foe_type = foe_type
         self.x = x
         self.y = y
+        self.energy = 16
         self.alive = True
         self.target = None
 
@@ -45,5 +48,22 @@ class BigFoe:
     def attack(self):
         pass
 
+    def receive_impact(self, x, y):
+        #if self.shield.energy > 0:
+        #    self.shield.sync_position( self )
+        #    self.shield.activate(x, y)
+        #else:
+        self.damage()
+
+    def damage(self, pain=1):
+        self.energy -= 1
+        if self.energy <= 0:
+            self.die()
+
     def die(self):
-        pass
+        self.alive = False
+        #spawn explosion
+        for x in BigFoe.game.explosions:
+            if x.alive: continue
+            x.spawn(int(self.x)-(BigFoe.width>>1),int(self.y)-(BigFoe.height>>1))
+            break

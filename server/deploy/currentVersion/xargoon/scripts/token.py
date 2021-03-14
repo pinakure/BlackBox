@@ -179,6 +179,16 @@ class Token:
         elif self.y < -Token.height: self.alive = False
         elif self.x > int(Token.game.dims[1][0]): self.alive = False
         elif self.y > int(Token.game.dims[1][1]): self.alive = False
+        #check collision with ship
+        left  = int(self.game.ship.x) - (self.game.ship.width>>1)
+        top   = int(self.game.ship.y) - (self.game.ship.height>>1)
+        right = left + self.game.ship.width
+        bottom= top  + self.game.ship.height
+        if self.x >= left and self.x <= right:
+                if self.y >= top and self.y <= bottom:
+                    self.game.ship.pickup_token(self.token_type)
+                    self.alive = False
+        
 
     def spawn(self):
         self.delta_x = ((random()*250)/250)*(-1 if int(random()*2)==1 else 1)

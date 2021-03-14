@@ -33,7 +33,7 @@ class Game:
         vpu.select(0)
         if index==0:
             vpu.fill(8,16,32,255)
-            vpu.perlin(0,16,32,255)
+            vpu.perlin(0, 8,16,255)
         vpu.select(1)
         
 
@@ -156,6 +156,7 @@ class Game:
     def loop():
         delta = 1.0
         Game.timer = 0
+        vpu.setscale(1,Game.scale, Game.scale)
         while Game.running:
             Game.timer+=1        
             Game.draw()
@@ -215,7 +216,7 @@ class Game:
         # Draw Ship (drawn on foreground layer)       
         Game.ship.draw()
         # raster screen and update input
-        vpu.setscale(1,Game.scale, Game.scale)
+        
         vpu.update()
 
 
@@ -226,4 +227,5 @@ def loop():
     return Game.loop()
 
 def destroy():
+    quit()
     return Game.destroy()

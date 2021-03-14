@@ -15,6 +15,7 @@ public:
 	static ALLEGRO_EVENT_QUEUE *clock_queue;
 	static ALLEGRO_EVENT event;
 	static std::vector<Sprite> sprites;
+	static Surface* target;
 	static int  cycles;
 	static long int epoch;
 	static int	width;

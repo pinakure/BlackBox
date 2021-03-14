@@ -81,9 +81,24 @@ class HudIcon:
 
     @staticmethod
     def draw():
+        #pre-clear hud buffer
         select( HudIcon.layer_index )
-        
         fill(0,0,0,0)
+
+        # Draw Shield energy Bar
+        left = int(HudIcon.game.dims[HudIcon.layer_index][0]/4)
+        top  = 0#int(HudIcon.game.dims[HudIcon.layer_index][1]/2)
+        energy_bar_width = 64
+        setcolor(0,0,0, 32)
+        fillrect(left+7, top + 7, energy_bar_width+4, 8)
+        setcolor(0,64,64, 8)
+        w = int((HudIcon.game.ship.energy / 100)* (energy_bar_width+2))
+        fillrect(left+8, top + 8, w, 6)
+        setcolor(0,255,255, 64)
+        w = int((HudIcon.game.ship.shield.energy / 100)* energy_bar_width)
+        fillrect(left+9, top + 9, w, 4)
+        
+        # draw powerup selection bar selection rectangle
         fx = int(HudIcon.game.dims[HudIcon.layer_index][0]/2)
         fy = int(HudIcon.game.dims[HudIcon.layer_index][1]/2)-8
         o = 5
@@ -95,7 +110,11 @@ class HudIcon:
             elif o == 3: fillrect(fx+15,fy-4,50,8)
             elif o == 4: fillrect(fx+71,fy-4,34,8)
             elif o == 5: fillrect(fx+111,fy-4,42,8)
+        
+        # draw powerup selection bar selection overlay
         drawsprite(HudIcon.footer,fx,fy)
+        
+        # draw current weapon icon
         drawanim( 
             HudIcon.gfx[HudIcon.game.ship.weapon_type][HudIcon.game.ship.weapon_level], 
             HudIcon.x+160, HudIcon.y-8

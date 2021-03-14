@@ -24,7 +24,7 @@ class Ship:
         print("Initializing Ship...")
         Ship.tileset = createsprite("ship01",10)
         Ship.initialized = True
-        Ship.timer = 0
+        Ship.timer = 0        
         Shield.initialize(game)
 
     @staticmethod
@@ -47,6 +47,9 @@ class Ship:
         self.shooting = False
         self.shoot_intent = False
         self.rapid_fire = 3
+        self.energy = 100
+        self.shield.energy = 100
+        self.tokens = []
         self.weapon_type = int(random()*Projectile.TYPE_MAX)
         self.weapon_level = int(random()*4)
         self.anim = createanim(Ship.width, Ship.height, Ship.tileset, 0, 0, 3, 0, False, 0.125)
@@ -116,6 +119,9 @@ class Ship:
     def brake_x(self):
         self.delta_x *= .96
         
+    def pickup_token(self, token_type):
+        # SFX
+        self.tokens.append(token_type)
 
     def update(self, delta):
         if not self.alive: return
@@ -156,9 +162,30 @@ class Ship:
         self.delta_y += .125
         self.delta_y = 2.0 if self.delta_y > 2.0 else self.delta_y       
 
+    def receive_impact(self, x, y, pain=1):
+        if self.shield.energy > 0:
+            self.shield.sync_position( self )
+            self.shield.energy -= pain
+            self.shield.activate(x, y)
+        else:
+            self.damage(pain)
+
+    def damage(self, pain=1):
+        self.energy -= 1
+        if self.energy <= 0:
+            self.die()
+
+    def die(self):
+        #Spawn explosion
+        for x in Ship.game.explosions:
+            if x.alive: continue
+            x.spawn(int(self.x)-(Ship.width>>1), int(self.y)-(Ship.height>>1))
+            break
+        self.alive = False
+        self.energy = 0
+
     def draw(self):
-        if not Shield.alive:
-            Shield.alive = True
+        if not self.alive: return
         drawanim(self.anim, int(self.x), int(self.y))
         Shield.draw()
         self.flames[0].draw()

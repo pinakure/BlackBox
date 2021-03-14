@@ -9,6 +9,7 @@
 #include<Windows.h>
 #pragma comment(lib, "urlmon.lib")
 
+Surface* Engine::target= &Vpu::background;
 #define WORLD_SIZE					65535
 #define NPC_COUNT					128
 int Engine::width					= 640;
@@ -231,7 +232,7 @@ void Engine::print(std::string text) {
 
 float Engine::_rotation = 0.0f;
 void Engine::rotate(float r) {
-	Vpu::select(Vpu::background);
+	Vpu::select(*Engine::target);
 	_rotation = r;
 	Vpu::target->rotation[0]+=_rotation;
 }
@@ -240,7 +241,7 @@ float Engine::_scale[3] = {
 	0.0f, 0.0f, 0.0f,
 };
 void Engine::scale(float x, float y, float z) {
-	Vpu::select(Vpu::background);
+	Vpu::select(*Engine::target); 
 	_scale[0] = x;
 	_scale[1] = y;
 	_scale[2] = z;

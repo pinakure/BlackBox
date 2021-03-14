@@ -653,7 +653,7 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 
 		case ALLEGRO_KEY_F5: 
 			if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) {
-				Engine::scale(-0.01, -0.01, 0.0);				
+				Engine::scale(-0.01, -0.01, 0.0);
 			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::scale(0.0, 0.0, 0.0);
 			break;
 
@@ -674,11 +674,10 @@ void InputDevice::handleEvent(ALLEGRO_EVENT &event) {
 				Engine::rotate(0.01);
 			} else if (event.keyboard.type == ALLEGRO_EVENT_KEY_UP) Engine::rotate(0.0);
 			break;
-
-		case 55: //f9
-		case 56: //f10
-		case 57: //f11
-		case 58: //f11
+		/* F9  */case 55: if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) Engine::target = &Vpu::background; break;
+		/* F10 */case 56: if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) Engine::target = &Vpu::foreground; break;
+		/* F11 */case 57: if (event.keyboard.type == ALLEGRO_EVENT_KEY_DOWN) Engine::target = &Vpu::overlay; break;
+		case 58: //f12
 			break;
 
 		case 93: //pause / break

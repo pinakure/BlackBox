@@ -25,9 +25,12 @@ class BigExplosion:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.energy_type = 0
         self.time = 0
         self.alive = True
-        self.anim = createanim(32,32,BigExplosion.tileset,0,0,1,3,False,0.25)
+        self.anim_fire   = createanim(32,32,BigExplosion.tileset,0,0,3,1,False,0.25)
+        self.anim_plasma = createanim(32,32,BigExplosion.tileset,0,2,3,3,False,0.25)
+        self.anim = self.anim_fire
     
     def __del__(self):
         if self.anim: deleteanim(self.anim)
@@ -40,13 +43,13 @@ class BigExplosion:
         if self.time > 30:
             self.alive = False
 
-    def spawn(self):
-        # self.x = int(BigExplosion.game.dims[1][0]/4) + int(random()*(BigExplosion.game.dims[1][0]/2))-16
-        # self.y = int(BigExplosion.game.dims[1][1]/4) + int(random()*(BigExplosion.game.dims[1][1]/2))-16
-        self.x = int(random()*BigExplosion.game.dims[1][0])-16
-        self.y = int(random()*BigExplosion.game.dims[1][1])-16
+    def spawn(self, x, y, energy_type=0):
+        self.x = x
+        self.y = y
         self.time = 0
         self.alive = True
+        self.energy_type = energy_type
+        self.anim = self.anim_plasma if self.energy_type == 1 else self.anim_fire
 
     def draw(self):
         if not self.alive: 

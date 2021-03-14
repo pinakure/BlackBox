@@ -52,7 +52,39 @@ class Projectile:
     def __del__(self):
         pass
 
+    def check_ship_collision(self):
+        # return not None if projectile collides with an (alive) ship
+        # set bounding box coordinates 
+        target = self.game.ship if self.game.ship.shield.energy <= 0 else self.game.ship.shield
+        if not self.game.ship.alive: return None
+        tw = target.width - 12
+        th = target.height - 12
+        left  = int(target.x) - (tw>>1)
+        top   = int(target.y) - (tw>>1)
+        right = left + tw
+        bottom= top  + th
+        if self.x >= left and self.x <= right:
+            if self.y >= top and self.y <= bottom:
+                return self.game.ship
+        return None
+    
+    def check_foe_collision(self):
+        # return not None if projectile collides with an (alive) foe
+        for foe in self.game.foes:
+            if not foe.alive: continue
+            # set bounding box coordinates 
+            left  = int(foe.x) - (foe.width>>1)
+            top   = int(foe.y) - (foe.height>>1)
+            right = left + foe.width
+            bottom= top  + foe.height
+            if self.x >= left and self.x <= right:
+                if self.y >= top and self.y <= bottom:
+                    return foe
+        return None
+        
     def update(self, delta):
+        from data.scripts.foe               import Foe
+        from data.scripts.ship              import Ship
         if not self.alive: return
         self.x += self.delta_x
         self.y += self.delta_y
@@ -62,6 +94,11 @@ class Projectile:
         elif self.y > int(Projectile.game.dims[1][1]): self.alive = False
         self.angle = atan2(-self.delta_x, -self.delta_y)*-1
         if self.delta_x > -.1 and self.delta_x < .1 and self.delta_y > -.1 and self.delta_y < .1: self.alive = False
+        if self.owner == Foe: target = self.check_ship_collision()
+        elif self.owner == Ship: target = self.check_foe_collision()
+        if target is not None:
+            self.alive = False
+            target.receive_impact(self.x, self.y)
             
     @staticmethod
     def spawn(x,y,projectile_type,level,delta_x=0.0, delta_y=-1.5, owner=None):
