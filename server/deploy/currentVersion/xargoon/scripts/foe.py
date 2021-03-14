@@ -59,7 +59,7 @@ class Foe:
         self.alive            = True
         self.target           = None
         self.point            = RandomPoint(self.x, self.y)
-        self.weapon_type      = Projectile.TYPE_C
+        self.weapon_type      = foe_type%3
         self.projectile_speed = Foe.weapon_speed[ self.weapon_type ]
         self.weapon_level     = Foe.weapon_level[ self.weapon_type ]
         self.shoot_rate       = Foe.weapon_rate[ self.weapon_type ]
@@ -153,6 +153,10 @@ class Foe:
         self.x = int(random() * Foe.game.dims[1][0] ) - 16
         self.y = int(random() * Foe.game.dims[1][1] ) - 16
         self.foe_type = int(random()*(Foe.TYPE_MAX))
+        self.weapon_type      = self.foe_type%3
+        self.projectile_speed = Foe.weapon_speed[ self.weapon_type ]
+        self.weapon_level     = Foe.weapon_level[ self.weapon_type ]
+        self.shoot_rate       = Foe.weapon_rate[ self.weapon_type ]        
         self.current_burst = 3
         self.path = []
         self.thrust = 1.0
@@ -250,6 +254,13 @@ class Foe:
         #spawn explosion
         for x in Foe.game.explosions:
             if x.alive: continue
-            x.spawn(int(self.x)-(Foe.width>>1), int(self.y)-(Foe.height>>1), energy_explosion)
+            x.spawn(int(self.x)-(Foe.width>>1), int(self.y)-(Foe.height>>1), energy_explosion)                
             Foe.game.score += 1           
             break
+        if Foe.game.score % 5==1: 
+            for t in Foe.game.tokens:
+                if t.alive: continue
+                t.spawn(int(self.x)-(Foe.width>>1), int(self.y)-(Foe.height>>1))                
+                break
+        
+            

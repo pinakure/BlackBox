@@ -190,12 +190,12 @@ class Token:
                     self.alive = False
         
 
-    def spawn(self):
+    def spawn(self, x=0, y=0, token_type=None):
         self.delta_x = ((random()*250)/250)*(-1 if int(random()*2)==1 else 1)
         self.delta_y = ((random()*250)/250)*(-1 if int(random()*2)==1 else 1)
-        self.x = int(random()*Token.game.dims[1][0])-16
-        self.y = int(random()*Token.game.dims[1][1])-16
-        self.token_type = int(random() * Token.TYPE_MAX)
+        self.x = x
+        self.y = y
+        self.token_type = int(random() * Token.TYPE_MAX) if token_type is None else token_type
         self.alive = True
 
     def draw(self):

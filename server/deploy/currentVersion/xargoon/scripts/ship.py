@@ -122,6 +122,8 @@ class Ship:
     def pickup_token(self, token_type):
         # SFX
         self.tokens.append(token_type)
+        self.weapon_type = int(random()*Projectile.TYPE_MAX)
+        self.weapon_level = int(random()*4)%4            
 
     def update(self, delta):
         if not self.alive: return
@@ -138,8 +140,6 @@ class Ship:
             if Ship.timer % (64 >> self.rapid_fire) == 0: self.shooting = True
                 
         if self.shooting:
-            self.weapon_type = int(random()*Projectile.TYPE_MAX)
-            self.weapon_level = int(random()*4)%4
             delta_y = -1.5 + (self.delta_y) if self.delta_y < 0 else -1.5
             delta_x = .25
             Projectile.spawn(self.x+2-(Ship.width>>1), self.y-2, self.weapon_type, self.weapon_level,  delta_x , delta_y, Ship)

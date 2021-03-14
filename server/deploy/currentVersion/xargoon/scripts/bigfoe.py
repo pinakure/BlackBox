@@ -1,6 +1,7 @@
 from vpu import *
-
-class BigFoe:
+from random import random
+from data.scripts.foe import Foe
+class BigFoe(Foe):
     TYPE_A = 0x00
     TYPE_B = 0x01
     TYPE_C = 0x02
@@ -36,16 +37,7 @@ class BigFoe:
         if not self.alive: return
         pass
 
-    def find_target(self):
-        pass
-
-    def wander(self):
-        pass
-
-    def flee(self):
-        pass
-
-    def attack(self):
+    def generate_random_path(self):
         pass
 
     def receive_impact(self, x, y):
@@ -60,6 +52,22 @@ class BigFoe:
         if self.energy <= 0:
             self.die()
 
+    def spawn(self):
+        from data.scripts.foe import Foe
+        self.x = int(random() * Foe.game.dims[1][0] ) - 16
+        self.y = int(random() * Foe.game.dims[1][1] ) - 16
+        self.weapon_type      = int(random()*4)
+        self.projectile_speed = Foe.weapon_speed[ self.weapon_type ]
+        self.weapon_level     = Foe.weapon_level[ self.weapon_type ]
+        self.shoot_rate       = Foe.weapon_rate[ self.weapon_type ]        
+        self.foe_type = int(random()*(Foe.TYPE_MAX))
+        self.current_burst = 3
+        self.path = []
+        self.thrust = 1.0
+        self.generate_random_path()
+        self.timer = int(random() * self.shoot_rate)
+        self.alive = True
+    
     def die(self):
         self.alive = False
         #spawn explosion

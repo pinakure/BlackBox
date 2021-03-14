@@ -35,8 +35,6 @@ class Game:
             vpu.fill(8,16,32,255)
             vpu.perlin(0, 8,16,255)
         vpu.select(1)
-        
-
 
     @staticmethod
     def setup():
@@ -126,7 +124,9 @@ class Game:
         x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
         y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
         token_type = int(random()*(Token.TYPE_MAX))
-        Game.tokens.append(Token(x, y, token_type))        
+        t = Token(x, y, token_type)
+        t.alive = False
+        Game.tokens.append(t)
 
     @staticmethod
     def spawn():
@@ -179,7 +179,7 @@ class Game:
         HudIcon.update(delta)
         for token in Game.tokens:
             if token.alive: token.update(delta)
-            else: token.spawn()
+            #else: token.spawn()
         for explosion in Game.explosions:
             if explosion.alive: explosion.update(delta)
             #else: explosion.spawn()
