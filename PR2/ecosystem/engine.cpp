@@ -21,6 +21,7 @@ ALLEGRO_TIMER *Engine::timer		= NULL;
 ALLEGRO_TIMER *Engine::clock		= NULL;
 ALLEGRO_EVENT_QUEUE *Engine::queue	= NULL;
 ALLEGRO_EVENT Engine::event;	
+std::vector<Entity*> Engine::entities = std::vector<Entity*>();
 /* 
 ---------------------------------------------------------------------------------------- 
  Point to the showcase we want to test on runtime 
@@ -148,6 +149,13 @@ void Engine::handleEvents() {
 	}		
 }
 
+static void drawEntities() {
+	std::vector<Entity*>::iterator it = Engine::entities.begin();
+	for (; it != Engine::entities.end(); it++) {
+		(*it)->draw();
+	}
+}
+
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		// Clean before drawing HUD
@@ -166,13 +174,26 @@ void Engine::render() {
 	}
 }
 
+void Engine::destroyEntities() {
+	std::vector<Entity*>::iterator it = Engine::entities.begin();
+	for (; it < Engine::entities.end(); it++) {
+		delete(*it);
+	}
+	Engine::entities.clear();
+}
+
 #include <chrono>
 auto tp1 = std::chrono::system_clock::now();
 auto tp2 = std::chrono::system_clock::now();
 
+void updateEntities(float delta) {
+	std::vector<Entity*>::iterator it = Engine::entities.begin();
+	for (; it != Engine::entities.end(); it++) {
+		(*it)->update(delta);
+	}
+}
+
 void Engine::update() {
-	
-	
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsedTime = tp2 - tp1;
 	tp1 = tp2;
@@ -192,7 +213,9 @@ void Engine::update() {
 	Hud::update(fElapsedTime);
 	Dashboard::update(fElapsedTime);
 	InputDevice::update(fElapsedTime);
+	updateEntities(fElapsedTime);
 	Console::update();//!!!
+	
 	render();
 	handleEvents();
 	cycles++;

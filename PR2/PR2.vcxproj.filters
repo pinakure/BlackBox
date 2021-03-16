@@ -131,6 +131,9 @@
     <ClCompile Include="ecosystem\tiledmap.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
+    <ClCompile Include="ecosystem\entity.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

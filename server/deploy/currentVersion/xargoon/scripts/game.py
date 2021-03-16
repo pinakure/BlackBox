@@ -7,6 +7,7 @@ from data.scripts.token             import Token
 from data.scripts.foe               import Foe
 from data.scripts.bigfoe            import BigFoe
 from data.scripts.hudicon           import HudIcon
+from data.scripts.entity            import Entity, EntityController
 from random                         import random
 import blackbox
 import vpu
@@ -17,6 +18,7 @@ class Game:
     width = 0
     height = 0
     dims = {}
+    entities = []
     tokens = []
     explosions = []
     projectiles = []
@@ -51,6 +53,8 @@ class Game:
         # get layer dimensions
         vpu.select(0); Game.dims[0] = vpu.dimensions()
         vpu.select(1); Game.dims[1] = vpu.dimensions()
+        Game.width  = Game.dims[1][0]
+        Game.height = Game.dims[1][1]
         vpu.select(2); Game.dims[2] = vpu.dimensions()
         print(f"GAME: BG Resolution: {Game.dims[0][0]} x {Game.dims[0][1]}")
         print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
@@ -101,6 +105,42 @@ class Game:
         
         #Spawn ship
         Game.spawn()
+
+        #Test entity system
+        #-------------------------------------------------------
+        ent = Entity(Game, 16,16,"Test 1")
+        ent.addcontroller(EntityController.CONTROLLER_INPUT)
+        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_MOVE)
+        ent.addcontroller(EntityController.CONTROLLER_AVOID)
+        ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
+        Game.entities.append(ent)
+        #-------------------------------------------------------
+        ent = Entity(Game, 16,16,"Test 2")
+        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_MOVE)
+        ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
+        ent.addcontroller(EntityController.CONTROLLER_AVOID)
+        Game.entities.append(ent)
+        #-------------------------------------------------------
+        ent = Entity(Game, 16,16,"Test 3")
+        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_MOVE)
+        ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
+        ent.addcontroller(EntityController.CONTROLLER_AVOID)
+        Game.entities.append(ent)
+        #-------------------------------------------------------
+        ent = Entity(Game, 16,16,"Test 4")
+        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_MOVE)
+        #ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
+        #ent.addcontroller(EntityController.CONTROLLER_AVOID)
+        Game.entities.append(ent)
+        #-------------------------------------------------------
+        Game.entities[1].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[0])
+        Game.entities[0].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[1])
+        Game.entities[1].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[2])
+        Game.entities[2].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[3])
         
     @staticmethod
     def randomExplosion(baseclass):
@@ -136,6 +176,7 @@ class Game:
 
     @staticmethod
     def destroy():
+        Game.entities = []
         Game.tokens = []
         Game.explosions = []
         Game.projectiles = []
@@ -177,6 +218,10 @@ class Game:
     @staticmethod
     def update(delta):
         HudIcon.update(delta)
+        for entity in Game.entities:
+            entity.update(delta)
+            #if entity.alive: 
+            #else: token.spawn()
         for token in Game.tokens:
             if token.alive: token.update(delta)
             #else: token.spawn()
@@ -202,6 +247,8 @@ class Game:
         # pre-clean foreground layer
         vpu.select(1)
         vpu.fill(0,0,0,0)
+        for entity in Game.entities:  
+            entity.draw()
         for token in Game.tokens:            
             if token.alive: token.draw()
         for foe in Game.foes:            

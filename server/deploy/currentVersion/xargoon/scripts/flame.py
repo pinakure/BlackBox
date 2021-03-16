@@ -42,10 +42,6 @@ class Flame:
         self.y = y
         self.rotation = 0.0
         
-    def __del__(self):
-        if self.anim: deleteanim(self.anim)
-        self.anim = None
-
     def draw(self):
         drawanim(Flame.gfx[self.flame_type], self.x, self.y, self.rotation)
         

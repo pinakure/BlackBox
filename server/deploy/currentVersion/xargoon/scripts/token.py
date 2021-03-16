@@ -137,6 +137,8 @@ class Token:
         tintsprite(Token.tileset[ Token.TYPE_BOMB_B ], original_colors, palettes[1])
         tintsprite(Token.tileset[ Token.TYPE_BOMB_C ], original_colors, palettes[2])
         tintsprite(Token.tileset[ Token.TYPE_BOMB_D ], original_colors, palettes[3])
+        deletesprite(sprite)
+
         Token.gfx = {}
         for i in range(0, Token.TYPE_MAX):  
             Token.gfx[ i ] = createanim(16, 16, Token.tileset[ i ], 0, 0, 7, 0, False,0.125)        
@@ -147,15 +149,9 @@ class Token:
         for t in Token.gfx: 
             deleteanim(t)
         Token.gfx = {}
-        
         for t in Token.tileset: 
             deletesprite(t)
         Token.tileset = {}
-        
-        if Token.sprite: 
-            deletesprite(Token.sprite)
-        Token.sprite = None
-        
         Token.initialized = False
         
     def __init__(self, x=0, y=0, token_type=TYPE_A):

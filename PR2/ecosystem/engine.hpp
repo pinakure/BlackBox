@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include "entity.hpp"
 
 class Engine {
 private:
@@ -32,7 +33,11 @@ public:
 	static void print(std::string text);
 	static void printf(const char *fmt, ...);
 
+	static std::vector<Entity*> entities;
+	static void destroyEntities();
+
 	static void download(const char *file);
+
 
 	static void scale(float, float, float);
 	static void rotate(float);

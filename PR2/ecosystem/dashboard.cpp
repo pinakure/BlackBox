@@ -387,7 +387,8 @@ void DashboardTitle::execute() {
 		s.execute("Game.loop()");
 		InputDevice::control_c = false;
 		s.execute("Game.destroy()");
-		s.execute("Game = 1");
+		s.execute("Game = 1");		
+		Engine::destroyEntities();
 		Dashboard::enabled = true;
 	} else {
 		printf("ERROR: Cannot call game.main\n");

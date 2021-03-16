@@ -40,11 +40,11 @@ class Foe:
 
     @staticmethod 
     def destroy():
-        for i in range(0x00, 0x08):
-            deletesprite(Foe.gfx[i])
-        Foe.gfx = {}
-        Foe.initialized = False
-
+        if Foe.initialized:
+            for i in range(0x00, 0x08):
+                deletesprite(Foe.gfx[i])
+            Foe.gfx = {}
+            Foe.initialized = False
 
     def __init__(self, x, y, foe_type=TYPE_A):
         self.foe_type         = foe_type

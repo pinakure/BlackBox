@@ -1,6 +1,8 @@
 // When a function is not expected to return any value, it should return True on sucess
 // and False on error, and preferably drop the error over the console.
 
+#define HANDLE unsigned long 
+
 Surface *getLayer(int index) {
 	if (!Vpu::is_initialized) {
 		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");
@@ -33,19 +35,19 @@ pythoncommand(vpu_fading) {
 
 pythoncommand(vpu_textout) {
 	char* text;
-	int x;
-	int y;
-	if (!PyArg_ParseTuple(args, "sii", &text, &x, &y)) return NULL;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "sff", &text, &x, &y)) return NULL;
 	Vpu::print(std::string(text), x, y);
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_subsprite) {
 	long int handle;
-	int left=-1;
-	int top=-1;
-	int right=-1;
-	int bottom=-1;
-	if (!PyArg_ParseTuple(args, "i|iiii", &handle, &left, &top, &right, &bottom)) return NULL;
+	float left=-1;
+	float top=-1;
+	float right=-1;
+	float bottom=-1;
+	if (!PyArg_ParseTuple(args, "i|ffff", &handle, &left, &top, &right, &bottom)) return NULL;
 	// Get sprite object
 	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
 		Sprite *s = &Vpu::sprites.at(handle);
@@ -80,16 +82,16 @@ pythoncommand(vpu_tintsprite) {
 	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_pset) {
-	int x;
-	int y;
-	if (!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "ff", &x, &y)) return NULL;
 	Vpu::putpixel(x, y);
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_perlin) {
 	int handle;
-	int r=255,g=255,b=255;
-	if (!PyArg_ParseTuple(args, "i|iii", &handle, &r, &g, &b)) return NULL;
+	float r=255.0f,g=255.0f,b=255.0f;
+	if (!PyArg_ParseTuple(args, "i|fff", &handle, &r, &g, &b)) return NULL;
 	Surface* l = getLayer(handle);
 	if (l) {
 		Vpu::perlin(*l, r, g, b);
@@ -98,29 +100,29 @@ pythoncommand(vpu_perlin) {
 	return PyBool_FromLong(false);
 }
 pythoncommand(vpu_line) {
-	int x;
-	int y;
-	int dx;
-	int dy;
-	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
 	Vpu::line(x, y, dx, dy);
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_rect) {
-	int x;
-	int y;
-	int dx;
-	int dy;
-	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
 	Vpu::rectangle(x, y, dx, dy);
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_fillrect) {
-	int x;
-	int y;
-	int dx;
-	int dy;
-	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &dx, &dy)) return NULL;
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
 	Vpu::qfillRectangle(x, y, dx, dy);
 	return PyBool_FromLong(true);
 }
@@ -226,11 +228,11 @@ pythoncommand(vpu_setscale){
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_setcolor){
-	int r;
-	int g;
-	int b;
-	int a=255;
-	if(!PyArg_ParseTuple(args, "iii|i", &r, &g, &b, &a)) return NULL;
+	float r;
+	float g;
+	float b;
+	float a=255.0f;
+	if(!PyArg_ParseTuple(args, "fff|f", &r, &g, &b, &a)) return NULL;
 	Vpu::setColor(r, g, b, a);
 	return PyBool_FromLong(1);
 }
@@ -256,9 +258,9 @@ pythoncommand(vpu_createsurf){
 pythoncommand(vpu_drawsurf){
 	// Must subtract 3 units from handle (3 system layers to be selected which are not in <surfaces>)
 	int handle;
-	int x;
-	int y;
-	if(!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	float x;
+	float y;
+	if(!PyArg_ParseTuple(args, "iff", &handle, &x, &y)) return NULL;
 	Surface *s = getLayer(handle);
 	Vpu::drawSurface(*s, 0, 0, s->width, s->height, x, y);
 	return PyLong_FromLong(1);	
@@ -283,10 +285,10 @@ pythoncommand(vpu_createsprite){
 
 pythoncommand(vpu_drawsprite){
 	int handle;
-	int x;
-	int y;
+	float x;
+	float y;
 	float angle=0.0f;
-	if(!PyArg_ParseTuple(args, "iii|f", &handle, &x, &y, &angle)) return NULL;
+	if(!PyArg_ParseTuple(args, "iff|f", &handle, &x, &y, &angle)) return NULL;
 	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
 		Sprite* spr = &Vpu::sprites.at(handle);
 		spr->picture.rotation[0] = angle;
@@ -317,18 +319,17 @@ pythoncommand(vpu_transition) {
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_createanim){
-	int width;
-	int height;
-	int sprite;
-	int dx=0;
-	int dy=0;
-	int sx=1;
-	int sy=0;
-	bool autoupdate=false;
-	bool vertical=false;
+	float width;
+	float height;
+	int   sprite;
+	float dx=0;
+	float dy=0;
+	float sx=1;
+	float sy=0;
+	bool  vertical=false;
 	float speed = 1.0f;
-	int flags = 0;
-	if(!PyArg_ParseTuple(args, "iii|iiii|bfb", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed, &autoupdate)) return NULL;
+	bool  autoupdate=false;
+	if(!PyArg_ParseTuple(args, "ffi|ffffbfb", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed, &autoupdate)) return NULL;
 	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
 		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical, autoupdate);
 		Vpu::animations.at(handle).speed = speed;
@@ -351,10 +352,10 @@ pythoncommand(vpu_updateanim) {
 }
 pythoncommand(vpu_drawanim){
 	int handle;
-	int x;
-	int y;
+	float x;
+	float y;
 	float rotation = 0.0f;
-	if(!PyArg_ParseTuple(args, "iii|f", &handle, &x, &y, &rotation)) return NULL;
+	if(!PyArg_ParseTuple(args, "iff|f", &handle, &x, &y, &rotation)) return NULL;
 	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
 		Vpu::drawAnimationRotated(Vpu::animations.at(handle), x, y, rotation);
 		return PyBool_FromLong(true);
@@ -373,15 +374,7 @@ pythoncommand(vpu_setfont) {
 		return PyBool_FromLong(true);
 	}
 	printf("ERROR: font '%s' not found\n", fontname);
-	return PyBool_FromLong(false);
-	/*for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
-		Font* font = *it;
-		if (!font->name.compare(fontname)) {
-			Vpu::setFont(font);
-			return PyBool_FromLong(true);
-		}
-	}
-	return PyBool_FromLong(false);*/
+	return PyBool_FromLong(false);	
 }
 pythoncommand(vpu_dimensions){
 	if(!PyArg_ParseTuple(args, "")) return NULL;
@@ -400,27 +393,27 @@ pythoncommand(vpu_dimensions){
 	return list;	
 }
 pythoncommand(vpu_fill){
-	int r = -1;
-	int g = -1;
-	int b = -1;
-	int a = -1;
-	if(!PyArg_ParseTuple(args, "|iiii", &r, &g, &b, &a)) return NULL;
-	Vpu::paint(r>=0?r:0, g>=0 ? g : 0, b>=0? b : 0, a>=0 ? a : 255);
+	float r = -1.0f;
+	float g = -1.0f;
+	float b = -1.0f;
+	float a = -1.0f;
+	if(!PyArg_ParseTuple(args, "|ffff", &r, &g, &b, &a)) return NULL;
+	Vpu::paint(r>=0.0f?r:0, g>=0.0f ? g : 0.0f, b>=0.0f? b : 0.0f, a>=0.0f ? a : 255.0f);
 	return PyBool_FromLong(true);	
 }
 pythoncommand(vpu_fadein){
-	int r = -1;
-	int g = -1;
-	int b = -1;
-	if(!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;	
+	float r = -1;
+	float g = -1;
+	float b = -1;
+	if(!PyArg_ParseTuple(args, "|fff", &r, &g, &b)) return NULL;	
 	Vpu::fadein(r,g,b);
 	return PyBool_FromLong(true);
 }
 pythoncommand(vpu_fadeout){
-	int r = -1;
-	int g = -1;
-	int b = -1;
-	if (!PyArg_ParseTuple(args, "|iii", &r, &g, &b)) return NULL;
+	float r = -1;
+	float g = -1;
+	float b = -1;
+	if (!PyArg_ParseTuple(args, "|fff", &r, &g, &b)) return NULL;
 	Vpu::fadeout(r,g,b);
 	return PyBool_FromLong(true);
 }
@@ -559,7 +552,7 @@ pythoncommand(blackbox_createstring) {
 	char* name;
 	char* help = 0;
 	float  max_len = 65535;
-	char * value=0;
+	char* value = 0;
 	if (!PyArg_ParseTuple(args, "s|sis", &name, &value, &max_len, &help)) return NULL;
 	CVar::settings[name] = CVar::create<Text>(
 		name,
@@ -569,6 +562,56 @@ pythoncommand(blackbox_createstring) {
 		);
 	((Text*)CVar::settings[name])->setMaxLength(max_len);
 	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+
+
+#include "entity.hpp"
+pythoncommand(blackbox_createentity) {
+	int width = 16;
+	int height = 16;
+	char* name = nullptr;
+	if (!PyArg_ParseTuple(args, "|iis", &width, &height, &name)) return NULL;
+	Engine::entities.push_back(new Entity(width, height, name ? name : "UnnamedEntity"));
+	return PyLong_FromLong((long)Engine::entities.size() - 1);
+}
+pythoncommand(blackbox_updateentity) {
+	double delta;
+	long handle;
+	if (!PyArg_ParseTuple(args, "if", &handle, &delta)) return NULL;
+	Engine::entities[handle]->update(delta);
+	return PyBool_FromLong(1);
+}
+pythoncommand(blackbox_entitytarget) {
+	long handle_entity;
+	long handle_target;
+	int type;
+	if (!PyArg_ParseTuple(args, "iii", &handle_entity, &handle_target, &type)) return NULL;
+	Entity* src = Engine::entities[handle_entity]; 
+	Entity* dst = Engine::entities[handle_target]; 
+	if (src && dst) {
+		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+		switch (type) {
+			case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst);break;
+			case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst);break;
+			case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst);break;
+		}	
+		#undef HasController
+	}
+	return PyBool_FromLong(1);
+}
+pythoncommand(blackbox_drawentity) {
+	long handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->draw();
+	return PyBool_FromLong(1);
+}
+pythoncommand(blackbox_addcontroller) {
+	long handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &handle, &type)) return NULL;
+	Entity* e = Engine::entities[handle];
+	e->addController((EntityController::Type)type);
+	return PyLong_FromLong((long)e->controllers.size()-1);
 }
 
 pythoncommand(blackbox_deletevar) {
@@ -639,23 +682,23 @@ pythoncommand(typewriter_ready) {
 }
 
 pythoncommand(typewriter_setposition) {
-	int x;
-	int y;
-	if (!PyArg_ParseTuple(args, "ii", &x, &y)) return NULL;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "ff", &x, &y)) return NULL;
 	TypeWriter::x = x;
 	TypeWriter::y = y;
 	return PyLong_FromLong(1);
 }
 pythoncommand(typewriter_setcolor) {
-	int r = -1;
-	int g = -1;
-	int b = -1;
-	int a = -1;
-	if (!PyArg_ParseTuple(args, "iii|i", &r, &g, &b, &a)) return NULL;
+	float r;
+	float g;
+	float b;
+	float a = -1;
+	if (!PyArg_ParseTuple(args, "fff|f", &r, &g, &b, &a)) return NULL;
 	TypeWriter::r = r;
 	TypeWriter::g = g;
 	TypeWriter::b = b;
-	TypeWriter::a = a==-1?0:a;
+	TypeWriter::a = a==-1.0f?0.0f:a;
 	return PyLong_FromLong(1);
 }
 
@@ -757,11 +800,11 @@ pythoncommand(typewriter_enqueue) {
 }
 pythoncommand(typewriter_loadpic) {
 	char *buffer;
-	int x=0;
-	int y=0;
-	int w=0;
-	int h=0;
-	if(!PyArg_ParseTuple(args, "s|iiii", &buffer, &x, &y, &w, &h)) return NULL;	
+	float x=0;
+	float y=0;
+	float w=0;
+	float h=0;
+	if(!PyArg_ParseTuple(args, "s|ffff", &buffer, &x, &y, &w, &h)) return NULL;	
 	TypeWriter::loadPicture(buffer, x,y, w,h);
 	return PyLong_FromLong(1);
 }
@@ -867,6 +910,11 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
 	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
+	{"createentity"	, blackbox_createentity , METH_VARARGS, "blackbox.createentity(width, height, name) : Create a generic entity width given size and name"},
+	{"drawentity"	, blackbox_drawentity   , METH_VARARGS, "blackbox.drawentity(handle) : "},
+	{"updateentity"	, blackbox_updateentity , METH_VARARGS, "blackbox.updateentityt(entity, delta) : "},
+	{"entitytarget" , blackbox_entitytarget , METH_VARARGS, "blackbox.entitytarget(handle, target_handle) : " },
+	{"addcontroller", blackbox_addcontroller, METH_VARARGS, "blackbox.addcontroller(entity, controller_type) : "},
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
 	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"download"		, blackbox_download		, METH_VARARGS, "blackbox.download(filename) : Download file from current version repository."},
