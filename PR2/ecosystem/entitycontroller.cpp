@@ -170,9 +170,13 @@ void EntityFollowController::nextTarget() {
 }
 
 void EntityFollowController::update(double delta){
-	float dx = ((float(this->target_x) - this->parent->x)/16.0f);
-	float dy = ((float(this->target_y) - this->parent->y)/16.0f);
-	printf("dx: %f - dy: %f\r", dx, dy);
+	float dx = int(target_x - parent->x);
+	float dy = int(target_y - parent->y);
+	this->parent->angle = atan2(dx, dy) * -1;
+	
+	dx /= 16.0f;
+	dy /= 16.0f;
+	
 	if (this->path.size() == 0) {
 		this->generatePath();
 	}
@@ -236,24 +240,89 @@ void EntityMoveController::draw() {
 /*---------------------------------------------------------------------------------*/
 
 EntityShootController::EntityShootController(Entity* parent) : EntityController(parent) {
-	this->reload_time	= 16;
-	this->reload_timer	= 0;
+	this->reload_time	= 16.0f;
+	this->reload_timer	= 0.0f;
+	this->burst_time	= 8.0f;
+	this->burst_timer	= 0.0f; 
 	this->burst_size	= 5;
 	this->burst_counter = 0;
-	this->burst_time	= 8;
-	this->burst_timer	= 0;
+	
+	this->shoot			= false;
+	this->projectile_speed = 0.125f;
+	this->projectile_type  = 0;
 	this->target_x = 0;
 	this->target_y = 0;
 	this->target_width  = 0;
 	this->target_height = 0;
+	this->range			= 64;
 	this->target_entity = nullptr;
 }
 
 void EntityShootController::draw() {
+	if (this->target_entity) {
+		Vpu::color = al_map_rgba(
+			(this->target_in_range ? 255 : 0),
+			(this->shoot ? 255 : this->reloading ? 128 : 0),
+			0,
+			127
+		);
+		Vpu::circle(
+			this->parent->x,
+			this->parent->y,
+			this->range>>1,
+			Vpu::color.r * 255,
+			Vpu::color.g * 255,
+			Vpu::color.b * 255,
+			Vpu::color.a * 255
+		);
+		Vpu::line(this->parent->x, this->parent->y, this->target_x, this->target_y);
+	}
 }
-
 void EntityShootController::update(double delta){
-	// aim and shoot...
+	#define min(a,b) (a<b?a:b)
+	#define max(a,b) (a>b?a:b)
+	if (target_entity) setTarget(target_entity);
+	float x1 = min(target_x, parent->x);
+	float x2 = max(target_x, parent->x);
+	float y1 = min(target_y, parent->y);
+	float y2 = max(target_y, parent->y);
+	int distance = int((x2 - x1) + (y2 - y1));
+	target_in_range = distance <= range;
+	this->shoot = false;
+	if(target_in_range) {
+		int dx = int(target_x - parent->x);
+		int dy = int(target_y - parent->y);
+		if (reloading) {
+			reload_time += 1.0f * delta;
+			if (reload_time >= reload_timer) {
+				reload_time = 0.0f;
+				reloading = false;
+			}
+		} else {
+			burst_time += 1.0f * delta;
+			if (burst_time >= burst_timer) {
+				this->shoot = true;
+				burst_time = 0.0f;
+				burst_counter++;
+				if (burst_counter >= burst_size) {
+					burst_counter = 0;
+					reloading = true;
+				}
+			}
+		}
+		
+		this->parent->angle = atan2(dx, dy) * -1;
+
+		if (this->shoot) {
+			distance *= this->projectile_speed;
+			if (distance == 0)distance = 1;// avoid zero division!
+			
+			int w = this->parent->width >> 1;
+			//Projectile.spawn(self.x, self.y, self.weapon_type, self.weapon_level, dx / distance, dy / distance, Foe)
+		}
+	}
+	#undef min
+	#undef max
 }
 
 void EntityShootController::setTarget(Entity* target) {
@@ -290,23 +359,35 @@ void EntityAvoidController::update(double delta) {
 	// update avoid point if it is an entity
 	if (this->target_entity)this->setTarget(this->target_entity);
 	// calculate deltas
-	const float min_distance = 32.0f;
-	float dx = min_distance - ((float(this->target.x) - this->parent->x));
-	float dy = min_distance - ((float(this->target.y) - this->parent->y));
+	const float min_distance = parent->width;
+	float dx = int(target.x - parent->x);
+	float dy = int(target.y - parent->y);
+	float angle = atan2(-dx, -dy) * -1;
+	dx = min_distance - dx;
+	dy = min_distance - dy;
+	
 	if (abs(dx) > min_distance) dx = 0;
 	if (abs(dy) > min_distance) dy = 0;
 	// apply deltlas
 	this->active = false;
 	if ((abs(dx) > 0.0f) || (abs(dy) > 0.0f)) {
 		this->active = true;
+		this->parent->angle = angle;
 		if (this->parent->controllers[CONTROLLER_FOLLOW]) {
 			EntityFollowController* followctl = (EntityFollowController*)this->parent->controllers[CONTROLLER_FOLLOW];
 			followctl->path.clear();
+			followctl->target_x = followctl->target_x - (dx);
+			followctl->target_y = followctl->target_y - (dy);
+			followctl->path.push_back({ int(followctl->target_x) ,int(followctl->target_y) });
 		}
 		if (this->parent->controllers[CONTROLLER_MOVE]) {
 			EntityMoveController* movectl = (EntityMoveController*)this->parent->controllers[CONTROLLER_MOVE];
-			movectl->delta_x -= dx / 128.0f;
-			movectl->delta_y -= dy / 128.0f;			
+			//movectl->delta_x -= dx / 256.0f;
+			//movectl->delta_y -= dy / 256.0f;
+			//movectl->delta_x *= 0.97f;
+			//movectl->delta_y *= 0.97f;		
+			movectl->delta_x = movectl->delta_x < -2.0f ? -2.0f : movectl->delta_x > 2.0f ? 2.0f : movectl->delta_x;
+			movectl->delta_y = movectl->delta_y < -2.0f ? -2.0f : movectl->delta_y > 2.0f ? 2.0f : movectl->delta_y;
 		}
 	}
 }
@@ -321,4 +402,64 @@ void EntityAvoidController::setTarget(int x, int y) {
 	this->target_entity = nullptr;
 	this->target.x = x;
 	this->target.y = y;
+}
+
+/*---------------------------------------------------------------------------------*/
+EntityBounceController::EntityBounceController(Entity *parent) : EntityController(parent) {
+	this->setBounds();
+	this->acceleration_x = 0.05f;
+	this->acceleration_y = 0.0097f;
+}
+
+void EntityBounceController::setBounds() {
+	Surface* srf = &Vpu::foreground;
+	float surf_width  = srf->width;
+	float surf_height = srf->height;
+	real_width   = (surf_width / 2) * (srf->scale[0]/2);
+	real_height  = (surf_height/ 2) * (srf->scale[1]/2);
+	this->top    = (srf->height / 2) - (real_height / 2);
+	this->left   = (srf->width  / 2) - (real_width  / 2);
+	this->right  = this->left   + real_width;
+	this->bottom = this->top    + real_height;
+}
+
+void EntityBounceController::update(double delta) {
+	
+	if (this->parent->x > this->right- (parent->width >> 1)) {
+		acceleration_x = -abs(acceleration_x);
+		delta_x = -abs(delta_x);
+		this->parent->x = this->right- (parent->width >> 1);
+	} 
+	if (this->parent->x < this->left + (parent->width >> 1)) {
+		acceleration_x = abs(acceleration_x);
+		delta_x = abs(delta_x);
+		this->parent->x = this->left + (parent->width >> 1);
+	}
+	if (this->parent->y < this->top + (parent->height >> 1)) {
+		delta_y = abs(delta_y);
+		this->parent->y = this->top + (parent->height >> 1);
+	}
+	if (this->parent->y > this->bottom - (parent->height >> 1)) {
+		delta_y = -abs(delta_y);
+		this->parent->y = this->bottom - (parent->height >> 1);
+	}
+
+	delta_y += acceleration_y;
+	delta_x += acceleration_x;
+
+	float max_speed = 2.0f;
+	if (delta_x >  max_speed)delta_x =  max_speed;
+	if (delta_x < -max_speed)delta_x = -max_speed;
+	
+	if (parent->controllers[CONTROLLER_MOVE]) {
+		EntityMoveController* movectl = (EntityMoveController*)parent->controllers[CONTROLLER_MOVE];
+		movectl->delta_x = delta_x;
+		movectl->delta_y = delta_y;
+	}
+}
+
+void EntityBounceController::draw() {
+	Vpu::color = al_map_rgba(255, 64, 0, 128);
+	Vpu::rectangle(left + 1, top, right - left - 1, bottom - top - 1);
+	Vpu::rectangle(left + 2, top+1, right - left - 3, bottom - top - 3);
 }

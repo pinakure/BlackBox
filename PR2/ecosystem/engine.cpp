@@ -149,13 +149,6 @@ void Engine::handleEvents() {
 	}		
 }
 
-static void drawEntities() {
-	std::vector<Entity*>::iterator it = Engine::entities.begin();
-	for (; it != Engine::entities.end(); it++) {
-		(*it)->draw();
-	}
-}
-
 void Engine::render() {
 	if (Vpu::redraw && al_is_event_queue_empty(queue)) {
 		// Clean before drawing HUD

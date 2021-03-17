@@ -20,7 +20,8 @@ public:
 		CONTROLLER_MOVE   = 0x02,
 		CONTROLLER_SHOOT  = 0x03,
 		CONTROLLER_AVOID  = 0x04,
-		CONTROLLER_MAX    = 0x05,
+		CONTROLLER_BOUNCE = 0x05,
+		CONTROLLER_MAX    = 0x06,
 	}Type;
 
 	float time		= 0.0f;
@@ -109,21 +110,45 @@ public:
 
 class EntityShootController : public EntityController {
 public:
-	int reload_time			= 16;		// Time between shot bursts
-	int reload_timer		= 0;		// Time elapsed since last bust
-	int burst_size			= 5;		// Rounds shot in each burst
-	int burst_counter		= 0;		// Rounds shots since burst start
-	int burst_time			= 8;		// Time between shots
-	int burst_timer			= 0;		// Time elapsed since last shot
-	Entity *target_entity	= nullptr;	// If set, entity's coordinates override target_x and target_y
-	int target_x			= 0;		// Target position to shoot at(x coor)
-	int target_y			= 0;		// Target position to shoot at(y coord)
-	int target_width		= 16;
-	int target_height		= 16;
-	
+	float	reload_time = 16;		// Time between shot bursts
+	float	reload_timer = 0;		// Time elapsed since last bust
+	int		burst_size = 5;		// Rounds shot in each burst
+	int		burst_counter = 0;		// Rounds shots since burst start
+	float	burst_time = 8;		// Time between shots
+	float	burst_timer = 0;		// Time elapsed since last shot
+	Entity* target_entity = nullptr;	// If set, entity's coordinates override target_x and target_y
+	int		target_x = 0;		// Target position to shoot at(x coor)
+	int		target_y = 0;		// Target position to shoot at(y coord)
+	int		range = 320;		// Max Distance from position to target where shooting is allowed
+	float	projectile_speed = 0.125f;
+	int		projectile_type = 0;
+	int		target_width = 16;
+	int		target_height = 16;
+	bool	reloading = false;
+	bool	shoot = false;
+	bool	target_in_range = false;
+
 	EntityShootController(Entity* parent);
 	void setTarget(Entity* target);
 	void setTarget(int x, int y);
+	void update(double delta);
+	void draw();
+};
+
+class EntityBounceController : public EntityController {
+public:
+	float delta_x		 = 0.1f;
+	float delta_y		 = 0.0f;
+	float acceleration_x = 0.05f;
+	float acceleration_y = 0.005f;
+	int   left			 = 0;
+	int   right			 = 0;
+	int   top			 = 0;
+	int	  bottom		 = 0;
+	float real_width	 = 0;
+	float real_height	 = 0;
+	EntityBounceController(Entity* parent);
+	void setBounds();
 	void update(double delta);
 	void draw();
 };

@@ -566,7 +566,7 @@ pythoncommand(blackbox_createstring) {
 
 
 #include "entity.hpp"
-pythoncommand(blackbox_createentity) {
+pythoncommand(blackbox_entitycreate) {
 	int width = 16;
 	int height = 16;
 	char* name = nullptr;
@@ -574,38 +574,125 @@ pythoncommand(blackbox_createentity) {
 	Engine::entities.push_back(new Entity(width, height, name ? name : "UnnamedEntity"));
 	return PyLong_FromLong((long)Engine::entities.size() - 1);
 }
-pythoncommand(blackbox_updateentity) {
+pythoncommand(blackbox_entitydelete) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	//Engine::entities[handle]->enabled = false;
+	return PyLong_FromLong((long)Engine::entities.size() - 1);
+}
+pythoncommand(blackbox_entityenable) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->enabled = true;
+	return PyLong_FromLong(1);
+}
+pythoncommand(blackbox_entitydisable) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->enabled = false;
+	return PyLong_FromLong(1);
+}
+pythoncommand(blackbox_entityupdate) {
 	double delta;
 	long handle;
 	if (!PyArg_ParseTuple(args, "if", &handle, &delta)) return NULL;
 	Engine::entities[handle]->update(delta);
 	return PyBool_FromLong(1);
 }
-pythoncommand(blackbox_entitytarget) {
+pythoncommand(blackbox_entitysettgt) {
 	long handle_entity;
 	long handle_target;
 	int type;
 	if (!PyArg_ParseTuple(args, "iii", &handle_entity, &handle_target, &type)) return NULL;
-	Entity* src = Engine::entities[handle_entity]; 
-	Entity* dst = Engine::entities[handle_target]; 
+	Entity* src = Engine::entities[handle_entity];
+	Entity* dst = Engine::entities[handle_target];
 	if (src && dst) {
-		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+	#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
 		switch (type) {
-			case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst);break;
-			case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst);break;
-			case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst);break;
-		}	
-		#undef HasController
+		case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst); break;
+		case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst); break;
+		case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst); break;
+		}
+	#undef HasController
 	}
 	return PyBool_FromLong(1);
 }
-pythoncommand(blackbox_drawentity) {
+
+pythoncommand(blackbox_entityaddspr) {
+	long entity_handle;
+	long sprite_handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Sprite* spr = &Vpu::sprites[sprite_handle];
+	if (ent && spr) {
+		//ent->sprites.push_back(spr);
+		//return PyLong_FromLong((long)ent->sprites.size() - 1);
+	}
+	return PyLong_FromLong(-1);
+}
+
+pythoncommand(blackbox_entityaddani) {
+	long entity_handle;
+	long anim_handle;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Animation* ani = &Vpu::animations[anim_handle];
+	if (ent && ani) {
+		//ent->animations.push_back(ani);
+		//return PyLong_FromLong((long)ent->animations.size() - 1);
+	}
+	return PyLong_FromLong(-1);
+}
+
+pythoncommand(blackbox_entitysetspr) {
+	long entity_handle;
+	long sprite_handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Sprite* spr = &Vpu::sprites[sprite_handle];
+	if (ent && spr) {
+		ent->sprite = spr;
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+pythoncommand(blackbox_entitysetani) {
+	long entity_handle;
+	long anim_handle;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Animation* ani = &Vpu::animations[anim_handle];
+	if (ent && ani) {
+		ent->animation = ani;
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+pythoncommand(blackbox_entitysetpos) {
+	long entity_handle;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "iff", &entity_handle, &x, &y)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		ent->x = x;
+		ent->y = y;
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
+
+pythoncommand(blackbox_entitydraw) {
 	long handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
 	Engine::entities[handle]->draw();
 	return PyBool_FromLong(1);
 }
-pythoncommand(blackbox_addcontroller) {
+pythoncommand(blackbox_entityaddctl) {
 	long handle;
 	int type;
 	if (!PyArg_ParseTuple(args, "ii", &handle, &type)) return NULL;
@@ -910,15 +997,23 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "blackbox.createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
 	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
-	{"createentity"	, blackbox_createentity , METH_VARARGS, "blackbox.createentity(width, height, name) : Create a generic entity width given size and name"},
-	{"drawentity"	, blackbox_drawentity   , METH_VARARGS, "blackbox.drawentity(handle) : "},
-	{"updateentity"	, blackbox_updateentity , METH_VARARGS, "blackbox.updateentityt(entity, delta) : "},
-	{"entitytarget" , blackbox_entitytarget , METH_VARARGS, "blackbox.entitytarget(handle, target_handle) : " },
-	{"addcontroller", blackbox_addcontroller, METH_VARARGS, "blackbox.addcontroller(entity, controller_type) : "},
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
+	{"entitycreate"	, blackbox_entitycreate , METH_VARARGS, "blackbox.entitycreate(width, height, name) : Create a generic entity width given size and name"},
+	{"entityenable"	, blackbox_entityenable , METH_VARARGS, "blackbox.entityenable(handle) : Create a generic entity width given size and name"},
+	{"entitydisable", blackbox_entitydisable, METH_VARARGS, "blackbox.entitydisable(handle) : "},
+	{"entitydelete" , blackbox_entitydelete , METH_VARARGS, "blackbox.entitydelete(entity_handle) : "},
+	{"entitydraw"	, blackbox_entitydraw   , METH_VARARGS, "blackbox.entitydraw(handle) : "},
+	{"entitysettgt" , blackbox_entitysettgt , METH_VARARGS, "blackbox.entitysettgt(handle, target_handle) : " },
+	{"entityaddspr" , blackbox_entityaddspr , METH_VARARGS, "blackbox.entityaddspr(entity_handle, sprite_handle) : "},
+	{"entityaddani" , blackbox_entityaddani , METH_VARARGS, "blackbox.entityaddani(entity_handle, anim_handle) : "},
+	{"entitysetspr" , blackbox_entitysetspr , METH_VARARGS, "blackbox.entitysetspr(entity_handle, sprite_handle) : "},
+	{"entitysetani" , blackbox_entitysetani , METH_VARARGS, "blackbox.entitysetani(entity_handle, anim_handle) : "},
+	{"entitysetpos" , blackbox_entitysetpos , METH_VARARGS, "blackbox.entitysetpos(entity_handle, x, y) : "},
+	{"entityupdate"	, blackbox_entityupdate , METH_VARARGS, "blackbox.entityupdate(entity, delta) : "},
+	{"entityaddctl" , blackbox_entityaddctl , METH_VARARGS, "blackbox.entitytaddctl(entity, controller_type) : "},
+	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"download"		, blackbox_download		, METH_VARARGS, "blackbox.download(filename) : Download file from current version repository."},
-	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{"findvar"		, blackbox_findvar		, METH_VARARGS, "blackbox.findvar(var_name) : Find handle for the variable matching var_name"},
 	{"getvar"		, blackbox_getvar		, METH_VARARGS, "blackbox.getvar(var_handle) : Return value of the variable identified by var_handle"},
 	{"setvar"		, blackbox_setvar		, METH_VARARGS, "blackbox.setvar(var_handle,value) : Set value of the variable identified by var_handle"},

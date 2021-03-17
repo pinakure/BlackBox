@@ -410,11 +410,22 @@ void Vpu::fillCircle(int x, int y, float radius, int r, int g, int b, int alpha)
 	al_draw_filled_circle(x, y, radius, al_map_rgba(r, g, b, alpha));
 }
 
+static inline void drawEntities() {
+	al_set_target_bitmap(Vpu::foreground.bitmap);
+	std::vector<Entity*>::iterator it = Engine::entities.begin();
+	ALLEGRO_COLOR white = al_map_rgba(255, 255, 255, 64);
+	for (; it != Engine::entities.end(); it++) {
+		Vpu::color = white;
+		(*it)->draw();
+	}
+}
+
 void Vpu::render() {
-	
+	drawEntities();
+
 	al_set_target_bitmap(buffer);
 	/* Render enabled layers */
-	
+
 	#define renderlayer(l) {															\
 								float OFFSETX=(-(Vpu::width/2)*l.scale[0] ) + ( (Vpu::width/2)  * ( l.scale[0] - 1.0f ) );	\
 								float OFFSETY=(-(Vpu::height/2)*l.scale[1] ) + ( (Vpu::height/2) * ( l.scale[1] - 1.0f ) );	\

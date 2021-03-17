@@ -1,5 +1,15 @@
-# to import classes in this folder: 
-# from data.scripts.ship              import Ship 
+# ---------------------------------------------------------------------- #
+#   _           _     _     _                 _ _ _   _                  #
+#  | |         | |   | |   | |               | (_) | | |                 #
+#  | |__  _   _| |__ | |__ | | ___  ___ _ __ | |_| |_| |_ ___ _ __ ___   #
+#  | '_ \| | | | '_ \| '_ \| |/ _ \/ __| '_ \| | | __| __/ _ \ '__/ __|  #
+#  | |_) | |_| | |_) | |_) | |  __/\__ \ |_) | | | |_| ||  __/ |  \__ \  #
+#  |_.__/ \__,_|_.__/|_.__/|_|\___||___/ .__/|_|_|\__|\__\___|_|  |___/  #
+#                                      | |                               #
+#                                      |_|                               #
+# -----------------------------------------------------------------------#
+
+from data.scripts.bubble import Bubble
 from scripts.main import menu
 from random import random
 import blackbox
@@ -13,6 +23,13 @@ class Game:
     dims = {}
     scale = 2.0
     score = 0
+    lives = 3
+    stage = 0
+    world = 0
+
+    bubble_pool_size = 16
+    bubbles = []
+    player = None
 
     @staticmethod
     def setup():
@@ -23,6 +40,8 @@ class Game:
         vpu.disable(0)
         vpu.disable(1)
         vpu.disable(2)
+        vpu.setscale(0, 1.0, 1.0)
+        vpu.setscale(1, 1.0, 1.0)
         
         # get layer dimensions
         vpu.select(0); Game.dims[0] = vpu.dimensions()
@@ -43,20 +62,33 @@ class Game:
         vpu.enable(2)
         
         print("GAME: Initializing classes...")
-        # initialize subcomponents:
-        # Call static class.initialize(Game) methods for each base class
-        # ...
+        Bubble.initialize(Game)
         
         print("GAME: Initializing object pools...")
-        # Create object pools:
-        # for i in range(0, Game.xxx_pool_size):
-        #    Game.generate_random_xxx() <- preallocate memory
-        # ...
-
+        Game.preallocate()
+        
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
+
         
+    @staticmethod 
+    def preallocate():
+        Game.bubbles = []
+        for i in range(0, Game.bubble_pool_size):
+                size = int(random()*4)
+                Game.bubbles.append(Bubble(size))
+                Game.bubbles[len(Game.bubbles)-1].setposition(
+                    ((Game.dims[1][0]/2)-160)+(Bubble.sizes[size]>>1)+((float(i)/float(Game.bubble_pool_size))*float(320.0-(Bubble.sizes[size]>>1))),
+                    ((Game.dims[1][1]/2)-120)+(Bubble.sizes[size]>>1)+((float(i)/float(Game.bubble_pool_size))*float(100.0))
+                )
+
+    @staticmethod
+    def newgame():
+        Game.lives   = 3
+        Game.stage   = 0
+        Game.world   = 0
+        Game.player.spawn()
         
     @staticmethod
     def destroy():
@@ -64,6 +96,7 @@ class Game:
 
     @staticmethod
     def loop():
+        vpu.setscale(1,Game.scale, Game.scale)
         delta = 1.0
         while Game.running:
             Game.draw()
@@ -93,7 +126,6 @@ class Game:
         # ...
 
         # raster screen and update input
-        vpu.setscale(1,Game.scale, Game.scale)
         vpu.update()
 
 def setup():

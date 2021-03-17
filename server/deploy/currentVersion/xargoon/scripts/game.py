@@ -7,7 +7,7 @@ from data.scripts.token             import Token
 from data.scripts.foe               import Foe
 from data.scripts.bigfoe            import BigFoe
 from data.scripts.hudicon           import HudIcon
-from data.scripts.entity            import Entity, EntityController
+from entity                         import Entity, EntityController
 from random                         import random
 import blackbox
 import vpu
@@ -110,37 +110,55 @@ class Game:
         #-------------------------------------------------------
         ent = Entity(Game, 16,16,"Test 1")
         ent.addcontroller(EntityController.CONTROLLER_INPUT)
-        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_SHOOT)
         ent.addcontroller(EntityController.CONTROLLER_MOVE)
         ent.addcontroller(EntityController.CONTROLLER_AVOID)
         ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
         Game.entities.append(ent)
         #-------------------------------------------------------
         ent = Entity(Game, 16,16,"Test 2")
-        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_SHOOT)
         ent.addcontroller(EntityController.CONTROLLER_MOVE)
         ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
         ent.addcontroller(EntityController.CONTROLLER_AVOID)
         Game.entities.append(ent)
         #-------------------------------------------------------
         ent = Entity(Game, 16,16,"Test 3")
-        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_SHOOT)
         ent.addcontroller(EntityController.CONTROLLER_MOVE)
         ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
         ent.addcontroller(EntityController.CONTROLLER_AVOID)
         Game.entities.append(ent)
         #-------------------------------------------------------
         ent = Entity(Game, 16,16,"Test 4")
-        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_SHOOT)
         ent.addcontroller(EntityController.CONTROLLER_MOVE)
         #ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
         #ent.addcontroller(EntityController.CONTROLLER_AVOID)
         Game.entities.append(ent)
         #-------------------------------------------------------
-        Game.entities[1].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[0])
-        Game.entities[0].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[1])
-        Game.entities[1].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[2])
+        ent = Entity(Game, 16,16,"Test 5")
+        #ent.addcontroller(EntityController.CONTROLLER_SHOOT)
+        ent.addcontroller(EntityController.CONTROLLER_MOVE)
+        ent.addcontroller(EntityController.CONTROLLER_FOLLOW)
+        ent.addcontroller(EntityController.CONTROLLER_AVOID)
+        ent.setposition(ent.x, ent.y+64)
+        Game.entities.append(ent)
+        #-------------------------------------------------------
+        Game.entities[0].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[3])
+        Game.entities[1].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[3])
+        Game.entities[1].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[3])
         Game.entities[2].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[3])
+        Game.entities[3].controllers[EntityController.CONTROLLER_SHOOT ].set_target(Game.entities[4])
+        Game.entities[4].controllers[EntityController.CONTROLLER_AVOID ].set_target(Game.entities[3])
+        Game.entities[4].controllers[EntityController.CONTROLLER_FOLLOW].set_target(Game.entities[3])
+        sprite = vpu.createsprite('foe0')
+        subspr = vpu.subsprite(sprite, 0,  0, 16, 16) 
+        Game.entities[0].setsprite(subspr)
+        Game.entities[1].setsprite(subspr)
+        Game.entities[2].setsprite(subspr)
+        Game.entities[3].setsprite(subspr)
+        Game.entities[4].setsprite(subspr)
         
     @staticmethod
     def randomExplosion(baseclass):
@@ -218,22 +236,15 @@ class Game:
     @staticmethod
     def update(delta):
         HudIcon.update(delta)
-        for entity in Game.entities:
-            entity.update(delta)
-            #if entity.alive: 
-            #else: token.spawn()
         for token in Game.tokens:
             if token.alive: token.update(delta)
-            #else: token.spawn()
         for explosion in Game.explosions:
             if explosion.alive: explosion.update(delta)
-            #else: explosion.spawn()
         for foe in Game.foes:
             if foe.alive: foe.update(delta)
             else: foe.spawn()
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
-            #else: projectile.spawn()
         Game.ship.update(delta)
         if joypad.menu():
             from scripts.main import menu
@@ -247,8 +258,6 @@ class Game:
         # pre-clean foreground layer
         vpu.select(1)
         vpu.fill(0,0,0,0)
-        for entity in Game.entities:  
-            entity.draw()
         for token in Game.tokens:            
             if token.alive: token.draw()
         for foe in Game.foes:            

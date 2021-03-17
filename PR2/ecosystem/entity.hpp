@@ -18,10 +18,17 @@ public:
 	int			width	= 0;
 	int			height	= 0;
 	int			time	= 0;
+	float		angle	= 0.0f;
+	float		real_angle= 0.0f;
 	bool		enabled = true;
 	std::map<int, EntityController*> controllers;
 	//std::map<std::string, EntityProperty> properties;
 	
+	//std::vector<Sprite*> sprites;
+	Sprite* sprite = nullptr;
+	//std::vector<Animation*> animations;
+	Animation* animation = nullptr;
+
 	Entity(int width = 16, int height = 16, std::string name = "UnnamedEntity");
 	void update(double delta);
 	void addController(EntityController::Type type);
