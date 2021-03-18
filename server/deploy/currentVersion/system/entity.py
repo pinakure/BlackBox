@@ -165,7 +165,7 @@ class Entity:
         print(f"Entity {self.name} initialized")
 
     def disable(self):
-        self.disabled = True
+        self.enabled = False
         entitydisable(self.handle)
 
     def enable(self):
@@ -173,12 +173,16 @@ class Entity:
         entityenable(self.handle)
 
     def setposition(self, x, y):
+        self.x = x
+        self.y = y
         entitysetpos(self.handle, x, y)	
 
     def setsprite(self, sprite):
+        self.sprite = sprite
         entitysetspr(self.handle, sprite)
     
     def setanimation(self, animation):
+        self.animation = animation
         entitysetani(self.handle, animation)
 
     """
@@ -253,6 +257,9 @@ class EntityController:
     
     def set_target(self, target):
         entitysettgt(self.parent.handle, target.handle, self.controller_type)
+            
+    def set_delta(self, delta_x, delta_y):
+        entitysetdelta(self.parent.handle, delta_x, delta_y, self.controller_type)
             
     def __init__(self, entity, controller_type):
         self.controller_type = controller_type

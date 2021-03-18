@@ -341,10 +341,12 @@ pythoncommand(vpu_createanim){
 }
 pythoncommand(vpu_updateanim) {
 	int handle;
-	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	int frame = -1;
+	if (!PyArg_ParseTuple(args, "i|i", &handle, &frame)) return NULL;
 	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
 		Animation* a = &(Vpu::animations.at(handle));
 		a->run(a->speed);
+		if (frame >= 0)a->current_frame = frame;
 		return PyBool_FromLong(true);
 	}
 	printf("ERROR: anim_handle out of range\n");
@@ -607,13 +609,31 @@ pythoncommand(blackbox_entitysettgt) {
 	Entity* src = Engine::entities[handle_entity];
 	Entity* dst = Engine::entities[handle_target];
 	if (src && dst) {
-	#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
 		switch (type) {
-		case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst); break;
-		case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst); break;
-		case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst); break;
+		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+			case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst); break;
+			case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst); break;
+			case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst); break;
+		#undef HasController
 		}
-	#undef HasController
+	}
+	return PyBool_FromLong(1);
+}
+
+pythoncommand(blackbox_entitysetdelta) {
+	long  handle_entity;
+	float x;
+	float y;
+	int   type;
+	if (!PyArg_ParseTuple(args, "iffi", &handle_entity, &x, &y, &type)) return NULL;
+	Entity* src = Engine::entities[handle_entity];
+	if (src) {
+		switch (type) {
+		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+			case EntityController::CONTROLLER_BOUNCE: ((EntityBounceController*)Controller(BOUNCE))->setDelta(x,y); break;
+			case EntityController::CONTROLLER_MOVE:((EntityMoveController*)Controller(MOVE))->setDelta(x,y); break;
+		#undef HasController
+		}
 	}
 	return PyBool_FromLong(1);
 }
@@ -672,6 +692,21 @@ pythoncommand(blackbox_entitysetani) {
 	return PyBool_FromLong(false);
 }
 
+pythoncommand(entitysetarg) {
+	// entity_handle, parameter_name, value
+	long entity_handle;
+	char* parameter;
+	int controller_type=-1;
+	float value;
+	if (!PyArg_ParseTuple(args, "isf|i", &entity_handle, &parameter, &value, &controller_type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		// change parameter from controller, send directly.
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
 pythoncommand(blackbox_entitysetpos) {
 	long entity_handle;
 	float x;
@@ -682,6 +717,33 @@ pythoncommand(blackbox_entitysetpos) {
 		ent->x = x;
 		ent->y = y;
 		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
+
+pythoncommand(blackbox_entitygetpos) {
+	long entity_handle;
+	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		PyObject* list = PyList_New(2);
+		if (!list) throw("Unable to allocate memory for Python list");
+		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)ent->x));
+		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)ent->y));
+		return list;
+	}
+	return PyBool_FromLong(0);
+}
+pythoncommand(blackbox_entitygetdelta) {
+	long entity_handle;
+	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		PyObject* list = PyList_New(2);
+		if (!list) throw("Unable to allocate memory for Python list");
+		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_x));
+		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_y));
+		return list;
 	}
 	return PyBool_FromLong(0);
 }
@@ -1000,14 +1062,18 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
 	{"entitycreate"	, blackbox_entitycreate , METH_VARARGS, "blackbox.entitycreate(width, height, name) : Create a generic entity width given size and name"},
 	{"entityenable"	, blackbox_entityenable , METH_VARARGS, "blackbox.entityenable(handle) : Create a generic entity width given size and name"},
-	{"entitydisable", blackbox_entitydisable, METH_VARARGS, "blackbox.entitydisable(handle) : "},
-	{"entitydelete" , blackbox_entitydelete , METH_VARARGS, "blackbox.entitydelete(entity_handle) : "},
-	{"entitydraw"	, blackbox_entitydraw   , METH_VARARGS, "blackbox.entitydraw(handle) : "},
-	{"entitysettgt" , blackbox_entitysettgt , METH_VARARGS, "blackbox.entitysettgt(handle, target_handle) : " },
 	{"entityaddspr" , blackbox_entityaddspr , METH_VARARGS, "blackbox.entityaddspr(entity_handle, sprite_handle) : "},
 	{"entityaddani" , blackbox_entityaddani , METH_VARARGS, "blackbox.entityaddani(entity_handle, anim_handle) : "},
-	{"entitysetspr" , blackbox_entitysetspr , METH_VARARGS, "blackbox.entitysetspr(entity_handle, sprite_handle) : "},
+	{"entitydelete" , blackbox_entitydelete , METH_VARARGS, "blackbox.entitydelete(entity_handle) : "},
+	{"entitydraw"	, blackbox_entitydraw   , METH_VARARGS, "blackbox.entitydraw(handle) : "},
+	{"entitydisable", blackbox_entitydisable, METH_VARARGS, "blackbox.entitydisable(handle) : "},
+	{"entitygetpos" , blackbox_entitygetpos , METH_VARARGS, "blackbox.entitysetpos(entity_handle) : "},
+	{"entitygetdelta",blackbox_entitygetdelta,METH_VARARGS, "blackbox.entitygetdelta() : "},
 	{"entitysetani" , blackbox_entitysetani , METH_VARARGS, "blackbox.entitysetani(entity_handle, anim_handle) : "},
+	{"entitysetarg" , blackbox_entitysetarg , METH_VARARGS, "blackbox.entitysetarg(entity_handle, parameter_name, value) : "},
+	{"entitysetdelta",blackbox_entitysetdelta,METH_VARARGS, "blackbox.entitysetdelta(entity_handle, delta_x, delta_y, controller_type) : "},
+	{"entitysetspr" , blackbox_entitysetspr , METH_VARARGS, "blackbox.entitysetspr(entity_handle, sprite_handle) : "},
+	{"entitysettgt" , blackbox_entitysettgt , METH_VARARGS, "blackbox.entitysettgt(handle, target_handle, controller_type) : " },
 	{"entitysetpos" , blackbox_entitysetpos , METH_VARARGS, "blackbox.entitysetpos(entity_handle, x, y) : "},
 	{"entityupdate"	, blackbox_entityupdate , METH_VARARGS, "blackbox.entityupdate(entity, delta) : "},
 	{"entityaddctl" , blackbox_entityaddctl , METH_VARARGS, "blackbox.entitytaddctl(entity, controller_type) : "},
@@ -1059,7 +1125,7 @@ static PyMethodDef VpuMethods[] = {
 	{"dimensions"	, vpu_dimensions		, METH_VARARGS, "vpu.dimensions() : Returns selected bitmap [ width, height ] "},
 	{"disable"		, vpu_disable			, METH_VARARGS, "vpu.disable(layer) : Toggle off given vpu layer"},
 	{"drawanim"		, vpu_drawanim			, METH_VARARGS, "vpu.drawanim(handle, x, y, rotation) : Draw animation identified by given handle onto given coordinates" },
-	{"updateanim"	, vpu_updateanim		, METH_VARARGS, "vpu.updateanim() : Draw animation identified by given handle onto given coordinates" },
+	{"updateanim"	, vpu_updateanim		, METH_VARARGS, "vpu.updateanim(force_frame=None) : " },
 	{"drawsprite"	, vpu_drawsprite		, METH_VARARGS, "vpu.drawsprite(handle, x, y, rotation) : Draw Sprite identified by given handle onto given coordinates" },
 	{"drawsurf"		, vpu_drawsurf			, METH_VARARGS, "vpu.drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
 	{"enable"		, vpu_enable			, METH_VARARGS, "vpu.enable(layer) : Toggle on  given vpu layer"},

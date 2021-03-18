@@ -233,6 +233,11 @@ void EntityMoveController::update(double delta){
 	this->parent->y = fy;
 }
 
+void EntityMoveController::setDelta(float x, float y) {
+	this->delta_x = x;
+	this->delta_y = y;
+}
+
 void EntityMoveController::draw() {
 
 }
@@ -407,7 +412,7 @@ void EntityAvoidController::setTarget(int x, int y) {
 /*---------------------------------------------------------------------------------*/
 EntityBounceController::EntityBounceController(Entity *parent) : EntityController(parent) {
 	this->setBounds();
-	this->acceleration_x = 0.05f;
+	this->acceleration_x = 0.0125f;
 	this->acceleration_y = 0.0097f;
 }
 
@@ -421,6 +426,7 @@ void EntityBounceController::setBounds() {
 	this->left   = (srf->width  / 2) - (real_width  / 2);
 	this->right  = this->left   + real_width;
 	this->bottom = this->top    + real_height;
+	
 }
 
 void EntityBounceController::update(double delta) {
@@ -440,6 +446,7 @@ void EntityBounceController::update(double delta) {
 		this->parent->y = this->top + (parent->height >> 1);
 	}
 	if (this->parent->y > this->bottom - (parent->height >> 1)) {
+		//delta_y = -float(this->parent->width/4) / 2.5f; 
 		delta_y = -abs(delta_y);
 		this->parent->y = this->bottom - (parent->height >> 1);
 	}
@@ -447,7 +454,7 @@ void EntityBounceController::update(double delta) {
 	delta_y += acceleration_y;
 	delta_x += acceleration_x;
 
-	float max_speed = 2.0f;
+	float max_speed = 0.5f;
 	if (delta_x >  max_speed)delta_x =  max_speed;
 	if (delta_x < -max_speed)delta_x = -max_speed;
 	
@@ -456,6 +463,15 @@ void EntityBounceController::update(double delta) {
 		movectl->delta_x = delta_x;
 		movectl->delta_y = delta_y;
 	}
+}
+
+void EntityBounceController::setDelta(float x, float y) {
+	if (x < 0) acceleration_x = -abs(acceleration_x);
+	if (y < 0) acceleration_y = -abs(acceleration_y);
+	if (x > 0) acceleration_x = abs(acceleration_x);
+	if (y > 0) acceleration_y = abs(acceleration_y);
+	this->delta_x = x;
+	this->delta_y = y;
 }
 
 void EntityBounceController::draw() {

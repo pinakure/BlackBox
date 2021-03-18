@@ -1,5 +1,14 @@
+#-----------------------------------------------------------------------------------------------------------#
+#                                                                                                           #
+#                                    ####   #   #    ###    #   #   #####                                   #
+#                                    #      ##  #   #   #   #  #    #                                       #
+#                                    ####   # # #   #####   ###     ####                                    #
+#                                       #   #  ##   #   #   #  #    #                                       #
+#                                    ####   #   #   #   #   #   #   #####                                   #
+#                                                                                                           #
+#-----------------------------------------------------------------------------------------------------------#
 # to import classes in this folder: 
-# from data.scripts.ship              import Ship 
+from data.scripts.snake import Snake,Space
 from scripts.main import menu
 from random import random
 import blackbox
@@ -23,6 +32,11 @@ class Game:
         vpu.disable(0)
         vpu.disable(1)
         vpu.disable(2)
+        vpu.setscale(0,Game.scale, Game.scale)
+        vpu.setscale(1,Game.scale, Game.scale)
+        vpu.select(0);vpu.setrotation(0,0)
+        vpu.select(1);vpu.setrotation(1,0)
+        vpu.select(2);vpu.setrotation(2,0)
         
         # get layer dimensions
         vpu.select(0); Game.dims[0] = vpu.dimensions()
@@ -43,37 +57,30 @@ class Game:
         vpu.enable(2)
         
         print("GAME: Initializing classes...")
-        # initialize subcomponents:
-        # Call static class.initialize(Game) methods for each base class
-        # ...
+        Snake.initialize(Game)
         
-        print("GAME: Initializing object pools...")
-        # Create object pools:
-        # for i in range(0, Game.xxx_pool_size):
-        #    Game.generate_random_xxx() <- preallocate memory
-        # ...
-
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
-        
+        Snake.spawn(4)
         
     @staticmethod
     def destroy():
-        pass
+        Snake.destroy()
+        Space.destroy()
 
     @staticmethod
     def loop():
         delta = 1.0
         while Game.running:
             Game.draw()
-            Game.update(delta)            
+            Game.update(delta)
             
     @staticmethod
     def update(delta):
-        # do stuff
-        # ...
-
+        
+        Snake.update(delta)
+        
         # required stuff
         if blackbox.ctrlc():
             print("Control+C pressed.")
@@ -85,15 +92,10 @@ class Game:
         
     @staticmethod
     def draw():
-        # clear buffer
-        vpu.select(1)
-        vpu.fill(0,0,0,0)
-        
         #draw stuff
-        # ...
+        Space.draw()
 
         # raster screen and update input
-        vpu.setscale(1,Game.scale, Game.scale)
         vpu.update()
 
 def setup():

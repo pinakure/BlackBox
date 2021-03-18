@@ -26,9 +26,8 @@ class Game:
     lives = 3
     stage = 0
     world = 0
+    time  = 0
 
-    bubble_pool_size = 16
-    bubbles = []
     player = None
 
     @staticmethod
@@ -64,24 +63,9 @@ class Game:
         print("GAME: Initializing classes...")
         Bubble.initialize(Game)
         
-        print("GAME: Initializing object pools...")
-        Game.preallocate()
-        
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
-
-        
-    @staticmethod 
-    def preallocate():
-        Game.bubbles = []
-        for i in range(0, Game.bubble_pool_size):
-                size = int(random()*4)
-                Game.bubbles.append(Bubble(size))
-                Game.bubbles[len(Game.bubbles)-1].setposition(
-                    ((Game.dims[1][0]/2)-160)+(Bubble.sizes[size]>>1)+((float(i)/float(Game.bubble_pool_size))*float(320.0-(Bubble.sizes[size]>>1))),
-                    ((Game.dims[1][1]/2)-120)+(Bubble.sizes[size]>>1)+((float(i)/float(Game.bubble_pool_size))*float(100.0))
-                )
 
     @staticmethod
     def newgame():
@@ -105,7 +89,18 @@ class Game:
     @staticmethod
     def update(delta):
         # do stuff
-        # ...
+        Game.time+=1
+        if Game.time > 120:
+            for bubble in Bubble.pool:
+                if bubble.enabled:
+                    if int(random() * 10)==1:
+                        bubble.pang() 
+                        Game.time = 0
+                        break
+
+        for bubble in Bubble.pool:
+            if not bubble.enabled: continue
+            bubble.update(delta)
 
         # required stuff
         if blackbox.ctrlc():

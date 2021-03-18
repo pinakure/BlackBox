@@ -104,6 +104,7 @@ public:
 	int   bottom  = 0;	// Movement space bottom boundary
 		
 	EntityMoveController(Entity* parent);
+	void setDelta(float x, float y); 
 	void update(double delta);
 	void draw();
 };
@@ -149,6 +150,7 @@ public:
 	float real_height	 = 0;
 	EntityBounceController(Entity* parent);
 	void setBounds();
+	void setDelta(float x, float y);
 	void update(double delta);
 	void draw();
 };
