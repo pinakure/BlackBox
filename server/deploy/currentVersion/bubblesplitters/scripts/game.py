@@ -17,7 +17,8 @@ import blackbox
 import vpu
 import joypad
 from tiledmap import TiledMap
-        
+from interpolator import Interpolator
+                    
 class Game:
     running = True
     width = 0
@@ -36,6 +37,7 @@ class Game:
 
     @staticmethod
     def setup():
+            
         print("GAME: Setting up...")
         Game.running = True
         
@@ -96,6 +98,7 @@ class Game:
     @staticmethod
     def update(delta):
         # do stuff
+        Interpolator.update(delta)
 
         Game.map.update(delta)
 
@@ -103,10 +106,12 @@ class Game:
         if Game.time % 16==0:
             Game.map.redraw()
             
-        if Game.time > 120:
+        if Game.time > 120:            
+           
             for bubble in Bubble.pool:
                 if bubble.enabled:
                     if int(random() * 10)==1:
+                        Interpolator.add(0, 25, 60, vprint)
                         bubble.pang() 
                         Game.time = 0
                         break
@@ -138,6 +143,12 @@ class Game:
         
         # raster screen and update input
         vpu.update()
+
+
+def vprint(value):
+    vpu.select(2)
+    vpu.setcolor(255,0,0,255)
+    vpu.textout(f"{value}", 200,24)
 
 def setup():
     return Game.setup()
