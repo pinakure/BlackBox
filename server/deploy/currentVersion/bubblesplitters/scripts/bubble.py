@@ -1,5 +1,6 @@
 from random import random
 from entity import *
+import entitylib as el
 import vpu
 
 class Bubble(Entity):
@@ -98,7 +99,8 @@ class Bubble(Entity):
             self.explode = False
             self.disable()
             s = Bubble.sizes[self.size]
-            self.x, self.y = entitygetpos(self.handle)
+            
+            self.x, self.y = el.getposition(self.handle)
             Bubble.spawn(self.x-(s>>5), self.y, self.size-1, -1.0)
             Bubble.spawn(self.x+(s>>5), self.y, self.size-1, 1.0)
         

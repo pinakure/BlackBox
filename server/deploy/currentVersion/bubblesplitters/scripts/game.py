@@ -1,20 +1,22 @@
-# ---------------------------------------------------------------------- #
-#   _           _     _     _                 _ _ _   _                  #
-#  | |         | |   | |   | |               | (_) | | |                 #
-#  | |__  _   _| |__ | |__ | | ___  ___ _ __ | |_| |_| |_ ___ _ __ ___   #
-#  | '_ \| | | | '_ \| '_ \| |/ _ \/ __| '_ \| | | __| __/ _ \ '__/ __|  #
-#  | |_) | |_| | |_) | |_) | |  __/\__ \ |_) | | | |_| ||  __/ |  \__ \  #
-#  |_.__/ \__,_|_.__/|_.__/|_|\___||___/ .__/|_|_|\__|\__\___|_|  |___/  #
-#                                      | |                               #
-#                                      |_|                               #
-# -----------------------------------------------------------------------#
-
+######################################################################################################
+#                                                                                                    #
+#  88888888ba   88        88  88888888ba   88           88888888ba     ,ad8888ba,    88888888ba      # 
+#  88      "8b  88        88  88      "8b  88           88      "8b   d8"'    `"8b   88      "8b     # 
+#  88      ,8P  88        88  88      ,8P  88           88      ,8P  d8'        `8b  88      ,8P     # 
+#  88aaaaaa8P'  88        88  88aaaaaa8P'  88           88aaaaaa8P'  88          88  88aaaaaa8P'     # 
+#  88""""""8b,  88        88  88""""""8b,  88           88""""""'    88          88  88""""""'       # 
+#  88      `8b  88        88  88      `8b  88           88           Y8,        ,8P  88              # 
+#  88      a8P  Y8a.    .a8P  88      a8P  88           88            Y8a.    .a8P   88              # 
+#  88888888P"    `"Y8888Y"'   88888888P"   88888888888  88             `"Y8888Y"'    88              # 
+#                                                                                                    # 
+######################################################################################################
 from data.scripts.bubble import Bubble
 from scripts.main import menu
 from random import random
 import blackbox
 import vpu
 import joypad
+from tiledmap import TiledMap
         
 class Game:
     running = True
@@ -27,6 +29,8 @@ class Game:
     stage = 0
     world = 0
     time  = 0
+
+    map = None
 
     player = None
 
@@ -48,6 +52,8 @@ class Game:
         vpu.select(2); Game.dims[2] = vpu.dimensions()
         print(f"GAME: BG Resolution: {Game.dims[0][0]} x {Game.dims[0][1]}")
         print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
+        Game.width  = int(Game.dims[1][0])
+        Game.height = int(Game.dims[1][1])
         print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
         
         # prepare initial layer state
@@ -61,12 +67,13 @@ class Game:
         vpu.enable(2)
         
         print("GAME: Initializing classes...")
+        Game.map = TiledMap(Game, int(320/8),int(240/8),2)
         Bubble.initialize(Game)
         
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
-
+        
     @staticmethod
     def newgame():
         Game.lives   = 3
@@ -76,7 +83,7 @@ class Game:
         
     @staticmethod
     def destroy():
-        pass
+        del Game.map
 
     @staticmethod
     def loop():
@@ -89,7 +96,13 @@ class Game:
     @staticmethod
     def update(delta):
         # do stuff
+
+        Game.map.update(delta)
+
         Game.time+=1
+        if Game.time % 16==0:
+            Game.map.redraw()
+            
         if Game.time > 120:
             for bubble in Bubble.pool:
                 if bubble.enabled:
@@ -118,8 +131,11 @@ class Game:
         vpu.fill(0,0,0,0)
         
         #draw stuff
-        # ...
-
+        Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )
+        Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
+        Game.map.redraw()
+        Game.map.draw()
+        
         # raster screen and update input
         vpu.update()
 

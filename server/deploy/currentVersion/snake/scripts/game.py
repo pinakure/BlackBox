@@ -1,14 +1,17 @@
-#-----------------------------------------------------------------------------------------------------------#
-#                                                                                                           #
-#                                    ####   #   #    ###    #   #   #####                                   #
-#                                    #      ##  #   #   #   #  #    #                                       #
-#                                    ####   # # #   #####   ###     ####                                    #
-#                                       #   #  ##   #   #   #  #    #                                       #
-#                                    ####   #   #   #   #   #   #   #####                                   #
-#                                                                                                           #
-#-----------------------------------------------------------------------------------------------------------#
-# to import classes in this folder: 
-from data.scripts.snake import Snake,Space
+##############################################################################################################
+#                                                                                                            # 
+#                   ad88888ba   888b      88         db         88      a8P   88888888888                    #
+#                  d8"     "8b  8888b     88        d88b        88    ,88'    88                             #
+#                  Y8,          88 `8b    88       d8'`8b       88  ,88"      88                             #
+#                  `Y8aaaaa,    88  `8b   88      d8'  `8b      88,d88'       88aaaaa                        #
+#                    `"""""8b,  88   `8b  88     d8YaaaaY8b     8888"88,      88"""""                        #
+#                          `8b  88    `8b 88    d8""""""""8b    88P   Y8b     88                             #
+#                  Y8a     a8P  88     `8888   d8'        `8b   88     "88,   88                             #
+#                   "Y88888P"   88      `888  d8'          `8b  88       Y8b  88888888888                    #
+#                                                                                                            #
+##############################################################################################################
+                                                                        
+from data.scripts.snake import Snake,Space,Direction
 from scripts.main import menu
 from random import random
 import blackbox
@@ -26,7 +29,7 @@ class Game:
     @staticmethod
     def setup():
         print("GAME: Setting up...")
-        Game.running = True
+        Game.running = True 
         
         # disable rendering
         vpu.disable(0)
@@ -96,6 +99,11 @@ class Game:
         Space.draw()
 
         # raster screen and update input
+        if joypad.up():     Snake.keydown(Direction.UP)
+        elif joypad.down():   Snake.keydown(Direction.DOWN)
+        if joypad.right():  Snake.keydown(Direction.RIGHT)
+        elif joypad.left():   Snake.keydown(Direction.LEFT)
+        
         vpu.update()
 
 def setup():

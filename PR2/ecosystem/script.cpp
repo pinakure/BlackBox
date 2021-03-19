@@ -15,7 +15,8 @@ bool Script::initialize() {
 		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
 		PyImport_AppendInittab("console"	, &PyInit_console);
 		PyImport_AppendInittab("typewriter"	, &PyInit_typewriter);
-		PyImport_AppendInittab("tiledmap"	, &PyInit_tiledmap);
+		PyImport_AppendInittab("tm"			, &PyInit_tiledmap);
+		PyImport_AppendInittab("entitylib"	, &PyInit_entitylib);
 		PyImport_AppendInittab("joypad"		, &PyInit_joypad);
 		Py_SetPath(L".\\;.\\data\\system.zip");
 		Py_Initialize();

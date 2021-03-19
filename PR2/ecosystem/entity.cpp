@@ -6,6 +6,27 @@ int		Game::width		= 320;
 int		Game::height	= 240;
 float	Game::scale		= 1.0f;
 
+PyMethodDef Entity::methods[] = {
+	{ "create"			, Entity::pyCreate			, METH_VARARGS, "create(width, height, name) : Create a generic entity width given size and name"},
+	{ "enable"			, Entity::pyEnable			, METH_VARARGS, "enable(handle) : Create a generic entity width given size and name" },
+	{ "addsprite"		, Entity::pyAddSprite		, METH_VARARGS, "addsprite(entity_handle, sprite_handle) : " },
+	{ "addanimation"	, Entity::pyAddAnimation	, METH_VARARGS, "addanimation(entity_handle, anim_handle) : " },
+	{ "delete"			, Entity::pyDelete			, METH_VARARGS, "delete(entity_handle) : " },
+	{ "draw"			, Entity::pyDraw			, METH_VARARGS, "draw(handle) : " },
+	{ "disable"			, Entity::pyDisable			, METH_VARARGS, "disable(handle) : " },
+	{ "getposition"		, Entity::pyGetPosition		, METH_VARARGS, "setposition(entity_handle) : " },
+	{ "getdelta"		, Entity::pyGetDelta		, METH_VARARGS, "getdelta() : " },
+	{ "setanimation"	, Entity::pySetAnimation	, METH_VARARGS, "setanimation(entity_handle, anim_handle) : " },
+	{ "setparameter"	, Entity::pySetParameter	, METH_VARARGS, "setparameter(entity_handle, parameter_name, value) : " },
+	{ "setdelta"		, Entity::pySetDelta		, METH_VARARGS, "setdelta(entity_handle, delta_x, delta_y, controller_type) : " },
+	{ "setsprite"		, Entity::pySetSprite		, METH_VARARGS, "setsprite(entity_handle, sprite_handle) : " },
+	{ "settarget"		, Entity::pySetTarget		, METH_VARARGS, "settarget(handle, target_handle, controller_type) : " },
+	{ "setposition"		, Entity::pySetPosition		, METH_VARARGS, "setposition(entity_handle, x, y) : " },
+	{ "update"			, Entity::pyUpdate			, METH_VARARGS, "update(entity, delta) : " },
+	{ "addcontroller"	, Entity::pyAddController	, METH_VARARGS, "addcontroller(entity, controller_type) : " },
+	{NULL, NULL, 0, NULL}
+};
+
 Entity::Entity(int width, int height, std::string name) {
 	this->name   = name;
 	this->width  = width;
@@ -73,14 +94,222 @@ void Entity::addProperty(std::string name, ...) {
 
 }
 
-
-ExampleEntity::ExampleEntity(std::string name) : Entity(32,32,name) {
-	this->addController(EntityController::Type::CONTROLLER_INPUT);
-	this->addController(EntityController::Type::CONTROLLER_MOVE);
-	this->addController(EntityController::Type::CONTROLLER_FOLLOW);
-	this->addController(EntityController::Type::CONTROLLER_SHOOT);
+PyObject* Entity::pyCreate(PyObject* self, PyObject* args) {
+	int width = 16;
+	int height = 16;
+	char* name = nullptr;
+	if (!PyArg_ParseTuple(args, "|iis", &width, &height, &name)) return NULL;
+	Engine::entities.push_back(new Entity(width, height, name ? name : "UnnamedEntity"));
+	return PyLong_FromLong((long)Engine::entities.size() - 1);
 }
 
-void ExampleEntity::update(double delta) {
-
+PyObject* Entity::pyDelete(PyObject* self, PyObject* args) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	//Engine::entities[handle]->enabled = false;
+	return PyLong_FromLong((long)Engine::entities.size() - 1);
 }
+
+PyObject* Entity::pyEnable(PyObject* self, PyObject* args) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->enabled = true;
+	return PyLong_FromLong(1);
+}
+
+PyObject* Entity::pyDisable(PyObject* self, PyObject* args) {
+	int handle = 16;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->enabled = false;
+	return PyLong_FromLong(1);
+}
+
+PyObject* Entity::pyUpdate(PyObject* self, PyObject* args) {
+	double delta;
+	long handle;
+	if (!PyArg_ParseTuple(args, "if", &handle, &delta)) return NULL;
+	Engine::entities[handle]->update(delta);
+	return PyBool_FromLong(1);
+}
+
+PyObject* Entity::pySetTarget(PyObject* self, PyObject* args) {
+	long handle_entity;
+	long handle_target;
+	int type;
+	if (!PyArg_ParseTuple(args, "iii", &handle_entity, &handle_target, &type)) return NULL;
+	Entity* src = Engine::entities[handle_entity];
+	Entity* dst = Engine::entities[handle_target];
+	if (src && dst) {
+		switch (type) {
+		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+			case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst); break;
+			case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst); break;
+			case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst); break;
+		#undef HasController
+		}
+	}
+	return PyBool_FromLong(1);
+}
+
+PyObject* Entity::pySetDelta(PyObject* self, PyObject* args) {
+	long  handle_entity;
+	float x;
+	float y;
+	int   type;
+	if (!PyArg_ParseTuple(args, "iffi", &handle_entity, &x, &y, &type)) return NULL;
+	Entity* src = Engine::entities[handle_entity];
+	if (src) {
+		switch (type) {
+		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
+			case EntityController::CONTROLLER_BOUNCE: ((EntityBounceController*)Controller(BOUNCE))->setDelta(x, y); break;
+			case EntityController::CONTROLLER_MOVE:((EntityMoveController*)Controller(MOVE))->setDelta(x, y); break;
+		#undef HasController
+		}
+	}
+	return PyBool_FromLong(1);
+}
+
+PyObject* Entity::pyAddSprite(PyObject* self, PyObject* args) {
+	long entity_handle;
+	long sprite_handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Sprite* spr = &Vpu::sprites[sprite_handle];
+	if (ent && spr) {
+		//ent->sprites.push_back(spr);
+		//return PyLong_FromLong((long)ent->sprites.size() - 1);
+	}
+	return PyLong_FromLong(-1);
+}
+
+PyObject* Entity::pyAddAnimation(PyObject* self, PyObject* args) {
+	long entity_handle;
+	long anim_handle;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Animation* ani = &Vpu::animations[anim_handle];
+	if (ent && ani) {
+		//ent->animations.push_back(ani);
+		//return PyLong_FromLong((long)ent->animations.size() - 1);
+	}
+	return PyLong_FromLong(-1);
+}
+
+PyObject* Entity::pySetSprite(PyObject* self, PyObject* args) {
+	long entity_handle;
+	long sprite_handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Sprite* spr = &Vpu::sprites[sprite_handle];
+	if (ent && spr) {
+		ent->sprite = spr;
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+PyObject* Entity::pySetAnimation(PyObject* self, PyObject* args) {
+	long entity_handle;
+	long anim_handle;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	Animation* ani = &Vpu::animations[anim_handle];
+	if (ent && ani) {
+		ent->animation = ani;
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+PyObject* Entity::pySetParameter(PyObject* self, PyObject* args) {
+	// entity_handle, parameter_name, value
+	long entity_handle;
+	char* parameter;
+	int controller_type = -1;
+	float value;
+	if (!PyArg_ParseTuple(args, "isf|i", &entity_handle, &parameter, &value, &controller_type)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		// change parameter from controller, send directly.
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+PyObject* Entity::pySetPosition(PyObject* self, PyObject* args) {
+	long entity_handle;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "iff", &entity_handle, &x, &y)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		ent->x = x;
+		ent->y = y;
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
+
+PyObject* Entity::pyGetPosition(PyObject* self, PyObject* args) {
+	long entity_handle;
+	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		PyObject* list = PyList_New(2);
+		if (!list) throw("Unable to allocate memory for Python list");
+		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)ent->x));
+		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)ent->y));
+		return list;
+	}
+	return PyBool_FromLong(0);
+}
+
+PyObject* Entity::pyGetDelta(PyObject* self, PyObject* args) {
+	long entity_handle;
+	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) {
+		PyObject* list = PyList_New(2);
+		if (!list) throw("Unable to allocate memory for Python list");
+		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_x));
+		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_y));
+		return list;
+	}
+	return PyBool_FromLong(0);
+}
+
+PyObject* Entity::pyDraw(PyObject* self, PyObject* args) {
+	long handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	Engine::entities[handle]->draw();
+	return PyBool_FromLong(1);
+}
+
+PyObject* Entity::pyAddController(PyObject* self, PyObject* args) {
+	long handle;
+	int type;
+	if (!PyArg_ParseTuple(args, "ii", &handle, &type)) return NULL;
+	Entity* e = Engine::entities[handle];
+	e->addController((EntityController::Type)type);
+	return PyLong_FromLong((long)e->controllers.size() - 1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

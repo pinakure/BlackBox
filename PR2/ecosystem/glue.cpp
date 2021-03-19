@@ -17,7 +17,6 @@ Surface *getLayer(int index) {
 		index == 0 ? &Vpu::background :
 		index == 1 ? &Vpu::foreground :
 		&Vpu::overlay;
-	
 }
 
 /* ---------------------------------------------------------------------------------------
@@ -567,202 +566,6 @@ pythoncommand(blackbox_createstring) {
 }
 
 
-#include "entity.hpp"
-pythoncommand(blackbox_entitycreate) {
-	int width = 16;
-	int height = 16;
-	char* name = nullptr;
-	if (!PyArg_ParseTuple(args, "|iis", &width, &height, &name)) return NULL;
-	Engine::entities.push_back(new Entity(width, height, name ? name : "UnnamedEntity"));
-	return PyLong_FromLong((long)Engine::entities.size() - 1);
-}
-pythoncommand(blackbox_entitydelete) {
-	int handle = 16;
-	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	//Engine::entities[handle]->enabled = false;
-	return PyLong_FromLong((long)Engine::entities.size() - 1);
-}
-pythoncommand(blackbox_entityenable) {
-	int handle = 16;
-	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Engine::entities[handle]->enabled = true;
-	return PyLong_FromLong(1);
-}
-pythoncommand(blackbox_entitydisable) {
-	int handle = 16;
-	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Engine::entities[handle]->enabled = false;
-	return PyLong_FromLong(1);
-}
-pythoncommand(blackbox_entityupdate) {
-	double delta;
-	long handle;
-	if (!PyArg_ParseTuple(args, "if", &handle, &delta)) return NULL;
-	Engine::entities[handle]->update(delta);
-	return PyBool_FromLong(1);
-}
-pythoncommand(blackbox_entitysettgt) {
-	long handle_entity;
-	long handle_target;
-	int type;
-	if (!PyArg_ParseTuple(args, "iii", &handle_entity, &handle_target, &type)) return NULL;
-	Entity* src = Engine::entities[handle_entity];
-	Entity* dst = Engine::entities[handle_target];
-	if (src && dst) {
-		switch (type) {
-		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
-			case EntityController::CONTROLLER_AVOID: ((EntityAvoidController*)Controller(AVOID))->setTarget(dst); break;
-			case EntityController::CONTROLLER_FOLLOW:((EntityFollowController*)Controller(FOLLOW))->setTarget(dst); break;
-			case EntityController::CONTROLLER_SHOOT: ((EntityShootController*)Controller(SHOOT))->setTarget(dst); break;
-		#undef HasController
-		}
-	}
-	return PyBool_FromLong(1);
-}
-
-pythoncommand(blackbox_entitysetdelta) {
-	long  handle_entity;
-	float x;
-	float y;
-	int   type;
-	if (!PyArg_ParseTuple(args, "iffi", &handle_entity, &x, &y, &type)) return NULL;
-	Entity* src = Engine::entities[handle_entity];
-	if (src) {
-		switch (type) {
-		#define Controller(a) (src->controllers[EntityController::CONTROLLER_##a])
-			case EntityController::CONTROLLER_BOUNCE: ((EntityBounceController*)Controller(BOUNCE))->setDelta(x,y); break;
-			case EntityController::CONTROLLER_MOVE:((EntityMoveController*)Controller(MOVE))->setDelta(x,y); break;
-		#undef HasController
-		}
-	}
-	return PyBool_FromLong(1);
-}
-
-pythoncommand(blackbox_entityaddspr) {
-	long entity_handle;
-	long sprite_handle;
-	int type;
-	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	Sprite* spr = &Vpu::sprites[sprite_handle];
-	if (ent && spr) {
-		//ent->sprites.push_back(spr);
-		//return PyLong_FromLong((long)ent->sprites.size() - 1);
-	}
-	return PyLong_FromLong(-1);
-}
-
-pythoncommand(blackbox_entityaddani) {
-	long entity_handle;
-	long anim_handle;
-	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	Animation* ani = &Vpu::animations[anim_handle];
-	if (ent && ani) {
-		//ent->animations.push_back(ani);
-		//return PyLong_FromLong((long)ent->animations.size() - 1);
-	}
-	return PyLong_FromLong(-1);
-}
-
-pythoncommand(blackbox_entitysetspr) {
-	long entity_handle;
-	long sprite_handle;
-	int type;
-	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &sprite_handle, &type)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	Sprite* spr = &Vpu::sprites[sprite_handle];
-	if (ent && spr) {
-		ent->sprite = spr;
-		return PyBool_FromLong(true);
-	}
-	return PyBool_FromLong(false);
-}
-
-pythoncommand(blackbox_entitysetani) {
-	long entity_handle;
-	long anim_handle;
-	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &anim_handle)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	Animation* ani = &Vpu::animations[anim_handle];
-	if (ent && ani) {
-		ent->animation = ani;
-		return PyBool_FromLong(true);
-	}
-	return PyBool_FromLong(false);
-}
-
-pythoncommand(entitysetarg) {
-	// entity_handle, parameter_name, value
-	long entity_handle;
-	char* parameter;
-	int controller_type=-1;
-	float value;
-	if (!PyArg_ParseTuple(args, "isf|i", &entity_handle, &parameter, &value, &controller_type)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	if (ent) {
-		// change parameter from controller, send directly.
-		return PyBool_FromLong(true);
-	}
-	return PyBool_FromLong(false);
-}
-
-pythoncommand(blackbox_entitysetpos) {
-	long entity_handle;
-	float x;
-	float y;
-	if (!PyArg_ParseTuple(args, "iff", &entity_handle, &x, &y)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	if (ent) {
-		ent->x = x;
-		ent->y = y;
-		return PyBool_FromLong(1);
-	}
-	return PyBool_FromLong(0);
-}
-
-pythoncommand(blackbox_entitygetpos) {
-	long entity_handle;
-	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	if (ent) {
-		PyObject* list = PyList_New(2);
-		if (!list) throw("Unable to allocate memory for Python list");
-		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)ent->x));
-		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)ent->y));
-		return list;
-	}
-	return PyBool_FromLong(0);
-}
-pythoncommand(blackbox_entitygetdelta) {
-	long entity_handle;
-	if (!PyArg_ParseTuple(args, "i", &entity_handle)) return NULL;
-	Entity* ent = Engine::entities[entity_handle];
-	if (ent) {
-		PyObject* list = PyList_New(2);
-		if (!list) throw("Unable to allocate memory for Python list");
-		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_x));
-		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_y));
-		return list;
-	}
-	return PyBool_FromLong(0);
-}
-
-pythoncommand(blackbox_entitydraw) {
-	long handle;
-	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
-	Engine::entities[handle]->draw();
-	return PyBool_FromLong(1);
-}
-pythoncommand(blackbox_entityaddctl) {
-	long handle;
-	int type;
-	if (!PyArg_ParseTuple(args, "ii", &handle, &type)) return NULL;
-	Entity* e = Engine::entities[handle];
-	e->addController((EntityController::Type)type);
-	return PyLong_FromLong((long)e->controllers.size()-1);
-}
-
 pythoncommand(blackbox_deletevar) {
 	int handle;
 	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
@@ -968,24 +771,6 @@ pythoncommand(tbi) {
 	return PyLong_FromLong(1);
 }
 
-/* TiledMap glue functions -------------------------------------------------------------- */
-pythoncommand(tm_create) {
-	int handle = 1;
-	return PyLong_FromLong(handle);
-}
-
-pythoncommand(tm_destroy) {
-	return PyBool_FromLong(1);
-}
-
-pythoncommand(tm_draw) {
-	return PyBool_FromLong(1);
-}
-
-pythoncommand(tm_update) {
-	return PyBool_FromLong(1);
-}
-
 /* Joypad methods ---------------------------------------------------------------------- */
 extern char key[256];
 
@@ -1060,23 +845,6 @@ static PyMethodDef BlackBoxMethods[] = {
 	{"createinteger", blackbox_createinteger, METH_VARARGS, "blackbox.createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
 	{"createstring"	, blackbox_createstring	, METH_VARARGS, "blackbox.createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
 	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "blackbox.ctrlc() : Returns TRUE if CTRL+C was pressed"},
-	{"entitycreate"	, blackbox_entitycreate , METH_VARARGS, "blackbox.entitycreate(width, height, name) : Create a generic entity width given size and name"},
-	{"entityenable"	, blackbox_entityenable , METH_VARARGS, "blackbox.entityenable(handle) : Create a generic entity width given size and name"},
-	{"entityaddspr" , blackbox_entityaddspr , METH_VARARGS, "blackbox.entityaddspr(entity_handle, sprite_handle) : "},
-	{"entityaddani" , blackbox_entityaddani , METH_VARARGS, "blackbox.entityaddani(entity_handle, anim_handle) : "},
-	{"entitydelete" , blackbox_entitydelete , METH_VARARGS, "blackbox.entitydelete(entity_handle) : "},
-	{"entitydraw"	, blackbox_entitydraw   , METH_VARARGS, "blackbox.entitydraw(handle) : "},
-	{"entitydisable", blackbox_entitydisable, METH_VARARGS, "blackbox.entitydisable(handle) : "},
-	{"entitygetpos" , blackbox_entitygetpos , METH_VARARGS, "blackbox.entitysetpos(entity_handle) : "},
-	{"entitygetdelta",blackbox_entitygetdelta,METH_VARARGS, "blackbox.entitygetdelta() : "},
-	{"entitysetani" , blackbox_entitysetani , METH_VARARGS, "blackbox.entitysetani(entity_handle, anim_handle) : "},
-	{"entitysetarg" , blackbox_entitysetarg , METH_VARARGS, "blackbox.entitysetarg(entity_handle, parameter_name, value) : "},
-	{"entitysetdelta",blackbox_entitysetdelta,METH_VARARGS, "blackbox.entitysetdelta(entity_handle, delta_x, delta_y, controller_type) : "},
-	{"entitysetspr" , blackbox_entitysetspr , METH_VARARGS, "blackbox.entitysetspr(entity_handle, sprite_handle) : "},
-	{"entitysettgt" , blackbox_entitysettgt , METH_VARARGS, "blackbox.entitysettgt(handle, target_handle, controller_type) : " },
-	{"entitysetpos" , blackbox_entitysetpos , METH_VARARGS, "blackbox.entitysetpos(entity_handle, x, y) : "},
-	{"entityupdate"	, blackbox_entityupdate , METH_VARARGS, "blackbox.entityupdate(entity, delta) : "},
-	{"entityaddctl" , blackbox_entityaddctl , METH_VARARGS, "blackbox.entitytaddctl(entity, controller_type) : "},
 	{"epoch"		, blackbox_epoch		, METH_VARARGS, "blackbox.epoch() : Return current engine epoch uptime"},
 	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "blackbox.deletevar(var_handle) : Deletes variable by given variable handle"},
 	{"download"		, blackbox_download		, METH_VARARGS, "blackbox.download(filename) : Download file from current version repository."},
@@ -1088,14 +856,7 @@ static PyMethodDef BlackBoxMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-/* Tiled Map internal methods ------------------------------------------------------------------------- */
-static PyMethodDef TiledMapMethods[] = {
-	{"create"		, tm_create				, METH_VARARGS, "tiledmap.create(width,height,layer_count=1,tile_width=8,tile_height=8) : " },
-	{"destroy"		, tm_destroy			, METH_VARARGS, "tiledmap.destroy(tiledmap_handle) : " },
-	{"draw"			, tm_draw				, METH_VARARGS, "tiledmap.destroy(handle,x=0,y=0) : " },
-	{"update"		, tm_update				, METH_VARARGS, "tiledmap.update(handle,delta=1.0) : " },
-	{NULL, NULL, 0, NULL}
-};
+/* Joypad internal methods ---------------------------------------------------------------------------- */
 static PyMethodDef JoypadMethods[] = {
 	{"menu"			, joypad_menu		, METH_VARARGS, "joypad.menu() : " },
 	{"select"		, joypad_select		, METH_VARARGS, "joypad.select() : " },
@@ -1159,35 +920,32 @@ static PyMethodDef VpuMethods[] = {
 /* ----------------------------------------------------------------------
 	Definir Modulos
 ---------------------------------------------------------------------- */
-static PyModuleDef TiledMapModule	= {PyModuleDef_HEAD_INIT, "tiledmap"	, NULL, -1, TiledMapMethods	  , NULL, NULL, NULL, NULL};
+#include "tiledmap.hpp"
+#include "entity.hpp"
 static PyModuleDef BlackBoxModule	= {PyModuleDef_HEAD_INIT, "blackbox"	, NULL, -1, BlackBoxMethods	  , NULL, NULL, NULL, NULL};
-static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods		  , NULL, NULL, NULL, NULL};
-static PyModuleDef JoypadModule		= {PyModuleDef_HEAD_INIT, "joypad"		, NULL, -1, JoypadMethods	  , NULL, NULL, NULL, NULL};
+static PyModuleDef EntityLibModule  = {PyModuleDef_HEAD_INIT, "entitylib"	, NULL, -1, Entity::methods	  , NULL, NULL, NULL, NULL};
 static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1, ConsoleMethods	  , NULL, NULL, NULL, NULL};
+static PyModuleDef JoypadModule		= {PyModuleDef_HEAD_INIT, "joypad"		, NULL, -1, JoypadMethods	  , NULL, NULL, NULL, NULL};
+static PyModuleDef TiledMapModule	= {PyModuleDef_HEAD_INIT, "tm"			, NULL, -1, TiledMap::methods , NULL, NULL, NULL, NULL};
 static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriterMethods , NULL, NULL, NULL, NULL};
+static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, VpuMethods		  , NULL, NULL, NULL, NULL};
 
-static PyObject *PyInit_joypad(void) { return PyModule_Create(&JoypadModule); }
-static PyObject *PyInit_tiledmap(void) { return PyModule_Create(&TiledMapModule); }
-static PyObject *PyInit_blackbox(void){ return PyModule_Create(&BlackBoxModule); }
-static PyObject *PyInit_vpu(void){ return PyModule_Create(&VpuModule); }
-static PyObject *PyInit_console(void){ return PyModule_Create(&ConsoleModule); }
-static PyObject *PyInit_typewriter(void){ return PyModule_Create(&TypeWriterModule); }
+static PyObject *PyInit_blackbox(void)	{ return PyModule_Create(&BlackBoxModule);		}
+static PyObject *PyInit_entitylib(void) { return PyModule_Create(&EntityLibModule);		}
+static PyObject *PyInit_console(void)	{ return PyModule_Create(&ConsoleModule);		}
+static PyObject *PyInit_joypad(void)	{ return PyModule_Create(&JoypadModule);		}
+static PyObject* PyInit_tiledmap(void)	{ return PyModule_Create(&TiledMapModule);		}
+static PyObject *PyInit_typewriter(void){ return PyModule_Create(&TypeWriterModule);	}
+static PyObject *PyInit_vpu(void)		{ return PyModule_Create(&VpuModule);			}
 
 static void Py_LoadCommands() {
-	for (PyMethodDef &d : VpuMethods) {
-		if (!d.ml_name)continue;
-		Console::addHelp(d.ml_name, d.ml_doc);
-	}
-	for (PyMethodDef &d : BlackBoxMethods) {
-		if (!d.ml_name)continue;
-		Console::addHelp(d.ml_name, d.ml_doc);
-	}
-	for (PyMethodDef &d : ConsoleMethods) {
-		if (!d.ml_name)continue;
-		Console::addHelp(d.ml_name, d.ml_doc);
-	}
-	for (PyMethodDef &d : TypeWriterMethods) {
-		if (!d.ml_name)continue;
-		Console::addHelp(d.ml_name, d.ml_doc);
-	}
+	for (PyMethodDef &d : BlackBoxMethods	){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+	for (PyMethodDef &d : ConsoleMethods	){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+	for (PyMethodDef &d : JoypadMethods		){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+	for (PyMethodDef &d : TypeWriterMethods	){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+	for (PyMethodDef &d : VpuMethods		){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+
+//	for (PyMethodDef& d : Entity::methods) { if (!d.ml_name)continue; Console::addHelp(d.ml_name, d.ml_doc); }
+//	for (PyMethodDef &d : TiledMap::methods	){if(!d.ml_name)continue;Console::addHelp(d.ml_name, d.ml_doc);}
+
 }

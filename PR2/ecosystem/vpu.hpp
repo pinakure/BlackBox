@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include "surface.hpp"
+#include "tiledmap.hpp"
 #include "sprite.hpp"
 #include "animation.hpp"
 #include "font.hpp"
@@ -38,7 +39,9 @@ public:
 	static bool							ready;
 	static long int						animation_handle;
 	static long int						surface_handle;
+	static long int						tiledmap_handle;
 	static long int						sprite_handle;
+	static std::map<long int, TiledMap>	tiledmaps;
 	static std::map<long int, Surface>	surfaces;
 	static std::map<long int, Animation>animations;
 	static std::map<long int, Sprite>	sprites;
@@ -125,6 +128,8 @@ public:
 	static void drawAnimationRotated(Animation& animation, float dx, float dy, float angle=0.0f);
 
 	/* High Level API */
+	static long int allocateTiledMap(int width, int height, int layer_count, int tile_width=8, int tile_height=8);
+	static void deallocateTiledMap(long int handle);
 	static long int allocateSurface(int width, int height);
 	static void deallocateSurface(long int handle);
 	static long int allocateSprite(std::string filename, int priority=0);

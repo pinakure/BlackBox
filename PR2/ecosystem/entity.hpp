@@ -2,6 +2,7 @@
 #define __ENTITY_HPP
 
 #include "entitycontroller.hpp"
+#include "script.hpp"
 
 class Game {
 public:
@@ -12,6 +13,7 @@ public:
 
 class Entity {
 public:
+	static PyMethodDef methods[];
 	std::string name	= "";
 	float		x		= 0;
 	float		y		= 0;
@@ -41,13 +43,23 @@ public:
 	void addStringProperty(std::string name, ...);
 	void addColorProperty(std::string name, ...);
 	*/
+	static PyObject* pyCreate(PyObject* self, PyObject* args);
+	static PyObject* pyEnable(PyObject* self, PyObject* args);
+	static PyObject* pyAddSprite(PyObject* self, PyObject* args);
+	static PyObject* pyAddAnimation(PyObject* self, PyObject* args);
+	static PyObject* pyDelete(PyObject* self, PyObject* args);
+	static PyObject* pyDraw(PyObject* self, PyObject* args);
+	static PyObject* pyDisable(PyObject* self, PyObject* args);
+	static PyObject* pyGetPosition(PyObject* self, PyObject* args);
+	static PyObject* pyGetDelta(PyObject* self, PyObject* args);
+	static PyObject* pySetAnimation(PyObject* self, PyObject* args);
+	static PyObject* pySetParameter(PyObject* self, PyObject* args);
+	static PyObject* pySetDelta(PyObject* self, PyObject* args);
+	static PyObject* pySetSprite(PyObject* self, PyObject* args);
+	static PyObject* pySetTarget(PyObject* self, PyObject* args);
+	static PyObject* pySetPosition(PyObject* self, PyObject* args);
+	static PyObject* pyUpdate(PyObject* self, PyObject* args);
+	static PyObject* pyAddController(PyObject* self, PyObject* args);
 };
-
-class ExampleEntity : public Entity {
-public:
-	ExampleEntity(std::string name = "UnnamedExampleEntity");
-	void update(double delta);
-};
-
 
 #endif

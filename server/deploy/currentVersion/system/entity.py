@@ -1,4 +1,4 @@
-from blackbox import *
+import entitylib as el
 import vpu
 
 class Color:
@@ -153,7 +153,7 @@ class Entity:
         self.y           = self.game.height / 2 
         self.width       = width
         self.height      = height
-        self.handle      = entitycreate(width, height, name)
+        self.handle      = el.create(width, height, name)
         self.controllers = {}
         self.properties  = {}
         self.enabled     = True
@@ -166,24 +166,24 @@ class Entity:
 
     def disable(self):
         self.enabled = False
-        entitydisable(self.handle)
+        el.disable(self.handle)
 
     def enable(self):
         self.enabled = True
-        entityenable(self.handle)
+        el.enable(self.handle)
 
     def setposition(self, x, y):
         self.x = x
         self.y = y
-        entitysetpos(self.handle, x, y)	
+        el.setposition(self.handle, x, y)	
 
     def setsprite(self, sprite):
         self.sprite = sprite
-        entitysetspr(self.handle, sprite)
+        el.setsprite(self.handle, sprite)
     
     def setanimation(self, animation):
         self.animation = animation
-        entitysetani(self.handle, animation)
+        el.setanimation(self.handle, animation)
 
     """
     def loadsprite(self, filename):
@@ -191,7 +191,7 @@ class Entity:
         sprite = vpu.createsprite(filename, priority)
         if sprite>=0:
             self.sprites.append(sprite)            
-            return entityaddspr(self.handle, sprite)
+            return el.addsprite(self.handle, sprite)
         return None
     """
      
@@ -199,7 +199,7 @@ class Entity:
         animation = vpu.createanim(frame_width, frame_height, self.sprites[sprite_index], sx, sy, dx, dy, vertical, frame_rate, autoupdate)
         if animation>=0:
             self.animations.append(animation)
-            return entityaddani(self.handle, animation)            
+            return el.addanimation(self.handle, animation)            
         return None
 
     def __del__(self):
@@ -211,18 +211,18 @@ class Entity:
             vpu.deletesprite(sprite)
         self.sprites=[]
         self.sprite = None
-        entitydelete(self.handle)
+        el.delete(self.handle)
 
     # def draw(self):
     #     import vpu
-    #     entitydraw(self.handle)
+    #     el.draw(self.handle)
     #     if self.sprite:
     #         vpu.drawsprite(self.sprite, self.x, self.y, self.angle)        
     #     elif self.animation:
     #         vpu.drawanim(self.animation, self.x, self.y, self.angle)
         
     def update(self, delta):
-        entityupdate(self.handle, delta)
+        el.update(self.handle, delta)
         
     def addcontroller(self, type_index):
         self.controllers[ type_index ] = EntityController(self, type_index)
@@ -256,14 +256,14 @@ class EntityController:
     CONTROLLER_MAX      = 0x06
     
     def set_target(self, target):
-        entitysettgt(self.parent.handle, target.handle, self.controller_type)
+        el.settarget(self.parent.handle, target.handle, self.controller_type)
             
     def set_delta(self, delta_x, delta_y):
-        entitysetdelta(self.parent.handle, delta_x, delta_y, self.controller_type)
+        el.setdelta(self.parent.handle, delta_x, delta_y, self.controller_type)
             
     def __init__(self, entity, controller_type):
         self.controller_type = controller_type
         self.parent = entity
         self.controller_type = controller_type
-        self.handle = entityaddctl(entity.handle, controller_type)
+        self.handle = el.addcontroller(entity.handle, controller_type)
         

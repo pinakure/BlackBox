@@ -8,10 +8,12 @@
 std::map<long int, Surface>			Vpu::surfaces;
 std::map<long int, Animation>		Vpu::animations;
 std::map<long int, Sprite>			Vpu::sprites;
-	
+std::map<long int, TiledMap>		Vpu::tiledmaps;
+
 long int							Vpu::animation_handle=0;
-long int							Vpu::surface_handle=0;
+long int							Vpu::surface_handle = 0;
 long int							Vpu::sprite_handle=0;
+long int							Vpu::tiledmap_handle = 0;
 float								Vpu::fade_target_level=0.0f;
 float								Vpu::fade_level=0.0f;
 float								Vpu::fade_delta=1.5f;
@@ -760,9 +762,22 @@ void Vpu::deallocateAnimation(long int handle) {
 	}
 }
 
+long int Vpu::allocateTiledMap(int width, int height, int layer_count, int tile_width, int tile_height) {
+	tiledmap_handle++;
+	tiledmaps.insert(std::pair<long int, TiledMap>(tiledmap_handle, TiledMap(width, height, layer_count, tile_width, tile_height)));
+	return tiledmap_handle;
+}
+
+void Vpu::deallocateTiledMap(long int handle) {
+	if (tiledmaps.empty())return;
+	if (tiledmaps.find(handle) != tiledmaps.end()) {
+		tiledmaps.erase(handle);
+	}
+}
+
 long int Vpu::allocateSurface(int width, int height) {
 	surface_handle++;
-	surfaces.insert( std::pair<long int, Surface>(surface_handle, createSurface(width, height)) );
+	surfaces.insert(std::pair<long int, Surface>(surface_handle, createSurface(width, height)));
 	return surface_handle;
 }
 
@@ -790,9 +805,9 @@ void Vpu::tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>
 		for (int x = 0; x < sprite.picture.width; x++) {
 			ALLEGRO_COLOR c = al_get_pixel(sprite.picture.bitmap, x, y);
 			Pixel p = {
-				c.r * 255,
-				c.g * 255,
-				c.b * 255
+				int(c.r * 255.0f),
+				int(c.g * 255.0f),
+				int(c.b * 255.0f)
 			};
 			if ((p.r == 0) && (p.g == 0) && (p.b == 0))continue;
 			std::vector<Pixel>::iterator it = src.begin();

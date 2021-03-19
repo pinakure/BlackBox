@@ -1,5 +1,5 @@
-from random import random
 import joypad
+from random import random
 import vpu
 
 class Orientation:
@@ -95,8 +95,8 @@ class SnakePart:
 class Snake:
     game            = None
     time            = 0
-    speed           = 15
-    initial_speed   = 15
+    speed           = 10
+    initial_speed   = 10
     orientation     = Orientation.VERTICAL
     direction       = Direction.UP 
     next_direction  = Direction.UP 
@@ -211,7 +211,7 @@ class Snake:
             tx = Snake.parts[Snake.length-1].x - nx
             ty = Snake.parts[Snake.length-1].y - ny
             Snake.parts[Snake.length] = Snake.part(tx,ty, Snake.orientation)
-            Snake.legnth+=1
+            Snake.length+=1
             # gen new dot
             Space.randomdot()
         
@@ -219,44 +219,31 @@ class Snake:
         for i in range(0, Snake.length):
             Space.cells[Snake.parts[i].y][Snake.parts[i].x] = CellType.SNAKE | Snake.parts[i].orientation
         Snake.moved = False
+        if Snake.direction != Snake.next_direction:
+            Snake.keydown(Snake.next_direction)
 
     @staticmethod
     def walk():
         #Space.clear()
         if Snake.pause: return
-        if Snake.direction == Direction.UP:   Snake.moveto(Snake.parts[ Snake.length-1 ].x  , Snake.parts[ Snake.length-1 ].y-1 )
-        if Snake.direction == Direction.LEFT: Snake.moveto(Snake.parts[ Snake.length-1 ].x-1, Snake.parts[ Snake.length-1 ].y   )
-        if Snake.direction == Direction.DOWN: Snake.moveto(Snake.parts[ Snake.length-1 ].x  , Snake.parts[ Snake.length-1 ].y+1 )
-        if Snake.direction == Direction.RIGHT:Snake.moveto(Snake.parts[ Snake.length-1 ].x+1, Snake.parts[ Snake.length-1 ].y   )
+        elif Snake.direction == Direction.UP:   Snake.moveto(Snake.parts[ Snake.length-1 ].x  , Snake.parts[ Snake.length-1 ].y-1 )
+        elif Snake.direction == Direction.LEFT: Snake.moveto(Snake.parts[ Snake.length-1 ].x-1, Snake.parts[ Snake.length-1 ].y   )
+        elif Snake.direction == Direction.DOWN: Snake.moveto(Snake.parts[ Snake.length-1 ].x  , Snake.parts[ Snake.length-1 ].y+1 )
+        elif Snake.direction == Direction.RIGHT:Snake.moveto(Snake.parts[ Snake.length-1 ].x+1, Snake.parts[ Snake.length-1 ].y   )
         Snake.redraw = True
         
     @staticmethod    
     def keydown(direction):
+        Snake.next_direction = direction
         if Snake.moved: return
         Snake.moved = True
-        Snake.next_direction = direction
             
-        last_orientation = Orientation.VERTICAL if Snake.direction in (Direction.UP, Direction.DOWN) else Orientation.Horizontal
-        last_direction   = Snake.direction
-        
         if Snake.direction in (Direction.UP, Direction.DOWN):
             Snake.orientation = Orientation.VERTICAL
             Snake.direction = Direction.LEFT if Snake.next_direction==Direction.LEFT else Direction.RIGHT if  Snake.next_direction == Direction.RIGHT else Snake.direction
-        if Snake.direction in (Direction.LEFT, Direction.RIGHT):
+        else:
             Snake.orientation = Orientation.HORIZONTAL
             Snake.direction = Direction.UP if Snake.next_direction==Direction.UP else Direction.DOWN if  Snake.next_direction == Direction.DOWN else Snake.direction
-        
-        if Snake.orientation != last_orientation:
-            #Snake.orientation = Orientation.BOTH
-            #if((lastdir == 'u') && (snakedir == 'l'))snakeorient = 'nexus up-left' 
-            #else if((lastdir == 'u') && (snakedir == 'r'))snakeorient = 'nexus up-right' 
-            #else if((lastdir == 'd') && (snakedir == 'l'))snakeorient = 'nexus down-left' 
-            #else if((lastdir == 'd') && (snakedir == 'r'))snakeorient = 'nexus down-right'
-            #else if((lastdir == 'l') && (snakedir == 'd'))snakeorient = 'nexus left-down' 
-            #else if((lastdir == 'l') && (snakedir == 'u'))snakeorient = 'nexus left-up' 
-            #else if((lastdir == 'r') && (snakedir == 'd'))snakeorient = 'nexus right-down' 
-            #else if((lastdir == 'r') && (snakedir == 'u'))snakeorient = 'nexus right-up' 
-            pass
     
     @staticmethod
     def print():
@@ -275,7 +262,4 @@ class Snake:
             Snake.moved = False
             Snake.pause ^= 1
         """
-        if joypad.up():     Snake.keydown(Direction.UP)
-        if joypad.right():  Snake.keydown(Direction.RIGHT)
-        if joypad.down():   Snake.keydown(Direction.DOWN)
-        if joypad.left():   Snake.keydown(Direction.LEFT)
+        
