@@ -32,11 +32,13 @@ enum E_InputButton {
 
 #include "trigger.hpp"
 #include "snapshot.hpp"
+#include "python.h"
 
 class InputDevice {
 	private:
 		static Demo				demo;
 	public:
+		static PyMethodDef methods[];
 		///////////////////////
 		// CVARS				//
 		///////////////////////		
@@ -142,6 +144,24 @@ class InputDevice {
 		static void			loadVars();
 		static void			restart();
 		static void			handleEvent(ALLEGRO_EVENT &event);
+
+		static PyObject* pyA(PyObject* self, PyObject* args);
+		static PyObject* pyB(PyObject* self, PyObject* args);
+		static PyObject* pyX(PyObject* self, PyObject* args);
+		static PyObject* pyY(PyObject* self, PyObject* args);
+		static PyObject* pyL1(PyObject* self, PyObject* args);
+		static PyObject* pyL2(PyObject* self, PyObject* args);
+		static PyObject* pyL3(PyObject* self, PyObject* args);
+		static PyObject* pyR1(PyObject* self, PyObject* args);
+		static PyObject* pyR2(PyObject* self, PyObject* args);
+		static PyObject* pyR3(PyObject* self, PyObject* args);
+		static PyObject* pyUp(PyObject* self, PyObject* args);
+		static PyObject* pyDown(PyObject* self, PyObject* args);
+		static PyObject* pyLeft(PyObject* self, PyObject* args);
+		static PyObject* pyRight(PyObject* self, PyObject* args);
+		static PyObject* pyMenu(PyObject* self, PyObject* args);
+		static PyObject* pySelect(PyObject* self, PyObject* args);
+		static PyObject* pyStart(PyObject* self, PyObject* args);
 
 		~InputDevice(void);
 };

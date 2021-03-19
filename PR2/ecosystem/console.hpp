@@ -75,6 +75,7 @@ typedef struct t_Toggle {
 
 class Console{
 	public:		
+		static PyMethodDef methods[];
 		////////////////////////////////////////////
 		// CVARS										//
 		////////////////////////////////////////////
@@ -235,7 +236,8 @@ class Console{
 		
 		static std::string				stripColors(const char *colored);
 
-
+		static PyObject* pyCls(PyObject* self, PyObject* args);
+		static PyObject* pyPrint(PyObject* self, PyObject* args);
 };
 
 #define COMMAND_CALLBACK(a)			int a(std::vector<std::string> &args)

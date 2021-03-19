@@ -12,12 +12,12 @@ bool Script::initialize() {
 		PyObject* pInt = NULL;
 
 		PyImport_AppendInittab("blackbox"	, &PyInit_blackbox);
-		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
 		PyImport_AppendInittab("console"	, &PyInit_console);
-		PyImport_AppendInittab("typewriter"	, &PyInit_typewriter);
-		PyImport_AppendInittab("tm"			, &PyInit_tiledmap);
 		PyImport_AppendInittab("entitylib"	, &PyInit_entitylib);
 		PyImport_AppendInittab("joypad"		, &PyInit_joypad);
+		PyImport_AppendInittab("tm"			, &PyInit_tiledmap);
+		PyImport_AppendInittab("typewriter"	, &PyInit_typewriter);
+		PyImport_AppendInittab("vpu"		, &PyInit_vpu);
 		Py_SetPath(L".\\;.\\data\\system.zip");
 		Py_Initialize();
 		Py_LoadCommands();

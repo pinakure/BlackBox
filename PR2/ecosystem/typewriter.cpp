@@ -41,6 +41,24 @@ static Surface surface;
 static Surface overlay;
 Font	*TypeWriter::font = NULL;
 
+PyMethodDef TypeWriter::methods[] = {
+	{"addchoice"    , TypeWriter::pyAddChoice	, METH_VARARGS, "addchoice(name, value) : Add a pair of name: value to the available choice array"},
+	{"addoption"    , TypeWriter::pyAddOption	, METH_VARARGS, "addoption(var_handle) : Add a variable which can be modified at the menu"},
+	{"clear"	    , TypeWriter::pyClear		, METH_VARARGS, "clear() : Clear option and choice list"},
+	{"clearpic"		, TypeWriter::pyClearPicture, METH_VARARGS, "typewriter.clearpic() : Remove picture from typewriter overlay"},
+	{"enqueue"		, TypeWriter::pyEnqueue		, METH_VARARGS, "typewriter.enqueue(text) : Enqueue message into typewriter buffer and open if if closed"},
+	{"getchoice"    , TypeWriter::pyGetChoice	, METH_VARARGS, "typewriter.answer() : Returns last answer, or empty string if no answer was given at last choice list"},
+	{"gettext"		, TypeWriter::pyGetText		, METH_VARARGS, "typewriter.gettext() : Polls text input dialog upon finished is activated, the it returns text"},
+	{"loadpic"		, TypeWriter::pyLoadPicture	, METH_VARARGS, "typewriter.loadpic(picfilename, x=0, y=0, w=0, h=0)  : Load picture from file to typewriter overlay"},
+	{"prompt"		, TypeWriter::pyPrompt		, METH_VARARGS, "typewriter.prompt(placeholder='') : Opens prompt dialog optionally presenting given placeholder text"},
+	{"ready"		, TypeWriter::pyReady		, METH_VARARGS, "ready() : Returns true once user pressed next or close button"},
+	{"setposition"	, TypeWriter::pySetPosition	, METH_VARARGS, "typewriter.setposition(x, y) : Set the origin point for the typewriter box "},
+	{"setcolor"		, TypeWriter::pySetColor	, METH_VARARGS, "typewriter.setcolor(r=-1, g=-1, b=-1, a=-1) : Change  typewriter box color scheme"},
+	{"setfont"		, TypeWriter::pySetFont		, METH_VARARGS, "typewriter.setfont(font_handle) : Switch font to be used in typewriter box"},
+	{"setsize"		, TypeWriter::pySetSize		, METH_VARARGS, "typewriter.setsize(w, h) : Set new dimensions for the typewriter box"},
+	{NULL, NULL, 0, NULL}
+};
+
 void TypeWriter::initialize() {
 	if(Vpu::fonts.size())
 		font = Vpu::fonts[Vpu::fonts.size()-1];
@@ -931,3 +949,152 @@ void GetTextBox::draw() {
 	Vpu::popColor();
 	Vpu::popFont();
 }
+
+
+
+/* TypeWriter --------------------------------------------------------------------------- */
+
+#define pythoncommand(name) static PyObject *name(PyObject *self, PyObject *args)
+
+PyObject* TypeWriter::pyReady(PyObject* self, PyObject* args){
+	return PyLong_FromLong(TypeWriter::next);
+}
+
+PyObject* TypeWriter::pySetPosition(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "ff", &x, &y)) return NULL;
+	TypeWriter::x = x;
+	TypeWriter::y = y;
+	return PyLong_FromLong(1);
+}
+PyObject* TypeWriter::pySetColor(PyObject* self, PyObject* args) {	
+	float r;
+	float g;
+	float b;
+	float a = -1;
+	if (!PyArg_ParseTuple(args, "fff|f", &r, &g, &b, &a)) return NULL;
+	TypeWriter::r = r;
+	TypeWriter::g = g;
+	TypeWriter::b = b;
+	TypeWriter::a = a == -1.0f ? 0.0f : a;
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyPrompt(PyObject* self, PyObject* args){
+	char* placeholder = NULL;
+	if (!PyArg_ParseTuple(args, "|s", &placeholder)) return NULL;
+	if (GetTextBox::status == GetTextBox::STATUS_DISABLED) {
+		TypeWriter::clearTextBox(16, placeholder ? placeholder : "");
+		GetTextBox::status = GetTextBox::STATUS_ENABLED;
+	}
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyGetText(PyObject* self, PyObject* args) {
+	if (GetTextBox::status == GetTextBox::STATUS_FINISHED) {
+		std::string ret = GetTextBox::text;
+		GetTextBox::status = GetTextBox::STATUS_DISABLED;
+		GetTextBox::text = "";
+		return Py_BuildValue("s", ret.c_str());
+	}
+	return PyLong_FromLong(0);
+}
+
+PyObject* TypeWriter::pySetFont(PyObject* self, PyObject* args) {
+	char* font_typewriter;
+	char* font_gettextbox = NULL;
+	if (!PyArg_ParseTuple(args, "s|s", &font_typewriter, &font_gettextbox)) return NULL;
+	if (!font_gettextbox) font_gettextbox = font_typewriter;
+	std::vector<Font*>::iterator it;
+	bool found = false;
+	for (it = Vpu::fonts.begin(); it < Vpu::fonts.end(); it++) {
+		Font* font = *it;
+		if (!font->name.compare(font_typewriter)) {
+			TypeWriter::font = font;
+			if (found)return PyBool_FromLong(true);
+			else found = true;
+		}
+		if (!font->name.compare(font_gettextbox)) {
+			GetTextBox::font = font;
+			if (found)return PyBool_FromLong(true);
+			else found = true;
+		}
+	}
+	return PyBool_FromLong(false);
+}
+
+PyObject* TypeWriter::pySetSize(PyObject* self, PyObject* args) {
+	int width;
+	int height;
+	if (!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
+	TypeWriter::final_width = width;
+	TypeWriter::final_height = height;
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyAddChoice(PyObject* self, PyObject* args) {
+	char* name;
+	char* value;
+	if (!PyArg_ParseTuple(args, "ss", &name, &value)) return NULL;
+	TypeWriter::choices.insert(
+		std::pair < std::string, std::string>(name, value)
+	);
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyClear(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	TypeWriter::options.clear();
+	TypeWriter::choices.clear();
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyAddOption(PyObject* self, PyObject* args) {
+	int variable_index;
+	if (!PyArg_ParseTuple(args, "i", &variable_index)) return NULL;
+	CVar* var = CVar::findByUUID(variable_index);
+	if (var) {
+		TypeWriter::options.push_back(var);
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
+
+PyObject* TypeWriter::pyGetChoice(PyObject* self, PyObject* args) {
+	char* question = NULL;
+	if (!PyArg_ParseTuple(args, "|s", &question))
+		return NULL;
+	if (question != NULL)TypeWriter::question = question;
+	return Py_BuildValue("s", TypeWriter::getAnswer().c_str());
+}
+
+PyObject* TypeWriter::pyEnqueue(PyObject* self, PyObject* args) {
+	char* buffer;
+	int wait = 0;
+	if (!PyArg_ParseTuple(args, "s|i", &buffer, &wait)) return NULL;
+	TypeWriter::enqueue(buffer);
+	TypeWriter::wait_time = wait * ENGINE_FPS;
+	return PyLong_FromLong(1);
+}
+PyObject* TypeWriter::pyLoadPicture(PyObject* self, PyObject* args) {
+	char* buffer;
+	float x = 0;
+	float y = 0;
+	float w = 0;
+	float h = 0;
+	if (!PyArg_ParseTuple(args, "s|ffff", &buffer, &x, &y, &w, &h)) return NULL;
+	TypeWriter::loadPicture(buffer, x, y, w, h);
+	return PyLong_FromLong(1);
+}
+PyObject* TypeWriter::pyClearPicture(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	TypeWriter::clearPicture();
+	return PyLong_FromLong(1);
+}
+
+PyObject* TypeWriter::pyTBI(PyObject* self, PyObject* args) {
+	Console::print("To Be Implemented");
+	return PyLong_FromLong(1);
+}
+

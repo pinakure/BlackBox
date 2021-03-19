@@ -71,6 +71,12 @@ int							Console::palette[16];
 #define getcwd _getcwd
 
 
+PyMethodDef Console::methods[] = {
+	{"echo"			, Console::pyPrint		, METH_VARARGS, "echo(text) : Dump given text over console"},
+	{"cls"			, Console::pyCls		, METH_VARARGS, "cls() : Clean console buffer"},
+	{NULL, NULL, 0, NULL}
+};
+
 void Console::initialize(void){
 	if (initialized) return;
 	
@@ -1782,3 +1788,20 @@ void Console::loadVars(void) {
 void Console::addHelp(std::string name, std::string hlp) {
 	pyhelp.insert(std::pair<std::string, std::string>(name, hlp));
 }
+
+
+
+/* ------------------------------------------------------------------------------------ */
+
+PyObject* Console::pyPrint(PyObject* self, PyObject* args) {
+	char* buffer;
+	if (!PyArg_ParseTuple(args, "s", &buffer)) return NULL;
+	Engine::print(buffer);
+	return PyLong_FromLong(1);
+}
+PyObject* Console::pyCls(PyObject* self, PyObject* args) {
+	Console::clear();
+	return PyLong_FromLong(1);
+}
+
+

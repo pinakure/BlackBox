@@ -18,6 +18,7 @@ import vpu
 import joypad
 from tiledmap import TiledMap
 from interpolator import Interpolator
+from data.scripts.background import Background
                     
 class Game:
     running = True
@@ -37,7 +38,7 @@ class Game:
 
     @staticmethod
     def setup():
-            
+
         print("GAME: Setting up...")
         Game.running = True
         
@@ -70,6 +71,8 @@ class Game:
         
         print("GAME: Initializing classes...")
         Game.map = TiledMap(Game, int(320/8),int(240/8),2)
+        #Game.map.load_tileset("")
+        Background.initialize(Game)
         Bubble.initialize(Game)
         
         # set video scale to 2x
@@ -139,7 +142,9 @@ class Game:
         Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )
         Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
         Game.map.redraw()
-        Game.map.draw()
+        if Game.map.need_redraw:
+            Background.draw()
+            #Game.map.draw()
         
         # raster screen and update input
         vpu.update()

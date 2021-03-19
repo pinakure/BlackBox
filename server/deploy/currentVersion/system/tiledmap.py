@@ -12,10 +12,12 @@ class TiledMap:
         self.tile_width  = tile_width
         self.tile_height = tile_height
         self.target      = 0 # background
+        self.need_redraw = False
         self.handle      = tm.create(width, height, layer_count, tile_width, tile_height)
 
-    def redraw(self, layer_index=-1):
-        tm.redraw(self.handle, layer_index)
+    def redraw(self):
+        self.need_redraw = True
+        tm.redraw(self.handle, -1)
     
     def fill(self, value, layer_index=-1):
         tm.fill(self.handle, value, layer_index)
@@ -46,6 +48,7 @@ class TiledMap:
 
     def draw(self):
         tm.draw(self.handle, self.x, self.y)
+        self.need_redraw = False
 
     def update(self, delta):
         tm.update(self.handle, delta)

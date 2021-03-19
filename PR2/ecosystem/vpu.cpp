@@ -18,7 +18,7 @@ float								Vpu::fade_target_level=0.0f;
 float								Vpu::fade_level=0.0f;
 float								Vpu::fade_delta=1.5f;
 int									Vpu::fade_color[3] = {0, 0, 0};
-
+Pixel								Vpu::__getpixel;
 int Vpu::pixel_format = 0;
 
 Surface Vpu::console;
@@ -28,8 +28,8 @@ Surface Vpu::foreground;
 
 std::vector<ALLEGRO_COLOR> Vpu::color_stack;
 std::vector<Font*> Vpu::font_stack;
-Surface* Vpu::target = NULL;
-ALLEGRO_BITMAP *Vpu::buffer= NULL;
+Surface* Vpu::target = nullptr;
+ALLEGRO_BITMAP *Vpu::buffer= nullptr;
 int Vpu::frames = 0;
 unsigned long int Vpu::total_frames = 0;
 int Vpu::fps = 0;
@@ -51,6 +51,51 @@ Font* Vpu::biggest_font = NULL;
 Font* Vpu::smallest_font = NULL;
 Font* Vpu::legacy_font = NULL;
 
+
+
+PyMethodDef Vpu::methods[] = {
+	{"transition"	, Vpu::pyTransition		, METH_VARARGS, "transition(type) : Performs half of an interactive transition and wait for user to change screen to continue" },
+	{"createanim"	, Vpu::pyCreateAnimation, METH_VARARGS, "createanim(width, height, sprite_handle) : Return Handle to new Animation object " },
+	{"createsprite"	, Vpu::pyCreateSprite	, METH_VARARGS, "createsprite(filename) : Returns Handle to Sprite object create upon given filename" },
+	{"createsurf"	, Vpu::pyCreateSurface	, METH_VARARGS, "createsurf(width, height) : Returns Handle to Surface object to be drawn arbitrarily to screen" },
+	{"deleteanim"	, Vpu::pyDeleteAnimation, METH_VARARGS, "deleteanim(handle) : Delete Animation identified by given Handle" },
+	{"deletesprite"	, Vpu::pyDeleteSprite	, METH_VARARGS, "deletesprite(handle) : Delete Sprite identified by given Handle" },
+	{"deletesurf"	, Vpu::pyDeleteSurface	, METH_VARARGS, "deletesurf(handle) : Delete Surface identified by given Handle" },
+	{"dimensions"	, Vpu::pyDimensions		, METH_VARARGS, "dimensions() : Returns selected bitmap [ width, height ] "},
+	{"disable"		, Vpu::pyDisable		, METH_VARARGS, "disable(layer) : Toggle off given vpu layer"},
+	{"drawanim"		, Vpu::pyDrawAnimation	, METH_VARARGS, "drawanim(handle, x, y, rotation) : Draw animation identified by given handle onto given coordinates" },
+	{"updateanim"	, Vpu::pyUpdateAnimation, METH_VARARGS, "updateanim(force_frame=None) : " },
+	{"drawsprite"	, Vpu::pyDrawSprite		, METH_VARARGS, "drawsprite(handle, x, y, rotation) : Draw Sprite identified by given handle onto given coordinates" },
+	{"drawsurf"		, Vpu::pyDrawSurface	, METH_VARARGS, "drawsurf(handle, x, y) : Draw surface identified by given handle onto given coordinates" },
+	{"enable"		, Vpu::pyEnable			, METH_VARARGS, "enable(layer) : Toggle on  given vpu layer"},
+	{"fadein"		, Vpu::pyFadeIn			, METH_VARARGS, "fadein() : Fade screen from black"},
+	{"fadeout"		, Vpu::pyFadeOut		, METH_VARARGS, "fadeout() : Fade screen to black"},
+	{"fading"		, Vpu::pyFading			, METH_VARARGS, "fading() : Return True is fade in / fade out is activated" },
+	{"fill"			, Vpu::pyFill			, METH_VARARGS, "fill(r, g, b, a) : Fill selected bitmap with given color or default color"},
+	{"fillrect"		, Vpu::pyFillRectangle	, METH_VARARGS, "filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
+	{"frames"		, Vpu::pyFrames			, METH_VARARGS, "frames() : Return actual frame count"},
+	{"fullscreen"	, Vpu::pyFullScreen		, METH_VARARGS, "fullscreen(enabled) : Toggle fullscreen mode"},
+	{"selectsprite"	, Vpu::pySelectSprite	, METH_VARARGS, "selectsprite(sprite_handle) : Select surface bound to given sprite"},
+	{"rect"			, Vpu::pyRectangle		, METH_VARARGS, "rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
+	{"line"			, Vpu::pyLine			, METH_VARARGS, "line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
+	{"perlin"		, Vpu::pyPerlin			, METH_VARARGS, "perlin(surface_handle, r, g, b) : Generate perlin noise using given color along given surface" },
+	{"pset"			, Vpu::pyPutPixel		, METH_VARARGS, "pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
+	{"getpixel"		, Vpu::pyGetPixel		, METH_VARARGS, "color = getpixel(x, y) : Read pixel from selected surface" },
+	{"getsurfacedata",Vpu::pyGetSurfaceData , METH_VARARGS, "[ colors ] = getsurfacedata() : Read whole pixel data from selected surface in a linear list" },
+	{"restart"		, Vpu::pyRestart		, METH_VARARGS, "restart() : Restart Video Processing Unit"},
+	{"rotate"		, Vpu::pyRotate			, METH_VARARGS, "rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
+	{"select"		, Vpu::pySelect			, METH_VARARGS, "select(layer) : Select given layer to perform next graphic operations onto it"},
+	{"setcolor"		, Vpu::pySetColor		, METH_VARARGS, "setcolor(r, g, b, a) : Sets current painting color"},
+	{"setfont"		, Vpu::pySetFont		, METH_VARARGS, "setfont(font_handle) : Sets current font to the one identified by given handle"},
+	{"setrotation"	, Vpu::pySetRotation	, METH_VARARGS, "setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
+	{"setscale"		, Vpu::pySetScale		, METH_VARARGS, "setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
+	{"scale"		, Vpu::pyScale			, METH_VARARGS, "scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
+	{"subsprite"	, Vpu::pySubSprite		, METH_VARARGS, "subsprite(sprite_handle|, left, top, right, bottom) : Create sprite region or full copy from original sprite"},
+	{"textout"		, Vpu::pyTextOut		, METH_VARARGS, "textout(text, x, y) : Print given text at given coordinates"},
+	{"tintsprite"	, Vpu::pyTintSprite		, METH_VARARGS, "tintsprite(sprite_handle, original_palette, new_palette) : Change colors in sprite from original_palette to new_palette"},
+	{"update"		, Vpu::pyUpdate			, METH_VARARGS, "update() : Allow blackbox engine to perform its rendering based input and output operations"},
+	{NULL, NULL, 0, NULL}
+};
 
 void prepareTests() {
 	Vpu::foreground.enabled = false;
@@ -340,6 +385,11 @@ ALLEGRO_COLOR Vpu::alter(ALLEGRO_COLOR _color, float qr, float qg, float qb, flo
 
 static char _buffer[65535];
 
+#include <iostream>
+void Vpu::printf(const char* txt) {
+	std::cout << txt;
+
+}
 
 void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
 	va_list ap;
@@ -500,6 +550,19 @@ void Vpu::popColor() {
 
 void Vpu::putpixel(int x, int y) {
 	al_put_pixel(x, y, color);
+}
+
+Pixel* Vpu::getpixel(int x, int y) {
+	if (!Vpu::target)return &Vpu::__getpixel;
+	//al_lock_bitmap(Vpu::target->bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+	ALLEGRO_COLOR c = al_get_pixel(Vpu::target->bitmap, x, y);
+	Vpu::__getpixel.r = c.r * 255.0f;
+	Vpu::__getpixel.g = c.g * 255.0f;
+	Vpu::__getpixel.b = c.b * 255.0f;
+	Vpu::__getpixel.a = c.a * 255.0f;
+	//
+	al_unlock_bitmap(Vpu::target->bitmap);
+	return &Vpu::__getpixel;
 }
 
 void Vpu::line(int x, int y, int dx, int dy) {
@@ -828,4 +891,455 @@ void Vpu::tintSprite(Sprite& sprite, std::vector<Pixel>& src, std::vector<Pixel>
 		}
 	}
 	al_unlock_bitmap(sprite.picture.bitmap);
+}
+Surface* getLayer(int index) {
+	if (!Vpu::is_initialized) {
+		printf("vpu is not initialized.\nYou must call vpu.restart() before operating.\n");
+		return NULL;
+	}
+	if (index >= 3) {
+		if (Vpu::surfaces.find(index - 3) != Vpu::surfaces.end())
+			return &(Vpu::surfaces.at(index - 3));
+		else index %= 3;
+	}
+	return
+		index == 0 ? &Vpu::background :
+		index == 1 ? &Vpu::foreground :
+		&Vpu::overlay;
+}
+
+
+
+
+
+
+
+PyObject* Vpu::pyCreateAnimation(PyObject* self, PyObject* args) {
+	float width;
+	float height;
+	int   sprite;
+	float dx = 0;
+	float dy = 0;
+	float sx = 1;
+	float sy = 0;
+	bool  vertical = false;
+	float speed = 1.0f;
+	bool  autoupdate = false;
+	if (!PyArg_ParseTuple(args, "ffi|ffffbfb", &width, &height, &sprite, &sx, &sy, &dx, &dy, &vertical, &speed, &autoupdate)) return NULL;
+	if (Vpu::sprites.find(sprite) != Vpu::sprites.end()) {
+		long int handle = Vpu::allocateAnimation(width, height, Vpu::sprites.at(sprite), sx, sy, dx, dy, vertical, autoupdate);
+		Vpu::animations.at(handle).speed = speed;
+		Vpu::animations.at(handle).bidirectional = false;
+		return PyLong_FromLong(handle);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyCreateSprite(PyObject* self, PyObject* args) {
+	int priority = 0;
+	char* filename;
+	if (!PyArg_ParseTuple(args, "s|i", &filename, &priority)) return NULL;
+	long int handle = Vpu::allocateSprite(filename, priority);
+	return PyLong_FromLong(handle);
+}
+PyObject* Vpu::pyCreateSurface(PyObject* self, PyObject* args) {
+	// Must add 3 units to handle (3 system layers to be selected which are not in <Vpu::surfaces> )
+	int width;
+	int height;
+	if (!PyArg_ParseTuple(args, "ii", &width, &height)) return NULL;
+	long int handle = Vpu::allocateSurface(width, height);
+	return PyLong_FromLong(handle + 3);
+}
+PyObject* Vpu::pyEnable(PyObject * self, PyObject * args) {
+	int index;
+	if (!PyArg_ParseTuple(args, "i", &index)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(false);
+	(*layer).enabled = true;
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pyDeleteAnimation(PyObject* self, PyObject* args) {
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Vpu::deallocateAnimation(handle);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyDeleteSprite(PyObject* self, PyObject* args) {
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Vpu::deallocateSprite(handle);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyDeleteSurface(PyObject* self, PyObject* args) {
+	// Must subtract 3 units from handle (3 system layers to be selected which are not in <Vpu::surfaces>)
+	long int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::surfaces.find(handle - 3) != Vpu::surfaces.end()) {
+		Vpu::deallocateSurface(handle - 3);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: surface_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyDimensions(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	int dims[2] = { Vpu::target->width, Vpu::target->height };
+
+	PyObject* list = PyList_New(2);
+	if (!list) throw("Unable to allocate memory for Python list");
+	for (unsigned int i = 0; i < 2; i++) {
+		PyObject* num = PyFloat_FromDouble((double)dims[i]);
+		if (!num) {
+			Py_DECREF(list);
+			throw("Unable to allocate memory for Python list");
+		}
+		PyList_SET_ITEM(list, i, num);
+	}
+	return list;
+}
+PyObject* Vpu::pyDisable(PyObject * self, PyObject * args) {
+	int index;
+	if (!PyArg_ParseTuple(args, "i", &index)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(false);
+	(*layer).enabled = false;
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pyDrawAnimation(PyObject* self, PyObject* args) {
+	int handle;
+	float x;
+	float y;
+	float rotation = 0.0f;
+	if (!PyArg_ParseTuple(args, "iff|f", &handle, &x, &y, &rotation)) return NULL;
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Vpu::drawAnimationRotated(Vpu::animations.at(handle), x, y, rotation);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyDrawSprite(PyObject* self, PyObject* args) {
+	int handle;
+	float x;
+	float y;
+	float angle = 0.0f;
+	if (!PyArg_ParseTuple(args, "iff|f", &handle, &x, &y, &angle)) return NULL;
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Sprite* spr = &Vpu::sprites.at(handle);
+		spr->picture.rotation[0] = angle;
+		Vpu::drawSprite(*spr, x, y);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyDrawSurface(PyObject* self, PyObject* args) {
+	// Must subtract 3 units from handle (3 system layers to be selected which are not in <surfaces>)
+	int handle;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "iff", &handle, &x, &y)) return NULL;
+	Surface* s = getLayer(handle);
+	Vpu::drawSurface(*s, 0, 0, s->width, s->height, x, y);
+	return PyLong_FromLong(1);
+}
+PyObject* Vpu::pyFadeIn(PyObject * self, PyObject * args) {
+	float r = -1;
+	float g = -1;
+	float b = -1;
+	if (!PyArg_ParseTuple(args, "|fff", &r, &g, &b)) return NULL;
+	Vpu::fadein(r, g, b);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyFadeOut(PyObject * self, PyObject * args) {
+	float r = -1;
+	float g = -1;
+	float b = -1;
+	if (!PyArg_ParseTuple(args, "|fff", &r, &g, &b)) return NULL;
+	Vpu::fadeout(r, g, b);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyFading(PyObject * self, PyObject * args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	return PyBool_FromLong(Vpu::fade_level == Vpu::fade_target_level);
+}
+PyObject* Vpu::pyFillRectangle(PyObject * self, PyObject * args) {
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
+	Vpu::qfillRectangle(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyFullScreen(PyObject* self, PyObject* args) {
+	bool fullscreen;
+	if (!PyArg_ParseTuple(args, "b", &fullscreen)) return NULL;
+	Vpu::fullscreen = fullscreen;
+	return PyBool_FromLong(Vpu::fullscreen);
+}
+PyObject* Vpu::pyFill(PyObject* self, PyObject* args) {
+	float r = -1.0f;
+	float g = -1.0f;
+	float b = -1.0f;
+	float a = -1.0f;
+	if (!PyArg_ParseTuple(args, "|ffff", &r, &g, &b, &a)) return NULL;
+	Vpu::paint(r >= 0.0f ? r : 0, g >= 0.0f ? g : 0.0f, b >= 0.0f ? b : 0.0f, a >= 0.0f ? a : 255.0f);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyFrames(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	return PyLong_FromLong(Vpu::total_frames);
+}
+PyObject* Vpu::pyGetPixel(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "ff", &x, &y)) return NULL;
+	Pixel* p = Vpu::getpixel(x, y);
+	return PyLong_FromLong(
+		((int(p->a) & 0xFF) << 24) |
+		((int(p->b) & 0xFF) << 16) |
+		((int(p->g) & 0xFF) << 8) |
+		(int(p->r) & 0xFF)
+	);
+}
+PyObject* Vpu::pyGetSurfaceData(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	Surface* s = Vpu::target;
+	ALLEGRO_BITMAP* bmp = s->bitmap;
+	if(bmp) {
+		PyObject* list = PyList_New(s->width * s->height);
+		if (!list) throw("Unable to allocate memory for Python list");
+		al_lock_bitmap(bmp, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+		int i = 0;
+		for (int y = 0; y < s->height; y++) {
+			for (int x = 0; x < s->width; x++) {
+				ALLEGRO_COLOR p = al_get_pixel(bmp, x, y);
+				int color = ((int(p.a*255.0f) & 0xFF) << 24) |
+							((int(p.b*255.0f)  & 0xFF) << 16) |
+							((int(p.g*255.0f)  & 0xFF) << 8) |
+							(int(p.r * 255.0f) & 0xFF);
+				PyList_SET_ITEM(list, i, PyLong_FromLong(color));
+				i++;
+			}
+		}
+		al_unlock_bitmap(bmp);
+		return list;
+	}
+	return PyList_New(0);
+}
+PyObject* Vpu::pyLine(PyObject * self, PyObject * args) {
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
+	Vpu::line(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyPerlin(PyObject * self, PyObject * args) {
+	int handle;
+	float r = 255.0f, g = 255.0f, b = 255.0f;
+	if (!PyArg_ParseTuple(args, "i|fff", &handle, &r, &g, &b)) return NULL;
+	Surface* l = getLayer(handle);
+	if (l) {
+		Vpu::perlin(*l, r, g, b);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyPutPixel(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "ff", &x, &y)) return NULL;
+	Vpu::putpixel(x, y);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyRectangle(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	float dx;
+	float dy;
+	if (!PyArg_ParseTuple(args, "ffff", &x, &y, &dx, &dy)) return NULL;
+	Vpu::rectangle(x, y, dx, dy);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyReload(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	if (!Vpu::start())exit(1);
+	if (!Vpu::restart())exit(1);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyRestart(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	bool r = true;
+	r &= Vpu::start();
+	r &= Vpu::restart();
+	return PyBool_FromLong(r);
+}
+PyObject* Vpu::pyRotate(PyObject* self, PyObject* args) {
+	int index;
+	float rotation;
+	if (!PyArg_ParseTuple(args, "if", &index, &rotation)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(1);
+	(*layer).rotation[0] += rotation;
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pySelect(PyObject* self, PyObject* args) {
+	int index;
+	if (!PyArg_ParseTuple(args, "i", &index)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer)return PyBool_FromLong(false);
+	Vpu::select(*layer);
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pySelectSprite(PyObject* self, PyObject* args) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Vpu::select(Vpu::sprites.at(handle).picture);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pySetColor(PyObject* self, PyObject* args) {
+	float r;
+	float g;
+	float b;
+	float a = 255.0f;
+	if (!PyArg_ParseTuple(args, "fff|f", &r, &g, &b, &a)) return NULL;
+	Vpu::setColor(r, g, b, a);
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pySetFont(PyObject* self, PyObject* args) {
+	char* fontname;
+	if (!PyArg_ParseTuple(args, "s", &fontname)) return NULL;
+	std::vector<Font*>::iterator it;
+	bool found = false;
+	Font* f = Vpu::getFontByName(fontname);
+	if (f) {
+		Vpu::setFont(f);
+		return PyBool_FromLong(true);
+	}
+	printf(("ERROR: font not found:"+std::string(fontname)+"\n").c_str());
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pySetRotation(PyObject* self, PyObject* args) {
+	int index;
+	float rotation;
+	if (!PyArg_ParseTuple(args, "if", &index, &rotation)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(1);
+	(*layer).rotation[0] = rotation;
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pySetScale(PyObject* self, PyObject* args) {
+	int index;
+	float scale_x;
+	float scale_y;
+	if (!PyArg_ParseTuple(args, "iff", &index, &scale_x, &scale_y)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(1);
+	(*layer).scale[0] = scale_x;
+	(*layer).scale[1] = scale_y;
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyScale(PyObject* self, PyObject* args) {
+	int index;
+	float scale_x;
+	float scale_y;
+	if (!PyArg_ParseTuple(args, "iff", &index, &scale_x, &scale_y)) return NULL;
+	Surface* layer = getLayer(index);
+	if (!layer) return PyBool_FromLong(1);
+	(*layer).scale[0] += scale_x;
+	(*layer).scale[1] += scale_y;
+	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pySubSprite(PyObject* self, PyObject* args) {
+	long int handle;
+	float left = -1;
+	float top = -1;
+	float right = -1;
+	float bottom = -1;
+	if (!PyArg_ParseTuple(args, "i|ffff", &handle, &left, &top, &right, &bottom)) return NULL;
+	// Get sprite object
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Sprite* s = &Vpu::sprites.at(handle);
+		// Fill empty variables (-1) with sprite geometry (to allow a 1:1 copy if not specified)
+		if (left == -1) left = 0;
+		if (top == -1) top = 0;
+		if (right == -1) right = s->picture.width - 1;
+		if (bottom == -1) bottom = s->picture.height - 1;
+		// Return handle from new sprite
+		handle = Vpu::createSubSprite(*s, left, top, right, bottom);
+		return PyLong_FromLong(handle);
+	}
+	printf("ERROR: sprite_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyTextOut(PyObject* self, PyObject* args) {
+	char* text;
+	float x;
+	float y;
+	if (!PyArg_ParseTuple(args, "sff", &text, &x, &y)) return NULL;
+	Vpu::print(std::string(text), x, y);
+	return PyBool_FromLong(true);
+}
+extern std::vector<Pixel> listToPalette(PyObject* incoming);
+PyObject* Vpu::pyTintSprite(PyObject* self, PyObject* args) {
+	long int handle;
+	PyObject* original; //list
+	PyObject* updated; //list
+	if (!PyArg_ParseTuple(args, "iOO", &handle, &original, &updated)) return NULL;
+	// Get palettes
+	std::vector<Pixel> pal_o = listToPalette(original);
+	std::vector<Pixel> pal_u = listToPalette(updated);
+	// Colorize sprite data
+	if (Vpu::sprites.find(handle) != Vpu::sprites.end()) {
+		Sprite* s = &Vpu::sprites.at(handle);
+		Vpu::tintSprite(*s, pal_o, pal_u);
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+PyObject* Vpu::pyTransition(PyObject* self, PyObject* args) {
+	int type = -1;
+	if (!PyArg_ParseTuple(args, "|i", &type)) return NULL;
+	Curtain::enabled = true;
+	if (type >= 0) {
+		type %= CURTAIN_TYPE_SIZE;
+		Curtain::type = (CurtainType)type;
+	}
+	return PyBool_FromLong(true);
+}
+PyObject* Vpu::pyUpdate(PyObject* self, PyObject* args) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	Engine::update();
+	if (!Engine::run) exit(-1);
+	static bool ready = false;
+	ready = Vpu::ready;
+	Vpu::ready = false;
+	return PyBool_FromLong(ready);
+}
+PyObject* Vpu::pyUpdateAnimation(PyObject* self, PyObject* args) {
+	int handle;
+	int frame = -1;
+	if (!PyArg_ParseTuple(args, "i|i", &handle, &frame)) return NULL;
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Animation* a = &(Vpu::animations.at(handle));
+		a->run(a->speed);
+		if (frame >= 0)a->current_frame = frame;
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
 }

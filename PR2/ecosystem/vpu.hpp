@@ -16,24 +16,26 @@ typedef struct s_Pixel {
 	int r = 0;
 	int g = 0;
 	int b = 0;
+	int a = 255;
 }Pixel;
 
 class Vpu {
 private:
-	static Font							*legacy_font;
+	static Font* legacy_font;
 	static ALLEGRO_COLOR				shadow;
 	static ALLEGRO_COLOR				transparent;
 	static std::vector<ALLEGRO_COLOR>	color_stack;
 	static std::vector<Font*>			font_stack;
+	static Pixel						__getpixel;
 public:
 	static std::vector<Font*>			fonts;
-	static Font							*font;
-	static Font*						smallest_font;
-	static Font*						biggest_font;
-	static Surface						*target;	
-	static ALLEGRO_BITMAP				*buffer;	
+	static Font* font;
+	static Font* smallest_font;
+	static Font* biggest_font;
+	static Surface* target;
+	static ALLEGRO_BITMAP* buffer;
 	static ALLEGRO_COLOR				color;
-	static ALLEGRO_DISPLAY				*display;
+	static ALLEGRO_DISPLAY* display;
 	static bool							is_initialized;
 	static bool							fullscreen;
 	static bool							ready;
@@ -57,7 +59,8 @@ public:
 	static int							height;
 	static bool							redraw;
 	static unsigned long int			total_frames;
-	
+	static PyMethodDef					methods[];
+
 	// Initialization and base routines
 	static bool initialize();
 	static void initializeFonts();
@@ -68,6 +71,7 @@ public:
 	static void loadVars();
 
 	// Text output
+	static void printf(const char* txt);
 	static void printf(int  x, int y, int flags, const char *fmt, ...);//slow!
 	static void print			(std::string text, int  x, int y, int flags=0);
 	static void printInteger	(std::string text, int d, int  x, int y, int flags=0);
@@ -84,6 +88,7 @@ public:
 	static void circle(int x, int y, float radius, int r, int g, int b, int alpha=255);
 	static void paint(int r, int g, int b, int alpha = 255);
 	static void putpixel(int x, int y);
+	static Pixel *getpixel(int x, int y);
 	static void line(int x, int y, int dx, int dy);
 
 	
@@ -151,6 +156,47 @@ public:
 	static float fade_level;
 	static float fade_delta;
 
+	static PyObject* pyTransition(PyObject* self, PyObject* args);
+	static PyObject* pyCreateAnimation(PyObject* self, PyObject* args);
+	static PyObject* pyCreateSprite(PyObject* self, PyObject* args);
+	static PyObject* pyCreateSurface(PyObject* self, PyObject* args);
+	static PyObject* pyDeleteAnimation(PyObject* self, PyObject* args);
+	static PyObject* pyDeleteSprite(PyObject* self, PyObject* args);
+	static PyObject* pyDeleteSurface(PyObject* self, PyObject* args);
+	static PyObject* pyDimensions(PyObject* self, PyObject* args);
+	static PyObject* pyDisable(PyObject* self, PyObject* args);
+	static PyObject* pyDrawAnimation(PyObject* self, PyObject* args);
+	static PyObject* pyUpdateAnimation(PyObject* self, PyObject* args);
+	static PyObject* pyDrawSprite(PyObject* self, PyObject* args);
+	static PyObject* pyDrawSurface(PyObject* self, PyObject* args);
+	static PyObject* pyEnable(PyObject* self, PyObject* args);
+	static PyObject* pyFadeIn(PyObject* self, PyObject* args);
+	static PyObject* pyFadeOut(PyObject* self, PyObject* args);
+	static PyObject* pyFading(PyObject* self, PyObject* args);
+	static PyObject* pyFill(PyObject* self, PyObject* args);
+	static PyObject* pyFillRectangle(PyObject* self, PyObject* args);
+	static PyObject* pyFrames(PyObject* self, PyObject* args);
+	static PyObject* pyFullScreen(PyObject* self, PyObject* args);
+	static PyObject* pySelectSprite(PyObject* self, PyObject* args);
+	static PyObject* pyRectangle(PyObject* self, PyObject* args);
+	static PyObject* pyLine(PyObject* self, PyObject* args);
+	static PyObject* pyPerlin(PyObject* self, PyObject* args);
+	static PyObject* pyPutPixel(PyObject* self, PyObject* args);
+	static PyObject* pyGetPixel(PyObject* self, PyObject* args);
+	static PyObject* pyGetSurfaceData(PyObject* self, PyObject* args);
+	static PyObject* pyRestart(PyObject* self, PyObject* args);
+	static PyObject* pyReload(PyObject* self, PyObject* args);
+	static PyObject* pyRotate(PyObject* self, PyObject* args);
+	static PyObject* pySelect(PyObject* self, PyObject* args);
+	static PyObject* pySetColor(PyObject* self, PyObject* args);
+	static PyObject* pySetFont(PyObject* self, PyObject* args);
+	static PyObject* pySetRotation(PyObject* self, PyObject* args);
+	static PyObject* pySetScale(PyObject* self, PyObject* args);
+	static PyObject* pyScale(PyObject* self, PyObject* args);
+	static PyObject* pySubSprite(PyObject* self, PyObject* args);
+	static PyObject* pyTextOut(PyObject* self, PyObject* args);
+	static PyObject* pyTintSprite(PyObject* self, PyObject* args);
+	static PyObject* pyUpdate(PyObject* self, PyObject* args);
 };
 
 #endif

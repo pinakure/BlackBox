@@ -67,6 +67,21 @@ Boolean					*InputDevice::debug_crosshair;
 												// "><", "()", "[]", "/\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 const char *controller_button_names[INPUT_MAX] = { "B1", "B2", "B3", "B4", "T1", "T2", "T3", "T4", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 
+PyMethodDef InputDevice::methods[] = {
+	{"menu"			, InputDevice::pyMenu		, METH_VARARGS, "menu() : " },
+	{"select"		, InputDevice::pySelect		, METH_VARARGS, "select() : " },
+	{"start"		, InputDevice::pyStart		, METH_VARARGS, "start() : " },
+	{"left"			, InputDevice::pyLeft		, METH_VARARGS, "left() : " },
+	{"right"		, InputDevice::pyRight		, METH_VARARGS, "right() : " },
+	{"up"			, InputDevice::pyUp			, METH_VARARGS, "up() : " },
+	{"down"			, InputDevice::pyDown		, METH_VARARGS, "down() : " },
+	{"a"			, InputDevice::pyA			, METH_VARARGS, "a() : " },
+	{"b"			, InputDevice::pyB			, METH_VARARGS, "b() : " },
+	{"x"			, InputDevice::pyX			, METH_VARARGS, "x() : " },
+	{"y"			, InputDevice::pyY			, METH_VARARGS, "y() : " },
+	{NULL, NULL, 0, NULL}
+};
+
 InputDevice::InputDevice(){
 	
 } 
@@ -815,5 +830,35 @@ void InputDevice::update(int delta){
 
 	//PROFILE_END("input");
 }
+
+/* Joypad methods ---------------------------------------------------------------------- */
+
+#define pythoncommand(name) static PyObject *name(PyObject *self, PyObject *args)
+extern char key[256];
+
+
+PyObject* InputDevice::pyMenu(PyObject* self, PyObject* args) {
+	return PyBool_FromLong(
+		(InputDevice::controller[INPUT_START] & InputDevice::controller[INPUT_SELECT])
+		||
+		key[ALLEGRO_KEY_ESCAPE]
+	);
+}
+PyObject* InputDevice::pySelect (PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_SELECT] || key[ALLEGRO_KEY_BACKSPACE]); }
+PyObject* InputDevice::pyStart	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_START] || key[ALLEGRO_KEY_ENTER]); }
+PyObject* InputDevice::pyUp		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_UP] || key[ALLEGRO_KEY_UP]); }
+PyObject* InputDevice::pyDown	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_DOWN] || key[ALLEGRO_KEY_DOWN]); }
+PyObject* InputDevice::pyLeft	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_LEFT] || key[ALLEGRO_KEY_LEFT]); }
+PyObject* InputDevice::pyRight	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_RIGHT] || key[ALLEGRO_KEY_RIGHT]); }
+PyObject* InputDevice::pyA		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_CIRCLE] || key[ALLEGRO_KEY_C]); }
+PyObject* InputDevice::pyB		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_CROSS] || key[ALLEGRO_KEY_X]); }
+PyObject* InputDevice::pyX		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_TRIANGLE] || key[ALLEGRO_KEY_D]); }
+PyObject* InputDevice::pyY		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_SQUARE] || key[ALLEGRO_KEY_S]); }
+PyObject* InputDevice::pyL1		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L1] || key[ALLEGRO_KEY_Z]); }
+PyObject* InputDevice::pyL2		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L2] || key[ALLEGRO_KEY_A]); }
+PyObject* InputDevice::pyL3		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L3] || key[ALLEGRO_KEY_Q]); }
+PyObject* InputDevice::pyR1		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R1] || key[ALLEGRO_KEY_V]); }
+PyObject* InputDevice::pyR2		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R2] || key[ALLEGRO_KEY_F]); }
+PyObject* InputDevice::pyR3		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R3] || key[ALLEGRO_KEY_R]); }
 
 #undef gpu

@@ -8,10 +8,12 @@
 #include <string>
 #include "cvar.hpp"
 #include "font.hpp"
+#include "script.hpp"
 
 class TypeWriter {
 private:
 public:
+	static PyMethodDef methods[];
 	static bool next;
 	static int wait_time;
 	static int x;
@@ -63,6 +65,22 @@ public:
 	
 	static void enqueue(const char *text);	
 	static std::string getAnswer();
+
+	static PyObject* pyReady(PyObject* self, PyObject* args);
+	static PyObject* pySetPosition(PyObject* self, PyObject* args);
+	static PyObject* pySetColor(PyObject* self, PyObject* args);
+	static PyObject* pyPrompt(PyObject* self, PyObject* args);
+	static PyObject* pyGetText(PyObject* self, PyObject* args);
+	static PyObject* pySetFont(PyObject* self, PyObject* args);
+	static PyObject* pySetSize(PyObject* self, PyObject* args);
+	static PyObject* pyAddChoice(PyObject* self, PyObject* args);
+	static PyObject* pyClear(PyObject* self, PyObject* args);
+	static PyObject* pyAddOption(PyObject* self, PyObject* args);
+	static PyObject* pyGetChoice(PyObject* self, PyObject* args);
+	static PyObject* pyEnqueue(PyObject* self, PyObject* args);
+	static PyObject* pyLoadPicture(PyObject* self, PyObject* args);
+	static PyObject* pyClearPicture(PyObject* self, PyObject* args);
+	static PyObject* pyTBI(PyObject* self, PyObject* args);
 };
 
 class GetTextBox {

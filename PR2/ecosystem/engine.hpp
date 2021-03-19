@@ -10,6 +10,7 @@
 class Engine {
 private:
 public:
+	static PyMethodDef methods[];
 	static ALLEGRO_TIMER *timer;
 	static ALLEGRO_TIMER *clock;
 	static ALLEGRO_EVENT_QUEUE *queue;

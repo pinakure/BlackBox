@@ -60,6 +60,8 @@ Showcase *showcase =
 #
 ---------------------------------------------------------------------------------------- 
 */
+
+
 bool Engine::initialize() {
 	try{
 		al_init();
@@ -311,3 +313,230 @@ void Engine::download(const char* file) {
 	Vpu::foreground.enabled = true;
 	Vpu::background.enabled = true;
 }
+
+
+
+#define pythoncommand(name) static PyObject *name(PyObject *self, PyObject *args)
+pythoncommand(blackbox_update) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	Engine::download("toc.py");
+	return PyBool_FromLong(true);
+}
+
+pythoncommand(blackbox_download) {
+	char* file;
+	if (!PyArg_ParseTuple(args, "s", &file)) return NULL;
+	Engine::download(file);
+	return PyBool_FromLong(true);
+}
+
+pythoncommand(blackbox_version) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	return PyLong_FromLong(3);
+}
+
+pythoncommand(blackbox_epoch) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	return PyLong_FromLong(Engine::epoch);
+}
+
+pythoncommand(blackbox_ctrlc) {
+	if (!PyArg_ParseTuple(args, "")) return NULL;
+	if (InputDevice::control_c) {
+		InputDevice::control_c = false;
+		InputDevice::control = false;
+		return PyBool_FromLong(1);
+	}
+	return PyBool_FromLong(0);
+}
+
+pythoncommand(blackbox_createinteger) {
+	char* name;
+	char* help = 0;
+	int min = -65535;
+	int max = 65535;
+	int value = 0;
+	if (!PyArg_ParseTuple(args, "s|iiis", &name, &value, &min, &max, &help)) return NULL;
+	CVar::settings[name] = CVar::create<Integer>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Integer*)CVar::settings[name])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+pythoncommand(blackbox_createdecimal) {
+	char* name;
+	char* help = 0;
+	float min = -65535;
+	float  max = 65535;
+	float value = 0;
+	if (!PyArg_ParseTuple(args, "s|fffs", &name, &value, &min, &max, &help)) return NULL;
+	CVar::settings[name] = CVar::create<Floating>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Floating*)CVar::settings[name])->setMinMax(min, max);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+
+#include "dashboard.hpp"
+
+pythoncommand(blackbox_addtitle) {
+	char* name;
+	char* description;
+	char* developer;
+	char* url;
+	char* picture;
+	char* genre;
+	char* font;
+	bool  multiplayer = false;
+	bool  cooperative = false;
+	bool  joystick = false;
+	bool  mouse = false;
+	bool  keyboard = false;
+	int	  rating = 5;
+	char* released = 0;
+	char* parent = 0;
+
+	if (!
+		PyArg_ParseTuple(
+			args,
+			"sssssssbbbbbiss",
+			&name, &description, &developer, &url, &picture, &genre, &font, &multiplayer, &cooperative, &joystick, &mouse, &keyboard, &rating, &released, &parent
+		)
+		) return NULL;
+	Dashboard::addTitle(
+		name,
+		description,
+		developer,
+		url,
+		picture,
+		genre,
+		font,
+		multiplayer,
+		cooperative,
+		joystick,
+		mouse,
+		keyboard,
+		rating,
+		released ? released : "01-01-2022",
+		parent
+	);
+	return PyBool_FromLong(true);
+}
+
+pythoncommand(blackbox_createboolean) {
+	char* name;
+	char* help = 0;
+	int value = 0;
+	if (!PyArg_ParseTuple(args, "s|is", &name, &value, &help)) return NULL;
+	CVar::settings[name] = CVar::create<Boolean>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+
+pythoncommand(blackbox_createstring) {
+	char* name;
+	char* help = 0;
+	float  max_len = 65535;
+	char* value = 0;
+	if (!PyArg_ParseTuple(args, "s|sis", &name, &value, &max_len, &help)) return NULL;
+	CVar::settings[name] = CVar::create<Text>(
+		name,
+		help ? help : "",
+		value,
+		false
+		);
+	((Text*)CVar::settings[name])->setMaxLength(max_len);
+	return PyLong_FromLong(CVar::settings[name]->getUUID());
+}
+
+
+pythoncommand(blackbox_deletevar) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	CVar* cvar = CVar::findByUUID(handle);
+	if (cvar) {
+		std::map < std::string, CVar*>::iterator it;
+		for (it = CVar::settings.begin(); it != CVar::settings.end(); it++) {
+			if (it->second) {
+				if (it->second->getUUID() == handle) {
+					delete cvar;
+					CVar::settings.erase(it);
+					return PyBool_FromLong(true);
+				}
+			}
+		}
+	}
+	Console::print("Variable not defined");
+	return PyBool_FromLong(false);
+}
+
+pythoncommand(blackbox_findvar) {
+	char* name;
+	if (!PyArg_ParseTuple(args, "s", &name)) return NULL;
+	if (CVar::settings[name])return PyLong_FromLong(CVar::settings[name]->getUUID());
+	std::string out = "Variable ";
+	out += name;
+	out += " not defined";
+	Console::print(out);
+	return PyLong_FromLong(-1);
+}
+
+pythoncommand(blackbox_getvar) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	CVar* var = CVar::findByUUID(handle);
+	if (var) {
+		switch (var->getType()) {
+		default:
+		case CVAR_TEXT:		return Py_BuildValue("s", var->toString().c_str());
+		case CVAR_INTEGER:	return PyLong_FromLong(-1);
+		case CVAR_FLOATING: return PyFloat_FromDouble(((Floating*)var)->get());
+		case CVAR_BOOLEAN:  return PyBool_FromLong(((Boolean*)var)->get());
+		}
+	}
+	else {
+		Console::print("Variable not defined");
+	}
+	return PyBool_FromLong(0);
+}
+
+pythoncommand(blackbox_setvar) {
+	char* value;
+	int handle;
+	if (!PyArg_ParseTuple(args, "is", &handle, &value)) return NULL;
+	CVar* var = CVar::findByUUID(handle);
+	if (var) {
+		var->parseValue(value);
+		return PyBool_FromLong(1);
+	}
+	Console::print("Variable not defined");
+	return PyBool_FromLong(0);
+}
+
+PyMethodDef Engine::methods[] = {
+	{"addtitle"		, blackbox_addtitle		, METH_VARARGS, "addtitle(name,description,developer,url,picture,genre,font,multiplayer,cooperative,joystick,mouse,keyboard,rating,released,parent) : Add given title to the dashboard."},
+	{"createboolean", blackbox_createboolean, METH_VARARGS, "createboolean(name,value,help) : Create a boolean variable and get handle"},
+	{"createdecimal", blackbox_createdecimal, METH_VARARGS, "createdecimal(name,value,max_value,min_value,help) : Create a decimal variable and get handle"},
+	{"createinteger", blackbox_createinteger, METH_VARARGS, "createinteger(name,value,max_value,min_value,help) : Create an integer variable and get handle"},
+	{"createstring"	, blackbox_createstring	, METH_VARARGS, "createstring(name,placeholder,max_length,help) : Create a string variable and get handle"},
+	{"ctrlc"		, blackbox_ctrlc		, METH_VARARGS, "ctrlc() : Returns TRUE if CTRL+C was pressed"},
+	{"epoch"		, blackbox_epoch		, METH_VARARGS, "epoch() : Return current engine epoch uptime"},
+	{"deletevar"	, blackbox_deletevar    , METH_VARARGS, "deletevar(var_handle) : Deletes variable by given variable handle"},
+	{"download"		, blackbox_download		, METH_VARARGS, "download(filename) : Download file from current version repository."},
+	{"findvar"		, blackbox_findvar		, METH_VARARGS, "findvar(var_name) : Find handle for the variable matching var_name"},
+	{"getvar"		, blackbox_getvar		, METH_VARARGS, "getvar(var_handle) : Return value of the variable identified by var_handle"},
+	{"setvar"		, blackbox_setvar		, METH_VARARGS, "setvar(var_handle,value) : Set value of the variable identified by var_handle"},
+	{"update"		, blackbox_update		, METH_VARARGS, "update() : Update Table of Contents up to latest version."},
+	{"version"		, blackbox_version		, METH_VARARGS, "version() : Return current BlackBox engine version"},
+	{NULL, NULL, 0, NULL}
+};
