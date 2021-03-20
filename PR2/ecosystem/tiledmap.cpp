@@ -10,6 +10,7 @@ PyMethodDef TiledMap::methods[] = {
 	{"fill"			, TiledMap::pyFill			, METH_VARARGS, "set(handle,tile_index,layer_index=-1) : " },
 	{"get"			, TiledMap::pyGet			, METH_VARARGS, "get(handle,x,y,layer_index=0) : " },
 	{"getdata"		, TiledMap::pyGetData		, METH_VARARGS, "getdata(handle,layer_index=0) : " },
+	{"loadtileset"	, TiledMap::pyLoadTileset	, METH_VARARGS, "loadtileset(handle,tileset_filename) : " },
 	{"redraw"		, TiledMap::pyRedraw		, METH_VARARGS, "redraw(handle,layer_index=-1) : " },
 	{"set"			, TiledMap::pySet			, METH_VARARGS, "set(handle,x,y,value,layer_index=0) : " },
 	{"setdata"		, TiledMap::pySetData		, METH_VARARGS, "setdata(handle,value,layer_index=0) : " },
@@ -47,19 +48,23 @@ void TiledMap::draw(int ix, int iy) {
 	std::vector<TiledLayer>::iterator layer = this->layers.begin();
 	int dy = iy	, dx = ix;
 	int tile_index, tileset_index;
-	Vpu::color = al_map_rgba(0, 64, 255, 128);
+	ALLEGRO_COLOR grid = al_map_rgba(0, 64, 255, 128);
+	ALLEGRO_COLOR text = al_map_rgba(192,192,192,255);
 	
 	Vpu::select(*this->target);
 	//al_lock_bitmap(this->target->bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+	Surface* ts = this->tileset.size() == 0 ? nullptr : &this->tileset[0];
+	int tileset_width = ts->width / this->tile_width;
+	int tileset_height = ts->height / this->tile_height;
+	int tileset_size = tileset_width * tileset_height;
 	while (layer != this->layers.end()) {
 		dy = iy;
 		if(layer->redraw)
-		for (int y = 0; y < this->h; y++) {
+			for (int y = 0; y < this->h; y++) {
 			dx = ix;
 			int* p = layer->data[y];
 			for (int x = 0; x < this->w; x++) {
-				v				= *p;
-				if (this->tileset.size() == 0) {
+				if (!ts){
 					/*Vpu::fillRectangle(
 						dx, dy,
 						this->tile_width, this->tile_height,
@@ -68,20 +73,32 @@ void TiledMap::draw(int ix, int iy) {
 						Vpu::color.b * 255.0f,
 						Vpu::color.a * 255.0f
 					); */
+					Vpu::color = grid;
 					Vpu::rectangle(
 						dx, dy,
 						this->tile_width, this->tile_height
 					);
+					Vpu::color = text;
+					Vpu::printf(
+						dx + (this->tile_width >> 1),
+						dy - (this->tile_height >> 1),
+						ALLEGRO_ALIGN_CENTER,
+						tile_index > 0 ? " " : "#",
+						tile_index > 0 ? 1 : 8
+					);
 				} else {
-					tile_index		= v & 0x00ffffff;
-					tileset_index	= (v & 0xff>>6) % (this->tileset.size() ? this->tileset.size() : 1);
-					Surface* ts = &this->tileset[tileset_index];
+					v = *p;
+					tile_index = (v & 0x00ffffff) % tileset_size;
+					tileset_index = ((v & 0xff000000) >> 24) % this->tileset.size();
+					int oy = int(tile_index / tileset_width) * this->tile_height;
+					int ox = (tile_index % tileset_width) * this->tile_width;
 					Vpu::drawSurface(
 						*ts,
-						(tile_index % ts->width), int(tile_index / ts->width),
+						ox, oy,
 						this->tile_width, this->tile_height,
 						dx, dy
 					);
+					
 				}
 				dx += this->tile_width;
 				p++;
@@ -96,6 +113,15 @@ void TiledMap::draw(int ix, int iy) {
 
 void TiledMap::update(double delta) {
 
+}
+
+bool TiledMap::loadTileset(std::string filename) {
+	Surface s = Vpu::loadBitmap("tilesets/" + filename+".png");
+	if (s.enabled) {
+		this->tileset.push_back(s);
+		return true;
+	}
+	return false;
 }
 
 
@@ -196,8 +222,8 @@ PyObject* TiledMap::pySet(PyObject* self, PyObject* args) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		layer %= tm->layer_count;
 		TiledLayer* tl = &tm->layers[layer];
-		y %= tl->w;
-		x %= tl->h;
+		y %= tl->h;
+		x %= tl->w;
 		tl->data[y][x] = value;
 		return PyBool_FromLong(true);
 	}
@@ -265,8 +291,8 @@ PyObject* TiledMap::pyGet(PyObject* self, PyObject* args) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		layer %= tm->layer_count;
 		TiledLayer* tl = &tm->layers[layer];
-		y %= tl->w;
-		x %= tl->h;
+		y %= tl->h;
+		x %= tl->w;
 		return PyLong_FromLong(tl->data[y][x]);
 	}
 	printf("ERROR @ pyGet : tiledmap_handle out of range\n");
@@ -298,6 +324,18 @@ PyObject* TiledMap::pyGetData(PyObject* self, PyObject* args) {
 			c_str());
 	}
 	printf("ERROR @ pyGetData : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+PyObject* TiledMap::pyLoadTileset(PyObject* self, PyObject* args) {
+	int handle;
+	char *name;
+	if (!PyArg_ParseTuple(args, "is", &handle, &name)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		return PyBool_FromLong(tm->loadTileset(name));
+	}
+	printf("ERROR @ pyRedraw : tiledmap_handle out of range\n");
 	return PyBool_FromLong(false);
 }
 
@@ -345,10 +383,11 @@ void TiledLayer::destroy() {
 
 void TiledLayer::createDataRow(int index) {
 	this->data[index] = (int*)malloc(sizeof(int)* this->w);
+	memset(this->data[index], 0, sizeof(int)*this->w);
 }
 
 void TiledLayer::set(int x, int y, int tile_index, int tileset_index) {
-	this->data[y][x] = ((tileset_index & 0xFF) << 6) | (tile_index & 0x00FFFFFF);
+	this->data[y][x] = ((tileset_index & 0xFF) << 24) | (tile_index & 0x00FFFFFF);
 }
 
 int TiledLayer::get(int x, int y) {
@@ -360,7 +399,7 @@ int TiledLayer::getTile(int x, int y) {
 }
 
 char TiledLayer::getTileset(int x, int y) {
-	return (this->data[y][x] & 0xFF000000) >> 6;
+	return (this->data[y][x] & 0xFF000000) >> 24;
 }
 
 void TiledLayer::fill(int value) {

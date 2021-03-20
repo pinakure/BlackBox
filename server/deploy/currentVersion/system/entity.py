@@ -162,7 +162,7 @@ class Entity:
         self.sprite      = None
         self.animations  = []
         self.animation   = None
-        print(f"Entity {self.name} initialized")
+        #print(f"Entity {self.name} initialized")
 
     def disable(self):
         self.enabled = False

@@ -1048,9 +1048,11 @@ class Background:
     @staticmethod
     def createpicture(sprite_day, sprite_dawn, sprite_nite, picture_index):
         Background.pictures[picture_index] = {}
-        Background.pictures[picture_index][Background.DAY ] = vpu.subsprite(sprite_day , 0, 0+(picture_index*176), 240, 176+(picture_index*176))
-        Background.pictures[picture_index][Background.DAWN] = vpu.subsprite(sprite_dawn, 0, 0+(picture_index*176), 240, 176+(picture_index*176))
-        Background.pictures[picture_index][Background.NITE] = vpu.subsprite(sprite_nite, 0, 0+(picture_index*176), 240, 176+(picture_index*176))
+        width = 320
+        height = 235
+        Background.pictures[picture_index][Background.DAY ] = vpu.subsprite(sprite_day , 0, 0+(picture_index*height), width, height+(picture_index*height))
+        Background.pictures[picture_index][Background.DAWN] = vpu.subsprite(sprite_dawn, 0, 0+(picture_index*height), width, height+(picture_index*height))
+        Background.pictures[picture_index][Background.NITE] = vpu.subsprite(sprite_nite, 0, 0+(picture_index*height), width, height+(picture_index*height))
         
     @staticmethod
     def initialize(game):
@@ -1083,5 +1085,5 @@ class Background:
     def draw():
         vpu.select(0)
         x = (int(Background.game.dims[0][0]) >> 1) 
-        y = (int(Background.game.dims[0][1]) >> 1) 
+        y = (int(Background.game.dims[0][1]) >> 1) -5
         vpu.drawsprite(Background.pictures[Background.index][Background.time], x, y)

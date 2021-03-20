@@ -46,6 +46,15 @@ class TiledMap:
     def settarget(self, surface_handle):
         tm.settarget(self.handle, surface_handle)
 
+    def load_data(self, data):
+        pass
+    
+    def setvalue(self, x,y, value, layer=0):
+        tm.set(self.handle, x, y, value, layer)
+    
+    def load_tileset(self, tileset_filename):
+        return tm.loadtileset(self.handle, tileset_filename)
+
     def draw(self):
         tm.draw(self.handle, self.x, self.y)
         self.need_redraw = False

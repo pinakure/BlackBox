@@ -39,18 +39,21 @@ public:
 	void destroy();
 	void draw(int x, int y);
 	void update(double delta);
-	static PyObject* pyCreate	(PyObject* self, PyObject* args);
-	static PyObject* pyClear	(PyObject* self, PyObject* args);
-	static PyObject* pyDestroy	(PyObject* self, PyObject* args);
-	static PyObject* pyDraw		(PyObject* self, PyObject* args);
-	static PyObject* pyFill		(PyObject* self, PyObject* args);
-	static PyObject* pyGet		(PyObject* self, PyObject* args);
-	static PyObject* pyGetData	(PyObject* self, PyObject* args);
-	static PyObject* pyRedraw	(PyObject* self, PyObject* args);
-	static PyObject* pySet		(PyObject* self, PyObject* args);
-	static PyObject* pySetData	(PyObject* self, PyObject* args);
-	static PyObject* pySetTarget(PyObject* self, PyObject* args);
-	static PyObject* pyUpdate	(PyObject* self, PyObject* args);
+	bool loadTileset(std::string tileset);
+	
+	static PyObject* pyCreate		(PyObject* self, PyObject* args);
+	static PyObject* pyClear		(PyObject* self, PyObject* args);
+	static PyObject* pyDestroy		(PyObject* self, PyObject* args);
+	static PyObject* pyDraw			(PyObject* self, PyObject* args);
+	static PyObject* pyFill			(PyObject* self, PyObject* args);
+	static PyObject* pyGet			(PyObject* self, PyObject* args);
+	static PyObject* pyGetData		(PyObject* self, PyObject* args);
+	static PyObject* pyLoadTileset	(PyObject* self, PyObject* args);
+	static PyObject* pyRedraw		(PyObject* self, PyObject* args);
+	static PyObject* pySet			(PyObject* self, PyObject* args);
+	static PyObject* pySetData		(PyObject* self, PyObject* args);
+	static PyObject* pySetTarget	(PyObject* self, PyObject* args);
+	static PyObject* pyUpdate		(PyObject* self, PyObject* args);
 
 };
 
