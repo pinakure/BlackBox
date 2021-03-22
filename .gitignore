@@ -80,3 +80,5 @@ alpha/scripts/__init__.py
 alpha/scripts/games/
 
 alpha/scripts/stress.py
+
+data/
