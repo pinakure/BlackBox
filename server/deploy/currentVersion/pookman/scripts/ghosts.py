@@ -67,18 +67,11 @@ class Ghost(Entity):
         Ghost.gfx = {}        
         for i in range(0,4):
             Ghost.gfx[i] = {
-                Direction.UP     : Animation(16, 16, Ghost.sprite, 0, i,  1, i, False, 0.25, False, AnimationLoop.PINGPONG),
+                Direction.RIGHT  : Animation(16, 16, Ghost.sprite, 0, i,  1, i, False, 0.25, False, AnimationLoop.PINGPONG),
                 Direction.DOWN   : Animation(16, 16, Ghost.sprite, 2, i,  3, i, False, 0.25, False, AnimationLoop.PINGPONG),
                 Direction.LEFT   : Animation(16, 16, Ghost.sprite, 4, i,  5, i, False, 0.25, False, AnimationLoop.PINGPONG),
-                Direction.RIGHT  : Animation(16, 16, Ghost.sprite, 6, i,  7, i, False, 0.25, False, AnimationLoop.PINGPONG),
+                Direction.UP     : Animation(16, 16, Ghost.sprite, 6, i,  7, i, False, 0.25, False, AnimationLoop.PINGPONG),
             }
-        # Eyes animation
-        Ghost.gfx[GhostType.DEAD] = {
-            Direction.RIGHT  : Animation(16,16, Ghost.sprite, 0, GhostType.DEAD, 1, GhostType.DEAD , False, 0.25, False, AnimationLoop.PINGPONG),
-            Direction.DOWN   : Animation(16,16, Ghost.sprite, 2, GhostType.DEAD, 3, GhostType.DEAD , False, 0.25, False, AnimationLoop.PINGPONG),
-            Direction.LEFT   : Animation(16,16, Ghost.sprite, 4, GhostType.DEAD, 5, GhostType.DEAD , False, 0.25, False, AnimationLoop.PINGPONG),
-            Direction.UP     : Animation(16,16, Ghost.sprite, 6, GhostType.DEAD, 7, GhostType.DEAD , False, 0.25, False, AnimationLoop.PINGPONG),
-        }        
         # Scared and Scared blinking 
         Ghost.gfx[GhostType.PREY] = {
             Direction.RIGHT  : Animation(16,16, Ghost.sprite, 0, GhostType.PREY, 3, GhostType.PREY , False, 0.125, False, AnimationLoop.PINGPONG),
@@ -86,11 +79,18 @@ class Ghost(Entity):
             Direction.DOWN   : Animation(16,16, Ghost.sprite, 0, GhostType.PREY, 3, GhostType.PREY , False, 0.125, False, AnimationLoop.PINGPONG),
             Direction.UP     : Animation(16,16, Ghost.sprite, 0, GhostType.PREY, 3, GhostType.PREY , False, 0.125, False, AnimationLoop.PINGPONG),
         }
+        # Eyes animation
+        Ghost.gfx[GhostType.DEAD] = {
+            Direction.RIGHT  : Animation(16,16, Ghost.sprite, 0, GhostType.DEAD, 1, GhostType.DEAD , False, 0, False),
+            Direction.DOWN   : Animation(16,16, Ghost.sprite, 2, GhostType.DEAD, 3, GhostType.DEAD , False, 0, False),
+            Direction.LEFT   : Animation(16,16, Ghost.sprite, 4, GhostType.DEAD, 5, GhostType.DEAD , False, 0, False),
+            Direction.UP     : Animation(16,16, Ghost.sprite, 6, GhostType.DEAD, 7, GhostType.DEAD , False, 0, False),
+        }        
         Ghost.gfx[GhostType.BLINK] = {
-            Direction.RIGHT  : Animation(16,16, Ghost.sprite, 0, GhostType.BLINK,7, GhostType.BLINK, False, 0.125, False, AnimationLoop.PINGPONG),
-            Direction.LEFT   : Animation(16,16, Ghost.sprite, 0, GhostType.BLINK,7, GhostType.BLINK, False, 0.125, False, AnimationLoop.PINGPONG),
-            Direction.DOWN   : Animation(16,16, Ghost.sprite, 0, GhostType.BLINK,7, GhostType.BLINK, False, 0.125, False, AnimationLoop.PINGPONG),
-            Direction.UP     : Animation(16,16, Ghost.sprite, 0, GhostType.BLINK,7, GhostType.BLINK, False, 0.125, False, AnimationLoop.PINGPONG),
+            Direction.RIGHT  : Animation(16,16, Ghost.sprite, 0, GhostType.PREY,7, GhostType.PREY, False, 0.125, False, AnimationLoop.PINGPONG),
+            Direction.LEFT   : Animation(16,16, Ghost.sprite, 0, GhostType.PREY,7, GhostType.PREY, False, 0.125, False, AnimationLoop.PINGPONG),
+            Direction.DOWN   : Animation(16,16, Ghost.sprite, 0, GhostType.PREY,7, GhostType.PREY, False, 0.125, False, AnimationLoop.PINGPONG),
+            Direction.UP     : Animation(16,16, Ghost.sprite, 0, GhostType.PREY,7, GhostType.PREY, False, 0.125, False, AnimationLoop.PINGPONG),
         }
         Ghost.initialized = True
 
@@ -285,7 +285,7 @@ class Ghost(Entity):
             self.targetX = self.targetX
             self.targetY = self.targetY
     
-    def set_targets(self, x, y, ox, oy):
+    def set_targets(self, x, y):
         self.targets[0].lock(x[0], y[0])
         self.targets[1].lock(x[1], y[1])
         self.targets[2].lock(x[2], y[2])
@@ -298,22 +298,26 @@ class Ghost(Entity):
         self.targets[3].lock(self.tx,    self.ty+1)
         
     def switch_mode(self, mode):
+        self.mode = mode
         if self.mode == GhostStatus.CHASE:
+            self.frame  = 0
             self.chaseTime = 0
             self.gfx     = self.ghost_type
             self.reverse()
         elif self.mode == GhostStatus.SCATTER:
+            self.frame  = 0
             self.scaterTime = 0
             self.gfx    = self.ghost_type
             self.reverse()            
         elif self.mode == GhostStatus.FRIGHTENED:
+            self.frame  = 0
             self.gfx    = GhostType.PREY
             self.reverse()            
         elif self.mode == GhostStatus.RETURNING:
+            self.frame  = 0
             self.gfx    = GhostType.DEAD
             self.reverse()
-        self.mode = mode
-
+        
     def reverse(self):
         if self.direction ==  Direction.RIGHT: self.direction = Direction.LEFT
         elif self.direction == Direction.DOWN: self.direction = Direction.UP
@@ -398,9 +402,9 @@ class Ghost(Entity):
                     #print("\nSCATTER >> CHASE")
                     self.switch_mode(GhostStatus.CHASE)
                 else: self.scaterTime+=1
-                self.move()
             else: self.updateflags()
-                #print(f"SCATTER[{self.scaterTime}]", end="\r")
+            self.move()
+            #print(f"SCATTER[{self.scaterTime}]", end="\r")
         elif self.mode == GhostStatus.CHASE:
             if Ghost.game.pacman.energized == Ghost.game.pacman.energyQ - 1:
                 self.switch_mode(GhostStatus.FRIGHTENED)

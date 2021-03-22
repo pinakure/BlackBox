@@ -45,10 +45,10 @@ class Pacman(Entity):
         Pacman.sprite = vpu.createsprite("pacman")
         if Pacman.sprite:            
             Pacman.gfx = {}
-            Pacman.gfx[Direction.RIGHT] = Animation(16,16, Pacman.sprite, 0,  0, 16, 0, False, 0, False)
-            Pacman.gfx[Direction.DOWN ] = Animation(16,16, Pacman.sprite, 0,  1, 16, 1, False, 0, False)
-            Pacman.gfx[Direction.LEFT ] = Animation(16,16, Pacman.sprite, 0,  2, 16, 2, False, 0, False)
-            Pacman.gfx[Direction.UP   ] = Animation(16,16, Pacman.sprite, 0,  3, 16, 3, False, 0, False)
+            Pacman.gfx[Direction.RIGHT] = Animation(16,16, Pacman.sprite, 0,  0, 15, 0, False, 0, False)
+            Pacman.gfx[Direction.DOWN ] = Animation(16,16, Pacman.sprite, 0,  1, 15, 1, False, 0, False)
+            Pacman.gfx[Direction.LEFT ] = Animation(16,16, Pacman.sprite, 0,  2, 15, 2, False, 0, False)
+            Pacman.gfx[Direction.UP   ] = Animation(16,16, Pacman.sprite, 0,  3, 15, 3, False, 0, False)
             Pacman.initialized = True
         else:
             Pacman.initialized = False
@@ -96,8 +96,11 @@ class Pacman(Entity):
     def draw():
         if Pacman.status == PacmanStatus.DEAD: return
 
-        if Pacman.status != PacmanStatus.DIEING:
+        if Pacman.status not in (PacmanStatus.DIEING,PacmanStatus.DEAD):
             Pacman.gfx[Pacman.direction].setframe(9 + int(Pacman.frame))
+        else:
+            Pacman.gfx[Pacman.direction].setframe(int(Pacman.frame))
+        print(f"{Direction.string(Pacman.direction)}  -> {Pacman.frame}", end="      \r")
             
         Pacman.gfx[Pacman.direction].draw(Pacman.rx+4, Pacman.ry + 4)
 
@@ -232,8 +235,8 @@ class Pacman(Entity):
         # Set ghost status to scared (eyes returning to the zone)
 
         Pacman.game.score   += (200 * Pacman.multiplier)
-        Pacman.multiplier		*= 2
-        Pacman.eating			= True
+        Pacman.multiplier	*= 2
+        Pacman.eating		= True
         Pacman.game.freeze	= 25
 
         w = Pacman.game.map.width
