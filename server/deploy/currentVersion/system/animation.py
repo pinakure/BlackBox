@@ -1,4 +1,4 @@
-from vpu import createanim, updateanim, drawanim
+from vpu import createanim, updateanim, drawanim, setframe as SetFrame
 
 class AnimationLoop:
     NONE     = 0x00
@@ -54,3 +54,6 @@ class Animation:
         if loop_type is None: return self._loop
         self._loop = loop_type
         setanimlooptype(self,handle, loop_type)
+
+    def setframe(self, frame):
+        SetFrame(self.handle, frame)

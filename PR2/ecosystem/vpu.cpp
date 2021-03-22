@@ -85,6 +85,7 @@ PyMethodDef Vpu::methods[] = {
 	{"restart"		, Vpu::pyRestart		, METH_VARARGS, "restart() : Restart Video Processing Unit"},
 	{"rotate"		, Vpu::pyRotate			, METH_VARARGS, "rotate(layer, angle) : Rotate specified layer (0-11) given degrees"},
 	{"select"		, Vpu::pySelect			, METH_VARARGS, "select(layer) : Select given layer to perform next graphic operations onto it"},
+	{"setframe"		, Vpu::pySetFrame		, METH_VARARGS, "setframe(handle, frame) : Sets active frame for specified animation"},
 	{"setcolor"		, Vpu::pySetColor		, METH_VARARGS, "setcolor(r, g, b, a) : Sets current painting color"},
 	{"setfont"		, Vpu::pySetFont		, METH_VARARGS, "setfont(font_handle) : Sets current font to the one identified by given handle"},
 	{"setrotation"	, Vpu::pySetRotation	, METH_VARARGS, "setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
@@ -1219,6 +1220,18 @@ PyObject* Vpu::pySetColor(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "fff|f", &r, &g, &b, &a)) return NULL;
 	Vpu::setColor(r, g, b, a);
 	return PyBool_FromLong(1);
+}
+PyObject* Vpu::pySetFrame(PyObject* self, PyObject* args) {
+	int handle;
+	int frame;
+	if (!PyArg_ParseTuple(args, "ii", &handle, &frame)) return NULL;
+	if (Vpu::animations.find(handle) != Vpu::animations.end()) {
+		Animation* a = &(Vpu::animations.at(handle));
+		a->current_frame = frame % (a->frame.size());
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR: anim_handle out of range\n");
+	return PyBool_FromLong(false);
 }
 PyObject* Vpu::pySetFont(PyObject* self, PyObject* args) {
 	char* fontname;

@@ -5,6 +5,7 @@
 PyMethodDef TiledMap::methods[] = {
 	{"create"		, TiledMap::pyCreate		, METH_VARARGS, "create(width,height,layer_count=1,tile_width=8,tile_height=8) : " },
 	{"clear"		, TiledMap::pyClear			, METH_VARARGS, "clear(handle,layer_index=-1) : " },
+	{"count"		, TiledMap::pyCount			, METH_VARARGS, "count(handle,value,layer_index=-1) : " },
 	{"destroy"		, TiledMap::pyDestroy		, METH_VARARGS, "destroy(tiledmap_handle) : " },
 	{"draw"			, TiledMap::pyDraw			, METH_VARARGS, "destroy(handle,x=0,y=0) : " },
 	{"fill"			, TiledMap::pyFill			, METH_VARARGS, "set(handle,tile_index,layer_index=-1) : " },
@@ -192,6 +193,26 @@ PyObject* TiledMap::pyClear(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(false);
 }
 
+PyObject* TiledMap::pyCount(PyObject* self, PyObject* args) {
+	int handle;
+	int value;
+	int layer = -1;
+	
+	if (!PyArg_ParseTuple(args, "ii|i", &handle, &value, &layer)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		int count = 0;
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		if (layer == -1)for (int i = 0; i < tm->layers.size(); i++) {
+			count += tm->layers[i].count(value);
+		} else {
+			count += tm->layers[layer].count(value);
+		}
+		return PyLong_FromLong(count);
+	}
+	printf("ERROR @ pyFill : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
 PyObject* TiledMap::pyFill(PyObject* self, PyObject* args) {
 	int handle;
 	int value;
@@ -201,8 +222,7 @@ PyObject* TiledMap::pyFill(PyObject* self, PyObject* args) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		if (layer == -1)for (int i = 0; i < tm->layers.size(); i++) {
 			tm->layers[i].fill(value);
-		}
-		else {
+		} else {
 			tm->layers[layer].fill(value);
 		}
 		return PyBool_FromLong(true);
@@ -283,8 +303,8 @@ PyObject* TiledMap::pySetData(PyObject* self, PyObject* args) {
 
 PyObject* TiledMap::pyGet(PyObject* self, PyObject* args) {
 	int handle;
-	int x;
-	int y;
+	unsigned int x;
+	unsigned int y;
 	int layer = 0;
 	if (!PyArg_ParseTuple(args, "iii|i", &handle, &x, &y, &layer)) return NULL;
 	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
@@ -408,4 +428,14 @@ void TiledLayer::fill(int value) {
 			this->data[y][x] = value;
 		}
 	}
+}
+
+int TiledLayer::count(int value) {
+	int count = 0;
+	for (int y = 0; y < this->h; y++) {
+		for (int x = 0; x < this->w; x++) {
+			count += this->data[y][x] == value ? 1 : 0;
+		}
+	}
+	return count;
 }

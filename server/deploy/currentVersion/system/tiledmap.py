@@ -18,6 +18,9 @@ class TiledMap:
     def redraw(self):
         self.need_redraw = True
         tm.redraw(self.handle, -1)
+
+    def count(self, value, layer_index=-1):
+        return tm.count(self.handle, value, layer_index)
     
     def fill(self, value, layer_index=-1):
         tm.fill(self.handle, value, layer_index)

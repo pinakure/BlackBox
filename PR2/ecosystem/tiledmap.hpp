@@ -20,6 +20,7 @@ public:
 	int  getTile(int x, int y);
 	char getTileset(int x, int y);
 	void fill(int value);
+	int  count(int value);
 	void clear() { this->fill(-1); }
 };
 
@@ -43,6 +44,7 @@ public:
 	
 	static PyObject* pyCreate		(PyObject* self, PyObject* args);
 	static PyObject* pyClear		(PyObject* self, PyObject* args);
+	static PyObject* pyCount		(PyObject* self, PyObject* args);
 	static PyObject* pyDestroy		(PyObject* self, PyObject* args);
 	static PyObject* pyDraw			(PyObject* self, PyObject* args);
 	static PyObject* pyFill			(PyObject* self, PyObject* args);

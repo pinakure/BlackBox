@@ -190,6 +190,7 @@ public:
 	static PyObject* pySelect(PyObject* self, PyObject* args);
 	static PyObject* pySetColor(PyObject* self, PyObject* args);
 	static PyObject* pySetFont(PyObject* self, PyObject* args);
+	static PyObject* pySetFrame(PyObject* self, PyObject* args);
 	static PyObject* pySetRotation(PyObject* self, PyObject* args);
 	static PyObject* pySetScale(PyObject* self, PyObject* args);
 	static PyObject* pyScale(PyObject* self, PyObject* args);

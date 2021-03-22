@@ -1,505 +1,345 @@
-from entity import Entity
+import                          vpu
+from entity                     import Entity
+from animation                  import * 
+from direction                  import * 
+from data.scripts.pacmanstatus  import PacmanStatus
+from data.scripts.ghoststatus   import GhostStatus
+from data.scripts.ghosttype     import GhostType
+from data.scripts.ghosts        import Ghost
+
 
 class Pacman(Entity):
-    game = None
+    initialized = False
+    game        = None
+    sprite      = None
+    gfx         = {}
+
+    rx 		    = 0
+    ry	 		= 0
+    x 			= 0
+    y 			= 0
+    tx 		    = 0
+    ty	 		= 0
+    steady		= True
+
+    status		= PacmanStatus.DEAD
+    energized	= 0
+    energyQ	    = 500
+
+    inIntersection = False
+
+    speed 		= 1.25
+    frame 		= 0
+    frameDir 	= 1
+    frameSpd 	= 0.75
+    eating		= False
+    multiplier	= 1	
+
+    direction	= Direction.RIGHT
+    nextDir	    = Direction.RIGHT
 
     @staticmethod
     def initialize(game):
         Pacman.game = game
-
-    def __init__(self, ghost_type=0x00):
-        self.ghost_type = ghost_type
-
-"""
-var PacmanGfx = false;
-
-
-
-var	DIR_RIGHT	= 0x00,
-DIR_DOWN	= 0x01,
-DIR_LEFT	= 0x02,
-DIR_UP		= 0x03;
-
-
-
-var DirNames = [];
-
-DirNames[DIR_UP   ]	= 'upwards';
-
-DirNames[DIR_DOWN ] = 'downwards';
-
-DirNames[DIR_LEFT ] = 'leftwards';
-
-DirNames[DIR_RIGHT] = 'rightwards';
-
-
-
-var DirOpposite = [];
-
-DirOpposite[DIR_DOWN ] = DIR_UP;
-
-DirOpposite[DIR_UP	 ] = DIR_DOWN;
-
-DirOpposite[DIR_LEFT ] = DIR_RIGHT;
-
-DirOpposite[DIR_RIGHT] = DIR_LEFT;
-
-
-
-
-
-
-var	PACMAN_DEAD		= 0x00,
-PACMAN_READY	= 0x01,
-PACMAN_WALKING	= 0x02,
-PACMAN_DIEING	= 0x03;
-
-
-
-function Pacman(game){
-this.self 		= this;
-this.game 		= game;
-this.rx 		= (13*8)+4;
-this.ry	 		= (23*8);
-this.x 			= parseInt(this.rx);
-this.y 			= parseInt(this.ry);
-this.tx 		= 1;
-this.ty	 		= 1;
-this.steady		= true;
-
-this.status		= PACMAN_DEAD;
-this.energized	= 0;
-this.energyQ	= 500;
-
-this.inIntersection = false;
-
-this.speed 		= 1.25;//.8;
-this.frame 		= 0;
-this.frameDir 	= 1;
-this.frameSpd 	= 1.5;
-this.eating		= false;
-this.multiplier	= 1;	
-
-this.sprite		= false;
-this.direction	= DIR_RIGHT;
-this.nextDir	= DIR_RIGHT;
-
-if(!PacmanGfx) this.loadGraphics();
-this.ready();
-
-}
-
-
-
-Pacman.prototype.ready = function(){
-this.steady		= true;
-this.ry	 		= (23*8);
-this.rx 		= (13*8)+4;
-this.x 			= this.rx;
-this.y			= this.ry;
-this.tx 		= parseInt(this.x / 8);
-this.ty	 		= parseInt(this.y / 8);
-this.game.pills = 0;
-this.spawn();
-
-}
-
-
-
-Pacman.prototype.loadGraphics = function(){
-info("PACMAN", "Requesting graphic data");
-try {            
-	this.sprite = new SpriteSheet(this.game.engine, "gfx/pacman.png", 16, 16, [255,0,255], this.self);
-} catch(e) {
-	complaint('PACMAN', 'Failed to load graphics', e);
-	ParticleGfx = false;
-}
-
-}
-
-
-
-Pacman.prototype.processGraphics = function(me){
-info("PACMAN", "Processing graphic data");
-
-
-PacmanGfx = [];
-var x,y,i=0;
-var totalFrames = 0;
-PacmanGfx[DIR_RIGHT] = new Animation(	me.sprite, 
-										0,  0, 
-										16, 0, 
-										true, 1, true);
-PacmanGfx[DIR_DOWN ] = new Animation(	me.sprite, 
-										0,  1, 
-										16, 1, 
-										true, 1, true);
-PacmanGfx[DIR_LEFT ] = new Animation(	me.sprite, 
-										0,  2, 
-										16, 2, 
-										true, 1, true);
-PacmanGfx[DIR_UP   ] = new Animation(	me.sprite, 
-										0,  3, 
-										16, 3, 
-										true, 1, true);
-
-
-totalFrames = 	PacmanGfx[DIR_RIGHT].frameCount + PacmanGfx[DIR_DOWN].frameCount +
-				PacmanGfx[DIR_LEFT].frameCount	+ PacmanGfx[DIR_UP].frameCount;
-
-cout('^3'+totalFrames+'^8 frames extracted');	
-
-}
-
-
-
-Pacman.prototype.render = function(){
-
-if(this.status == PACMAN_DEAD) return;
-
-if(debug[DEBUG_PACMAN]){ this.game.engine.graphics.setAlpha(0.05); }
-
-if(this.status != PACMAN_DIEING){
-	PacmanGfx[this.direction].setCurrentFrame(9 + parseInt(this.frame));
-}
-
-PacmanGfx[this.direction].draw(this.x - 4, this.y + 20);		
-
-
-if(debug[DEBUG_PACMAN]){
-	this.game.engine.graphics.setAlpha(0.25);
-	var ctx = this.game.engine.graphics.context[this.game.engine.graphics.defaultContext];
-	ctx.fillStyle = "#ffff00";
-	var x = this.tx * 8;
-	var y = this.ty * 8;
-	ctx.fillRect(x, y + 24, 8,8);
-	
-	this.game.engine.graphics.setAlpha(0.5);
-	x = this.x;
-	y = this.y;
-	
-	ctx.fillStyle = "#888800";
-	ctx.fillRect(x, 	y + 24, 8,8);
-	ctx.fillStyle = "#ffff00";
-	ctx.fillRect(x+1, 	y + 25, 6,6);
-	ctx.fillRect(x, 	y + 26, 8,4);
-	ctx.fillRect(x+2,	y + 24, 4,8);
-
-	
-	
-	
-	this.game.engine.graphics.setAlpha(1);
-}
-
-
-}
-
-
-
-Pacman.prototype.spawn = function(){
-this.rx = (13*8)+4;
-this.ry = (23*8);
-this.x = parseInt(this.x);
-this.y = parseInt(this.y);
-this.tx = parseInt(this.x / 8);
-this.ty = parseInt(this.y / 8);
-this.status = PACMAN_READY;
-this.direction = DIR_RIGHT;
-
-}
-
-
-
-Pacman.prototype.die = function(){
-info("PACMAN", "die...");
-this.status = PACMAN_DIEING;
-this.frame = PacmanGfx[this.direction].frameCount-1;
-
-}
-
-
-
-Pacman.prototype.setSpeed = function(){
-/** Adjust speed **/
-if(this.game.level == 0){
-	this.energyQ = 500;
-	if(this.energized > 0){ if(this.eating) this.speed = 0.79; else this.speed = 0.9; 	}
-	else if(this.eating) this.speed = 0.71; else this.speed = 0.8;
-} else if(this.game.level < 4){
-	this.energyQ = 250;
-	if(this.energized > 0){ if(this.eating) this.speed = 0.83; else this.speed = 0.95; 	}
-	else if(this.eating) this.speed = 0.79; else this.speed = 0.9;
-} else if(this.game.level < 19){
-	this.energyQ = 125;
-	if(this.energized > 0){ if(this.eating) this.speed = 0.87; else this.speed = 1.0;		}
-	else if(this.eating) this.speed = 0.87; else this.speed = 1.0;
-} else {
-	this.energyQ = 1;
-	if(this.energized > 0){ if(this.eating) this.speed = 0.79; else this.speed = 0.9; 	}
-	else if(this.eating) this.speed = 0.79; else this.speed = 0.9;
-}
-
-//this.speed *= 1;
-
-}
-
-
-
-Pacman.prototype.update = function(delta){
-var i = (this.ty * this.game.map.map.width) + this.tx;
-
-
-
-if(this.energized > 0) {
-	if(this.game.isGhost(i)	) this.eatGhost(i);
-	this.energized--;
-} else {
-	if(this.game.isGhost(i)	) {
-		this.die();	
-		return;
-	}
-}
-
-
-this.setSpeed();
-
-
-switch(this.status){
-	case PACMAN_DEAD: 
-		this.game.resetSystems();
-		return;
-	
-	case PACMAN_DIEING: 
-		this.game.freeze = 5;			
-		if( this.frame > 0 ){ 
-			this.frame--;				
-		} else this.status = PACMAN_DEAD;
-		PacmanGfx[this.direction].frame = this.frame;
-		return;
-		break;
-	
-	case PACMAN_READY:
-		//this.energized = 0;
-		if(this.steady)break;
-		if(this.canWalk(this.nextDir)) {
-			this.direction = this.nextDir;
-			this.status = PACMAN_WALKING;
-		} break;
-		
-	case PACMAN_WALKING:			
-		if(!this.canWalk(this.direction)) {
-			this.status = PACMAN_READY;
-			this.rx = this.tx * 8;
-			this.ry = this.ty * 8;
-			this.rx = this.x;
-			this.ry = this.y;
-		}
-		
-		if(this.canWalk(this.nextDir)) {
-			if(this.direction != this.nextDir){
-				this.rx = this.x;
-				this.ry = this.y;
-			}
-			this.direction = this.nextDir;
-		}
-				
-		if(this.canWalk(this.direction)){
-			switch(this.direction){
-				case DIR_RIGHT:	this.moveRight();	break;
-				case DIR_DOWN:	this.moveDown();	break;
-				case DIR_LEFT:	this.moveLeft();	break;
-				case DIR_UP: 	this.moveUp();		break;
-			}			
-	
-			/** Animate Pacman**/
-			this.frame+= this.frameSpd * this.frameDir;			
-			if(this.frame > 6) { this.frame = 6; this.frameDir = -1; }
-			if(this.frame < 0) { this.frame = 0; this.frameDir =  1; }
-		
-			
-		}
-	
-		/** Exit if pacman is outside the map **/
-		if(this.tx > this.game.map.map.width)return;
-		if(this.ty > this.game.map.map.height)return;
-		
-		/** Check if there is food in the middle of this position **/
-
-
-		if(this.inIntersection){
-			i = (this.ty * this.game.map.map.width) + this.tx;
-			if(this.game.isPill(i)		) this.eatPill(i); 		else
-			if(this.game.isEnergizer(i)	) this.eatEnergizer(i);	
-		}
-		break;			
-}
-
-}
-
-
-
-Pacman.prototype.eatGhost = function(position){
-// Set ghost status to scared (eyes returning to the zone)
-
-this.game.addScore(200 * this.multiplier);
-this.multiplier			*= 2;
-this.eating				= true;
-this.game.freeze		= 25;
-
-var w = this.game.map.map.width;
-var h = this.game.map.map.height;
-var pos = [];
-
-pos[GHOST_BLINKY]	= (this.game.blinky.ty	* w) + this.game.blinky.tx;
-pos[GHOST_PINKY]	= (this.game.pinky.ty 	* w) + this.game.pinky.tx;
-pos[GHOST_INKY] 	= (this.game.inky.ty 	* w) + this.game.inky.tx;
-pos[GHOST_CLYDE]	= (this.game.clyde.ty 	* w) + this.game.clyde.tx;
-
-
-if((pos[GHOST_BLINKY] == position) && (this.game.blinky.mode == STATUS_FRIGHTENED)) return this.game.blinky.switchMode(STATUS_RETURNING);
-if((pos[GHOST_PINKY ] == position) && (this.game.pinky.mode  == STATUS_FRIGHTENED)) return this.game.pinky.switchMode(STATUS_RETURNING);
-if((pos[GHOST_INKY  ] == position) && (this.game.inky.mode   == STATUS_FRIGHTENED)) return this.game.inky.switchMode(STATUS_RETURNING);
-if((pos[GHOST_CLYDE ] == position) && (this.game.clyde.mode  == STATUS_FRIGHTENED)) return this.game.clyde.switchMode(STATUS_RETURNING);
-
-}
-
-
-
-Pacman.prototype.eatPill = function(i){
-this.game.map.map.layers[0].data[i]	= 40;
-this.game.addScore(10);
-this.game.map.redraw 	= true;
-this.eating 			= true;
-if(this.game.blinky.timer	< GhostDelays[GHOST_BLINKY]) this.game.blinky.timer++; 	else
-if(this.game.pinky.timer 	< GhostDelays[GHOST_PINKY ]) this.game.pinky.timer++;	else
-if(this.game.inky.timer		< GhostDelays[GHOST_INKY  ]) this.game.inky.timer++;		else
-if(this.game.clyde.timer	< GhostDelays[GHOST_CLYDE ]) this.game.clyde.timer++;
-
-}
-
-
-
-Pacman.prototype.eatEnergizer = function(i){
-this.game.map.map.layers[0].data[i] = 40;
-this.energized 			+= this.energyQ;
-this.game.addScore(50);
-this.multiplier			= 1;
-this.game.map.redraw 	= true;
-this.eating 			= true;
-
-}
-
-
-
-Pacman.prototype.canTurn = function(direction){
-// Return true if xposition < 2 or xposition > 6
-
-}
-
-
-
-Pacman.prototype.canWalk = function(direction){
-var map = this.game.map.map.layers[0].data;
-var w = this.game.map.map.width;
-var h = this.game.map.map.height;
-	
-var right	= parseInt( ( this.ty * w ) + this.tx + 1 );
-var down	= parseInt( ((this.ty + 1) * w) + this.tx);
-var left 	= parseInt( ( this.ty * w ) + this.tx - 1); 
-var up 		= parseInt( ((this.ty - 1) * w) + this.tx);
-
-var outside	= (this.tx < 1) || (this.ty < 1) || (this.tx >= w-1) || (this.ty >= h-1);
-var hInt = (this.x % 8) == 0;
-var vInt = (this.y % 8) == 0;
-
-switch(direction){
-	case DIR_RIGHT:	return ((map[right] > 30) && (vInt)) || (outside);
-	case DIR_DOWN:	return ((map[down ] > 30) && (hInt)) || (outside);
-	case DIR_LEFT:	return ((map[left ] > 30) && (vInt)) || (!hInt) || (outside);
-	case DIR_UP: 	return ((map[up   ] > 30) && (hInt)) || (!vInt) || (outside);
-}
-
-}
-
-
-
-Pacman.prototype.go = function(nextdirection){
-this.steady = false;
-/**Avoid entering the ghost house!**/
-if(this.ty == DOOR_Y-1){
-	if(nextdirection == DIR_DOWN){
-		if((this.tx >= DOOR_X[0]-2)&&(this.tx <= DOOR_X[1]+2)) return;
-	}
-}
-
-this.nextDir = this.direction;
-
-
-if(this.x > (this.game.map.map.width*8) - 16) return;
-if(this.y > (this.game.map.map.height*8) - 16) return;
-if(this.y < 8) return;
-if(this.x < 8) return;
-
-this.nextDir = nextdirection;
-
-}
-
-
-
-Pacman.prototype.clamp = function(){
-var w = this.game.map.map.width;
-var h = this.game.map.map.height;
-var tw = this.game.map.map.tileWidth;
-var th = this.game.map.map.tileHeight;
-var height	= h*th;
-var width 	= w*tw;
-
-if(this.ry > height	+16) this.ry -= height+24; else 
-if(this.ry < -16		) this.ry += height+24;
-	
-if(this.rx > width +16	) this.rx -= width+24; else 
-if(this.rx < -16		) this.rx += width+24;
-
-this.x  = parseInt(this.rx);
-this.y  = parseInt(this.ry);
-
-this.ty = parseInt(this.y / 8);
-this.tx = parseInt(this.x / 8);
-
-//this.inIntersection = (((this.y % 8) == 0)&&((this.x % 8) == 0));	
-var corner = 4.5;
-this.inIntersection 	= (((((this.rx % 8) > 8-(corner+this.speed) )||((this.rx % 8)< 1 + (corner + this.speed) )))&&(((this.ry % 8) > 8-(corner + this.speed) )||((this.ry % 8)< 0 + (corner + this.speed) )));
-
-}
-
-
-Pacman.prototype.moveRight = function(){
-this.rx += this.speed;
-this.clamp();
-
-}
-
-
-
-Pacman.prototype.moveDown = function(){
-this.ry += this.speed;
-this.clamp();
-
-}
-
-
-
-Pacman.prototype.moveLeft = function(){
-this.rx -= this.speed;
-this.clamp();
-
-}
-
-
-
-Pacman.prototype.moveUp = function(){
-this.ry -= this.speed;
-this.clamp();
-
-}
-"""
+        Entity.__init__(Pacman, Pacman.game)
+        Pacman.sprite = vpu.createsprite("pacman")
+        if Pacman.sprite:            
+            Pacman.gfx = {}
+            Pacman.gfx[Direction.RIGHT] = Animation(16,16, Pacman.sprite, 0,  0, 16, 0, False, 0, False)
+            Pacman.gfx[Direction.DOWN ] = Animation(16,16, Pacman.sprite, 0,  1, 16, 1, False, 0, False)
+            Pacman.gfx[Direction.LEFT ] = Animation(16,16, Pacman.sprite, 0,  2, 16, 2, False, 0, False)
+            Pacman.gfx[Direction.UP   ] = Animation(16,16, Pacman.sprite, 0,  3, 16, 3, False, 0, False)
+            Pacman.initialized = True
+        else:
+            Pacman.initialized = False
+            print('Failed to load graphics');                
+        
+        Pacman.rx 		    = (13*8)+4
+        Pacman.ry	 		= (23*8)
+        Pacman.x 			= int(Pacman.rx)
+        Pacman.y 			= int(Pacman.ry)
+        Pacman.tx 		    = 1
+        Pacman.ty	 		= 1
+        Pacman.steady		= True
+
+        Pacman.status		= PacmanStatus.DEAD
+        Pacman.energized	= 0
+        Pacman.energyQ	    = 500
+
+        Pacman.inIntersection = False
+
+        Pacman.speed 		= 1.25 #.8;
+        Pacman.frame 		= 0
+        Pacman.eating		= False
+        Pacman.multiplier	= 1	
+
+        Pacman.direction	= Direction.RIGHT
+        Pacman.nextDir	    = Direction.RIGHT
+
+        Pacman.ready()
+
+    @staticmethod
+    def destroy():
+        pass
+    
+    def ready():
+        Pacman.steady	    = True
+        Pacman.ry	 	    = (23*8)
+        Pacman.rx 		    = (13*8)+4
+        Pacman.x 		    = Pacman.rx
+        Pacman.y		    = Pacman.ry
+        Pacman.tx 		    = int(Pacman.x / 8)
+        Pacman.ty	 	    = int(Pacman.y / 8)
+        Pacman.game.pills   = 0
+        Pacman.spawn()  
+
+    def draw():
+        if Pacman.status == PacmanStatus.DEAD: return
+
+        if Pacman.status != PacmanStatus.DIEING:
+            Pacman.gfx[Pacman.direction].setframe(9 + int(Pacman.frame))
+            
+        Pacman.gfx[Pacman.direction].draw(Pacman.rx+4, Pacman.ry + 4)
+
+        if Pacman.game.debug.PACMAN:
+            vpu.setcolor(64,64,0, 64)
+            x = Pacman.tx * 8
+            y = Pacman.ty * 8
+            vpu.fillrect(x,y,8,8)
+            
+            x = Pacman.x
+            y = Pacman.y            
+            vpu.setcolor(128,128,0,128)            
+            vpu.fillrect(x, y , 8, 8)
+            vpu.setcolor(255, 255, 0, 128)
+            vpu.fillrect(x+1,y+1, 6 , 6 )
+            vpu.fillrect( x ,y+2, 8 , 4 )
+            vpu.fillrect(x+2, y , 4 , 8 )            
+            
+
+    def spawn():
+        Pacman.tx         = 13
+        Pacman.ty         = 23
+        Pacman.rx         = (Pacman.tx * 8) + 4
+        Pacman.ry         = (Pacman.ty * 8)
+        Pacman.x          = Pacman.rx
+        Pacman.y          = Pacman.ry
+        Pacman.status     = PacmanStatus.READY
+        Pacman.direction  = Direction.RIGHT
+        if Pacman.game.blinky: 
+            Pacman.game.blinky.reset()
+            Pacman.game.inky.reset()
+            Pacman.game.pinky.reset()
+            Pacman.game.clyde.reset()        
+    def die():
+        Pacman.status     = PacmanStatus.DIEING
+        Pacman.frame      = 15
+
+    def set_speed():
+        # Adjust settings for level > 19  
+        energy_level = 1
+        eating_speed = 0.79 if Pacman.energized > 0 else 0.79
+        normal_speed =  0.9 if Pacman.energized > 0 else  0.9
+
+        if Pacman.game.level == 0:
+            energy_level = 500
+            eating_speed = 0.79 if Pacman.energized > 0 else 0.71
+            normal_speed =  0.9 if Pacman.energized > 0 else  0.8
+        elif Pacman.game.level < 4:
+            energy_level = 250
+            eating_speed = 0.83 if Pacman.energized > 0 else 0.79
+            normal_speed = 0.95 if Pacman.energized > 0 else  0.9            
+        elif Pacman.game.level < 19:
+            energy_level = 125
+            eating_speed = 0.87 if Pacman.energized > 0 else 0.87
+            normal_speed = 1.00 if Pacman.energized > 0 else 1.00
+        
+        Pacman.energyQ = energy_level
+        Pacman.speed = eating_speed if Pacman.eating else normal_speed
+        
+
+    def update(delta):
+        i = (Pacman.ty * 28) + Pacman.tx
+        if Pacman.energized > 0:
+            if Pacman.game.is_ghost(i):
+                Pacman.eat_ghost(i)
+            Pacman.energized -= 1
+        else:
+            if Pacman.game.is_ghost(i):
+                Pacman.die()
+                return
+        
+        Pacman.set_speed()
+
+        if Pacman.status  ==  PacmanStatus.DEAD:
+            Pacman.game.resetSystems()
+            return        
+        elif Pacman.status == PacmanStatus.DIEING:
+            Pacman.game.freeze = 5
+            if Pacman.frame > 0:
+                Pacman.frame-=1
+            else: 
+                Pacman.status = PacmanStatus.DEAD
+            Pacman.gfx[Pacman.direction].setframe(Pacman.frame)
+            return
+        elif Pacman.status == PacmanStatus.READY:
+            #Pacman.energized = 0;
+            if not Pacman.steady: 
+                if Pacman.can_walk(Pacman.nextDir):
+                    Pacman.direction  = Pacman.nextDir
+                    Pacman.status     = PacmanStatus.WALKING            
+        elif Pacman.status == PacmanStatus.WALKING:
+            if not Pacman.can_walk(Pacman.direction):
+                Pacman.status     = PacmanStatus.READY
+                Pacman.x          = (Pacman.x>>1)<<1
+                Pacman.y          = (Pacman.y>>1)<<1
+                Pacman.rx         = Pacman.x 
+                Pacman.ry         = Pacman.y
+            
+            if Pacman.can_walk(Pacman.nextDir):
+                if Pacman.direction != Pacman.nextDir:
+                    Pacman.rx = Pacman.x
+                    Pacman.ry = Pacman.y
+                Pacman.direction = Pacman.nextDir
+                    
+            if Pacman.can_walk(Pacman.direction):
+                if Pacman.direction  ==  Direction.RIGHT: Pacman.move_right()	
+                elif Pacman.direction == Direction.DOWN : Pacman.move_down()
+                elif Pacman.direction == Direction.LEFT : Pacman.move_left()
+                elif Pacman.direction == Direction.UP   : Pacman.move_up()
+        
+                # Animate Pacman
+                Pacman.frame += Pacman.frameSpd * Pacman.frameDir;			
+                if Pacman.frame > 6: 
+                    Pacman.frame      = 6
+                    Pacman.frameDir   = -1
+                if Pacman.frame < 0: 
+                    Pacman.frame      = 0
+                    Pacman.frameDir   =  1
+                
+        
+            # Exit if pacman is outside the map 
+            if Pacman.tx > Pacman.game.map.width : return
+            if Pacman.ty > Pacman.game.map.height: return
+            
+            # Check if there is food in the middle of Pacman position 
+            if Pacman.inIntersection:
+                i = (Pacman.ty * Pacman.game.map.width) + Pacman.tx
+                if Pacman.game.is_pill(i)	    : Pacman.eat_pill(i)		
+                elif Pacman.game.is_energizer(i): Pacman.eat_energizer(i)
+        
+    def eat_ghost(position):
+        # Set ghost status to scared (eyes returning to the zone)
+
+        Pacman.game.score   += (200 * Pacman.multiplier)
+        Pacman.multiplier		*= 2
+        Pacman.eating			= True
+        Pacman.game.freeze	= 25
+
+        w = Pacman.game.map.width
+        h = Pacman.game.map.height
+        
+        pos = {
+            GhostType.BLINKY : (Pacman.game.blinky.ty	* w) + Pacman.game.blinky.tx,
+            GhostType.PINKY  : (Pacman.game.pinky.ty 	* w) + Pacman.game.pinky.tx ,
+            GhostType.INKY   : (Pacman.game.inky.ty 	* w) + Pacman.game.inky.tx  ,
+            GhostType.CLYDE  : (Pacman.game.clyde.ty 	* w) + Pacman.game.clyde.tx , 
+        }
+
+        if (pos[ GhostType.BLINKY ] == position) and (Pacman.game.blinky.mode == GhostStatus.FRIGHTENED): return Pacman.game.blinky.switch_mode(GhostStatus.RETURNING)
+        if (pos[ GhostType.PINKY  ] == position) and (Pacman.game.pinky.mode  == GhostStatus.FRIGHTENED): return Pacman.game.pinky.switch_mode(GhostStatus.RETURNING)
+        if (pos[ GhostType.INKY   ] == position) and (Pacman.game.inky.mode   == GhostStatus.FRIGHTENED): return Pacman.game.inky.switch_mode(GhostStatus.RETURNING)
+        if (pos[ GhostType.CLYDE  ] == position) and (Pacman.game.clyde.mode  == GhostStatus.FRIGHTENED): return Pacman.game.clyde.switch_mode(GhostStatus.RETURNING)
+
+    def eat_pill(i):
+        x = i % Pacman.game.map.width
+        y = int(i / Pacman.game.map.width)
+        Pacman.game.map.set(x, y, 40, 0)
+        Pacman.game.score += 10
+        Pacman.game.map.redraw()
+        Pacman.eating = True
+        if Pacman.game.blinky.timer	 < Ghost.delay[GhostType.BLINKY]: Pacman.game.blinky.timer +=1
+        elif Pacman.game.pinky.timer < Ghost.delay[GhostType.PINKY ]: Pacman.game.pinky.timer  +=1
+        elif Pacman.game.inky.timer	 < Ghost.delay[GhostType.INKY  ]: Pacman.game.inky.timer   +=1	
+        elif Pacman.game.clyde.timer < Ghost.delay[GhostType.CLYDE ]: Pacman.game.clyde.timer  +=1
+
+    def eat_energizer(i):
+        x = i % Pacman.game.map.width
+        y = int(i / Pacman.game.map.width)
+        Pacman.game.map.set(x, y, 40, 0)
+        Pacman.energized += Pacman.energyQ
+        Pacman.game.score += 50
+        Pacman.multiplier	= 1
+        Pacman.game.map.redraw()
+        Pacman.eating = True
+
+    def can_walk(direction):
+        w = Pacman.game.map.width
+        h = Pacman.game.map_height
+           
+        right	= Pacman.tx + 1
+        down	= Pacman.ty + 1
+        left 	= Pacman.tx - 1
+        up 		= Pacman.ty - 1
+
+        outside	= (Pacman.tx < 1) or (Pacman.ty < 1) or (Pacman.tx >= w-1) or (Pacman.ty >= h-1)
+        hInt    = (Pacman.x % 8) == 0
+        vInt    = (Pacman.y % 8) == 0
+
+        if direction  ==  Direction.RIGHT: return ((Pacman.game.map.get(right, Pacman.ty) > 30) and (vInt)) or (outside)
+        elif direction == Direction.DOWN : return ((Pacman.game.map.get(Pacman.tx,  down) > 30) and (hInt)) or (outside)
+        elif direction == Direction.LEFT : return ((Pacman.game.map.get(left,  Pacman.ty) > 30) and (vInt)) or (not hInt) or (outside)
+        elif direction == Direction.UP   : return ((Pacman.game.map.get(Pacman.tx,    up) > 30) and (hInt)) or (not vInt) or (outside)
+
+    def go(next_direction):
+        Pacman.steady = False
+        # Avoid entering the ghost house!
+        if Pacman.ty == Pacman.game.door.y - 1:
+            if next_direction == Direction.DOWN:
+                if (Pacman.tx >= Pacman.game.door.x[0]-2) and (Pacman.tx <= Pacman.game.door.x[1]+2): return
+        Pacman.nextDir = Pacman.direction
+        if Pacman.x > (Pacman.game.map.width  * 8) - 16: return
+        if Pacman.y > (Pacman.game.map.height * 8) - 16: return
+        if Pacman.y < 8: return
+        if Pacman.x < 8: return
+        Pacman.nextDir = next_direction
+
+    def clamp():
+        w       = Pacman.game.map.width
+        h       = Pacman.game.map.height
+        tw      = 8
+        th      = 8
+        height	= h * th
+        width 	= w * tw
+
+        if Pacman.ry > height	+ 16: Pacman.ry -= height + 24
+        elif Pacman.ry   <   -  16: Pacman.ry += height + 24
+            
+        if Pacman.rx > width +  16: Pacman.rx -= width  + 24
+        elif Pacman.rx   <   -  16: Pacman.rx += width  + 24
+
+        Pacman.x  = int(Pacman.rx)
+        Pacman.y  = int(Pacman.ry)
+
+        Pacman.ty = int(Pacman.y / 8)
+        Pacman.tx = int(Pacman.x / 8)
+
+        #Pacman.inIntersection = (((Pacman.y % 8) == 0) and ((Pacman.x % 8) == 0))
+        corner = 4.5
+        Pacman.inIntersection  = (((((Pacman.rx % 8) > 8-(corner+Pacman.speed) )or((Pacman.rx % 8)< 1 + (corner + Pacman.speed) )))and(((Pacman.ry % 8) > 8-(corner + Pacman.speed) )or((Pacman.ry % 8)< 0 + (corner + Pacman.speed) )));
+
+    def move_right():
+        Pacman.rx += Pacman.speed
+        Pacman.clamp()
+
+    def move_down():
+        Pacman.ry += Pacman.speed
+        Pacman.clamp()
+
+    def move_left():
+        Pacman.rx -= Pacman.speed
+        Pacman.clamp()
+
+    def move_up():
+        Pacman.ry -= Pacman.speed
+        Pacman.clamp()
