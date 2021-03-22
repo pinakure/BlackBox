@@ -364,11 +364,11 @@ class Ghost(Entity):
         ix = int(x)
         iy = int(y)
         # Clamp and set real X and Y
-        if iy   > Ghost.game.map_height : self.ry = iy - Ghost.game.map.height - 8
-        elif iy < -8                    : self.ry = iy - Ghost.game.map.height + 8
+        if iy   > Ghost.game.map_height : self.ry = iy - Ghost.game.map_height - 8
+        elif iy < -8                    : self.ry = iy - Ghost.game.map_height + 8
         else                            : self.ry = y
-        if ix   > Ghost.game.map_width  : self.rx = ix - Ghost.game.map.width - 8
-        elif ix < -8                    : self.rx = ix + Ghost.game.map.width + 8    
+        if ix   > Ghost.game.map_width  : self.rx = ix - Ghost.game.map_width - 8
+        elif ix < -8                    : self.rx = ix + Ghost.game.map_width + 8    
         else                            : self.rx = x
         # Set rounded position (for use in drawing and calculations)
         self.x      = int(self.rx);    
@@ -476,5 +476,6 @@ class Ghost(Entity):
             # Draw absolute Position
             self.draw_box(self.tx<<3, self.ty<<3)
         else:
+            self.frame += .05
             Ghost.gfx[self.gfx][self.direction].setframe(int(self.frame))
             Ghost.gfx[self.gfx][self.direction].draw(self.x+4, self.y+4)
