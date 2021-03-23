@@ -136,6 +136,8 @@ class Pacman(Entity):
             Pacman.game.clyde.reset()        
     def die():
         Pacman.status     = PacmanStatus.DIEING
+        Pacman.game.bonus.isAlive = False
+        Pacman.game.bonus.timeout = 0
         Pacman.frame      = 15
 
     def set_speed():

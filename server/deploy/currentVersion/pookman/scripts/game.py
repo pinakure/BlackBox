@@ -357,6 +357,9 @@ class Game:
         #Game.map.update(delta)
 
         Game.time+=1
+        if Game.time % 500==500-1:
+            Bonus.isAlive=True
+            Bonus.timeout = 1000
         if Game.time % 16==0:
             Game.map.redraw()
 
@@ -388,7 +391,6 @@ class Game:
             li = 3 if (Game.level > 2) else (Game.level+1)
             for i in range(0, li):                
                 Bonus.gfx[Game.level-((li-1)-i)].draw(208 - (i<<4), 272)
-
             
             # draw map here
             # --------------------------
@@ -398,7 +400,7 @@ class Game:
             # --------------------------
             if Bonus.isAlive:
                 i = Bonus.game.level % (32*8)
-                Bonus.gfx[i].draw(Bonus.x, Bonus.y+24)
+                Bonus.gfx[i].draw(Bonus.x, Bonus.y+16)
         # draw sprites 
         vpu.select(Game.buffer[1])
         vpu.fill(0,0,0,0)
