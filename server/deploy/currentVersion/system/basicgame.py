@@ -9,7 +9,6 @@ class BasicGame:
     height = 0
     scale = 2.0
     score = 0
-    buffer = [ None, None ]
     time = 0
     map = None
     

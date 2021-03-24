@@ -78,7 +78,7 @@ PyMethodDef Vpu::methods[] = {
 	{"selectsprite"	, Vpu::pySelectSprite	, METH_VARARGS, "selectsprite(sprite_handle) : Select surface bound to given sprite"},
 	{"rect"			, Vpu::pyRectangle		, METH_VARARGS, "rect(x, y, dx, dy) : Draw a rectangle onto selected surface from x,y to dx,dy" },
 	{"line"			, Vpu::pyLine			, METH_VARARGS, "line(x, y, dx, dy) : Draw a line onto selected surface from x,y to dx,dy" },
-	{"perlin"		, Vpu::pyPerlin			, METH_VARARGS, "perlin(surface_handle, r, g, b) : Generate perlin noise using given color along given surface" },
+	{"perlin"		, Vpu::pyPerlin			, METH_VARARGS, "perlin(surface_handle, r, g, b, scaling_factor, octave, random_seed) : Generate perlin noise using given color along given surface" },
 	{"pset"			, Vpu::pyPutPixel		, METH_VARARGS, "pset(x, y) : Draw a pixel onto selected surface onto given coordinates" },
 	{"getpixel"		, Vpu::pyGetPixel		, METH_VARARGS, "color = getpixel(x, y) : Read pixel from selected surface" },
 	{"getsurfacedata",Vpu::pyGetSurfaceData , METH_VARARGS, "[ colors ] = getsurfacedata() : Read whole pixel data from selected surface in a linear list" },
@@ -646,16 +646,14 @@ Surface Vpu::createSurface(int width, int height) {
 	return s;
 }
 
-void Vpu::perlin(Surface& surface, int r, int g, int b) {
-	const int w				= surface.width;
-	const int h				= surface.height;
-	int		  area			= w * h;
-	static float* noise_seed	= nullptr;
-	static float* perlin_noise	= nullptr;
-	int		  octave		= 7;
-	float	  scaling_bias	= 2.0f;
-	static Surface* last	= nullptr;
-	
+void Vpu::perlin(Surface& surface, int r, int g, int b, float scaling_bias, int octave, int random_seed) {
+	const int		w				= surface.width;
+	const int		h				= surface.height;
+	int				area			= w * h;
+	static float*	noise_seed		= nullptr;
+	static float*	perlin_noise	= nullptr;
+	static Surface* last			= nullptr;
+	srand(random_seed);
 	// Initialize buffers (use cache if same surface is used recurrently)
 	if (&surface != last) {
 		if(perlin_noise) delete perlin_noise;
@@ -1148,11 +1146,12 @@ PyObject* Vpu::pyLine(PyObject * self, PyObject * args) {
 }
 PyObject* Vpu::pyPerlin(PyObject * self, PyObject * args) {
 	int handle;
-	float r = 255.0f, g = 255.0f, b = 255.0f;
-	if (!PyArg_ParseTuple(args, "i|fff", &handle, &r, &g, &b)) return NULL;
+	float r = 255.0f, g = 255.0f, b = 255.0f, octave = 7, scaling_factor = 2.0f;
+	int random_seed = (rand() * RAND_MAX);
+	if (!PyArg_ParseTuple(args, "i|fffffi", &handle, &r, &g, &b, &scaling_factor, &octave, &random_seed)) return NULL;
 	Surface* l = getLayer(handle);
 	if (l) {
-		Vpu::perlin(*l, r, g, b);
+		Vpu::perlin(*l, r, g, b, scaling_factor, octave, random_seed);
 		return PyBool_FromLong(true);
 	}
 	return PyBool_FromLong(false);
