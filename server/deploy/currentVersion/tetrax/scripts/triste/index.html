@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <title>Triste Auto Play Bot</title>
+        <script src="jquery.js"></script>
+        <script src="shapes.js"></script>
+        <script src="tetris.js"></script>
+        <script src="tetrismap.js"></script>
+        <script src="tetrispiece.js"></script>
+        <script src="simulation.js"></script>
+        <link rel="stylesheet" type="text/css" href="triste.css" />
+    </head>
+    <body><div id="info">SYNTAX ERROR!</div><div id="output_wrapper"><table style="width:100%; table-layout: fixed;"><tbody id="output" style="width:100%"></tbody></table></div></body>
+    <script>
+        function createCanvas(id, width, height, parent='body',show_id=true){
+            $(parent).append(`<div class="canvaswrapper canvaswrapper-${id}">
+                                <canvas id="${id}" width="${width}" height="${height}"></canvas>
+                                <br/>${show_id?id:''}<span class="score"></span>
+                            </div>`);
+            var wrapper_node = $(`div.canvaswrapper-${id}`);
+            var canvas_node  = $(`#${id}`);
+            return canvas_node;
+        }
+        function createCanvasBox(index=0){
+            $('body').append(`<div class="canvasbox canvas-${index}"></div>`);
+            return $(`div.canvasbox canvas-${index}`);
+        }
+        function createScoreBox(index){
+            $(`.canvas-${index}`).append(`<div class="scorebox-${index}" id="scorebox${index}">[]</div>`);
+            return $(`.scorebox-${index}`);
+        }
+        function initialize(){
+            var width  = 10;//8;
+            var height = 20;//12;
+            createCanvas("initial_state", width, height);
+            createCanvas("best_movement", width, height);
+            for(a=0; a<4; a++){
+                createCanvas(`angle_${a}`, width, height);
+                createCanvasBox(a);
+                for(x=0; x<width; x++){
+                    createCanvas(`angle_${a}_${x}`, width, height,`.canvas-${a}`, false);
+                }
+                createScoreBox(a);
+            }
+            createCanvas(`map`, width, height);
+            Tetris.initialize(width, height);
+        }
+
+        initialize();
+    </script>
+    <label id="label_option_animate" for="option_animate">Skip Animation</label><input checked="false" type="checkbox" onclick="Tetris.animate ^= 1;" value="0" id="option_animate">
+    <label id="label_option_drawmap" for="option_drawmap">Skip Rendering</label><input checked="false" type="checkbox" onclick="Tetris.draw_map ^= 1;" value="0" id="option_drawmap">
+    <label id="label_option_drawsim" for="option_drawsim">Show IA</label><input checked="false" type="checkbox" onclick="Tetris.draw_sim ^= 1;Tetris.sim_scores ^= 1;" value="0" id="option_drawsim">
+    <label id="label_option_slowmo"  for="option_slowmo" >Slow Motion</label><input checked="false" type="checkbox" onclick="Tetris.speed=Tetris.speed == 1 ? 25 : 1;" value="0" id="option_slowmo">
+    <input type="button" onclick="Tetris.show_results()" value="Show Results" id="option_results">
+    <script>
+        var checkboxes = document.getElementsByTagName('input');
+        for (var i=0; i<checkboxes.length; i++)  {
+        if (checkboxes[i].type == 'checkbox')   {
+            checkboxes[i].checked = false;
+        }
+        $('#option_animate').click();
+    }
+    </script>
+</html>

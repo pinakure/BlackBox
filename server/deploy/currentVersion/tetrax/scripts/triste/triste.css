@@ -1,0 +1,449 @@
+html {
+    position: absolute;
+    top: 0px;
+	left: 0px;
+	width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+body {
+	position: absolute;
+	/* background:#101010; */
+	overflow-x:hidden;
+	top: 0px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+}
+label {
+	/* color: #f0f0f0; */
+}
+
+body * {
+    box-sizing: border-box;
+    padding: 0px 0px 0px 0px;
+    margin:  0px 0px 0px 0px;
+    border-collapse: collapse;
+}
+div#triste {
+	display: inline-block;
+	width: 100%;
+	box-align: center;
+	text-align: center;
+	padding-left: calc(50% - calc(8 * 16px) );
+	position: relative;
+}
+
+table.triste {
+	box-sizing	: border-box;	
+	position	: absolute;
+	z-index		: 1000;
+}
+table.triste tbody tr td span,
+table.triste tbody tr td,
+table.triste tbody tr {
+	height		: 16px;
+	min-height	: 16px;
+	max-height	: 16px;
+	line-height : 8px;
+	box-sizing	: border-box;	
+}
+
+table.triste tbody tr td span,
+table.triste tbody tr td {
+	width		: 16px;
+	min-width	: 16px;
+	max-width	: 16px;
+	line-height : 8px;
+	box-sizing	: border-box;	
+}
+
+.piece.green 	{ background : #008800; border-color: #44ca44;}
+.piece.blue  	{ background : #000088; border-color: #4444ca;}
+.piece.yellow 	{ background : #888800; border-color: #caca44;}
+.piece.red 		{ background : #880000; border-color: #ca4444;}
+
+span.piece{
+	width: 100%;
+	height: 100%;
+	line-height: 8px;
+	box-sizing: border-box;
+	display: inline-block;
+	border-style: ridge;
+	border-width: 6px;
+	box-shadow: 2px 2px 0px #8888;
+}
+
+#scene {
+	position: absolute;
+	box-sizing: border-box;	
+	min-width: calc(16 * 16px);
+	width: calc(16 * 16px);
+	max-width: calc(16 * 16px);
+	min-height: calc(16 * 48px);
+	height: calc(16 * 48px);
+	line-height: 8px;
+	max-height: calc(16 * 48px);
+}
+#scene div {
+	box-sizing: border-box;	
+	border: 2px #e0e0e0 inset;
+	background: #a0a0a0;
+	display: inline-block;
+	min-width: 16px;
+	width: 16px;
+	max-width: 16px;
+	min-height: 16px;
+	height: 16px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	max-height: 16px;
+	line-height: 8px;
+}
+
+#debug {
+	position: absolute;
+	top: 0px;
+	font-size: 10px;
+	font-family: courier;
+	background: #0000ff80;
+	color: #ffffffa0;
+	z-index: 100000;
+	font-weight: 800;
+	width: 33%;
+	overflow-x: hidden;
+	overflow-y: auto;	
+	border: 1px #ffffffa0 outset;
+	box-sizing: border-box;
+	padding: 8px 8px 8px 8px;
+	margin: 0px 0px 0px 0px;
+	box-shadow: 2px 2px 0px #88888880;
+	height: 100%;
+}
+
+#debug.pieces {
+	left: 0px;
+}
+
+#debug.map {
+	right: 0px;
+}
+#debug tbody tr td {
+	vertical-align: middle;
+	text-align: center;
+	color: #c0c0c0c0;
+
+}
+
+*{
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
+
+th {
+	text-align: left;
+}
+
+#debug tbody tr th,
+#debug thead tr th {
+	padding: 2px 2px 2px 2px;	
+	max-width:  16px;
+	min-width:  16px;
+	width:  	16px;
+	max-height: 16px;
+	min-height: 16px;
+	height: 	16px;
+	color: #ffffff;
+	background: #00000080;
+}
+
+#debug table:nth-child(1)  {
+	background: #00800080;
+}
+
+#debug table:nth-child(2) * {
+	color: transparent;
+}
+#debug table:nth-child(2) tbody td.dark{
+	background-color: #00ff8840;
+}
+#debug table{
+	position: absolute;
+	top: 0px;
+}
+
+.dark {
+	background: #00400040;
+}
+
+body{
+	padding: 16px 16px 16px 16px !important;
+}
+
+
+:root {
+	--width: 8px;
+	--height: 12px;
+	--initial-state-zoom:	10;
+	--map-zoom:	26;
+	--initial-state-width: 	calc(var(--width) * var(--initial-state-zoom));
+	--initial-state-height: calc(var(--height) * var(--initial-state-zoom));
+	--map-width	: 	calc(var(--width) * var(--map-zoom));
+	--map-height: 	calc(var(--height) * var(--map-zoom));
+}
+
+canvas {
+	border: 1px #303030 solid;
+}
+
+canvas#angle_0,
+canvas#angle_1,
+canvas#angle_2,
+canvas#angle_3,
+canvas#best_movement,
+canvas#initial_state {
+	position: relative;
+	margin: 0px 0px 0px 0px;	
+	width: 	var(--initial-state-width);
+	height: var(--initial-state-height);	
+}
+
+.canvasbox canvas {
+	
+}
+
+canvas#map {
+	position: relative;
+	margin: 0px 0px 0px 0px;	
+	width: 	var(--map-width);
+	height: var(--map-height);	
+}
+
+
+.canvaswrapper {
+	position: absolute;
+	padding: 8px 8px 8px 8px;
+	box-sizing: border-box;
+	border: 1px #303030 solid;
+	display: inline-block;
+	font-size: 8px;
+	width: 100px;
+	height: 160px;
+	overflow:hidden;
+	font-family: 'Sans-serif';
+	text-align: center;
+	box-shadow: 2px 2px 0px #8888;	
+}
+.canvaswrapper-map {
+	width: auto !important;
+	height: auto !important;
+	left:  28px;
+	top:  202px;
+}
+
+.canvaswrapper-initial_state {
+	left: 16px;	
+	top:  16px;
+}
+
+.canvaswrapper-best_movement {
+	left: 16px;	
+	top:  216px;
+}
+
+.canvaswrapper-angle_0,
+.canvaswrapper-angle_1,
+.canvaswrapper-angle_2,
+.canvaswrapper-angle_3 {
+	left: 300px;	
+}
+.canvaswrapper-angle_0 {top:   16px;}
+.canvaswrapper-angle_1 {top:  216px;}
+.canvaswrapper-angle_2 {top:  416px;}
+.canvaswrapper-angle_3 {top:  616px;}
+
+
+.canvasbox {
+	position: absolute;
+	padding: 8px 8px 8px 8px;
+	/* border: 1px solid #303030; */
+	width: /*1940px*/1590px;/*970px;*/
+	height: 180px;
+	/* box-shadow: 2px 2px 0px #8888; */
+}
+.canvaswrapper-initial_state {
+	display:none;
+}
+.canvaswrapper-best_movement {
+	display:none;
+}
+.canvasbox  .canvaswrapper {
+	position: relative;
+	margin: 0px 0px 0px 0px;
+	border: 1px solid #303030;
+	border-collapse: collapse;
+}
+
+.canvasbox  .canvaswrapper  canvas {
+	width: 	var(--initial-state-width);
+	height: var(--initial-state-height);
+}
+
+.canvasbox {		left: 280px;}
+.canvasbox.canvas-0 {	top: -6px;	}
+.canvasbox.canvas-1 {	top: 154px; }
+.canvasbox.canvas-2 {	top: 314px; }
+.canvasbox.canvas-3 {	top: 474px; }
+
+.canvaswrapper-angle_0 { display: none; }
+.canvaswrapper-angle_1 { display: none; }
+.canvaswrapper-angle_2 { display: none; }
+.canvaswrapper-angle_3 { display: none; }
+
+
+div.scorebox-0,
+div.scorebox-1,
+div.scorebox-2,
+div.scorebox-3 {
+	border: 1px #909090 solid;
+	font-size: 12px;
+	background: #e0e0e0;
+	display: none;
+	/*display: inline-block !important;*/
+	position: absolute;;
+	margin-left: 6px;
+	width: 96px !important;	
+	text-align: center;
+	overflow: show;
+	height: 160px;
+	padding: 16px 16px 16px 16px;
+	vertical-align: middle;
+}
+
+#info {
+	opacity: 0.5;
+	overflow: hidden;
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	height: 200px;
+	width: 284px;
+	border-radius: 0px 8px 0px 8px;
+	box-shadow: 2px 2px 0px #8888;
+	background: #fafac4;
+	border: 1px solid #606028;
+	padding: 8px 8px 8px 8px;
+	box-sizing: border-box;
+	display: inline-block;
+	font-size: 16px;
+	color: #303030;
+	font-family: 'Sans-serif';
+}
+
+
+#output_wrapper {
+	height: 700px;
+	width: 1524px;
+	box-sizing: border-box;
+	left: 280px;
+	top: 650px;
+	display: inline-block;
+	position: absolute;	
+}
+
+
+#output {
+	opacity: 0.5;
+	overflow-x: hidden;
+	overflow-y: auto;
+	width: 100%;;
+	border-radius: 0px 8px 0px 8px;
+	box-shadow: 2px 2px 0px #8888;
+	background: #fafac4;
+	border: 1px solid #606028;
+	padding: 8px 8px 8px 8px;
+	box-sizing: border-box;
+	display: inline-block;
+	font-size: 16px;
+	color: #303030;
+	font-family: 'Sans-serif';
+}
+
+.red {
+	color: #ff0000;
+	text-shadow: 0px 0px 1px #00ffff;
+}
+.green {
+	color: #0000ff;
+	text-shadow: 0px 0px 1px #00ffff;
+}
+
+#option_drawsim {left: 16px;}
+#label_option_drawsim {left : 40px;}
+#label_option_drawsim,
+#option_drawsim {
+	position: absolute;
+	z-index: 10000;
+	top: calc(90% -  32px);
+	font-size: 12px;
+}
+#option_slowmo {left: 16px;}
+#label_option_slowmo {left : 40px;}
+#label_option_slowmo,
+#option_slowmo {
+	position: absolute;
+	z-index: 10000;
+	top: calc(90% -  48px);
+	font-size: 12px;
+}
+#option_drawmap {left: 16px;}
+#label_option_drawmap {left : 40px;}
+#label_option_drawmap,
+#option_drawmap {
+	position: absolute;
+	z-index: 10000;
+	top: calc(90% -  64px);
+	font-size: 12px;
+}
+#option_animate {left: 16px;}
+#label_option_animate {left : 40px;}
+#label_option_animate,
+#option_animate {
+	position: absolute;
+	z-index: 10000;
+	top: calc(90% - 80px);
+	font-size: 12px;
+}
+#option_results {position: absolute; left: 100px; top: calc(90% - 132px);}
+
+table.lines {
+	width: 100%;
+	margin: 0px 0px 0px 0px;
+	table-layout: fixed;
+}
+
+table.lines tbody tr th:nth-child(1){
+	width: 10%;
+}
+
+table.lines tbody tr,
+table.lines tbody tr td,
+table.lines tbody tr th{
+	border-collapse: collapse;
+	border-bottom: 1px solid #00000080;
+	font-size: 8px;
+	height: 10px;
+	min-height: 10px;
+	max-height: 10px;
+	line-height: 10px;
+}
+table.lines tbody tr:last-child,
+table.lines tbody tr:last-child td,
+table.lines tbody tr:last-child th{
+	border: none !important;
+}

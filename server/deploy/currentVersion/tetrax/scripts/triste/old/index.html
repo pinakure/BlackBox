@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Triste Auto Play Bot</title>
+        <script src="jquery.js"></script>
+        <script src="common.js"></script>
+        <!--<script src="shapes.js"></script>
+        <script src="map.js"></script>
+        <script src="piece.js"></script>
+        <script src="triste.js"></script>-->
+        <link rel="stylesheet" type="text/css" href="triste.css" />
+    </head>
+    <body></body>
+    <script>
+        
+
+        function createCanvas(id, width, height, parent='body'){
+            $(parent).append(`<div class="canvaswrapper canvaswrapper-${id}">
+                                <canvas id="${id}" width="${width}" height="${height}"></canvas>
+                                <br/>${id}
+                            </div>`);
+            var wrapper_node = $(`div.canvaswrapper-${id}`);
+            var canvas_node  = $(`#${id}`);
+            return canvas_node;
+        }
+        function createCanvasBox(index=0){
+            $('body').append(`<div class="canvasbox canvas-${index}"></div>`);
+            return $(`div.canvasbox canvas-${index}`);
+        }
+        function createScoreBox(index){
+            $(`.canvas-${index}`).append(`<div class="scorebox-${index}">[]</div>`);
+            return $(`.scorebox-${index}`);
+        }
+        function initialize(){
+            var width  = 8;
+            var height = 12;
+            createCanvas("initial_state", width, height);
+            createCanvas("best_movement", width, height);
+            for(a=0; a<4; a++){
+                createCanvas(`angle_${a}`, width, height);
+                createCanvasBox(a);
+                for(x=0; x<width; x++){
+                    createCanvas(`angle_${a}_${x}`, width, height,`.canvas-${a}`);
+                }
+                createScoreBox(a);
+            }
+            createCanvas(`map`, width, height);
+        }
+
+        initialize();
+
+        //Triste.initialize();
+    </script>
+</html>
