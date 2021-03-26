@@ -238,6 +238,7 @@ class Console{
 
 		static PyObject* pyCls(PyObject* self, PyObject* args);
 		static PyObject* pyPrint(PyObject* self, PyObject* args);
+		static PyObject* pyExec(PyObject* self, PyObject* args);
 };
 
 #define COMMAND_CALLBACK(a)			int a(std::vector<std::string> &args)

@@ -91,7 +91,7 @@ PyMethodDef Vpu::methods[] = {
 	{"setrotation"	, Vpu::pySetRotation	, METH_VARARGS, "setrotation(layer, angle) : Sets rotation for specified layer (0-11) at given degrees"},
 	{"setscale"		, Vpu::pySetScale		, METH_VARARGS, "setscale(layer, scale_x, scale_y) : Sets scale for specified layer [0-11] given horizontal and vertical values"},
 	{"scale"		, Vpu::pyScale			, METH_VARARGS, "scale(layer, scale_x, scale_y) : Change specified layer [0-11] given horizontal and vertical scale factor"},
-	{"subsprite"	, Vpu::pySubSprite		, METH_VARARGS, "subsprite(sprite_handle|, left, top, right, bottom) : Create sprite region or full copy from original sprite"},
+	{"subsprite"	, Vpu::pySubSprite		, METH_VARARGS, "subsprite(sprite_handle, left, top, right, bottom) : Create sprite region or full copy from original sprite"},
 	{"textout"		, Vpu::pyTextOut		, METH_VARARGS, "textout(text, x, y) : Print given text at given coordinates"},
 	{"tintsprite"	, Vpu::pyTintSprite		, METH_VARARGS, "tintsprite(sprite_handle, original_palette, new_palette) : Change colors in sprite from original_palette to new_palette"},
 	{"update"		, Vpu::pyUpdate			, METH_VARARGS, "update() : Allow blackbox engine to perform its rendering based input and output operations"},

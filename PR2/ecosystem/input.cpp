@@ -7,7 +7,7 @@ Surface					InputDevice::joystick_image;
 Surface					InputDevice::joystick_bitmap;
 Surface					InputDevice::keyboard_bitmap[2];
 
-bool					InputDevice::controller[INPUT_MAX];
+int 					InputDevice::controller[INPUT_MAX];
 E_InputButton			InputDevice::remap[INPUT_MAX];
 int						InputDevice::axis_x[2];
 int						InputDevice::axis_y[2];
@@ -79,6 +79,12 @@ PyMethodDef InputDevice::methods[] = {
 	{"b"			, InputDevice::pyB			, METH_VARARGS, "b() : " },
 	{"x"			, InputDevice::pyX			, METH_VARARGS, "x() : " },
 	{"y"			, InputDevice::pyY			, METH_VARARGS, "y() : " },
+	{"l1"			, InputDevice::pyL1			, METH_VARARGS, "l1() : " },
+	{"l2"			, InputDevice::pyL2			, METH_VARARGS, "l2() : " },
+	{"l3"			, InputDevice::pyL3			, METH_VARARGS, "l3() : " },
+	{"r1"			, InputDevice::pyR1			, METH_VARARGS, "r1() : " },
+	{"r2"			, InputDevice::pyR2			, METH_VARARGS, "r2() : " },
+	{"r3"			, InputDevice::pyR3			, METH_VARARGS, "r3() : " },
 	{NULL, NULL, 0, NULL}
 };
 
@@ -282,7 +288,7 @@ void InputDevice::restart() {
 
 		// clear controller button array			
 		for (int i = 0; i<INPUT_MAX; i++) {
-			controller[i] = false;
+			controller[i] = 0;
 			remap[i] = (E_InputButton)i;
 		}
 		
@@ -390,6 +396,11 @@ void matrixmode_callback(int i) {};
 void walk_callback(int i) {};
 
 void InputDevice::updateController(void){
+	for (int i = 0; i < INPUT_MAX; i++) {
+		if (controller[i] == -1)controller[i] = 0;
+		else if (controller[i] == 1) controller[i] = 2;
+		remap[i] = (E_InputButton)i;
+	}
 	/*
 	//PROFILE_START();
 	int sens = InputDevice::in_joysens->get();
@@ -437,6 +448,11 @@ void InputDevice::updateController(void){
 
 void InputDevice::updateJoystick(void){
 	// =)
+	for (int i = 0; i < INPUT_MAX; i++) {
+		if (controller[i] == -1)controller[i] = 0;
+		else if (controller[i] == 1) controller[i] = 2;
+		remap[i] = (E_InputButton)i;
+	}
 }
 
 
@@ -800,7 +816,8 @@ void InputDevice::update(int delta){
 		readMouse = false;
 	}
 	
-	if(joystick)updateJoystick();
+	//if(joystick)
+		updateJoystick();
 
 	for (Trigger &t : trigger) {
 		t.update();
@@ -839,26 +856,26 @@ extern char key[256];
 
 PyObject* InputDevice::pyMenu(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(
-		(InputDevice::controller[INPUT_START] & InputDevice::controller[INPUT_SELECT])
+		((InputDevice::controller[INPUT_START]==1) & (InputDevice::controller[INPUT_SELECT]>0))
 		||
 		key[ALLEGRO_KEY_ESCAPE]
 	);
 }
-PyObject* InputDevice::pySelect (PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_SELECT] || key[ALLEGRO_KEY_BACKSPACE]); }
-PyObject* InputDevice::pyStart	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_START] || key[ALLEGRO_KEY_ENTER]); }
-PyObject* InputDevice::pyUp		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_UP] || key[ALLEGRO_KEY_UP]); }
-PyObject* InputDevice::pyDown	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_DOWN] || key[ALLEGRO_KEY_DOWN]); }
-PyObject* InputDevice::pyLeft	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_LEFT] || key[ALLEGRO_KEY_LEFT]); }
-PyObject* InputDevice::pyRight	(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_RIGHT] || key[ALLEGRO_KEY_RIGHT]); }
-PyObject* InputDevice::pyA		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_CIRCLE] || key[ALLEGRO_KEY_C]); }
-PyObject* InputDevice::pyB		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_CROSS] || key[ALLEGRO_KEY_X]); }
-PyObject* InputDevice::pyX		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_TRIANGLE] || key[ALLEGRO_KEY_D]); }
-PyObject* InputDevice::pyY		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_SQUARE] || key[ALLEGRO_KEY_S]); }
-PyObject* InputDevice::pyL1		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L1] || key[ALLEGRO_KEY_Z]); }
-PyObject* InputDevice::pyL2		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L2] || key[ALLEGRO_KEY_A]); }
-PyObject* InputDevice::pyL3		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_L3] || key[ALLEGRO_KEY_Q]); }
-PyObject* InputDevice::pyR1		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R1] || key[ALLEGRO_KEY_V]); }
-PyObject* InputDevice::pyR2		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R2] || key[ALLEGRO_KEY_F]); }
-PyObject* InputDevice::pyR3		(PyObject* self, PyObject* args){ return PyBool_FromLong(InputDevice::controller[INPUT_R3] || key[ALLEGRO_KEY_R]); }
+PyObject* InputDevice::pySelect(PyObject* self, PyObject* args) { return PyLong_FromLong(InputDevice::controller[INPUT_SELECT	] + (key[ALLEGRO_KEY_BACKSPACE	] ? 1 : 0));}
+PyObject* InputDevice::pyStart	(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_START	] + (key[ALLEGRO_KEY_ENTER		] ? 1 : 0));}
+PyObject* InputDevice::pyUp		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_UP		] + (key[ALLEGRO_KEY_UP			] ? 1 : 0));}
+PyObject* InputDevice::pyDown	(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_DOWN		] + (key[ALLEGRO_KEY_DOWN		] ? 1 : 0));}
+PyObject* InputDevice::pyLeft	(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_LEFT		] + (key[ALLEGRO_KEY_LEFT		] ? 1 : 0));}
+PyObject* InputDevice::pyRight	(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_RIGHT	] + (key[ALLEGRO_KEY_RIGHT		] ? 1 : 0));}
+PyObject* InputDevice::pyA		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_CIRCLE	] + (key[ALLEGRO_KEY_C			] ? 1 : 0));}
+PyObject* InputDevice::pyB		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_CROSS	] + (key[ALLEGRO_KEY_X			] ? 1 : 0));}
+PyObject* InputDevice::pyX		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_TRIANGLE	] + (key[ALLEGRO_KEY_D			] ? 1 : 0));}
+PyObject* InputDevice::pyY		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_SQUARE	] + (key[ALLEGRO_KEY_S			] ? 1 : 0));}
+PyObject* InputDevice::pyL1		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_L1		] + (key[ALLEGRO_KEY_Z			] ? 1 : 0));}
+PyObject* InputDevice::pyL2		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_L2		] + (key[ALLEGRO_KEY_A			] ? 1 : 0));}
+PyObject* InputDevice::pyL3		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_L3		] + (key[ALLEGRO_KEY_Q			] ? 1 : 0));}
+PyObject* InputDevice::pyR1		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_R1		] + (key[ALLEGRO_KEY_V			] ? 1 : 0));}
+PyObject* InputDevice::pyR2		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_R2		] + (key[ALLEGRO_KEY_F			] ? 1 : 0));}
+PyObject* InputDevice::pyR3		(PyObject* self, PyObject* args){ return PyLong_FromLong(InputDevice::controller[INPUT_R3		] + (key[ALLEGRO_KEY_R			] ? 1 : 0));}
 
 #undef gpu

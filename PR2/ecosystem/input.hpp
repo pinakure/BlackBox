@@ -15,18 +15,18 @@ enum E_InputButton {
 	INPUT_CIRCLE,   // () - button1
 	INPUT_SQUARE,   // [] - button2	  
 	INPUT_TRIANGLE, // /\ - button3
-	INPUT_L1,		// button4
 	INPUT_R1,		// button5
-	INPUT_L2,		// button6
-	INPUT_R2,		// button7
+	INPUT_L1,		// button4
+	INPUT_R3,		// button7
+	INPUT_L3,		// button6
 	INPUT_SELECT,	// button8
 	INPUT_START,	// button9
 	INPUT_RIGHT,	// hat_x++
 	INPUT_LEFT,		// hat_x--
 	INPUT_DOWN,		// hat_y++
 	INPUT_UP,		// hat_y--
-	INPUT_L3,		// button10
-	INPUT_R3,		// button11
+	INPUT_L2,		// button10
+	INPUT_R2,		// button11
 	INPUT_MAX
 };
 
@@ -63,7 +63,7 @@ class InputDevice {
 		static Surface 			joystick_bitmap;
 		static Surface			keyboard_bitmap[2];
 
-		static bool				controller[INPUT_MAX]; // array holding the input buttons, where all controls converge but binds
+		static int				controller[INPUT_MAX]; // array holding the input buttons, where all controls converge but binds
 		static E_InputButton	remap[INPUT_MAX];
 		static int				axis_x[2];
 		static int				axis_y[2];

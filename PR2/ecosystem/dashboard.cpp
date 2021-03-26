@@ -155,7 +155,7 @@ void Dashboard::update(double delta) {
 	if (KEYDOWN(key[ALLEGRO_KEY_ESCAPE])) {
 		Script::execute("menu()");
 	}
-	if (KEYDOWN(key[ALLEGRO_KEY_LEFT])) {
+	if (KEYDOWN(key[ALLEGRO_KEY_LEFT])|| InputDevice::controller[INPUT_LEFT]) {
 		offset = -16.0f;
 		cursor_x--;
 		if (cursor_x < 0)cursor_x = columns - 1;		

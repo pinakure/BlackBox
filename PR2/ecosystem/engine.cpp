@@ -128,7 +128,7 @@ void Engine::handleEvents() {
 			break;
 
 		case ALLEGRO_EVENT_JOYSTICK_BUTTON_UP:
-			InputDevice::controller[event.joystick.button] = 0;
+			InputDevice::controller[event.joystick.button] = -1;
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:

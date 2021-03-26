@@ -1,3 +1,4 @@
+from scripts.main import menu
 import blackbox
 import vpu
 import joypad

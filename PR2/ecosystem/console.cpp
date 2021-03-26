@@ -73,6 +73,7 @@ int							Console::palette[16];
 
 PyMethodDef Console::methods[] = {
 	{"echo"			, Console::pyPrint		, METH_VARARGS, "echo(text) : Dump given text over console"},
+	{"exec"			, Console::pyExec		, METH_VARARGS, "exec(command) : Run given command on console"},
 	{"cls"			, Console::pyCls		, METH_VARARGS, "cls() : Clean console buffer"},
 	{NULL, NULL, 0, NULL}
 };
@@ -1797,6 +1798,12 @@ PyObject* Console::pyPrint(PyObject* self, PyObject* args) {
 	char* buffer;
 	if (!PyArg_ParseTuple(args, "s", &buffer)) return NULL;
 	Engine::print(buffer);
+	return PyLong_FromLong(1);
+}
+PyObject* Console::pyExec(PyObject* self, PyObject* args) {
+	char* buffer;
+	if (!PyArg_ParseTuple(args, "s", &buffer)) return NULL;
+	Console::execute(buffer);
 	return PyLong_FromLong(1);
 }
 PyObject* Console::pyCls(PyObject* self, PyObject* args) {
