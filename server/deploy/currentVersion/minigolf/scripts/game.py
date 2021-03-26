@@ -131,7 +131,7 @@ class Game(BasicGame):
     def destroy():
         for i in range(0,3):
             if Game.buffer[i]: 
-                deletesprite(Game.buffer[i])
+                vpu.deletesurf(Game.buffer[i])
         BasicGame.destroy()
 
     @staticmethod
