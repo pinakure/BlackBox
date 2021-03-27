@@ -38,6 +38,9 @@ class InputDevice {
 	private:
 		static Demo				demo;
 	public:
+
+		static int typematic_rate;
+
 		static PyMethodDef methods[];
 		///////////////////////
 		// CVARS				//

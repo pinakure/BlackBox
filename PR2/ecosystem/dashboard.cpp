@@ -152,25 +152,25 @@ void Dashboard::update(double delta) {
 		return_lock = false;
 	}
 
-	if (KEYDOWN(key[ALLEGRO_KEY_ESCAPE])) {
+	if (KEYDOWN(key[ALLEGRO_KEY_ESCAPE]) || InputDevice::controller[INPUT_SELECT]==1) {
 		Script::execute("menu()");
 	}
-	if (KEYDOWN(key[ALLEGRO_KEY_LEFT])|| InputDevice::controller[INPUT_LEFT]) {
+	if (KEYDOWN(key[ALLEGRO_KEY_LEFT]) || InputDevice::controller[INPUT_LEFT]==1) {
 		offset = -16.0f;
 		cursor_x--;
 		if (cursor_x < 0)cursor_x = columns - 1;		
 	}
-	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT])) {
+	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT]) || InputDevice::controller[INPUT_RIGHT]==1) {
 		offset = -16.0f;
 		cursor_x++;
 		if (cursor_x >= columns)cursor_x = 0;		
 	}
-	else if (KEYDOWN(key[ALLEGRO_KEY_UP])) {
+	else if (KEYDOWN(key[ALLEGRO_KEY_UP]) || InputDevice::controller[INPUT_UP]==1) {
 		offset = -16.0f;
 		cursor_y--;
 		if (cursor_y < 0)cursor_y = rows - 1;		
 	}
-	else if (KEYDOWN(key[ALLEGRO_KEY_DOWN])) {
+	else if (KEYDOWN(key[ALLEGRO_KEY_DOWN]) || InputDevice::controller[INPUT_DOWN]==1) {
 		offset = -16.0f;
 		cursor_y++;
 		if (cursor_y >= rows)cursor_y = 0;
@@ -187,7 +187,7 @@ void Dashboard::update(double delta) {
 	// Update selected 
 	if(titles.size()>0)
 		selected = &titles[active_index];
-	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+	if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || InputDevice::controller[INPUT_START]==1) {
 		if (selected) selected->load();
 	}
 	printf("Updating Dashboard %f                    \r", delta);

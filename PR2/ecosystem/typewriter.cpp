@@ -468,10 +468,10 @@ void TypeWriter::updateChoices(double delta) {
 	if (active_option < options.size()) {
 		TypeWriter::updateOptions(delta);
 	} else {
-		if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevChoice();
-		if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextChoice();
+		if (KEYDOWN(key[ALLEGRO_KEY_UP	]) || InputDevice::controller[INPUT_UP	]==1) return TypeWriter::prevChoice();
+		if (KEYDOWN(key[ALLEGRO_KEY_DOWN]) || InputDevice::controller[INPUT_DOWN]==1) return TypeWriter::nextChoice();
 	}
-	if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) return TypeWriter::selectChoice();
+	if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || InputDevice::controller[INPUT_CROSS]==1) return TypeWriter::selectChoice();
 }
 
 void TypeWriter::prevOption() {
@@ -521,10 +521,10 @@ void TypeWriter::decreaseValue() {
 }
 
 void TypeWriter::updateOptions(double delta) {
-	if (KEYDOWN(key[ALLEGRO_KEY_UP]))	 return TypeWriter::prevOption();
-	if (KEYDOWN(key[ALLEGRO_KEY_DOWN]))	 return TypeWriter::nextOption();
-	if (key[ALLEGRO_KEY_LEFT])	 return TypeWriter::decreaseValue();
-	if (key[ALLEGRO_KEY_RIGHT]) return TypeWriter::increaseValue();
+	if (KEYDOWN(key[ALLEGRO_KEY_UP	]) || KEYDOWN(InputDevice::controller[INPUT_UP  ]))	 return TypeWriter::prevOption();
+	if (KEYDOWN(key[ALLEGRO_KEY_DOWN]) || KEYDOWN(InputDevice::controller[INPUT_DOWN]))	 return TypeWriter::nextOption();
+	if (key[ALLEGRO_KEY_LEFT]  || InputDevice::controller[INPUT_LEFT ]) return TypeWriter::decreaseValue();
+	if (key[ALLEGRO_KEY_RIGHT] || InputDevice::controller[INPUT_RIGHT]) return TypeWriter::increaseValue();
 }
 
 void TypeWriter::updateText(double delta) {
@@ -542,7 +542,7 @@ void TypeWriter::updateText(double delta) {
 	if ((round(TypeWriter::width) != int(final_width)) || (round(TypeWriter::height) != int(final_height))) {
 		if (round(TypeWriter::width) > int(final_width)) {
 			TypeWriter::needs_redraw = true;
-			if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+			if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || KEYDOWN(InputDevice::controller[INPUT_CROSS])) {
 				if (!Console::enabled) {
 					TypeWriter::next = true;
 					enabled = false;
@@ -605,7 +605,7 @@ void TypeWriter::updateText(double delta) {
 					TypeWriter::queue.pop();
 					TypeWriter::next = false;
 				}
-				if (KEYDOWN(key[ALLEGRO_KEY_ENTER])) {
+				if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || KEYDOWN(InputDevice::controller[INPUT_CROSS])) {
 					TypeWriter::next = true;
 					TypeWriter::wait_time = 120;
 				}
@@ -816,17 +816,17 @@ void GetTextBox::toggleCaps() {
 }
 
 void GetTextBox::update() {
-	if (key[ALLEGRO_KEY_LSHIFT] || key[ALLEGRO_KEY_RSHIFT]) {
-		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ])) return GetTextBox::moveCaretLeft();
-		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ])) return GetTextBox::moveCaretRight();
+	if (key[ALLEGRO_KEY_LSHIFT] || key[ALLEGRO_KEY_RSHIFT] || InputDevice::controller[INPUT_L1] || InputDevice::controller[INPUT_R1]) {
+		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ]) || KEYDOWN(InputDevice::controller[INPUT_LEFT	])) return GetTextBox::moveCaretLeft();
+		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ]) || KEYDOWN(InputDevice::controller[INPUT_RIGHT	])) return GetTextBox::moveCaretRight();
 	} else {
-		if (KEYDOWN(key[ALLEGRO_KEY_TAB		 ])) return GetTextBox::toggleCaps();
-		if (KEYDOWN(key[ALLEGRO_KEY_BACKSPACE])) return GetTextBox::backspace();
-		if (KEYDOWN(key[ALLEGRO_KEY_ENTER	 ])) return GetTextBox::putchar();
-		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ])) return GetTextBox::moveCursorLeft();
-		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ])) return GetTextBox::moveCursorRight();
-		if (KEYDOWN(key[ALLEGRO_KEY_UP		 ])) return GetTextBox::moveCursorUp();
-		if (KEYDOWN(key[ALLEGRO_KEY_DOWN	 ])) return GetTextBox::moveCursorDown();
+		if (KEYDOWN(key[ALLEGRO_KEY_TAB		 ]) || KEYDOWN(InputDevice::controller[INPUT_SELECT	])) return GetTextBox::toggleCaps();
+		if (KEYDOWN(key[ALLEGRO_KEY_BACKSPACE]) || KEYDOWN(InputDevice::controller[INPUT_CIRCLE	])) return GetTextBox::backspace();
+		if (KEYDOWN(key[ALLEGRO_KEY_ENTER	 ]) || KEYDOWN(InputDevice::controller[INPUT_CROSS	])) return GetTextBox::putchar();
+		if (KEYDOWN(key[ALLEGRO_KEY_LEFT	 ]) || KEYDOWN(InputDevice::controller[INPUT_LEFT	])) return GetTextBox::moveCursorLeft();
+		if (KEYDOWN(key[ALLEGRO_KEY_RIGHT	 ]) || KEYDOWN(InputDevice::controller[INPUT_RIGHT	])) return GetTextBox::moveCursorRight();
+		if (KEYDOWN(key[ALLEGRO_KEY_UP		 ]) || KEYDOWN(InputDevice::controller[INPUT_UP		])) return GetTextBox::moveCursorUp();
+		if (KEYDOWN(key[ALLEGRO_KEY_DOWN	 ]) || KEYDOWN(InputDevice::controller[INPUT_DOWN	])) return GetTextBox::moveCursorDown();
 	}
 }
 

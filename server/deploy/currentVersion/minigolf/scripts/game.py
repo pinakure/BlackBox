@@ -10,7 +10,11 @@
 #                               88    `"Y88888P"     `"Y8888Y"'    88888888888  88                          #
 #                                                                                                           #
 #############################################################################################################
-# to import classes in this folder: 
+try: del Map
+except: pass
+try: del Game
+except: pass
+
 from data.scripts.map           import map
 from data.scripts.editor        import Editor
 from scripts.main               import menu

@@ -1733,19 +1733,19 @@ void Console::loadCommands(void) {
 
 	CVar::loadCommands();
 	// Commands defined with last parameter as "" wont drop an error if no arguments are given along
-	addCommand("cd", cdCommand, "Changes active working directory", "cd <folder_name>");
-	addCommand("cls", cls, "Clear console buffer", "");
-	addCommand("cwd", cwdCommand, "Shows active working directory", "");
-	addCommand("dir", dirCommand, "Shows files and folders in current working directory", "");
-	addCommand("dump", dump, "Dump console buffer into given filename", "dump <output_filename>");
-	addCommand("echo", echoCommand, "Dump given text on the console buffer", "");
-	addCommand("help", help, "Show help about requested command", "help <help_term | -toc | -full>");
-	addCommand("memdump", memDumpCommand, "Dump heap blocks to the filesystem", "");
-	addCommand("addtoggle", debug_addtoggle, "Adds a toggle with given id and name", "debug_addtoggle <id> <name>");
-	addCommand("toggle", toggleCmd, "Set or toggle given in-game toggle", "toggle <toggle_id> [toggle_status]");
-	addCommand("toggleconsole", toggleCon, "Open or close the console interface", "");
-	addCommand("togglelist", toggle_list, "Show list of current in-game toggles", "");
-	addCommand("view", view, "Dump given filename over the console", "view <input_filename>");
+	addCommand("cd"				, cdCommand			, "Changes active working directory", "cd <folder_name>");
+	addCommand("cls"			, cls				, "Clear console buffer", "");
+	addCommand("cwd"			, cwdCommand		, "Shows active working directory", "");
+	addCommand("dir"			, dirCommand		, "Shows files and folders in current working directory", "");
+	addCommand("dump"			, dump				, "Dump console buffer into given filename", "dump <output_filename>");
+	addCommand("echo"			, echoCommand		, "Dump given text on the console buffer", "");
+	addCommand("help"			, help				, "Show help about requested command", "help <help_term | -toc | -full>");
+	addCommand("memdump"		, memDumpCommand	, "Dump heap blocks to the filesystem", "");
+	addCommand("addtoggle"		, debug_addtoggle	, "Adds a toggle with given id and name", "debug_addtoggle <id> <name>");
+	addCommand("toggle"			, toggleCmd			, "Set or toggle given in-game toggle", "toggle <toggle_id> [toggle_status]");
+	addCommand("toggleconsole"	, toggleCon			, "Open or close the console interface", "");
+	addCommand("togglelist"		, toggle_list		, "Show list of current in-game toggles", "");
+	addCommand("view"			, view				, "Dump given filename over the console", "view <input_filename>");
 
 	sortCommands();
 }

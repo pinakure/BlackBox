@@ -358,10 +358,11 @@ class Ghost(Entity):
             if Ghost.game.debug.GHOSTS:
                 if nearest.direction != self.direction:
                     print(f"Turning {Direction.string(self.direction)}")
-                       
-            if self.can_walk(nearest.direction):
-                self.direction = nearest.direction;            
-            elif Ghost.game.debug.GHOSTS:
+
+            if nearest:                       
+                if self.can_walk(nearest.direction):
+                    self.direction = nearest.direction;            
+                elif Ghost.game.debug.GHOSTS:
                     print(f"Going {Direction.string(self.direction)}: can't go {Direction.string(nearest.direction)} from ({self.tx},{self.ty}) to ({nearest.x},{nearest.y})")
 
     def move_to(self, x,y):
