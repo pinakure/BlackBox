@@ -1,3 +1,4 @@
+from tiledmap               import TiledMap
 from random                 import random
 from data.scripts.common    import *
 from data.scripts.tristemap import Map
@@ -12,60 +13,64 @@ RULES:
 
 """
 
-
 class Triste:
     CONTINUE    = 0x1
     NEWSHAPE    = 0x2
     GAMEOVER    = 0x3
     colors      = Colors
-    gameover    = False
-    width       = 16
-    height      = 32
-    map         = []
-    piececount  = 0
-    currentpiece= None
-    game        = None
-    
-    @staticmethod
-    def initialize(game):
-        # Initialize map memory 
-        Triste.game = game
-        Triste.map = Map(Triste, Triste.width, Triste.height)
-        Triste.map.create()
-        # Create first piece 
-        Triste.newshape()
+    width       = 15
+    height      = 26
         
-        # Call first logic cycle 
-        # not needed, its replaced by update calls from engine.
-        # window.setTimeout(Triste.logic, 60);
-        
-    @staticmethod
-    def newgame():
-        Triste.initialize(Triste.game)
-    
-    @staticmethod
-    def newshape():
-        Triste.currentpiece = None
-        while Triste.currentpiece is None:
-            Triste.currentpiece = Triste.add_piece(int(random()*7))
-        column  = Triste.find_optimal_column()
-        rotation= Triste.find_optimal_angle()
-    
-    @staticmethod
-    def add_piece(shape_type):
-        shape    = ShapeTypes.get(shape_type)
-        column   = 0; #Triste.find_optimal_column()
-        row      = -shape.height
-        rotation = 0; # Triste.find_optimal_angle()
-        return Triste.map.add_shape(shape, column, row, rotation)        
+    def __init__(self, game, flip=False):
+        self.gameover     = False
+        self.score        = 0
+        self.flip         = flip
+        self.x            = 0 if not flip else 160
+        self.piececount   = 0
+        self.currentpiece = None
+        self.game         = game
+        self.lines        = 0
+        self.map          = Map(self, Triste.width, Triste.height)
+        self.display      = TiledMap(self.game, Triste.width, Triste.height,2)
+        self.display.fill(0x7F, 0)
+        self.display.fill(0x7F, 1)
+        if not self.display.load_tileset("blocks"):
+            print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
+            quit()
+        self.map.create()
+        self.newgame()
 
-    @staticmethod
-    def find_optimal_angle():
+    def newgame(self):
+        self.gameover     = False
+        self.currentpiece = None
+        self.piececount   = 0
+        self.score        = 0
+        self.lines        = 0
+        self.map.clear()
+        self.newshape()
+        self.display.fill(0x7F, 0)
+        self.display.fill(0x7F, 1)
+        
+    def newshape(self):
+        self.currentpiece = None
+        while self.currentpiece is None:
+            self.currentpiece = self.add_piece(int(random()*7))
+        column  = self.find_optimal_column()
+        rotation= self.find_optimal_angle()
+    
+    def add_piece(self, shape_type):
+        shape    = ShapeTypes.get(shape_type)
+        column   = self.find_optimal_column()
+        row      = -shape.height
+        rotation = 0 # self.find_optimal_angle()
+        return self.map.add_shape(shape, column, row, rotation)        
+
+    def find_optimal_angle(self):
         """ Evaluate match score for each angle """
-        shape = Triste.currentpiece
+        shape = self.currentpiece
         angle = shape.angle
         angles = {}
-        for __i in range(0, len(shape.data)-1):
+        for __i in range(0, len(shape.data)):
             angles[__i] = [ shape.get_columns() ]; # angles[__i] = [ shape.getRows() ]; 
             # move forward in angle list 
             shape.rotation += 1;  
@@ -74,54 +79,35 @@ class Triste:
         # scores = get_scores(angles);
         return 0
         
-    @staticmethod
-    def find_optimal_column():
-        return 1
-        """
-        var optimal_value = Triste.height;
-        var optimal_index = -1;
-        var columns = [];
-        for(ci=0;ci<Triste.width; ci++){
-            columns[ci] = Triste.getColumnWeight(ci);
-        }
-        for(ci=0;ci<Triste.width; ci++){
-            if(columns[ci] < optimal_value){
-                optimal_index = ci;
-                optimal_value = columns[ci];
-            };
-        }
-        return optimal_index;
-        """
-    
-    @staticmethod
-    def draw():
-        pass
+    def find_optimal_column(self):
+        return 3+int(random()*(self.width-6))
 
-    @staticmethod
-    def update(delta):
-        p = Triste.currentpiece
-        status = p.logic()
+    def draw(self):
+        # draw board to the map object
+        #self.map.draw(self.game.map, 1 if not self.flip else 24, 3)
+        self.display.x = ((self.game.width>>1) - 152) if not self.flip else ((self.game.width>>1)+32)
+        self.display.y = ((self.game.height>>1)- 96)  if not self.flip else ((self.game.height>>1)-96)
+        self.display.fill(0x7F, 1)
+        self.currentpiece.draw(1)
+        self.display.redraw()
+        self.display.draw()
+
+    def update(self, delta):
+        status = self.currentpiece.logic()
         if status == Triste.GAMEOVER:
             print("Game Over!")
-            Triste.gameover = True
-            Triste.newgame()
+            self.gameover = True
+            self.newgame()
         elif status == Triste.NEWSHAPE:
-            Triste.newshape()
-        
-        #not needed 
-        #if not Triste.gameover:
-        #    window.setTimeout(Triste.logic, 60)
+            self.currentpiece.draw(0)
+            self.newshape()
+   
 '''
-
-    
-    
-    @staticmethod
-    def get_column_weight(column):
-        weights = Triste.map.get_weights()
+    def get_column_weight(self, column):
+        weights = self.map.get_weights()
         return weights[column]
         
-    @staticmethod
-    def removeLines(mapdata, lineset):
+    def removeLines(self, mapdata, lineset):
         """ Returns mapdata without new lines, inserting new lines over the top """        
         new_mapdata = []
         map_height = mapdata.length
@@ -138,8 +124,7 @@ class Triste:
             new_mapdata.splice(0,0,new_row)
         return new_mapdata
     
-    @staticmethod
-    def find_lines(mapdata):
+    def find_lines(self, mapdata):
         """ Return list of line indices to be removed if any """
         lines = []
         for map_row_index in mapdata:
@@ -151,15 +136,14 @@ class Triste:
                 lines[lines.length] = map_row_index
         return lines
     
-    @staticmethod
-    def would_cause_line(shape, x, y):
+    def would_cause_line(self, shape, x, y):
         """ Return true if given shape data would produce a new line , scoring """
-        virtual_map = Triste.map
+        virtual_map = self.map
         for row_index in shape:
             row = shape[row_index]
             for col_index in row:
                 virtual_map[y+row_index][x+col_index] &= shape[row_index][col_index]
-        lines = Triste.find_lines(virtual_map)
+        lines = self.find_lines(virtual_map)
         return lines.length > 0
 
 def Intent(self, shapedata):

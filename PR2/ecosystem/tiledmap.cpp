@@ -242,8 +242,10 @@ PyObject* TiledMap::pySet(PyObject* self, PyObject* args) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		layer %= tm->layer_count;
 		TiledLayer* tl = &tm->layers[layer];
-		y %= tl->h;
-		x %= tl->w;
+		if (y < 0) return PyBool_FromLong(false);
+		else if (x < 0) return PyBool_FromLong(false);
+		else if (x >= tl->w) return PyBool_FromLong(false);
+		else if (y >= tl->h) return PyBool_FromLong(false);
 		tl->data[y][x] = value;
 		return PyBool_FromLong(true);
 	}

@@ -10,6 +10,10 @@
 # 88             `"Y8888Y"'      `"Y8888Y"'    88       Y8b  88     `8'     88  d8'          `8b  88      `888  #
 #                                                                                                               #
 #################################################################################################################
+import importlib 
+import data.scripts.map
+importlib.reload(data.scripts.map) 
+
 from data.scripts.map           import map
 from data.scripts.pacmanstatus  import PacmanStatus
 from data.scripts.ghoststatus   import GhostStatus

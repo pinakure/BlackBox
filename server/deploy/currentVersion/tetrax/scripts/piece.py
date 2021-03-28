@@ -7,7 +7,7 @@ class Piece:
     def __init__(self, triste, shape, x, y, rotation=0):
         color_index       = int( random()*  len(Colors) )
         self.triste       = triste
-        self.color        = Colors[color_index]
+        self.color        = color_index
         self.shape        = shape
         self.data         = shape.data
         self.width        = shape.width
@@ -21,14 +21,41 @@ class Piece:
         self.active       = True
         self.target       = None
         self.target_angle = rotation
-        print("Piece initialized")
 
+    def draw(self,layer=1):
+        c = 2+(int(self.color / 2)*16)+(self.color%2)
+        dy=self.y
+        for py in range(0, self.shape.height):
+            dx = self.x
+            for px in range(0, self.shape.width):
+                if self.data[self.rotation][(py*self.width)+px]:
+                    self.triste.display.set(dx+ px, dy+py, c ,layer)
+        
+    def logic(self):
+        self.y+=1
+        if not self.is_placeable(self.triste.map):
+            self.y-=1
+            self.active = False
+            if self.write(self.triste.map):
+                #print(f"writing to collission (triste) map AT {self.x}, {self.y}")
+                return self.triste.NEWSHAPE;            
+            else:
+                return self.triste.GAMEOVER
+        """
+        if self.target:
+            self.follow_target()
+        else:
+            self.find_target()
+        penalty = self.triste.map.get_penalty(self, self.x)
+        """
+        return self.triste.CONTINUE
+    
     def get_rows(self):
         """ Returns a set of rows from the set of rows conforming the shape """
         rows = {}
         for row_index in (0, self.shape.height-1):
             row = {}
-            for column_index in range(0, self.shape.width-1):
+            for column_index in range(0, self.shape.width):
                 row[column_index] = self.shape.data[self.rotation][(row_index * self.shape.width)+column_index]
             rows[row_index] = row
         return rows
@@ -36,46 +63,17 @@ class Piece:
     def get_columns(self):
         """ Returns a set of columns from the set of rows conforming the shape"""
         cols = {}
-        for column_index in range(0, self.shape.width-1):
+        for column_index in range(0, self.shape.width):
             col = {}
-            for row_index in range(0, self.shape.height-1):
+            for row_index in range(0, self.shape.height):
                 col[row_index] = self.shape.data[self.rotation][(row_index*self.shape.width)+column_index]
             cols[column_index] = col
         return cols
 
-    def logic(self):
-        self.update()
-        self.y+=1
-        if not self.is_placeable(self.triste.map):
-            self.y-=1
-            self.update()
-            self.active = False
-            if self.write(self.triste.map):
-                return self.triste.NEWSHAPE;            
-            else:
-                return self.triste.GAMEOVER
-        if self.target:
-            self.follow_target()
-        else:
-            self.find_target()
-        self.update()
-        penalty = self.triste.map.get_penalty(self, self.x)
-        return self.triste.CONTINUE
-
-    def update(self):
-        pass
-        """
-        var node = $(`table.self.triste#${self.id}`)
-        node.attr('x', self.x)
-        node.attr('y', self.y)
-        node.css('left' , `${int(node.attr('x')) * 16}px`)
-        node.css('top'  , `${int(node.attr('y')) * 16}px`)
-        """
-
     def is_placeable(self, _map):
         ip_index = 0
-        for ip_row in range(0, self.shape.height-1):
-            for ip_col in range(0, self.shape.width-1):
+        for ip_row in range(0, self.shape.height):
+            for ip_col in range(0, self.shape.width):
                 if self.shape.data[self.rotation][ip_index]==1:
                     x = self.x + ip_col
                     y = self.y + ip_row
@@ -84,33 +82,7 @@ class Piece:
                 ip_index+=1
         return True
 
-    def draw(self):
-        html = ''
-        """
-        for(py=0; py < self.shape.height; py++){
-            html += '<tr>'
-            for(px=0; px < self.shape.width; px++){
-                var value =  self.data[self.rotation][(py*self.width)+px]
-                var piece_class = `${self.color} ${ value ? 'piece':''}`
-                html += `<td><span class="${piece_class}"><span></td>`
-            }
-            html += '</tr>'
-        }
-        $('#scene').append(`<table 
-            id="${self.id}" 
-            class="self.triste ${self.type}" 
-            x="${self.x}" 
-            y="${self.y}" 
-            width="${self.shape.width}" 
-            height="${self.shape.height}" 
-            type="${self.shape.name}" 
-            rotation="${self.rotation}"
-        >
-            ${html}
-        </table>`)
-        self.update()
-        """
-
+        
     #-------------------------------------------------------------------------------------------------------------
 
 
@@ -118,7 +90,7 @@ class Piece:
         weight  = 0
         cols    = self.get_columns()
         column  = cols[column]
-        for col_index in range(0, column.length):
+        for col_index in range(0, len(column)):
             weight += column[col_index]
         return weight
 
@@ -130,7 +102,7 @@ class Piece:
         optimal_index   = -1
         columns         = {}
         for foci in range(0, self.shape.width):
-            columns[foci] = self.getWeight(foci)
+            columns[foci] = self.get_weight(foci)
         for foci in range(0, self.shape.width):
             if columns[foci] > optimal_value:
                 optimal_index = foci
@@ -145,8 +117,8 @@ class Piece:
             self.rotation += 1
         if not self.is_placeable( self.triste.map ):
             self.rotation = fallback
-        else:
-            self.draw()
+        # else:
+        #     self.draw()
     
     def follow_target(self):
         self.follow_angle()
@@ -180,7 +152,6 @@ class Piece:
             if self.is_placeable(self.triste.map):
                 self.target = pseudo_x
             self.x = old_x
-            self.update()
 
     def get_real_width(self):
         """ Return real piece width, skipping unpopulated columns """    

@@ -8,6 +8,25 @@ class Map:
         self.height = height
         self.data   = {}
 
+    def clear(self):
+        for di in self.data:
+            c = self.data[di]
+            for ci in c:
+                c[ci] = 0x20 #0x7F
+
+    def set(self, x, y, value):
+        if x<0: return
+        elif y<0: return
+        elif x>=width: return
+        elif y>=height: return
+        data[y][x] = value
+
+    def draw(self, map, dx=0, dy=0):
+        for di in self.data:
+            c = self.data[di]
+            for ci in c:                
+                map.set(ci+dx, di+dy, c[ci], 1)
+                
     def copy(self, data):
         for di in data:
             arr = {}
@@ -32,8 +51,6 @@ class Map:
         #if shape.center[0] > -1: piece.x -= shape.center[0]
         if piece.is_placeable(self.triste.map): 
             self.triste.piececount+=1
-            # draw piece
-            # html = piece.render() 
             piece.logic()
             return piece
         offset = piece.find_optimal_column()
@@ -54,7 +71,8 @@ class Map:
         if x >= self.width  : return False
         if x <  0           : return False
         if y >= self.height : return False
-        return self.data[y][x] == 0
+        #print(f"Check {x},{y} = {self.data[y][x]}")
+        return self.data[y][x] == 32
 
     #----------------------------------------------------------------------------------------------------
     #----------------------------------------------------------------------------------------------------

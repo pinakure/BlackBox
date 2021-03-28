@@ -10,10 +10,9 @@
 #                               88    `"Y88888P"     `"Y8888Y"'    88888888888  88                          #
 #                                                                                                           #
 #############################################################################################################
-try: del Map
-except: pass
-try: del Game
-except: pass
+import importlib 
+import data.scripts.map
+importlib.reload(data.scripts.map) 
 
 from data.scripts.map           import map
 from data.scripts.editor        import Editor

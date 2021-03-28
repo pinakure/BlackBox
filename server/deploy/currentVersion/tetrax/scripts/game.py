@@ -10,14 +10,12 @@
 #              88       88888888888       88       88      `8b  d8'          `8b  8P        Y8         #
 #                                                                                                      #
 ########################################################################################################
-try: del Map
-except: pass
-try: del Game
-except: pass
-try: del Triste
-except: pass
+import importlib 
+import data.scripts.map
+importlib.reload(data.scripts.map) 
 
 from data.scripts.triste    import Triste
+from data.scripts.map       import data
 from scripts.main           import menu
 from random                 import random
 from basicgame              import BasicGame
@@ -30,6 +28,7 @@ import joypad
 
 class Game(BasicGame):
     
+    triste = None
     buffer = [None, None]
 
     @staticmethod
@@ -41,26 +40,26 @@ class Game(BasicGame):
             #allocate custom video buffers
             Game.buffer[0] = vpu.createsurf(320, 240) 
             Game.buffer[1] = vpu.createsurf(320, 240) 
-            # create map
+            # create display map
             Game.setmap(TiledMap(Game, 40, 30, 3))
             if not Game.map.load_tileset("blocks"):
                 print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
                 quit()
             Game.map.fill(0x7E, 0)
-            Game.map.fill(0x7F, 1)
-            Game.map.fill(0x7F, 2)
-            
-            Triste.initialize(Game)
-
-            #Game.loadmap(map)
+            Game.loadmap(data)
+            Game.clear()            
+            Game.triste = [ Triste(Game), Triste(Game, True) ]
             vpu.setfont('smk')
-
-            
 
         except Exception as E:
             print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
             console.echo(f'ERROR: {str(E)}')                        
         
+    @staticmethod
+    def clear():
+        Game.map.fill(0x7F, 1)
+        Game.map.fill(0x7F, 2)
+
     @staticmethod
     def loop():
         delta = 1.0
@@ -71,16 +70,33 @@ class Game(BasicGame):
     @staticmethod
     def update(delta):
         # do stuff
-        Triste.update(delta)
-        
+        #Game.triste[0].update(delta)
+        #Game.triste[1].update(delta)
         # required stuff
         BasicGame.update(delta)
         
     @staticmethod
+    def draw_next():
+        pass
+
+    @staticmethod
+    def draw_stats():
+        pass
+
+    @staticmethod
+    def draw_scores():
+        score_a = ("0"*(13-(len(str(Game.triste[0].score))))) + str(Game.triste[0].score)
+        score_b = ("0"*(13-(len(str(Game.triste[1].score))))) + str(Game.triste[1].score)
+        vpu.setcolor(192,16,0,32)
+        vpu.textout(score_a,0, 0)
+        vpu.setcolor(0,16,192,32)
+        vpu.textout(score_b,320-(8*13), 0)
+
+    @staticmethod
     def draw():
-        Triste.draw()
         if Game.map.need_redraw:
             #clear map buffer
+            
             vpu.select(Game.buffer[0])
             vpu.fill(0,0,0,0)
             
@@ -89,24 +105,26 @@ class Game(BasicGame):
             Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
             Game.map.draw()
 
-            # draw things over map layer
+            vpu.select(Game.buffer[1])
+            vpu.fill(0,0,0,0)
+            Game.triste[0].draw()
+            Game.triste[1].draw()
+            Game.triste[0].update(1)
+            Game.triste[1].update(1)
             
-        # clear sprite buffers
-        vpu.select(Game.buffer[1])
-        vpu.fill(0,0,0,0)
-        vpu.setcolor(255,255,255,255)            
-        # vpu.textout(f"Editor Value: {hex(Editor.current)}"              ,2, 200)
-        # vpu.textout(f"Scale Factor: {str(Terrain.scale_factor)[0:4]}"   ,2, 210)
-        # vpu.textout(f"Noise Octave: {Terrain.octave}"                   ,2, 220)
-        # vpu.textout(f"Random  Seed: 0x{hex(Terrain.seed).upper()[2:]}"  ,2, 230)
+            vpu.select(Game.buffer[1])
+            Game.draw_scores()
+            Game.draw_stats()
+            Game.draw_next()
+            
+            #rasterize layers
+            vpu.select(0)
+            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+            for buffer in Game.buffer:
+                if buffer:
+                    vpu.drawsurf(buffer, left, top)
         
-        vpu.select(0)
-        left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
-        top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
-        for buffer in Game.buffer:
-            if buffer:
-                vpu.drawsurf(buffer, left, top)
-    
         # required stuff
         BasicGame.draw()
     
