@@ -101,7 +101,6 @@ class Game(BasicGame):
         vpu.setcolor(0,16,192,32)
         vpu.textout(lines_b, 162, 48)
         vpu.textout(level_b, 162, 80)
-        
 
     @staticmethod
     def draw():

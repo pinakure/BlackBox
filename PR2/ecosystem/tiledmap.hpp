@@ -40,7 +40,7 @@ public:
 	void destroy();
 	void draw(int x, int y);
 	void update(double delta);
-	bool loadTileset(std::string tileset);
+	int loadTileset(std::string tileset);
 	
 	static PyObject* pyCreate		(PyObject* self, PyObject* args);
 	static PyObject* pyClear		(PyObject* self, PyObject* args);

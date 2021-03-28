@@ -116,13 +116,13 @@ void TiledMap::update(double delta) {
 
 }
 
-bool TiledMap::loadTileset(std::string filename) {
+int TiledMap::loadTileset(std::string filename) {
 	Surface s = Vpu::loadBitmap("tilesets/" + filename+".png");
 	if (s.enabled) {
 		this->tileset.push_back(s);
-		return true;
+		return this->tileset.size();
 	}
-	return false;
+	return -1;
 }
 
 
@@ -355,7 +355,7 @@ PyObject* TiledMap::pyLoadTileset(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "is", &handle, &name)) return NULL;
 	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
-		return PyBool_FromLong(tm->loadTileset(name));
+		return PyLong_FromLong(tm->loadTileset(name));
 	}
 	printf("ERROR @ pyRedraw : tiledmap_handle out of range\n");
 	return PyBool_FromLong(false);
