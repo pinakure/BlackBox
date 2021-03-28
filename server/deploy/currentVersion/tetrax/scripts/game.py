@@ -69,11 +69,14 @@ class Game(BasicGame):
             
     @staticmethod
     def update(delta):
-        # do stuff
-        #Game.triste[0].update(delta)
-        #Game.triste[1].update(delta)
         # required stuff
         BasicGame.update(delta)
+        
+        # do stuff
+        if Game.map.need_redraw:
+            Game.triste[0].update(delta)
+            Game.triste[1].update(delta)
+        
         
     @staticmethod
     def draw_next():
@@ -109,8 +112,6 @@ class Game(BasicGame):
             vpu.fill(0,0,0,0)
             Game.triste[0].draw()
             Game.triste[1].draw()
-            Game.triste[0].update(1)
-            Game.triste[1].update(1)
             
             vpu.select(Game.buffer[1])
             Game.draw_scores()

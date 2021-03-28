@@ -147,22 +147,23 @@ class ShapeType:
     B   = 0x05
     T   = 0x06
 
-    def __init__(self, shape_type, type_name, allow_rotation, center_point, width, height, data={}):
+    def __init__(self, shape_type, type_name, allow_rotation, center_point, width, height, data={}, index=0):
         self.type_name      = type_name
         self.allow_rotation = allow_rotation
         self.center_point   = center_point
         self.width          = width
         self.height         = height
         self.data           = data 
+        self.index          = index
         
 class ShapeTypes:
-    L   = ShapeType(ShapeType.L , 'L'           , True, [1,1], 3, 3, data_L )
-    LF  = ShapeType(ShapeType.LF, 'L Flipped'   , True, [1,1], 3, 3, data_LF)
-    Z   = ShapeType(ShapeType.Z , 'Z'           , True, [1,1], 3, 3, data_Z )
-    ZF  = ShapeType(ShapeType.ZF, 'Z Flipped'   , True, [1,1], 3, 3, data_ZF)
-    I   = ShapeType(ShapeType.I , 'I'           , True, [1,1], 4, 4, data_I )
-    B   = ShapeType(ShapeType.B , '2x2 Cube'    , False,[0,1], 2, 2, data_B )
-    T   = ShapeType(ShapeType.T , 'T'           , True, [1,1], 3, 3, data_T )    
+    L   = ShapeType(ShapeType.L , 'L'           , True, [1,1], 3, 3, data_L , 0)
+    LF  = ShapeType(ShapeType.LF, 'L Flipped'   , True, [1,1], 3, 3, data_LF, 1)
+    Z   = ShapeType(ShapeType.Z , 'Z'           , True, [1,1], 3, 3, data_Z , 2)
+    ZF  = ShapeType(ShapeType.ZF, 'Z Flipped'   , True, [1,1], 3, 3, data_ZF, 3)
+    I   = ShapeType(ShapeType.I , 'I'           , True, [1,1], 4, 4, data_I , 4)
+    B   = ShapeType(ShapeType.B , '2x2 Cube'    , False,[0,1], 2, 2, data_B , 5)
+    T   = ShapeType(ShapeType.T , 'T'           , True, [1,1], 3, 3, data_T , 6)    
     
     @staticmethod
     def get(index):

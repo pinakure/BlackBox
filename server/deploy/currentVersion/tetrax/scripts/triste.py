@@ -2,6 +2,7 @@ from tiledmap               import TiledMap
 from random                 import random
 from data.scripts.common    import *
 from data.scripts.tristemap import Map
+from data.scripts.piece     import Piece
 from data.scripts.shapes    import ShapeTypes
 from data.scripts.colors    import Colors
 """
@@ -28,42 +29,49 @@ class Triste:
         self.x            = 0 if not flip else 160
         self.piececount   = 0
         self.currentpiece = None
+        self.nextpiece    = None
         self.game         = game
         self.lines        = 0
         self.map          = Map(self, Triste.width, Triste.height)
         self.display      = TiledMap(self.game, Triste.width, Triste.height,2)
+        self.nextmap      = TiledMap(self.game, 3, 3, 1)
         self.display.fill(0x7F, 0)
         self.display.fill(0x7F, 1)
-        if not self.display.load_tileset("blocks"):
-            print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
-            quit()
+        self.nextmap.fill(0x7F)
+        self.display.load_tileset("blocks")
+        self.nextmap.load_tileset("blocks")
         self.map.create()
         self.newgame()
 
     def newgame(self):
         self.gameover     = False
         self.currentpiece = None
+        self.nextpiece = None
         self.piececount   = 0
         self.score        = 0
         self.lines        = 0
         self.map.clear()
+        self.newnext()
         self.newshape()
         self.display.fill(0x7F, 0)
         self.display.fill(0x7F, 1)
+        self.nextmap.fill(0x7F)
+    
+    def newnext(self):
+        self.nextpiece = Piece(self, ShapeTypes.get(int(random()*7)), 0, 0, int(random()*4))
         
     def newshape(self):
         self.currentpiece = None
         while self.currentpiece is None:
-            self.currentpiece = self.add_piece(int(random()*7))
-        column  = self.find_optimal_column()
-        rotation= self.find_optimal_angle()
-    
+            self.currentpiece = self.add_piece(self.nextpiece.shape.index)            
+        self.newnext()
+        
     def add_piece(self, shape_type):
         shape    = ShapeTypes.get(shape_type)
         column   = self.find_optimal_column()
         row      = -shape.height
         rotation = 0 # self.find_optimal_angle()
-        return self.map.add_shape(shape, column, row, rotation)        
+        return self.map.add_shape(shape, column, row, rotation)
 
     def find_optimal_angle(self):
         """ Evaluate match score for each angle """
