@@ -45,6 +45,10 @@ class Game(BasicGame):
                             Game.map.set(x,y,0x28+c,1)
                     elif int(random()*3)==0:
                         Game.map.set(x,y,0x7,1)
+
+            Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
+            Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+            Game.map.setboundaries(0, 0, (Game.map.width*Game.map.tile_width)-320, (Game.map.height*Game.map.tile_height)-240)
                         
             #Game.map.fill(0x07,1)
             
@@ -86,26 +90,19 @@ class Game(BasicGame):
 
     @staticmethod
     def draw():
-        if Game.map.needredraw():
+        if Game.map.needsredraw():
             #clear map buffer
             
-            vpu.select(Game.buffer[0])
-            vpu.fill(0,0,0,0)
-            vpu.select(Game.buffer[1])
-            vpu.fill(0,0,0,0)
+            #vpu.select(Game.buffer[0])
+            #vpu.fill(0,0,0,0)
+            #vpu.select(Game.buffer[1])
+            #vpu.fill(0,0,0,0)
             
             # draw map
-            Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
-            Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
-            Game.map.setboundaries(0, 0, (Game.map.width*Game.map.tile_width)-320, (Game.map.height*Game.map.tile_height)-240)
             Game.map.draw()
 
             vpu.select(Game.buffer[1])
             vpu.fill(0,0,0,0)
-            
-            vpu.select(Game.buffer[1])
-            Game.draw_scores()
-            Game.draw_stats()
             
             #rasterize layers
             vpu.select(0)
