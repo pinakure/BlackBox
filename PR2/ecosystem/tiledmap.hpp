@@ -69,6 +69,7 @@ public:
 	int						layer_count;
 	Scroll					scroll;
 	Boundaries				boundaries;
+	
 
 	TiledMap(int w, int h, int layer_count, int tile_width, int tile_height);
 	void destroy();
@@ -91,9 +92,12 @@ public:
 	static PyObject* pyNeedsRedraw	(PyObject* self, PyObject* args);
 	static PyObject* pyRedraw		(PyObject* self, PyObject* args);
 	static PyObject* pySet			(PyObject* self, PyObject* args);
+	static PyObject* pySetActive	(PyObject* self, PyObject* args);
 	static PyObject* pySetBoundaries(PyObject* self, PyObject* args);
 	static PyObject* pySetData		(PyObject* self, PyObject* args);
+	static PyObject* pyGetScroll	(PyObject* self, PyObject* args);
 	static PyObject* pySetScroll	(PyObject* self, PyObject* args);
+	static PyObject* pySetSurface	(PyObject* self, PyObject* args);
 	static PyObject* pyScroll		(PyObject* self, PyObject* args);
 	static PyObject* pySetTarget	(PyObject* self, PyObject* args);
 	static PyObject* pyUpdate		(PyObject* self, PyObject* args);

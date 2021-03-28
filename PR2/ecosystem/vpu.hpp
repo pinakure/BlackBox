@@ -47,6 +47,7 @@ public:
 	static std::map<long int, Surface>	surfaces;
 	static std::map<long int, Animation>animations;
 	static std::map<long int, Sprite>	sprites;
+	static TiledMap						*active_map;
 	static Surface						overlay;
 	static Surface						background;
 	static Surface						foreground;

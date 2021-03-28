@@ -17,58 +17,41 @@ from random import random
 import blackbox
 import vpu
 import joypad
+from tiledmap import TiledMap
+from basicgame import BasicGame
+from data.scripts.map import data
         
-class Game:
-    running = True
-    width = 0
-    height = 0
-    dims = {}
-    scale = 2.0
-    score = 0
-    lock = False
+class Game(BasicGame):
+    
+    buffer = []
 
     @staticmethod
     def setup():
-        # prepare transition
-        vpu.disable(0)
-        vpu.disable(1)
-        vpu.disable(2)
+        print("GAME: Setup...")
+        BasicGame.prepare()
+        vpu.setrotation(0,0)
         vpu.transition() 
         while not vpu.update():pass
         # change screen content here
-        print("GAME: Setting up...")
-        
-        Game.running = True
-               
-        # get layer dimensions
-        vpu.select(0); Game.dims[0] = vpu.dimensions()
-        vpu.select(1); Game.dims[1] = vpu.dimensions()
-        vpu.select(2); Game.dims[2] = vpu.dimensions()
-        print(f"GAME: BG Resolution: {Game.dims[0][0]} x {Game.dims[0][1]}")
-        print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
-        print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
-        
-        # prepare initial layer state
-        vpu.select(0); vpu.fill(0,0,0)
-        vpu.select(1); vpu.fill(0,0,0,0)
-        vpu.select(2); vpu.fill(0,0,0,0)
-        
+        Game.buffer = [ vpu.createsurf(320, 240), vpu.createsurf(320, 240) ]
+        # create display map
+        Game.setmap(TiledMap(Game, 40, 30, 2, 8, 8))
+        if not Game.map.load_tileset("tiles"):
+            print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/tiles.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
+            quit()
+        print("Filling 0x00")
+        Game.loadmap(data   , 0)
+        Game.map.fill(0x00)
+        Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
+        Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+        Game.map.setsurface(Game.buffer[0])
+
         # enable rendering back
         vpu.enable(0)
         vpu.enable(1)
         vpu.enable(2)
         
-        print("GAME: Initializing classes...")
-        # initialize subcomponents:
-        # Call static class.initialize(Game) methods for each base class
-        # ...
         
-        print("GAME: Initializing object pools...")
-        # Create object pools:
-        # for i in range(0, Game.xxx_pool_size):
-        #    Game.generate_random_xxx() <- preallocate memory
-        # ...
-
         # set video scale to 2x
         vpu.setscale(0, 2.0, 2.0)
         vpu.setscale(1, 2.0, 2.0)
@@ -85,7 +68,7 @@ class Game:
         vpu.perlin(0, 160, 80,0)
         vpu.setfont('magic')
         vpu.setcolor(255,255,255)
-        vpu.textout("AXZLE", int(Game.dims[0][0]/2)-64,  int(Game.dims[0][1]/2)-64 )
+        vpu.textout("AXZLE", int(Game.width>>1)-64,  int(Game.height>>1)-64 )
         while not vpu.update():pass        
         while not joypad.start():
             vpu.select(1)
@@ -93,7 +76,7 @@ class Game:
             if vpu.frames()%20>10:
                 vpu.setfont('mana')        
                 vpu.setcolor(255,255,255)
-                vpu.textout("PRESS START BUTTON", int(Game.dims[1][0]/2)-72,  int(Game.dims[1][1]/2)+64 )
+                vpu.textout("PRESS START BUTTON", int(Game.width>>1)-72,  int(Game.height>>1)+64 )
             vpu.update()
         vpu.transition(int(random()*20)) 
         while not vpu.update():pass
@@ -101,44 +84,35 @@ class Game:
         vpu.select(1);vpu.fill(0,0,0,0)
         vpu.select(2);vpu.fill(0,0,0,0)        
         vpu.setfont('ibm')
-        return        
-        
 
     @staticmethod
     def loop():
         delta = 1.0
         Game.title()
+        Game.map.setactive()
         while Game.running:
-            Game.draw()
-            Game.update(delta)            
+            if Game.map.needsredraw():
+                vpu.select(Game.buffer[1])
+                # draw to buffer[1]
+
+            # rasterize buffer onto bg layer
+            vpu.select(0)
+            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+            print(Game.width, Game.height)
+            for buffer in Game.buffer:
+                if buffer:
+                    vpu.drawsurf(buffer, left, top)
+            # required stuff
+            BasicGame.draw()
+                
+            # if joypad.left():       Game.map.scroll_left()
+            # elif joypad.right():    Game.map.scroll_right()
+            # if joypad.up():         Game.map.scroll_up()
+            # elif joypad.down():     Game.map.scroll_down()
+            # required stuff
+            BasicGame.update(delta)
             
-    @staticmethod
-    def update(delta):
-        # do stuff
-        # ...
-
-        # required stuff (DEBUG ONLY)        
-        if blackbox.ctrlc():
-            print("Control+C pressed.")
-            Game.destroy()
-            Game.running = False
-            
-        if joypad.menu():
-            menu()
-        
-    @staticmethod
-    def draw():
-        # clear buffer
-        vpu.select(1)
-        vpu.fill(0,0,0,0)
-        
-        #draw stuff
-        # ...
-
-        # raster screen and update input
-        vpu.setscale(1,Game.scale, Game.scale)
-        Game.lock = not vpu.update()
-
 def setup():
     return Game.setup()
 
@@ -146,4 +120,6 @@ def loop():
     return Game.loop()
 
 def destroy():
+    Game.map.setactive(True)
+    Game.map.setsurface(-1)
     return Game.destroy()

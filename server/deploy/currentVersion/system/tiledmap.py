@@ -40,7 +40,8 @@ class TiledMap:
         self.boundaries.bottom  = bottom
         tm.setboundaries(self.handle, left, top, right, bottom)
         console.echo(f"Map boundaries set from ({left},{top}) to ({right},{bottom})")
-
+    def setactive(self, disable=False):         tm.setactive(self.handle,disable)
+    def setsurface(self, surface_handle):       tm.setsurface(self.handle, surface_handle)
     def set(self, x, y, tile_index, layer=0):   tm.set(self.handle, x, y, tile_index, layer) # duplicated!
     def setvalue(self, x,y, value, layer=0):    tm.set(self.handle, x, y, value, layer)    
     def count(self, value, layer_index=-1):     return tm.count(self.handle, value, layer_index)
@@ -49,6 +50,12 @@ class TiledMap:
     def get(self, x, y, layer_index=0):         return tm.get(self.handle, x, y, layer_index)
     def gettileset(self, x, y, layer_index=0):  return (tm.get(self.handle, x, y, layer_index) & 0xFF000000) >> 6
     def gettile(self, x, y, layer_index=0):     return (tm.get(self.handle, x, y, layer_index) & 0x00FFFFFF)
+    def getscroll(self):                        
+        p = Pixel()
+        scroll = tm.getscroll(self.handle)
+        p.x = scroll[0]
+        p.y = scroll[1]
+        return p
     def getdata(self, layer_index=0):           return tm.getdata(self.handle, layer_index)
     def setdata(self, data, layer_index=0):     tm.setdata(self.handle, data, layer_index)
     def settarget(self, surface_handle):        tm.settarget(self.handle, surface_handle)

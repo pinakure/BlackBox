@@ -11,12 +11,15 @@ PyMethodDef TiledMap::methods[] = {
 	{"draw"			, TiledMap::pyDraw			, METH_VARARGS, "destroy(handle,x=0,y=0) : " },
 	{"fill"			, TiledMap::pyFill			, METH_VARARGS, "set(handle,tile_index,layer_index=-1) : " },
 	{"get"			, TiledMap::pyGet			, METH_VARARGS, "get(handle,x,y,layer_index=0) : " },
+	{"getscroll"	, TiledMap::pyGetScroll		, METH_VARARGS, "[x, y] = getscroll(handle): " },
 	{"getdata"		, TiledMap::pyGetData		, METH_VARARGS, "getdata(handle,layer_index=0) : " },
 	{"loadtileset"	, TiledMap::pyLoadTileset	, METH_VARARGS, "loadtileset(handle,tileset_filename) : " },
 	{"redraw"		, TiledMap::pyRedraw		, METH_VARARGS, "redraw(handle,layer_index=-1) : " },
 	{"needsredraw"	, TiledMap::pyNeedsRedraw	, METH_VARARGS, "needsredraw(handle) : " },
 	{"set"			, TiledMap::pySet			, METH_VARARGS, "set(handle,x,y,value,layer_index=0) : " },
 	{"setdata"		, TiledMap::pySetData		, METH_VARARGS, "setdata(handle,value,layer_index=0) : " },
+	{"setactive"	, TiledMap::pySetActive		, METH_VARARGS, "setactive(handle, disable) : " },
+	{"setsurface"	, TiledMap::pySetSurface	, METH_VARARGS, "setsurface(tiledmap_handle,surface_handle) : " },
 	{"settarget"	, TiledMap::pySetTarget		, METH_VARARGS, "settarget(tiledmap_handle,surface_handle) : " },
 	{"setboundaries", TiledMap::pySetBoundaries , METH_VARARGS, "setboundaries(tiledmap_handle,left, top, right, bottom) : " },
 	{"setscroll"	, TiledMap::pySetScroll		, METH_VARARGS, "setscroll(tiledmap_handle,x, y) : " },
@@ -311,6 +314,25 @@ PyObject* TiledMap::pySetScroll(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(false);
 }
 
+PyObject* TiledMap::pySetSurface(PyObject* self, PyObject* args) {
+	int handle;
+	int surface;
+	if (!PyArg_ParseTuple(args, "ii", &handle, &surface)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		if (surface >= 0) {
+			Surface* srf = getLayer(surface);
+			tm->target = srf;
+		}
+		else {
+			tm->target = nullptr;
+		}
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR @ pySet : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
 PyObject* TiledMap::pySetBoundaries(PyObject* self, PyObject* args) {
 	int handle;
 	int left;
@@ -361,6 +383,20 @@ PyObject* TiledMap::pySetData(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(false);
 }
 
+PyObject* TiledMap::pySetActive(PyObject* self, PyObject* args) {
+	int handle;
+	bool disable=false;
+	if (!PyArg_ParseTuple(args, "i|b", &handle, &disable)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		if (!disable) Vpu::active_map = tm;
+		else Vpu::active_map = nullptr;
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR @ pySetData : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
 PyObject* TiledMap::pyGet(PyObject* self, PyObject* args) {
 	int handle;
 	unsigned int x;
@@ -374,6 +410,21 @@ PyObject* TiledMap::pyGet(PyObject* self, PyObject* args) {
 		y %= tl->h;
 		x %= tl->w;
 		return PyLong_FromLong(tl->data[y][x]);
+	}
+	printf("ERROR @ pyGet : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+PyObject* TiledMap::pyGetScroll(PyObject* self, PyObject* args) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		PyObject* list = PyList_New(2);
+		if (!list) throw("Unable to allocate memory for Python list");
+		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)tm->scroll.x));
+		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)tm->scroll.y));
+		return list;
 	}
 	printf("ERROR @ pyGet : tiledmap_handle out of range\n");
 	return PyBool_FromLong(false);

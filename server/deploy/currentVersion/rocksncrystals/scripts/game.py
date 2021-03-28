@@ -14,7 +14,6 @@ from pixel                  import Pixel
 class Game(BasicGame):
     
     buffer = [None, None]
-
     scroll = Pixel(0,0)
 
     @staticmethod
@@ -22,7 +21,7 @@ class Game(BasicGame):
         try:
             print("GAME: Setup...")
             BasicGame.prepare()
-
+            vpu.setrotation(0,0)
             #allocate custom video buffers
             Game.buffer[0] = vpu.createsurf(320, 240) 
             Game.buffer[1] = vpu.createsurf(320, 240) 
@@ -32,11 +31,10 @@ class Game(BasicGame):
                 print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
                 quit()
             print("Filling 0x00")
-            Game.clear()            
             Game.loadmap(data   , 0)
             Game.loadmap(map    , 1)
             
-            Game.autoupdate = False
+            # randomize contents
             for y in range(1,Game.map.height - 2):
                 for x in range(1,Game.map.width - 2):
                     if int(random()*3)==0:
@@ -46,75 +44,50 @@ class Game(BasicGame):
                     elif int(random()*3)==0:
                         Game.map.set(x,y,0x7,1)
 
+            # center the map on the screen
             Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
             Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+            # give the engine info about the scrollable area
             Game.map.setboundaries(0, 0, (Game.map.width*Game.map.tile_width)-320, (Game.map.height*Game.map.tile_height)-240)
-                        
-            #Game.map.fill(0x07,1)
+            # tell engine we want this map to be rendered automatically on vpu.update(), right after entities
+            Game.map.setactive() 
+            # tell engine which surface the map must be rendered onto
+            Game.map.setsurface(Game.buffer[0]) 
             
         except Exception as E:
             print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
             console.echo(f'ERROR: {str(E)}')                        
         
     @staticmethod
-    def clear():
-        pass
-        #Game.map.fill(0x00,0)
-        #Game.map.fill(0x07,1)
-
-    @staticmethod
     def loop():
         delta = 1.0
         while Game.running:
-            Game.draw()
-            Game.update(delta)
+            if Game.map.needsredraw():
+                # draw to buffer[1]
+                vpu.select(Game.buffer[1])
+                vpu.setcolor(255,0,0)
+                vpu.fill(0,0,0,0)
+                scroll = Game.map.getscroll()
+                vpu.textout(f"{scroll.x},{scroll.y}", 0, 0)
             
-    @staticmethod
-    def update(delta):
-        # required stuff
-        BasicGame.update(delta)
-        
-        if joypad.left():       Game.map.scroll_left()
-        elif joypad.up():       Game.map.scroll_up()
-        elif joypad.down():     Game.map.scroll_down()
-        elif joypad.right():    Game.map.scroll_right()
-        
-        
-    @staticmethod
-    def draw_stats():
-        pass
-
-    @staticmethod
-    def draw_scores():
-        pass
-
-    @staticmethod
-    def draw():
-        if Game.map.needsredraw():
-            #clear map buffer
-            
-            #vpu.select(Game.buffer[0])
-            #vpu.fill(0,0,0,0)
-            #vpu.select(Game.buffer[1])
-            #vpu.fill(0,0,0,0)
-            
-            # draw map
-            Game.map.draw()
-
-            vpu.select(Game.buffer[1])
-            vpu.fill(0,0,0,0)
-            
-            #rasterize layers
+            # rasterize buffer onto bg layer
             vpu.select(0)
-            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
-            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>2)
+            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>2)
             for buffer in Game.buffer:
                 if buffer:
                     vpu.drawsurf(buffer, left, top)
-        
-        # required stuff
-        BasicGame.draw()
-    
+            # required stuff
+            BasicGame.draw()
+                
+            if joypad.left():       Game.map.scroll_left()
+            elif joypad.right():    Game.map.scroll_right()
+            if joypad.up():         Game.map.scroll_up()
+            elif joypad.down():     Game.map.scroll_down()
+            # required stuff
+            BasicGame.update(delta)
+            
+
 def setup():
     return Game.setup()
 
@@ -122,4 +95,6 @@ def loop():
     return Game.loop()
 
 def destroy():
+    Game.map.setactive(False)
+    Game.map.setsurface(-1)
     return Game.destroy()

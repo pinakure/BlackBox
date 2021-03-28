@@ -10,6 +10,7 @@ std::map<long int, Animation>		Vpu::animations;
 std::map<long int, Sprite>			Vpu::sprites;
 std::map<long int, TiledMap>		Vpu::tiledmaps;
 
+TiledMap							*Vpu::active_map = nullptr;
 long int							Vpu::animation_handle=0;
 long int							Vpu::surface_handle = 0;
 long int							Vpu::sprite_handle=0;
@@ -475,6 +476,12 @@ static inline void drawEntities() {
 
 void Vpu::render() {
 	drawEntities();
+
+	if (Vpu::active_map) {
+		if(Vpu::active_map->target) al_set_target_bitmap(Vpu::active_map->target->bitmap);
+		Vpu::active_map->redraw();
+		Vpu::active_map->draw(-Vpu::active_map->scroll.x, -Vpu::active_map->scroll.y);
+	}
 
 	al_set_target_bitmap(buffer);
 	/* Render enabled layers */

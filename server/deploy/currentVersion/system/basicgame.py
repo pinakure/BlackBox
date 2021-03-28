@@ -33,6 +33,7 @@ class BasicGame:
         BasicGame.height = int (BasicGame.dims[0][1])
         print(f"GAME: FG Resolution: {BasicGame.dims[1][0]} x {BasicGame.dims[1][1]}")
         print(f"GAME: OL Resolution: {BasicGame.dims[2][0]} x {BasicGame.dims[2][1]}")
+        print(f"GAME: Resolution {BasicGame.width}x{BasicGame.height}")
         
     @staticmethod
     def disable_all():
@@ -109,7 +110,7 @@ class BasicGame:
         if joypad.menu():
             menu()
 
-        if BasicGame.time % 16==0 and BasicGame.autoredraw:
+        if BasicGame.time % 4==0 and BasicGame.autoredraw:
             BasicGame.map.redraw()
 
         BasicGame.time += 1
