@@ -1,101 +1,123 @@
 # to import classes in this folder: 
 # from data.scripts.ship              import Ship 
-from scripts.main import menu
-from random import random
 import blackbox
 import vpu
 import joypad
-        
-class Game:
-    running = True
-    width = 0
-    height = 0
-    dims = {}
-    scale = 2.0
-    score = 0
+import console
+from data.scripts.map       import data,map
+from scripts.main           import menu
+from random                 import random
+from basicgame              import BasicGame
+from tiledmap               import TiledMap
+from pixel                  import Pixel        
+
+class Game(BasicGame):
+    
+    buffer = [None, None]
+
+    scroll = Pixel(0,0)
 
     @staticmethod
     def setup():
-        print("GAME: Setting up...")
-        Game.running = True
-        
-        # disable rendering
-        vpu.disable(0)
-        vpu.disable(1)
-        vpu.disable(2)
-        
-        # get layer dimensions
-        vpu.select(0); Game.dims[0] = vpu.dimensions()
-        vpu.select(1); Game.dims[1] = vpu.dimensions()
-        vpu.select(2); Game.dims[2] = vpu.dimensions()
-        print(f"GAME: BG Resolution: {Game.dims[0][0]} x {Game.dims[0][1]}")
-        print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
-        print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
-        
-        # prepare initial layer state
-        vpu.select(0); vpu.fill(8,16,32,255)
-        vpu.select(1); vpu.fill(0,0,0,0)
-        vpu.select(2); vpu.fill(255,255,0,255)
-        
-        # enable rendering back
-        vpu.enable(0)
-        vpu.enable(1)
-        vpu.enable(2)
-        
-        print("GAME: Initializing classes...")
-        # initialize subcomponents:
-        # Call static class.initialize(Game) methods for each base class
-        # ...
-        
-        print("GAME: Initializing object pools...")
-        # Create object pools:
-        # for i in range(0, Game.xxx_pool_size):
-        #    Game.generate_random_xxx() <- preallocate memory
-        # ...
+        try:
+            print("GAME: Setup...")
+            BasicGame.prepare()
 
-        # set video scale to 2x
-        vpu.setscale(0, 2.0, 2.0)
-        vpu.setscale(1, 2.0, 2.0)
-        
+            #allocate custom video buffers
+            Game.buffer[0] = vpu.createsurf(320, 240) 
+            Game.buffer[1] = vpu.createsurf(320, 240) 
+            # create display map
+            Game.setmap(TiledMap(Game, 40, 30, 2, 16, 16))
+            if not Game.map.load_tileset("terrain"):
+                print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
+                quit()
+            print("Filling 0x00")
+            Game.clear()            
+            Game.loadmap(data   , 0)
+            Game.loadmap(map    , 1)
+            
+            Game.autoupdate = False
+            for y in range(1,Game.map.height - 2):
+                for x in range(1,Game.map.width - 2):
+                    if int(random()*3)==0:
+                        if int(random()*10)==0:
+                            c = int(random()*16)
+                            Game.map.set(x,y,0x28+c,1)
+                    elif int(random()*3)==0:
+                        Game.map.set(x,y,0x7,1)
+                        
+            #Game.map.fill(0x07,1)
+            
+        except Exception as E:
+            print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
+            console.echo(f'ERROR: {str(E)}')                        
         
     @staticmethod
-    def destroy():
+    def clear():
         pass
+        #Game.map.fill(0x00,0)
+        #Game.map.fill(0x07,1)
 
     @staticmethod
     def loop():
         delta = 1.0
         while Game.running:
             Game.draw()
-            Game.update(delta)            
+            Game.update(delta)
             
     @staticmethod
     def update(delta):
-        # do stuff
-        # ...
-
         # required stuff
-        if blackbox.ctrlc():
-            print("Control+C pressed.")
-            Game.destroy()
-            Game.running = False
-            
-        if joypad.menu():
-            menu()
+        BasicGame.update(delta)
+        
+        if joypad.left():       Game.map.scroll_left()
+        elif joypad.up():       Game.map.scroll_up()
+        elif joypad.down():     Game.map.scroll_down()
+        elif joypad.right():    Game.map.scroll_right()
+        
         
     @staticmethod
+    def draw_stats():
+        pass
+
+    @staticmethod
+    def draw_scores():
+        pass
+
+    @staticmethod
     def draw():
-        # clear buffer
-        vpu.select(1)
-        vpu.fill(0,0,0,0)
+        if Game.map.needredraw():
+            #clear map buffer
+            
+            vpu.select(Game.buffer[0])
+            vpu.fill(0,0,0,0)
+            vpu.select(Game.buffer[1])
+            vpu.fill(0,0,0,0)
+            
+            # draw map
+            Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
+            Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+            Game.map.setboundaries(0, 0, (Game.map.width*Game.map.tile_width)-320, (Game.map.height*Game.map.tile_height)-240)
+            Game.map.draw()
+
+            vpu.select(Game.buffer[1])
+            vpu.fill(0,0,0,0)
+            
+            vpu.select(Game.buffer[1])
+            Game.draw_scores()
+            Game.draw_stats()
+            
+            #rasterize layers
+            vpu.select(0)
+            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+            for buffer in Game.buffer:
+                if buffer:
+                    vpu.drawsurf(buffer, left, top)
         
-        #draw stuff
-        # ...
-
-        # raster screen and update input
-        vpu.setscale(1,Game.scale, Game.scale)
-        vpu.update()
-
+        # required stuff
+        BasicGame.draw()
+    
 def setup():
     return Game.setup()
 

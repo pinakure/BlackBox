@@ -24,6 +24,38 @@ public:
 	void clear() { this->fill(-1); }
 };
 
+class Boundaries {
+public:
+	int left    = 0;
+	int right   = 0;
+	int bottom  = 0;
+	int top		= 0;
+
+	Boundaries(int left=0, int top=0, int right=1, int bottom=1) {
+		this->set(left, top, right, bottom);
+	}
+	void set(int left = 0, int top = 0, int right = 1, int bottom = 1) {
+		this->left = left;
+		this->right = right;
+		this->bottom = bottom;
+		this->top = top;
+	}
+};
+
+class Scroll {
+public:
+	int x = 0;
+	int y = 0;
+
+	Scroll(int x=0, int y=0) {
+		this->set(x,y);
+	}
+	void set(int x = 0, int y = 0) {
+		this->x = x;
+		this->y = y;
+	}
+};
+
 class TiledMap {
 public:
 	static PyMethodDef		methods[];
@@ -35,12 +67,17 @@ public:
 	std::vector<TiledLayer> layers;
 	Surface					*target;
 	int						layer_count;
+	Scroll					scroll;
+	Boundaries				boundaries;
 
 	TiledMap(int w, int h, int layer_count, int tile_width, int tile_height);
 	void destroy();
 	void draw(int x, int y);
 	void update(double delta);
 	int loadTileset(std::string tileset);
+	void setScroll(int x, int y);
+	void setBoundaries(int left, int top, int right, int bottom);
+	void redraw();
 	
 	static PyObject* pyCreate		(PyObject* self, PyObject* args);
 	static PyObject* pyClear		(PyObject* self, PyObject* args);
@@ -51,9 +88,13 @@ public:
 	static PyObject* pyGet			(PyObject* self, PyObject* args);
 	static PyObject* pyGetData		(PyObject* self, PyObject* args);
 	static PyObject* pyLoadTileset	(PyObject* self, PyObject* args);
+	static PyObject* pyNeedsRedraw	(PyObject* self, PyObject* args);
 	static PyObject* pyRedraw		(PyObject* self, PyObject* args);
 	static PyObject* pySet			(PyObject* self, PyObject* args);
+	static PyObject* pySetBoundaries(PyObject* self, PyObject* args);
 	static PyObject* pySetData		(PyObject* self, PyObject* args);
+	static PyObject* pySetScroll	(PyObject* self, PyObject* args);
+	static PyObject* pyScroll		(PyObject* self, PyObject* args);
 	static PyObject* pySetTarget	(PyObject* self, PyObject* args);
 	static PyObject* pyUpdate		(PyObject* self, PyObject* args);
 

@@ -3,6 +3,14 @@ import blackbox
 import vpu
 import joypad
 
+try:
+    import importlib 
+    import data.scripts.map
+    importlib.reload(data.scripts.map) 
+except:
+    print("It seems Map is not loaded; no need to reload it")
+    pass
+
 class BasicGame:
     running = True
     dims = {}
@@ -11,6 +19,7 @@ class BasicGame:
     scale = 2.0
     score = 0
     time = 0
+    autoredraw = True
     map = None
     
 
@@ -52,14 +61,14 @@ class BasicGame:
         vpu.setscale(2, BasicGame.scale/2, BasicGame.scale/2)
 
     @staticmethod
-    def loadmap(data=[]):
-        BasicGame.map.fill(0xFF)
+    def loadmap(data=[], layer=0):
+        #BasicGame.map.fill(0x00)
         #load map...
         i=0
         try:
             for y in range(0, BasicGame.map.height):
                 for x in range(0,  BasicGame.map.width):
-                    BasicGame.map.setvalue(x,y, data[i], 0)
+                    BasicGame.map.setvalue(x,y, data[i], layer)
                     i+=1
         except:
             print("WARNING: Insufficient data provided to fill map!")
@@ -100,7 +109,7 @@ class BasicGame:
         if joypad.menu():
             menu()
 
-        if BasicGame.time % 16==0:
+        if BasicGame.time % 16==0 and BasicGame.autoredraw:
             BasicGame.map.redraw()
 
         BasicGame.time += 1

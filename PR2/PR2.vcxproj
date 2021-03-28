@@ -80,6 +80,7 @@
     <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,6 +90,7 @@
     <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,6 +100,7 @@
     <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -107,6 +110,7 @@
     <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,6 +131,17 @@
       <AdditionalLibraryDirectories>\codigo\BlackBox\packages\pythonx86.3.9.2\tools\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>..\blackbox_debug$(TargetExt)</OutputFile>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>C:\codigo\BlackBox\packages\python.3.9.2\tools\python.exe  C:\codigo\BlackBox\server\deploy\currentServer\build.py</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -148,6 +163,13 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\blackbox_debug_x64$(TargetExt)</OutputFile>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>C:\codigo\BlackBox\packages\python.3.9.2\tools\python.exe  C:\codigo\BlackBox\server\deploy\currentServer\build.py</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -172,6 +194,13 @@
       <AdditionalLibraryDirectories>\codigo\BlackBox\packages\pythonx86.3.9.2\tools\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>..\blackbox$(TargetExt)</OutputFile>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>C:\codigo\BlackBox\packages\python.3.9.2\tools\python.exe  C:\codigo\BlackBox\server\deploy\currentServer\build.py</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -198,11 +227,15 @@
       <OutputFile>..\blackbox_x64$(TargetExt)</OutputFile>
     </Link>
     <CustomBuildStep>
-      <Command>erase C:\codigo\BlackBox\data\toc.py</Command>
+      <Command>C:\codigo\BlackBox\packages\python.3.9.2\tools\python.exe  C:\codigo\BlackBox\server\deploy\currentServer\build.py</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Cleaning TOC.py</Message>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

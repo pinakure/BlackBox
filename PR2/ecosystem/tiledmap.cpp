@@ -1,5 +1,6 @@
 #include "tiledmap.hpp"
 #include "vpu.hpp"
+#include "direction.hpp"
 
 
 PyMethodDef TiledMap::methods[] = {
@@ -13,9 +14,13 @@ PyMethodDef TiledMap::methods[] = {
 	{"getdata"		, TiledMap::pyGetData		, METH_VARARGS, "getdata(handle,layer_index=0) : " },
 	{"loadtileset"	, TiledMap::pyLoadTileset	, METH_VARARGS, "loadtileset(handle,tileset_filename) : " },
 	{"redraw"		, TiledMap::pyRedraw		, METH_VARARGS, "redraw(handle,layer_index=-1) : " },
+	{"needsredraw"	, TiledMap::pyNeedsRedraw	, METH_VARARGS, "needsredraw(handle) : " },
 	{"set"			, TiledMap::pySet			, METH_VARARGS, "set(handle,x,y,value,layer_index=0) : " },
 	{"setdata"		, TiledMap::pySetData		, METH_VARARGS, "setdata(handle,value,layer_index=0) : " },
 	{"settarget"	, TiledMap::pySetTarget		, METH_VARARGS, "settarget(tiledmap_handle,surface_handle) : " },
+	{"setboundaries", TiledMap::pySetBoundaries , METH_VARARGS, "setboundaries(tiledmap_handle,left, top, right, bottom) : " },
+	{"setscroll"	, TiledMap::pySetScroll		, METH_VARARGS, "setscroll(tiledmap_handle,x, y) : " },
+	{"scroll"		, TiledMap::pyScroll		, METH_VARARGS, "scroll(tiledmap_handle, delta, direction) : " },
 	{"update"		, TiledMap::pyUpdate		, METH_VARARGS, "update(handle,delta=1.0) : " },
 	{NULL, NULL, 0, NULL}
 };
@@ -155,7 +160,7 @@ PyObject* TiledMap::pyDraw(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "i|ff", &handle, &x, &y)) return NULL;
 	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
-		tm->draw(x, y);
+		tm->draw(x-tm->scroll.x, y - tm->scroll.y);
 		return PyBool_FromLong(true);
 	}
 	printf("ERROR @ pyDraw : tiledmap_handle out of range\n");
@@ -260,9 +265,62 @@ PyObject* TiledMap::pySetTarget(PyObject* self, PyObject* args) {
 	int target;
 	if (!PyArg_ParseTuple(args, "ii", &handle, &target)) return NULL;
 	Surface* tgt = getLayer(target);
-	if(Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		tm->target = tgt;
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR @ pySet : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+PyObject* TiledMap::pyScroll(PyObject* self, PyObject* args) {
+	int handle;
+	float delta;
+	int direction;
+	if (!PyArg_ParseTuple(args, "ifi", &handle, &delta, &direction)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		int x = tm->scroll.x;
+		int y = tm->scroll.y;
+		// see direction.py
+		switch (direction) {
+			case 0: tm->setScroll(x, y - delta); break;
+			case 2: tm->setScroll(x, y + delta); break;
+			case 3: tm->setScroll(x - delta, y); break;
+			case 1: tm->setScroll(x + delta, y); break;
+		}		
+		printf("SCROLL: %d,%d   DELTA:%f  \r", tm->scroll.x, tm->scroll.y, delta);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR @ pySet : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+PyObject* TiledMap::pySetScroll(PyObject* self, PyObject* args) {
+	int handle;
+	int x;
+	int y;
+	if (!PyArg_ParseTuple(args, "iii", &handle, &x, &y)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		tm->setScroll(x, y);
+		return PyBool_FromLong(true);
+	}
+	printf("ERROR @ pySet : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+PyObject* TiledMap::pySetBoundaries(PyObject* self, PyObject* args) {
+	int handle;
+	int left;
+	int top;
+	int right;
+	int bottom;
+	if (!PyArg_ParseTuple(args, "iiiii", &handle, &left, &top, &right, &bottom)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		tm->setBoundaries(left, top, right, bottom);
 		return PyBool_FromLong(true);
 	}
 	printf("ERROR @ pySet : tiledmap_handle out of range\n");
@@ -381,6 +439,39 @@ PyObject* TiledMap::pyRedraw(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(false);
 }
 
+PyObject* TiledMap::pyNeedsRedraw(PyObject* self, PyObject* args) {
+	int handle;
+	if (!PyArg_ParseTuple(args, "i", &handle)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		for (int i = 0; i < tm->layers.size(); i++) {
+			if(tm->layers[i].redraw) return PyBool_FromLong(true);
+		}
+		return PyBool_FromLong(false);
+	}
+	printf("ERROR @ pyRedraw : tiledmap_handle out of range\n");
+	return PyBool_FromLong(false);
+}
+
+void TiledMap::setScroll(int x, int y) {
+	this->scroll.set(x, y);
+	if (this->scroll.y >= this->boundaries.bottom) this->scroll.y = this->boundaries.bottom - 1;
+	if (this->scroll.x >= this->boundaries.right ) this->scroll.x = this->boundaries.right - 1;
+	if (this->scroll.x <  this->boundaries.left  ) this->scroll.x = this->boundaries.left;
+	if (this->scroll.y <  this->boundaries.top   ) this->scroll.y = this->boundaries.top;	
+	this->redraw();
+}
+
+void TiledMap::redraw() {
+	for (int i = 0; i < this->layers.size(); i++) {
+		this->layers[i].redraw = true;
+	}
+}
+
+void TiledMap::setBoundaries(int left, int top, int right, int bottom) {
+	this->boundaries.set(left, top, right, bottom);
+}
+
 TiledLayer::TiledLayer(int w, int h) {
 	this->w		= w;
 	this->h		= h;
@@ -441,3 +532,4 @@ int TiledLayer::count(int value) {
 	}
 	return count;
 }
+
