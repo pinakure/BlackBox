@@ -30,6 +30,15 @@ class Piece:
             for px in range(0, self.shape.width):
                 if self.data[self.rotation][(py*self.width)+px]:
                     self.triste.display.set(dx+ px, dy+py, c ,layer)
+    
+    def drawnext(self,layer=1):
+        c = 2+(int(self.color / 2)*16)+(self.color%2)
+        dy=0
+        for py in range(0, self.shape.height):
+            dx = 0
+            for px in range(0, self.shape.width):
+                if self.data[self.rotation][(py*self.width)+px]:
+                    self.triste.nextmap.set(dx+ px, dy+py, c ,layer)
         
     def logic(self):
         self.y+=1

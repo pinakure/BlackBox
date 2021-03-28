@@ -49,8 +49,7 @@ class Game(BasicGame):
             Game.loadmap(data)
             Game.clear()            
             Game.triste = [ Triste(Game), Triste(Game, True) ]
-            vpu.setfont('smk')
-
+            
         except Exception as E:
             print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
             console.echo(f'ERROR: {str(E)}')                        
@@ -79,21 +78,30 @@ class Game(BasicGame):
         
         
     @staticmethod
-    def draw_next():
-        pass
-
-    @staticmethod
     def draw_stats():
         pass
 
     @staticmethod
     def draw_scores():
+        vpu.setfont('smk')
         score_a = ("0"*(13-(len(str(Game.triste[0].score))))) + str(Game.triste[0].score)
         score_b = ("0"*(13-(len(str(Game.triste[1].score))))) + str(Game.triste[1].score)
+        lines_a = ("0"*(3-(len(str(Game.triste[0].lines))))+str(Game.triste[0].lines)) if Game.triste[0].lines < 999 else "999"
+        lines_b = ("0"*(3-(len(str(Game.triste[1].lines))))+str(Game.triste[1].lines)) if Game.triste[1].lines < 999 else "999"
+        level_a = ("0"*(3-(len(str(Game.triste[0].level))))+str(Game.triste[0].level)) if Game.triste[0].level < 999 else "999"
+        level_b = ("0"*(3-(len(str(Game.triste[1].level))))+str(Game.triste[1].level)) if Game.triste[1].level < 999 else "999"
         vpu.setcolor(192,16,0,32)
         vpu.textout(score_a,0, 0)
         vpu.setcolor(0,16,192,32)
         vpu.textout(score_b,320-(8*13), 0)
+        vpu.setfont('tiny')
+        vpu.setcolor(192,16,0,32)
+        vpu.textout(lines_a, 138, 48)
+        vpu.textout(level_a, 138, 80)
+        vpu.setcolor(0,16,192,32)
+        vpu.textout(lines_b, 162, 48)
+        vpu.textout(level_b, 162, 80)
+        
 
     @staticmethod
     def draw():
@@ -116,7 +124,6 @@ class Game(BasicGame):
             vpu.select(Game.buffer[1])
             Game.draw_scores()
             Game.draw_stats()
-            Game.draw_next()
             
             #rasterize layers
             vpu.select(0)

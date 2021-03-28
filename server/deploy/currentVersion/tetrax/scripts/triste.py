@@ -32,6 +32,7 @@ class Triste:
         self.nextpiece    = None
         self.game         = game
         self.lines        = 0
+        self.level        = 0
         self.map          = Map(self, Triste.width, Triste.height)
         self.display      = TiledMap(self.game, Triste.width, Triste.height,2)
         self.nextmap      = TiledMap(self.game, 3, 3, 1)
@@ -50,12 +51,13 @@ class Triste:
         self.piececount   = 0
         self.score        = 0
         self.lines        = 0
+        self.level        = 0        
         self.map.clear()
         self.newnext()
         self.newshape()
         self.display.fill(0x7F, 0)
         self.display.fill(0x7F, 1)
-        self.nextmap.fill(0x7F)
+        self.nextmap.fill(0x13)
     
     def newnext(self):
         self.nextpiece = Piece(self, ShapeTypes.get(int(random()*7)), 0, 0, int(random()*4))
@@ -70,7 +72,7 @@ class Triste:
         shape    = ShapeTypes.get(shape_type)
         column   = self.find_optimal_column()
         row      = -shape.height
-        rotation = 0 # self.find_optimal_angle()
+        rotation = self.nextpiece.rotation
         return self.map.add_shape(shape, column, row, rotation)
 
     def find_optimal_angle(self):
@@ -93,12 +95,18 @@ class Triste:
     def draw(self):
         # draw board to the map object
         #self.map.draw(self.game.map, 1 if not self.flip else 24, 3)
+        self.nextmap.x = ((self.game.width>>1) -  24) if not self.flip else ((self.game.width>>1))
+        self.nextmap.y = (self.game.height>>1) -  120
         self.display.x = ((self.game.width>>1) - 152) if not self.flip else ((self.game.width>>1)+32)
-        self.display.y = ((self.game.height>>1)- 96)  if not self.flip else ((self.game.height>>1)-96)
+        self.display.y = (self.game.height>>1) -  96
+        self.nextmap.fill(0x7F)
+        self.nextpiece.drawnext(0)
         self.display.fill(0x7F, 1)
         self.currentpiece.draw(1)
         self.display.redraw()
         self.display.draw()
+        self.nextmap.redraw()
+        self.nextmap.draw()
 
     def update(self, delta):
         status = self.currentpiece.logic()
