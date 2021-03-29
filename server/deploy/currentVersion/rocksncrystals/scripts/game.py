@@ -4,6 +4,14 @@ import blackbox
 import vpu
 import joypad
 import console
+try:
+    import importlib 
+    import data.scripts.map
+    importlib.reload(data.scripts.map) 
+except:
+    print("It seems Map is not loaded; no need to reload it")
+    pass
+
 from data.scripts.map       import data,map
 from scripts.main           import menu
 from random                 import random

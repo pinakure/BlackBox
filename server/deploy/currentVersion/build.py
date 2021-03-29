@@ -226,6 +226,7 @@ class Build:
 b = Build()
 b.run()
 os.chdir(b.code_path)
+print("-------------------------------------------------------\nRunning BlackBox...\n-------------------------------------------------------\n")
 os.system('blackbox_debug_x64.exe')
 b.report("Cleaning up...")
 os.chdir(b.code_path)

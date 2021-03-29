@@ -19,11 +19,20 @@ import vpu
 import joypad
 from tiledmap import TiledMap
 from basicgame import BasicGame
-from data.scripts.map import data
-        
+
+try:
+    import importlib 
+    import data.scripts.map
+    importlib.reload(data.scripts.map) 
+except:
+    print("It seems Map is not loaded; no need to reload it")
+    pass
+from data.scripts.map import data, overlay
+
 class Game(BasicGame):
     
     buffer = []
+    area = None
 
     @staticmethod
     def setup():
@@ -35,16 +44,22 @@ class Game(BasicGame):
         # change screen content here
         Game.buffer = [ vpu.createsurf(320, 240), vpu.createsurf(320, 240) ]
         # create display map
+        Game.area = TiledMap(Game, 16, 16, 1, 8, 8)
         Game.setmap(TiledMap(Game, 40, 30, 2, 8, 8))
         if not Game.map.load_tileset("tiles"):
             print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/tiles.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
             quit()
-        print("Filling 0x00")
-        Game.loadmap(data   , 0)
-        Game.map.fill(0x00)
+        Game.area.load_tileset("tiles")
+        Game.map.fill(0x00,0)
+        Game.map.fill(0x0f,1)
+        Game.loadmap(data       , 0)
+        Game.loadmap(overlay    , 1)
         Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
         Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+        Game.area.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
+        Game.area.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120            
         Game.map.setsurface(Game.buffer[0])
+        Game.area.setsurface(Game.buffer[1])
 
         # enable rendering back
         vpu.enable(0)
@@ -86,26 +101,34 @@ class Game(BasicGame):
         vpu.setfont('ibm')
 
     @staticmethod
+    def updategrid():
+        ox = 22
+        oy = 12
+        i = 0
+        for y in range(0, 16):
+            for x in range(0, 16):
+                Game.map.set(ox + x, oy + y, 0x10+int(random()*8), 1)
+                i+=1
+
+    @staticmethod
     def loop():
         delta = 1.0
         Game.title()
         Game.map.setactive()
         while Game.running:
             if Game.map.needsredraw():
-                vpu.select(Game.buffer[1])
-                # draw to buffer[1]
-
+                Game.updategrid()
             # rasterize buffer onto bg layer
             vpu.select(0)
             left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
             top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
-            print(Game.width, Game.height)
             for buffer in Game.buffer:
                 if buffer:
                     vpu.drawsurf(buffer, left, top)
-            # required stuff
+            
             BasicGame.draw()
-                
+            
+            
             # if joypad.left():       Game.map.scroll_left()
             # elif joypad.right():    Game.map.scroll_right()
             # if joypad.up():         Game.map.scroll_up()

@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
-            "console": "integratedTerminal"
+            "console": "externalTerminal"
         }
     ]
 }
