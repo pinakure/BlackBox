@@ -12,6 +12,9 @@
 #include <string>
 #include <vector>
 
+#define True	PyBool_FromLong(true)
+#define False	PyBool_FromLong(false)
+
 class Script {
 	private:
 		unsigned int execution_counter = 0;

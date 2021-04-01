@@ -59,6 +59,8 @@ public:
 class TiledMap {
 public:
 	static PyMethodDef		methods[];
+	int						x = 0;
+	int						y = 0;
 	int						w;
 	int						h;
 	int						tile_width;
@@ -95,6 +97,7 @@ public:
 	static PyObject* pySetActive	(PyObject* self, PyObject* args);
 	static PyObject* pySetBoundaries(PyObject* self, PyObject* args);
 	static PyObject* pySetData		(PyObject* self, PyObject* args);
+	static PyObject* pySetPosition	(PyObject* self, PyObject* args);
 	static PyObject* pyGetScroll	(PyObject* self, PyObject* args);
 	static PyObject* pySetScroll	(PyObject* self, PyObject* args);
 	static PyObject* pySetSurface	(PyObject* self, PyObject* args);

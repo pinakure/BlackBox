@@ -11,7 +11,6 @@
 #                                                                                                            #
 ##############################################################################################################
 # to import classes in this folder: 
-# from data.scripts.ship              import Ship 
 from scripts.main import menu
 from random import random
 import blackbox
@@ -35,7 +34,7 @@ try:
 except:
     print("It seems Map is not loaded; no need to reload it")
     pass
-from data.scripts.map import data, overlay
+from data.scripts.map import data, overlay, title_data, title_bg
 
 class Puzzle:
     
@@ -51,6 +50,14 @@ class Puzzle:
     def initialize(game):
         Puzzle.game = game
 
+    @staticmethod
+    def clear():
+        Puzzle.game.map.fill(0x00,0)
+        Puzzle.game.map.fill(0x0f,1)
+        Puzzle.game.map.fill(0x0f,2)
+        Puzzle.game.loadmap(data, 0)
+        Puzzle.game.map.setsurface(Puzzle.game.buffer[0])
+
     @staticmethod 
     def mark():
         if   Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.NORMAL_EMPTY: Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.MARKED_EMPTY
@@ -65,9 +72,7 @@ class Puzzle:
     def unmark():
         if   Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.MARKED_EMPTY: Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.NORMAL_EMPTY
         elif Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.MARKED_VALUE: Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.NORMAL_VALUE
-        
     
-
     @staticmethod
     def setsize(width, height):
         Puzzle.width  = width
@@ -223,15 +228,9 @@ class Game(BasicGame):
             if not Game.map.load_tileset("tiles"):
                 print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/tiles.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
                 quit()
-            Game.map.fill(0x00,0)
-            Game.map.fill(0x0f,1)
-            Game.map.fill(0x0f,2)
-            Game.loadmap(data       , 0)
-            Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
-            Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
-            Game.map.setsurface(Game.buffer[0])
             
             Puzzle.initialize(Game)
+            Puzzle.clear()
             Puzzle.setsize(16, 16)
             Puzzle.randomize()
             
@@ -253,12 +252,21 @@ class Game(BasicGame):
 
     @staticmethod
     def title():
+        Game.map.setsurface(0)
+        #Game.map.setactive()
+        Game.map.setposition(
+            (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1), 
+            (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+        )
         vpu.select(0)
         vpu.fill(0,0,0)
-        vpu.perlin(0, 160, 80,0)
-        vpu.setfont('magic')
-        vpu.setcolor(255,255,255)
-        vpu.textout("AXZLE", int(Game.width>>1)-64,  int(Game.height>>1)-64 )
+        Puzzle.game.loadmap(title_bg, 0)
+        Puzzle.game.loadmap(title_data, 1)        
+        Game.map.draw()
+        #vpu.perlin(0, 160, 80,0)
+        #vpu.setfont('magic')
+        #vpu.setcolor(255,255,255)
+        #vpu.textout("AXZLE", int(Game.width>>1)-64,  int(Game.height>>1)-64 )
         while not vpu.update():pass        
         while not joypad.start():
             vpu.select(1)
@@ -270,6 +278,7 @@ class Game(BasicGame):
             vpu.update()
         vpu.transition(int(random()*20)) 
         while not vpu.update():pass
+        Puzzle.clear()
         vpu.select(0);vpu.fill(0,0,0)
         vpu.select(1);vpu.fill(0,0,0,0)
         vpu.select(2);vpu.fill(0,0,0,0)        
@@ -279,7 +288,7 @@ class Game(BasicGame):
     def loop():
         delta = 1.0
         Game.title()
-        Game.map.setactive()
+        Game.map.setactive() # set this map to be autoredrawn when calling vpu.update()
         while Game.running:
             if Game.map.needsredraw():
                 Game.map.fill(0xf, 1)

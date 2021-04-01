@@ -59,6 +59,10 @@ class TiledMap:
     def getdata(self, layer_index=0):           return tm.getdata(self.handle, layer_index)
     def setdata(self, data, layer_index=0):     tm.setdata(self.handle, data, layer_index)
     def settarget(self, surface_handle):        tm.settarget(self.handle, surface_handle)
+    def setposition(self, x, y):                
+        self.x = x
+        self.y = y
+        tm.setposition(self.handle, self.x, self.y)
     def setscroll(self, x, y):                  tm.setscroll(self.handle, x, y)    
     def scroll_up(self   , delta=1):            tm.scroll(self.handle, delta, Direction.UP)    
     def scroll_down(self , delta=1):            tm.scroll(self.handle, delta, Direction.DOWN)  
