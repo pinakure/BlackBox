@@ -17,7 +17,7 @@ PyMethodDef Entity::methods[] = {
 	{ "getposition"		, Entity::pyGetPosition		, METH_VARARGS, "setposition(entity_handle) : " },
 	{ "getdelta"		, Entity::pyGetDelta		, METH_VARARGS, "getdelta() : " },
 	{ "setanimation"	, Entity::pySetAnimation	, METH_VARARGS, "setanimation(entity_handle, anim_handle) : " },
-	{ "setparameter"	, Entity::pySetParameter	, METH_VARARGS, "setparameter(entity_handle, parameter_name, value) : " },
+	{ "parameter"		, Entity::pySetParameter	, METH_VARARGS, "parameter(entity_handle, parameter_name, value) : " },
 	{ "setdelta"		, Entity::pySetDelta		, METH_VARARGS, "setdelta(entity_handle, delta_x, delta_y, controller_type) : " },
 	{ "setsprite"		, Entity::pySetSprite		, METH_VARARGS, "setsprite(entity_handle, sprite_handle) : " },
 	{ "settarget"		, Entity::pySetTarget		, METH_VARARGS, "settarget(handle, target_handle, controller_type) : " },
@@ -228,14 +228,21 @@ PyObject* Entity::pySetParameter(PyObject* self, PyObject* args) {
 	long entity_handle;
 	char* parameter;
 	int controller_type = -1;
-	float value;
-	if (!PyArg_ParseTuple(args, "isf|i", &entity_handle, &parameter, &value, &controller_type)) return NULL;
+	char *value;
+	if (!PyArg_ParseTuple(args, "iiss", &entity_handle, &controller_type , &parameter, &value)) return NULL;
 	Entity* ent = Engine::entities[entity_handle];
 	if (ent) {
 		// change parameter from controller, send directly.
-		return PyBool_FromLong(true);
+		switch (controller_type) {
+			case EntityController::CONTROLLER_BOUNCE:
+				((EntityBounceController*)ent)->parseParam(parameter, value);
+				return True;				
+			default:
+				printf("pySetParameter::NOT IMPLEMENTED");
+				return False;
+		}
 	}
-	return PyBool_FromLong(false);
+	return False;
 }
 
 PyObject* Entity::pySetPosition(PyObject* self, PyObject* args) {

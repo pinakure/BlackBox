@@ -53,8 +53,8 @@ class Bubble(Entity):
             for i in range(0, Bubble.quantities[size]):
                 Bubble.pool.append(Bubble(size))
                 Bubble.pool[len(Bubble.pool)-1].setposition(
-                    ((Bubble.game.dims[1][0]/2)-160)+(Bubble.sizes[size]>>1)+((float(i)/float(Bubble.quantities[size]))*float(320.0-(Bubble.sizes[size]>>1))),
-                    ((Bubble.game.dims[1][1]/2)-120)+(Bubble.sizes[size]>>1)+((float(i)/float(Bubble.quantities[size]))*float(100.0))
+                    ((Bubble.game.width >>1)-160)+(Bubble.sizes[size]>>1)+((float(i)/float(Bubble.quantities[size]))*float(320.0-(Bubble.sizes[size]>>1))),
+                    ((Bubble.game.height>>1)-120)+(Bubble.sizes[size]>>1)+((float(i)/float(Bubble.quantities[size]))*float(100.0))
                 )
                 Bubble.pool[i].disable()
         for i in range(1,Bubble.quantities[3]):
@@ -74,6 +74,10 @@ class Bubble(Entity):
         self.setanimation(self.gfx)
         self.addcontroller(EntityController.CONTROLLER_MOVE)
         self.addcontroller(EntityController.CONTROLLER_BOUNCE)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('left'   , 0)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('right'  , 120)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('top'    , 0)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('bottom' , 240)
         self.explode_frame = 0
         self.explode = False
         self.disable()

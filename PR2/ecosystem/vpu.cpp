@@ -475,13 +475,13 @@ static inline void drawEntities() {
 }
 
 void Vpu::render() {
-	drawEntities();
 
 	if (Vpu::active_map) {
 		if(Vpu::active_map->target) al_set_target_bitmap(Vpu::active_map->target->bitmap);
 		Vpu::active_map->redraw();
 		Vpu::active_map->draw(-Vpu::active_map->scroll.x, -Vpu::active_map->scroll.y);
 	}
+	drawEntities();
 
 	al_set_target_bitmap(buffer);
 	/* Render enabled layers */

@@ -152,6 +152,7 @@ public:
 	void setBounds();
 	void setDelta(float x, float y);
 	void update(double delta);
+	void parseParam(std::string name, std::string value);
 	void draw();
 };
 

@@ -32,6 +32,10 @@ class Game(BasicGame):
     buffer = [None, None]
 
     @staticmethod
+    def destroy(): pass
+
+
+    @staticmethod
     def setup():
         try:
             print("GAME: Setup...")
@@ -72,7 +76,7 @@ class Game(BasicGame):
         BasicGame.update(delta)
         
         # do stuff
-        if Game.map.need_redraw:
+        if Game.running and Game.map.need_redraw:
             Game.triste[0].update(delta)
             Game.triste[1].update(delta)
         

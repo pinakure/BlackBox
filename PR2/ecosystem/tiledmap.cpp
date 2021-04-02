@@ -391,8 +391,9 @@ PyObject* TiledMap::pySetActive(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "i|b", &handle, &disable)) return NULL;
 	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
-		if (!disable) Vpu::active_map = tm;
-		else Vpu::active_map = nullptr;
+		if (disable)  
+			Vpu::active_map = nullptr; 
+		else Vpu::active_map = tm;
 		return True;
 	}
 	printf("ERROR @ pySetData : tiledmap_handle out of range\n");

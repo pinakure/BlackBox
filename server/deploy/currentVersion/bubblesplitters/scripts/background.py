@@ -1042,7 +1042,7 @@ class Background:
     game        = None
     initialized = False
     pictures    = {}
-    index       = 0x0
+    index       = 0x3
     time        = DAY
 
     @staticmethod
@@ -1084,6 +1084,6 @@ class Background:
         
     def draw():
         vpu.select(0)
-        x = (int(Background.game.dims[0][0]) >> 1) 
-        y = (int(Background.game.dims[0][1]) >> 1) -5
+        x = (int(Background.game.width) >> 1) 
+        y = (int(Background.game.height) >> 1) -5
         vpu.drawsprite(Background.pictures[Background.index][Background.time], x, y)

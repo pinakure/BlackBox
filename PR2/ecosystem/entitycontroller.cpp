@@ -479,3 +479,10 @@ void EntityBounceController::draw() {
 	Vpu::rectangle(left + 1, top, right - left - 1, bottom - top - 1);
 	Vpu::rectangle(left + 2, top+1, right - left - 3, bottom - top - 3);
 }
+
+void EntityBounceController::parseParam(std::string name, std::string value) {
+	if	    (name == "left"	 ) this->left   = atof(value.c_str());
+	else if (name == "right" ) this->right  = atof(value.c_str());
+	else if (name == "top"	 ) this->top    = atof(value.c_str());
+	else if (name == "bottom") this->bottom = atof(value.c_str());
+}

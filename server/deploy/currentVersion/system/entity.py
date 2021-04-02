@@ -1,5 +1,6 @@
 import entitylib as el
 import vpu
+from debug import debug
 
 class Color:
     def __init__(self, r=0,g=0,b=0,a=0):
@@ -254,7 +255,11 @@ class EntityController:
     CONTROLLER_AVOID    = 0x04
     CONTROLLER_BOUNCE   = 0x05
     CONTROLLER_MAX      = 0x06
-    
+
+    def parameter(self, param_name, param_value):
+        debug(f"Entity({self.controller_type})", f"Set {param_name} = {param_value}")
+        el.parameter(self.parent.handle, self.controller_type, param_name, str(param_value))
+
     def set_target(self, target):
         el.settarget(self.parent.handle, target.handle, self.controller_type)
             

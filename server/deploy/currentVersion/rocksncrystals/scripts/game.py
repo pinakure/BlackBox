@@ -17,12 +17,9 @@ from scripts.main           import menu
 from random                 import random
 from basicgame              import BasicGame
 from tiledmap               import TiledMap
-from pixel                  import Pixel        
+from debug                  import debug, error, panic
 
 class Game(BasicGame):
-    
-    buffer = [None, None]
-    scroll = Pixel(0,0)
 
     @staticmethod
     def setup():
@@ -31,8 +28,7 @@ class Game(BasicGame):
             BasicGame.prepare()
             vpu.setrotation(0,0)
             #allocate custom video buffers
-            Game.buffer[0] = vpu.createsurf(320, 240) 
-            Game.buffer[1] = vpu.createsurf(320, 240) 
+            Game.buffer = [ vpu.createsurf(320, 240) , vpu.createsurf(320, 240) ]
             # create display map
             Game.setmap(TiledMap(Game, 40, 30, 2, 16, 16))
             if not Game.map.load_tileset("terrain"):
@@ -66,6 +62,9 @@ class Game(BasicGame):
             print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
             console.echo(f'ERROR: {str(E)}')                        
         
+    @staticmethod
+    def destroy(): pass
+
     @staticmethod
     def loop():
         delta = 1.0
@@ -101,8 +100,3 @@ def setup():
 
 def loop():
     return Game.loop()
-
-def destroy():
-    Game.map.setactive(False)
-    Game.map.setsurface(-1)
-    return Game.destroy()

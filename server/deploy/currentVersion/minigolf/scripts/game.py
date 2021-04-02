@@ -21,6 +21,7 @@ from tiledmap                   import TiledMap
 from random                     import random
 from direction                  import *
 from basicgame                  import BasicGame
+from debug                      import debug, error, panic
 import                          vpu
 import                          joypad
         
@@ -85,24 +86,20 @@ class Terrain:
 
 class Game(BasicGame):    
 
-    buffer  = [ None, None, None ]    
-    
     @staticmethod
     def setup():
         try:
-            print("GAME: Setup...")
+            debug("Game", "Setting up")
             BasicGame.prepare()
 
             #allocate custom video buffers
-            Game.buffer[0] = vpu.createsurf(320, 240) 
-            Game.buffer[1] = vpu.createsurf(320, 240) 
-            Game.buffer[2] = vpu.createsurf(320, 240) 
+            Game.buffer = [vpu.createsurf(320, 240) , vpu.createsurf(320, 240) , vpu.createsurf(320, 240) ]
     
             # create map
             Game.setmap(TiledMap(Game, 40, 30, 3))
             if not Game.map.load_tileset("golf"):
-                print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/golf.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
-                quit()
+                panic("Cannot load 'tilesets/golf.png'", "Game could run perfectly, but we think it's better to abort current execution, as you wouldn't be able to see anything on the screen and that would be definitely bad.")
+            
             Game.loadmap(map)
             Game.map.fill(0x11F, 0)
             Game.map.fill(0x11F, 1)
@@ -134,12 +131,9 @@ class Game(BasicGame):
         BasicGame.update(delta)
         
     @staticmethod
-    def destroy():
-        for i in range(0,3):
-            if Game.buffer[i]: 
-                vpu.deletesurf(Game.buffer[i])
-        BasicGame.destroy()
-
+    def destroy(): 
+        debug("Game", "Destroy")
+        
     @staticmethod
     def draw():
         if Game.map.need_redraw:
@@ -184,6 +178,3 @@ def setup():
 
 def loop():
     return Game.loop()
-
-def destroy():
-    return Game.destroy()
