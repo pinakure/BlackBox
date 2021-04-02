@@ -70,7 +70,7 @@ class Bubble(Entity):
         #self.gfx    = Bubble.gfx[self.size]
         self.gfx    = vpu.createanim(self.width, self.height, Bubble.sprites[self.size], 0, 0, 3, 0, False, 0.0, False)
         if not self.gfx:
-            print("Cannot create bubble animation")
+            error("Bubble", "Cannot create bubble animation")
         self.setanimation(self.gfx)
         self.addcontroller(EntityController.CONTROLLER_MOVE)
         self.addcontroller(EntityController.CONTROLLER_BOUNCE)

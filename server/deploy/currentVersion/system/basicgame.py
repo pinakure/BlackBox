@@ -144,14 +144,18 @@ class BasicGame:
         vpu.select(0)
         vpu.perlin(255,0,128)
         
-        BasicGame.map.setactive(True)
-        BasicGame.map.setsurface(-1)
-        BasicGame.map.settarget(-1)
-        
+        if BasicGame.map is not None:
+            debug("BasicGame", "Destroying Map")
+            BasicGame.map.setactive(True)
+            BasicGame.map.setsurface(-1)
+            BasicGame.map.settarget(-1)
+            del BasicGame.map
+
         for buffer in BasicGame.buffer:
+            debug("BasicGame", "Destroying buffer")
             vpu.deletesurf(buffer)
             buffer = None
         BasicGame.buffer = []
         vpu.setfont('ibm')
-        if BasicGame.map is not None:
-            del BasicGame.map
+        
+            

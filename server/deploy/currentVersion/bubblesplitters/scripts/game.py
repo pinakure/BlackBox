@@ -10,17 +10,18 @@
 #  88888888P"    `"Y8888Y"'   88888888P"   88888888888  88             `"Y8888Y"'    88              # 
 #                                                                                                    # 
 ######################################################################################################
-from data.scripts.bubble import Bubble
-from scripts.main import menu
-from random import random
 import blackbox
 import vpu
 import joypad
-from tiledmap import TiledMap
-from interpolator import Interpolator
-from data.scripts.background import Background
-from basicgame import BasicGame
-from debug import debug, error
+from scripts.main               import menu
+from random                     import random
+from tiledmap                   import TiledMap
+from interpolator               import Interpolator
+from basicgame                  import BasicGame
+from debug                      import debug, error
+from data.scripts.bubble        import Bubble
+from data.scripts.background    import Background
+from data.scripts.player        import Player
 
 map = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -74,7 +75,7 @@ class Game(BasicGame):
         Game.prepare()
                
         debug("Game", "Initializing classes")
-        Game.map = TiledMap(Game, int(320/8),int(240/8),2)
+        Game.setmap(TiledMap(Game, int(320/8),int(240/8),2))
         if not Game.map.load_tileset("blocks"):
             error("Game", "Cannot load tileset!")
         
@@ -94,10 +95,8 @@ class Game(BasicGame):
 
         Background.initialize(Game)
         Bubble.initialize(Game)
-        
-        # set video scale to 2x
-        vpu.setscale(0, 2.0, 2.0)
-        vpu.setscale(1, 2.0, 2.0)
+        Game.player = Player()
+        Game.newgame()
         
     @staticmethod
     def newgame():
@@ -106,10 +105,6 @@ class Game(BasicGame):
         Game.world   = 0
         Game.player.spawn()
         
-    @staticmethod
-    def destroy():
-        del Game.map
-
     @staticmethod
     def loop():
         vpu.setscale(1,Game.scale, Game.scale)
@@ -146,8 +141,8 @@ class Game(BasicGame):
         # required stuff
         if blackbox.ctrlc():
             debug("Game", "Control+C pressed.")
-            Game.destroy()
             Game.running = False
+            return
             
         if joypad.menu():
             menu()
@@ -169,17 +164,7 @@ class Game(BasicGame):
         # raster screen and update input
         vpu.update()
 
-
 def vprint(value):
     vpu.select(2)
     vpu.setcolor(255,0,0,255)
     vpu.textout(f"{value}", 200,24)
-
-def setup():
-    return Game.setup()
-
-def loop():
-    return Game.loop()
-
-def destroy():
-    return Game.destroy()

@@ -1,4 +1,5 @@
 import vpu
+from debug import debug, error
 from data.scripts.palette import extract_palette
 
 original_colors = [
@@ -1056,27 +1057,27 @@ class Background:
         
     @staticmethod
     def initialize(game):
-        print("Initializing background")
+        debug("Background", "Initializing")
         Background.game = game
         #extract_palette('day')
         #extract_palette('dawn')
         #extract_palette('nite')
         sprite_day = vpu.createsprite('bg_day')
         if not sprite_day:
-            print("Cannot load sprites/bg_day.png")
+            error("Background", "Cannot load sprites/bg_day.png")
             return
         sprite_dawn = vpu.createsprite('bg_dawn')
         if not sprite_dawn:
-            print("Cannot load sprites/bg_dawn.png")
+            error("Background", "Cannot load sprites/bg_dawn.png")
             return
         sprite_nite = vpu.createsprite('bg_nite')
         if not sprite_nite:
-            print("Cannot load sprites/bg_nite.png")
+            error("Background", "Cannot load sprites/bg_nite.png")
             return
         for i in range(0,16):
             Background.createpicture(sprite_day, sprite_dawn, sprite_nite, i)
-            print(f"Initialized background #{i}", end="\r")
-        print("")
+            debug("Background", f"Initialized background #{i}", end="\r")
+        debug("Background", f"Initialized backgrounds            ")
         vpu.deletesprite(sprite_day)
         vpu.deletesprite(sprite_dawn)
         vpu.deletesprite(sprite_nite)
