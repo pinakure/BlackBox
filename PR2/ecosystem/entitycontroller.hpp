@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include "input.hpp"
+#include "tiledmap.hpp"
 class Entity;
 
 typedef struct s_PathPoint {
@@ -29,6 +30,7 @@ public:
 	EntityController(Entity* parent=nullptr);
 	virtual void update(double delta)=0;
 	virtual void draw() = 0;
+	virtual bool parseValue(std::string name, std::string value) = 0;
 };
 
 class EntityInputController : public EntityController {
@@ -57,6 +59,7 @@ public:
 	EntityInputController(Entity* parent);
 	void update(double delta);
 	void draw();
+	bool parseValue(std::string name, std::string value);
 };
 
 class EntityFollowController : public EntityController {
@@ -76,6 +79,7 @@ public:
 	void setTarget(int x, int y);
 	void update(double delta);
 	void draw();
+	bool parseValue(std::string name, std::string value);
 };
 
 class EntityAvoidController : public EntityController {
@@ -85,9 +89,10 @@ public:
 	bool active = false;
 	EntityAvoidController(Entity* parent);
 	void update(double delta);
-	void draw();
 	void setTarget(Entity* target);
 	void setTarget(int x, int y);
+	void draw();
+	bool parseValue(std::string name, std::string value);
 };
 
 class EntityMoveController : public EntityController {
@@ -107,6 +112,7 @@ public:
 	void setDelta(float x, float y); 
 	void update(double delta);
 	void draw();
+	bool parseValue(std::string name, std::string value);
 };
 
 class EntityShootController : public EntityController {
@@ -134,6 +140,7 @@ public:
 	void setTarget(int x, int y);
 	void update(double delta);
 	void draw();
+	bool parseValue(std::string name, std::string value);
 };
 
 class EntityBounceController : public EntityController {
@@ -148,12 +155,19 @@ public:
 	int	  bottom		 = 0;
 	float real_width	 = 0;
 	float real_height	 = 0;
+	TiledMap*			 map = nullptr;
 	EntityBounceController(Entity* parent);
 	void setBounds();
 	void setDelta(float x, float y);
 	void update(double delta);
-	void parseParam(std::string name, std::string value);
 	void draw();
+	void bounce_left(double delta);
+	void bounce_right(double delta);
+	void bounce_top(double delta);
+	void bounce_bottom(double delta);
+	void checkObstacle(int left, int top, int right, int bottom);
+	void checkBoundaries(double delta, int left, int top, int right, int bottom);
+	bool parseValue(std::string name, std::string value);
 };
 
 

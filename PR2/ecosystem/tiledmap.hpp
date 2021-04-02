@@ -72,7 +72,7 @@ public:
 	Scroll					scroll;
 	Boundaries				boundaries;
 	
-
+	static TiledMap* find(int handle);
 	TiledMap(int w, int h, int layer_count, int tile_width, int tile_height);
 	void destroy();
 	void draw(int x, int y);

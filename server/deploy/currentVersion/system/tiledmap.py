@@ -3,6 +3,7 @@ import console
 from pixel          import Pixel
 from boundaries     import Boundaries
 from direction      import Direction
+from debug          import debug, error
 
 class TiledMap:
     game = None
@@ -21,6 +22,17 @@ class TiledMap:
         self.target      = 0 # background
         self.need_redraw = False
         self.handle      = tm.create(width, height, layer_count, tile_width, tile_height)
+
+    def load(self, data, layer=0):
+        i=0
+        try:
+            for y in range(0, self.height):
+                for x in range(0,  self.width):
+                    self.setvalue(x,y, data[i], layer)
+                    i+=1
+        except:
+            debug('TiledMap', "WARNING: Insufficient data provided to fill map!")
+
 
     def needsredraw(self):
         return tm.needsredraw(self.handle)

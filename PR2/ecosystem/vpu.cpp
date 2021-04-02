@@ -465,10 +465,10 @@ void Vpu::fillCircle(int x, int y, float radius, int r, int g, int b, int alpha)
 }
 
 static inline void drawEntities() {
-	al_set_target_bitmap(Vpu::foreground.bitmap);
 	std::vector<Entity*>::iterator it = Engine::entities.begin();
 	ALLEGRO_COLOR white = al_map_rgba(255, 255, 255, 64);
 	for (; it != Engine::entities.end(); it++) {
+		al_set_target_bitmap((*it)->rendertarget->bitmap);
 		Vpu::color = white;
 		(*it)->draw();
 	}

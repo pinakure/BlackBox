@@ -67,6 +67,8 @@ class BasicGame:
 
     @staticmethod
     def loadmap(data=[], layer=0):
+        BasicGame.map.load(data,layer)
+        """
         #BasicGame.map.fill(0x00)
         #load map...
         i=0
@@ -77,6 +79,7 @@ class BasicGame:
                     i+=1
         except:
             debug('BasicGame', "WARNING: Insufficient data provided to fill map!")
+        """
 
     @staticmethod
     def prepare():

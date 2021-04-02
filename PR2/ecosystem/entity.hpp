@@ -23,6 +23,9 @@ public:
 	float		angle	= 0.0f;
 	float		real_angle= 0.0f;
 	bool		enabled = true;
+		
+	Surface*	rendertarget = nullptr;
+
 	std::map<int, EntityController*> controllers;
 	//std::map<std::string, EntityProperty> properties;
 	
@@ -36,6 +39,8 @@ public:
 	void addController(EntityController::Type type);
 	void addProperty(std::string name, ...);
 	
+	bool parseValue(int controller_type, std::string name, std::string value);
+
 	void draw();
 	/*
 	void addIntegerProperty(std::string name, ...);
@@ -56,6 +61,7 @@ public:
 	static PyObject* pySetParameter(PyObject* self, PyObject* args);
 	static PyObject* pySetDelta(PyObject* self, PyObject* args);
 	static PyObject* pySetSprite(PyObject* self, PyObject* args);
+	static PyObject* pySetRenderTarget(PyObject* self, PyObject* args);
 	static PyObject* pySetTarget(PyObject* self, PyObject* args);
 	static PyObject* pySetPosition(PyObject* self, PyObject* args);
 	static PyObject* pyUpdate(PyObject* self, PyObject* args);

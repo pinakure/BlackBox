@@ -257,7 +257,7 @@ class EntityController:
     CONTROLLER_MAX      = 0x06
 
     def parameter(self, param_name, param_value):
-        debug(f"Entity({self.controller_type})", f"Set {param_name} = {param_value}")
+        #debug(f"Entity({self.controller_type})", f"Set {param_name} = {param_value}")
         el.parameter(self.parent.handle, self.controller_type, param_name, str(param_value))
 
     def set_target(self, target):

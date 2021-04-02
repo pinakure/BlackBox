@@ -74,10 +74,11 @@ class Bubble(Entity):
         self.setanimation(self.gfx)
         self.addcontroller(EntityController.CONTROLLER_MOVE)
         self.addcontroller(EntityController.CONTROLLER_BOUNCE)
-        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('left'   , 0)
-        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('right'  , 120)
-        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('top'    , 0)
-        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('bottom' , 240)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('left'   , (Bubble.game.width >> 1) - 152)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('right'  , (Bubble.game.width >> 1) + 152)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('top'    , (Bubble.game.height >> 1) - 112)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('bottom' , (Bubble.game.height >> 1) + 112)
+        self.controllers[EntityController.CONTROLLER_BOUNCE].parameter('map'    , str(Bubble.game.colission.handle))
         self.explode_frame = 0
         self.explode = False
         self.disable()

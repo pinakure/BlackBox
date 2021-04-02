@@ -40,6 +40,10 @@ void EntityInputController::draw() {
 
 }
 
+bool EntityInputController::parseValue(std::string name, std::string value) {
+	return false;
+}
+
 /*---------------------------------------------------------------------------------*/
 
 EntityFollowController::EntityFollowController(Entity* parent) : EntityController(parent) {
@@ -91,6 +95,10 @@ void EntityFollowController::draw() {
 		Vpu::line(this->target_entity->x - ww, this->target_entity->y + hh, this->target_entity->x + ww, this->target_entity->y - hh);
 		Vpu::line(this->parent->x, this->parent->y, this->target_entity->x, this->target_entity->y);
 	}
+}
+
+bool EntityFollowController::parseValue(std::string name, std::string value) {
+	return false;
 }
 
 void EntityFollowController::generatePath() {
@@ -242,6 +250,11 @@ void EntityMoveController::draw() {
 
 }
 
+bool EntityMoveController::parseValue(std::string name, std::string value) {
+	return false;
+}
+
+
 /*---------------------------------------------------------------------------------*/
 
 EntityShootController::EntityShootController(Entity* parent) : EntityController(parent) {
@@ -283,6 +296,12 @@ void EntityShootController::draw() {
 		Vpu::line(this->parent->x, this->parent->y, this->target_x, this->target_y);
 	}
 }
+
+
+bool EntityShootController::parseValue(std::string name, std::string value) {
+	return false;
+}
+
 void EntityShootController::update(double delta){
 	#define min(a,b) (a<b?a:b)
 	#define max(a,b) (a>b?a:b)
@@ -360,6 +379,10 @@ void EntityAvoidController::draw() {
 	Vpu::line(this->parent->x, this->parent->y, this->target.x, this->target.y);
 }
 
+bool EntityAvoidController::parseValue(std::string name, std::string value) {
+	return false;
+}
+
 void EntityAvoidController::update(double delta) {
 	// update avoid point if it is an entity
 	if (this->target_entity)this->setTarget(this->target_entity);
@@ -426,34 +449,116 @@ void EntityBounceController::setBounds() {
 	this->left   = (srf->width  / 2) - (real_width  / 2);
 	this->right  = this->left   + real_width;
 	this->bottom = this->top    + real_height;
+}
+
+void EntityBounceController::bounce_left(double delta) {
+	acceleration_x = abs(acceleration_x);
+	delta_x = abs(delta_x);
+	this->parent->x = this->left + (parent->width >> 1);
+}
+void EntityBounceController::bounce_right(double delta) {
+	acceleration_x = -abs(acceleration_x);
+	delta_x = -abs(delta_x);
+	this->parent->x = this->right - (parent->width >> 1);
+}
+void EntityBounceController::bounce_top(double delta) {
+	delta_y = abs(delta_y);
+	this->parent->y = this->top + (parent->height >> 1);
+}
+void EntityBounceController::bounce_bottom(double delta) {
+	//delta_y = -float(this->parent->width/4) / 2.5f;
+	delta_y = -abs(delta_y);
+	this->parent->y = this->bottom - (parent->height >> 1);
+}
+
+void EntityBounceController::checkObstacle(int left, int top, int right, int bottom) {
+	int x = right - left;
+	int y = bottom - top;
+	int l, r;
+	int t, b;
+	int px, py;
+	int dx, dy;
+	dx = this->delta_x;
+	dy = this->delta_y;
+	t = this->parent->y - (this->parent->height >> 1) + this->delta_y;
+	b = this->parent->y + (this->parent->height >> 1) + this->delta_y;
+	// Check left
+	r = this->parent->x + (this->parent->width >> 1) + this->delta_x;
+	px = this->parent->x + dx;
+	py = this->parent->y + dy;
+	if ((px <= right) && (r >= left) && (py >= top) && (py <= bottom)) {
+		this->acceleration_x	 = -abs(this->acceleration_x);
+		this->delta_x			 = -abs(this->delta_x);
+		this->parent->x = left - (this->parent->width >> 1);
+	}
+	// Check right
+	l = this->parent->x - (this->parent->width >> 1) + this->delta_x;
+	px = this->parent->x + dx;
+	if ((px >= left) && (l <= right) && (py >= top) && (py <= bottom)) {
+		this->acceleration_x	 = +abs(this->acceleration_x);
+		this->delta_x			 = +abs(this->delta_x);
+		this->parent->x = right + (this->parent->width >> 1);
+	}
+	// Check bottom
+	t = this->parent->y - (this->parent->height >> 1) + this->delta_y;
+	px = this->parent->x + dx;
+	if ((py >= top) && (t <= bottom) && (px >= left) && (px <= right)) {
+		this->delta_y		 	 = +abs(this->delta_y);
+		this->parent->y = bottom + (this->parent->height >> 1)+1;
+	}
+	// Check top
+	b = this->parent->y + (this->parent->height >> 1) + this->delta_y;
+	py = this->parent->y + dy;
+	if ((py <= bottom) && (b >= top) && (px >= left) && (px <= right)) {
+		this->delta_y			 = -abs(this->delta_y);
+		this->parent->y = top - (this->parent->height >> 1);
+	}
 	
 }
 
+void EntityBounceController::checkBoundaries(double delta, int left, int top, int right, int bottom) {
+	if (this->parent->x > right	) this->bounce_right(delta);
+	if (this->parent->x < left	) this->bounce_left(delta); 
+	if (this->parent->y < top	) this->bounce_top(delta);
+	if (this->parent->y > bottom) this->bounce_bottom(delta); 
+}
+
 void EntityBounceController::update(double delta) {
+	// Check boundary bounce 
+	checkBoundaries(
+		delta,
+		this->left + (parent->width >> 1),
+		this->top + (parent->height >> 1),
+		this->right - (parent->width >> 1),
+		this->bottom - (parent->height >> 1)
+	);
 	
-	if (this->parent->x > this->right- (parent->width >> 1)) {
-		acceleration_x = -abs(acceleration_x);
-		delta_x = -abs(delta_x);
-		this->parent->x = this->right- (parent->width >> 1);
-	} 
-	if (this->parent->x < this->left + (parent->width >> 1)) {
-		acceleration_x = abs(acceleration_x);
-		delta_x = abs(delta_x);
-		this->parent->x = this->left + (parent->width >> 1);
-	}
-	if (this->parent->y < this->top + (parent->height >> 1)) {
-		delta_y = abs(delta_y);
-		this->parent->y = this->top + (parent->height >> 1);
-	}
-	if (this->parent->y > this->bottom - (parent->height >> 1)) {
-		//delta_y = -float(this->parent->width/4) / 2.5f; 
-		delta_y = -abs(delta_y);
-		this->parent->y = this->bottom - (parent->height >> 1);
+	// Check colission map bounce
+	if (this->map) {
+		int dx, dy;
+		dy = 0;
+		for (int y = 0; y < this->map->h; y++) {
+			dx = 0;
+			for (int x = 0; x < this->map->w; x++) {
+				if (this->map->layers[0].get(x, y) != 0x0) {
+					checkObstacle(
+						this->left + dx,
+						this->top  + dy,
+						this->left + dx + this->map->tile_width,
+						this->top  + dy + this->map->tile_height
+					);					
+				}
+				dx += this->map->tile_width;
+			}
+			dy += this->map->tile_height;
+		}
 	}
 
+	/* Apply delta acceleration */
 	delta_y += acceleration_y;
 	delta_x += acceleration_x;
-
+	
+	/* Limit delta acceleration */
 	float max_speed = 0.5f;
 	if (delta_x >  max_speed)delta_x =  max_speed;
 	if (delta_x < -max_speed)delta_x = -max_speed;
@@ -477,12 +582,43 @@ void EntityBounceController::setDelta(float x, float y) {
 void EntityBounceController::draw() {
 	Vpu::color = al_map_rgba(255, 64, 0, 128);
 	Vpu::rectangle(left + 1, top, right - left - 1, bottom - top - 1);
-	Vpu::rectangle(left + 2, top+1, right - left - 3, bottom - top - 3);
+	Vpu::rectangle(left + 2, top + 1, right - left - 3, bottom - top - 3);
+	Vpu::select(Vpu::foreground);
+
+	if (this->map) {
+		int dx, dy;
+		dy = 0;
+		for (int y = 0; y < this->map->h; y++) {
+			dx = 0;
+			for (int x = 0; x < this->map->w; x++) {
+				if (this->map->layers[0].get(x, y) != 0x0) {
+					Vpu::fillRectangle(
+						this->left + dx,
+						this->top + dy,
+						this->map->tile_width,
+						this->map->tile_height,
+						255, 0, 0, 8
+					);
+				}
+				dx += this->map->tile_width;
+			}
+			dy += this->map->tile_height;
+		}
+	}
 }
 
-void EntityBounceController::parseParam(std::string name, std::string value) {
+bool EntityBounceController::parseValue(std::string name, std::string value) {
 	if	    (name == "left"	 ) this->left   = atof(value.c_str());
 	else if (name == "right" ) this->right  = atof(value.c_str());
 	else if (name == "top"	 ) this->top    = atof(value.c_str());
 	else if (name == "bottom") this->bottom = atof(value.c_str());
+	else if (name == "accelx") this->acceleration_x = atof(value.c_str());
+	else if (name == "accely") this->acceleration_y = atof(value.c_str());
+	else if (name == "deltay") this->delta_y = atof(value.c_str());
+	else if (name == "deltax") this->delta_y = atof(value.c_str());
+	else if (name == "map"	 ) this->map = TiledMap::find(atoi(value.c_str()));
+	//else if (name == "maxdeltax") this->max_delta_x = atof(value.c_str());
+	//else if (name == "maxdeltay") this->max_delta_y = atof(value.c_str());
+	else return false;
+	return true;
 }

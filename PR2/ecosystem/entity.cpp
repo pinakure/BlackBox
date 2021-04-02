@@ -17,6 +17,7 @@ PyMethodDef Entity::methods[] = {
 	{ "getposition"		, Entity::pyGetPosition		, METH_VARARGS, "setposition(entity_handle) : " },
 	{ "getdelta"		, Entity::pyGetDelta		, METH_VARARGS, "getdelta() : " },
 	{ "setanimation"	, Entity::pySetAnimation	, METH_VARARGS, "setanimation(entity_handle, anim_handle) : " },
+	{ "setrendertarget"	, Entity::pySetRenderTarget	, METH_VARARGS, "setrendertarget(entity_handle, surface_handle) : " },
 	{ "parameter"		, Entity::pySetParameter	, METH_VARARGS, "parameter(entity_handle, parameter_name, value) : " },
 	{ "setdelta"		, Entity::pySetDelta		, METH_VARARGS, "setdelta(entity_handle, delta_x, delta_y, controller_type) : " },
 	{ "setsprite"		, Entity::pySetSprite		, METH_VARARGS, "setsprite(entity_handle, sprite_handle) : " },
@@ -34,6 +35,7 @@ Entity::Entity(int width, int height, std::string name) {
 	this->controllers = std::map<int, EntityController*>();
 	this->x = Vpu::foreground.width >> 1;
 	this->y = Vpu::foreground.height >> 1;
+	this->rendertarget = &Vpu::foreground;
 }
 
 #define _USE_MATH_DEFINES
@@ -80,7 +82,8 @@ void Entity::draw() {
 	//Vpu::print("E", this->x - 4, this->y - 6, 0);
 	if (this->sprite		) Vpu::drawSurfaceRotated(this->sprite->picture, this->x, this->y, this->real_angle);
 	else if(this->animation	) Vpu::drawAnimationRotated(*(this->animation), this->x, this->y, this->real_angle);
-	else Vpu::rectangle(this->x - (this->width >> 1), this->y - (this->height >>1), this->width, this->height);
+	else Vpu::rectangle(this->x - (this->width >> 1), this->y - (this->height >> 1), this->width, this->height);
+	//Vpu::fillRectangle(this->x - (this->width >> 1), this->y - (this->height >> 1), this->width, this->height, 0, 64, 0, 16);
 
 	std::map<int, EntityController*>::iterator it;
 	for (it = this->controllers.begin(); it != this->controllers.end(); it++) {
@@ -223,25 +226,41 @@ PyObject* Entity::pySetAnimation(PyObject* self, PyObject* args) {
 	return PyBool_FromLong(false);
 }
 
-PyObject* Entity::pySetParameter(PyObject* self, PyObject* args) {
-	// entity_handle, parameter_name, value
+bool Entity::parseValue(int controller_type, std::string name, std::string value) {
+	EntityController* ctl = this->controllers[controller_type];
+	switch (controller_type) {
+		case EntityController::CONTROLLER_AVOID:  return ((EntityAvoidController* )ctl)->parseValue(name, value);
+		case EntityController::CONTROLLER_BOUNCE: return ((EntityBounceController*)ctl)->parseValue(name, value);
+		case EntityController::CONTROLLER_FOLLOW: return ((EntityFollowController*)ctl)->parseValue(name, value);
+		case EntityController::CONTROLLER_INPUT:  return ((EntityInputController* )ctl)->parseValue(name, value);
+		case EntityController::CONTROLLER_MOVE:   return ((EntityMoveController*  )ctl)->parseValue(name, value);
+		case EntityController::CONTROLLER_SHOOT:  return ((EntityShootController* )ctl)->parseValue(name, value);		
+		default: 
+			printf("ParseValue: NOT IMPLEMENTED");
+			return false;
+	}
+}
+
+extern Surface* getLayer(int index);
+
+
+PyObject* Entity::pySetRenderTarget(PyObject* self, PyObject* args) {
 	long entity_handle;
-	char* parameter;
+	long surface_handle;
+	if (!PyArg_ParseTuple(args, "ii", &entity_handle, &surface_handle)) return NULL;
+	Entity* ent = Engine::entities[entity_handle];
+	if (ent) ent->rendertarget = getLayer(surface_handle);
+	return False;
+}
+
+PyObject* Entity::pySetParameter(PyObject* self, PyObject* args) {
+	long entity_handle;
+	char* parameter = 0;
 	int controller_type = -1;
-	char *value;
+	char *value = 0;
 	if (!PyArg_ParseTuple(args, "iiss", &entity_handle, &controller_type , &parameter, &value)) return NULL;
 	Entity* ent = Engine::entities[entity_handle];
-	if (ent) {
-		// change parameter from controller, send directly.
-		switch (controller_type) {
-			case EntityController::CONTROLLER_BOUNCE:
-				((EntityBounceController*)ent)->parseParam(parameter, value);
-				return True;				
-			default:
-				printf("pySetParameter::NOT IMPLEMENTED");
-				return False;
-		}
-	}
+	if ((ent) && (ent->parseValue(controller_type, parameter, value))) return True;
 	return False;
 }
 

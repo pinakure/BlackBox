@@ -603,3 +603,11 @@ int TiledLayer::count(int value) {
 	return count;
 }
 
+TiledMap *TiledMap::find(int handle){
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {		
+		return &Vpu::tiledmaps.at(handle);
+	}
+	return nullptr;
+}
+
+
