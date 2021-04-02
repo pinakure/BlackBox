@@ -78,6 +78,12 @@ class Game(BasicGame):
         Game.setmap(TiledMap(Game, int(320/8),int(240/8),2))
         if not Game.map.load_tileset("blocks"):
             error("Game", "Cannot load tileset!")
+        Game.map.fill(0x6f)
+        Game.map.load(map)
+        Game.map.setsurface(0)
+        Game.map.settarget(0)
+        Game.map.setactive()
+        Game.map.setposition(( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 ), ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 ))
         
         Game.colission = TiledMap(Game, 40,30,1)
         i = 0
@@ -90,9 +96,7 @@ class Game(BasicGame):
                 i+=1
         #Game.colission.load(map_colission)
 
-        Game.map.fill(0x6f)
-        Game.map.load(map)
-
+        BasicGame.autoredraw = False
         Background.initialize(Game)
         Bubble.initialize(Game)
         Game.player = Player()
@@ -104,6 +108,7 @@ class Game(BasicGame):
         Game.stage   = 0
         Game.world   = 0
         Game.player.spawn()
+        Game.map.redraw()
         
     @staticmethod
     def loop():
@@ -116,36 +121,23 @@ class Game(BasicGame):
     @staticmethod
     def update(delta):
         # do stuff
-        Interpolator.update(delta)
+        BasicGame.update(delta)
+        #Interpolator.update(delta)
 
-        Game.map.update(delta)
-
-        Game.time+=1
-        if Game.time % 16==0:
-            Game.map.redraw()
-            
-        if Game.time > 120:            
-           
+        #Game.map.update(delta)
+    
+        if BasicGame.time > 120:            
             for bubble in Bubble.pool:
                 if bubble.enabled:
                     if int(random() * 10)==1:
-                        Interpolator.add(0, 25, 60, vprint)
+                        #Interpolator.add(0, 25, 60, vprint)
                         bubble.pang() 
-                        Game.time = 0
+                        BasicGame.time = 0
                         break
 
         for bubble in Bubble.pool:
             if not bubble.enabled: continue
             bubble.update(delta)
-        
-        # required stuff
-        if blackbox.ctrlc():
-            debug("Game", "Control+C pressed.")
-            Game.running = False
-            return
-            
-        if joypad.menu():
-            menu()
         
     @staticmethod
     def draw():
@@ -153,16 +145,13 @@ class Game(BasicGame):
         vpu.select(1)
         vpu.fill(0,0,0,0)
         
-        #draw stuff
-        Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )
-        Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
         #Game.map.redraw()
         if Game.map.need_redraw:
             Background.draw()
-            Game.map.draw()
-        
+            Game.map.need_redraw=False
+            
         # raster screen and update input
-        vpu.update()
+        BasicGame.draw()
 
 def vprint(value):
     vpu.select(2)

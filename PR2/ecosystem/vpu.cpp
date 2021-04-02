@@ -477,9 +477,11 @@ static inline void drawEntities() {
 void Vpu::render() {
 
 	if (Vpu::active_map) {
-		if(Vpu::active_map->target) al_set_target_bitmap(Vpu::active_map->target->bitmap);
-		Vpu::active_map->redraw();
-		Vpu::active_map->draw(-Vpu::active_map->scroll.x, -Vpu::active_map->scroll.y);
+		if (Vpu::active_map->layers[0].redraw) {
+			if (Vpu::active_map->target) al_set_target_bitmap(Vpu::active_map->target->bitmap);
+			Vpu::active_map->redraw();
+			Vpu::active_map->draw(Vpu::active_map->x - Vpu::active_map->scroll.x, Vpu::active_map->y - Vpu::active_map->scroll.y);
+		}
 	}
 	drawEntities();
 

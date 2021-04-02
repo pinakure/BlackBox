@@ -97,6 +97,7 @@ class Puzzle:
         Puzzle.game.time_left = 600
         Puzzle.game.time_offset = blackbox.epoch()
         Puzzle.game.total_count = 1
+        Puzzle.game.map.redraw()
         
     @staticmethod 
     def initialize(game):
@@ -123,6 +124,7 @@ class Puzzle:
         debug("Puzzle", "Loading levels...66.66%", end="\r")
         Puzzle.loadlevels(big    , Puzzle.big    , PuzzleSize.BIG)
         debug("Puzzle", "Loading levels.....100%   ")
+        Puzzle.game.map.redraw()
         
     @staticmethod
     def clear():
@@ -131,11 +133,13 @@ class Puzzle:
         Puzzle.game.map.fill(0x0f,2)
         Puzzle.game.loadmap(data, 0)
         Puzzle.game.map.setsurface(Puzzle.game.buffer[0])
+        Puzzle.game.map.redraw()        
 
     @staticmethod 
     def mark():
         if   Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.NORMAL_EMPTY: Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.MARKED_EMPTY
         elif Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.NORMAL_VALUE: Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.MARKED_VALUE
+        Puzzle.game.map.redraw()
 
     @staticmethod 
     def press():
@@ -151,7 +155,8 @@ class Puzzle:
             Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.PUSHED_VALUE
             Puzzle.game.correct()
             if Game.total_count == 0:
-                Game.reveal()        
+                Game.reveal()
+        Puzzle.game.map.redraw()     
         
     @staticmethod 
     def unmark():
@@ -159,6 +164,7 @@ class Puzzle:
             Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.NORMAL_EMPTY
         elif Puzzle.data[Puzzle.y][Puzzle.x] == TileStatus.MARKED_VALUE: 
             Puzzle.data[Puzzle.y][Puzzle.x] = TileStatus.NORMAL_VALUE
+        Puzzle.game.map.redraw()
     
     @staticmethod
     def setsize(width, height):

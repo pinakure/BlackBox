@@ -584,7 +584,7 @@ void EntityBounceController::draw() {
 	Vpu::rectangle(left + 1, top, right - left - 1, bottom - top - 1);
 	Vpu::rectangle(left + 2, top + 1, right - left - 3, bottom - top - 3);
 	Vpu::select(Vpu::foreground);
-
+	/*
 	if (this->map) {
 		int dx, dy;
 		dy = 0;
@@ -605,6 +605,7 @@ void EntityBounceController::draw() {
 			dy += this->map->tile_height;
 		}
 	}
+	*/
 }
 
 bool EntityBounceController::parseValue(std::string name, std::string value) {
