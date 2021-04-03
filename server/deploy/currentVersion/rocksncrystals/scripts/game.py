@@ -21,10 +21,16 @@ from debug                  import debug, error, panic
 
 class Game(BasicGame):
 
+    TILE_ROCK = 0x61
+    TILE_TNT  = 0x60
+    TILE_BLOCKS    = 0x28
+    TILE_GEM_BIG   = 0x40
+    TILE_GEM_SMALL = 0x50
+
     @staticmethod
     def setup():
         try:
-            print("GAME: Setup...")
+            debug("Game", "Setting up")
             BasicGame.prepare()
             vpu.setrotation(0,0)
             #allocate custom video buffers
@@ -32,22 +38,29 @@ class Game(BasicGame):
             # create display map
             Game.setmap(TiledMap(Game, 40, 30, 2, 16, 16))
             if not Game.map.load_tileset("terrain"):
-                print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
-                quit()
-            print("Filling 0x00")
-            Game.loadmap(data   , 0)
-            Game.loadmap(map    , 1)
+                panic("Game", "Cannot load 'tilesets/blocks.png'", "Game could run perfectly, but we think it's better to abort current execution, as you wouldn't be table to see anything on the screen and that would be definitely bad.")
+            Game.map.load(data,0)
+            Game.map.load(map, 1)
             
             # randomize contents
-            for y in range(1,Game.map.height - 2):
-                for x in range(1,Game.map.width - 2):
-                    if int(random()*3)==0:
-                        if int(random()*10)==0:
-                            c = int(random()*16)
-                            Game.map.set(x,y,0x28+c,1)
-                    elif int(random()*3)==0:
-                        Game.map.set(x,y,0x7,1)
-
+            for y in range(1,Game.map.height - 1):
+                for x in range(1,Game.map.width - 1):
+                    if int(random()*25)==0: # block
+                        c = int(random()*24)
+                        Game.map.set(x,y,0x28+c,1)
+                    elif int(random()*25)==0: # Small Gem
+                        c = int(random()*16)
+                        Game.map.set(x,y,0x50+c,1)
+                    elif int(random()*100)==0: # TNT
+                        Game.map.set(x,y,0x60,1)
+                    elif int(random()*50)==0: # Big Gem
+                        c = int(random()*16)
+                        Game.map.set(x,y,0x40+c,1)
+                    elif int(random()*3)==0:  # boulder
+                        Game.map.set(x,y,0x61,1)
+                    else:
+                        Game.map.set(x,y,0x1,1) # dirt
+            
             # center the map on the screen
             Game.map.x = ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160
             Game.map.y = ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
@@ -57,10 +70,10 @@ class Game(BasicGame):
             Game.map.setactive() 
             # tell engine which surface the map must be rendered onto
             Game.map.setsurface(Game.buffer[0]) 
+            BasicGame.autoredraw = False            
             
         except Exception as E:
-            print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
-            console.echo(f'ERROR: {str(E)}')                        
+            panic("Game", "Setup Failed", str(E))
         
     @staticmethod
     def destroy(): pass
@@ -68,23 +81,23 @@ class Game(BasicGame):
     @staticmethod
     def loop():
         delta = 1.0
+        Game.map.need_redraw = True
         while Game.running:
-            if Game.map.needsredraw():
+            if Game.map.needsredraw() or Game.map.need_redraw:
                 # draw to buffer[1]
                 vpu.select(Game.buffer[1])
                 vpu.setcolor(255,0,0)
                 vpu.fill(0,0,0,0)
                 scroll = Game.map.getscroll()
                 vpu.textout(f"{scroll.x},{scroll.y}", 0, 0)
-            
-            # rasterize buffer onto bg layer
-            vpu.select(0)
-            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>2)
-            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>2)
-            for buffer in Game.buffer:
-                if buffer:
-                    vpu.drawsurf(buffer, left, top)
-            # required stuff
+                # rasterize buffer onto bg layer
+                vpu.select(0)
+                left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>2)
+                top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>2)
+                for buffer in Game.buffer:
+                    if buffer:
+                        vpu.drawsurf(buffer, left, top)
+                # required stuff
             BasicGame.draw()
                 
             if joypad.left():       Game.map.scroll_left()

@@ -83,6 +83,7 @@ class BasicGame:
 
     @staticmethod
     def prepare():
+        BasicGame.autoredraw = True
         Vpu.initialize()
         BasicGame.running = True        
         # disable rendering 

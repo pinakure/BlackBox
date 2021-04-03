@@ -75,10 +75,10 @@ class TiledMap:
         self.x = x
         self.y = y
         tm.setposition(self.handle, self.x, self.y)
-    def setscroll(self, x, y):                  tm.setscroll(self.handle, x, y)    
-    def scroll_up(self   , delta=1):            tm.scroll(self.handle, delta, Direction.UP)    
-    def scroll_down(self , delta=1):            tm.scroll(self.handle, delta, Direction.DOWN)  
-    def scroll_left(self , delta=1):            tm.scroll(self.handle, delta, Direction.LEFT)  
-    def scroll_right(self, delta=1):            tm.scroll(self.handle, delta, Direction.RIGHT) 
+    def setscroll(self, x, y):                  tm.setscroll(self.handle, x, y)
+    def scroll_up(self   , delta=1):            tm.scroll(self.handle, delta, Direction.UP)
+    def scroll_down(self , delta=1):            tm.scroll(self.handle, delta, Direction.DOWN)
+    def scroll_left(self , delta=1):            tm.scroll(self.handle, delta, Direction.LEFT)
+    def scroll_right(self, delta=1):            tm.scroll(self.handle, delta, Direction.RIGHT)
     def load_tileset(self, tileset_filename):   return tm.loadtileset(self.handle, tileset_filename)
     def update(self, delta):                    tm.update(self.handle, delta)

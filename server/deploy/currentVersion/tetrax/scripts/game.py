@@ -50,7 +50,10 @@ class Game(BasicGame):
                 print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
                 quit()
             Game.map.fill(0x7E, 0)
-            Game.loadmap(data)
+            Game.map.load(data)
+            Game.map.redraw()
+            BasicGame.autoredraw = False
+
             Game.clear()            
             Game.triste = [ Triste(Game), Triste(Game, True) ]
             
@@ -76,9 +79,10 @@ class Game(BasicGame):
         BasicGame.update(delta)
         
         # do stuff
-        if Game.running and Game.map.need_redraw:
+        if Game.running and Game.time % 4 == 0:
             Game.triste[0].update(delta)
             Game.triste[1].update(delta)
+            Game.map.redraw()
         
         
     @staticmethod
