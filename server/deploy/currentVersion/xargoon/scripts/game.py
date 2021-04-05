@@ -21,15 +21,13 @@ from data.scripts.bigfoe            import BigFoe
 from data.scripts.hudicon           import HudIcon
 from entity                         import Entity, EntityController
 from random                         import random
+from debug                          import debug,panic,error
+from basicgame                      import BasicGame
 import blackbox
 import vpu
 import joypad
 
-class Game:
-    running = True
-    width = 0
-    height = 0
-    dims = {}
+class Game(BasicGame):
     entities = []
     tokens = []
     explosions = []
@@ -52,31 +50,15 @@ class Game:
 
     @staticmethod
     def setup():
-        # prepare transition
-        vpu.disable(0)
-        vpu.disable(1)
-        vpu.disable(2)
-        vpu.transition() 
-        while not vpu.update():pass
+        BasicGame.prepare()
         # change screen content here
-        print("GAME: Setting up...")
-        Game.running = True
-        # disable rendering
-        # get layer dimensions
-        vpu.select(0); Game.dims[0] = vpu.dimensions()
-        vpu.select(1); Game.dims[1] = vpu.dimensions()
-        Game.width  = Game.dims[1][0]
-        Game.height = Game.dims[1][1]
-        vpu.select(2); Game.dims[2] = vpu.dimensions()
-        print(f"GAME: BG Resolution: {Game.dims[0][0]} x {Game.dims[0][1]}")
-        print(f"GAME: FG Resolution: {Game.dims[1][0]} x {Game.dims[1][1]}")
-        print(f"GAME: OL Resolution: {Game.dims[2][0]} x {Game.dims[2][1]}")
+        debug("Game", "Setting up")
         # prepare initial layer state
         Game.prepare_background(0)
         vpu.select(1); vpu.fill(0,0,0,0)
         vpu.select(2); vpu.fill(255,255,0,255)
         # initialize subcomponents
-        print("GAME: Initializing classes...")
+        debug("Game", "Initializing classes")
         HudIcon.initialize(Game)
         Token.initialize(Game)
         BigExplosion.initialize(Game)
@@ -86,7 +68,7 @@ class Game:
         Ship.initialize(Game)
         Foe.initialize(Game)
         BigFoe.initialize(Game)
-        print("GAME: Initializing object pools...")
+        debug("Game", "Initializing object pools")
         # Create token pool
         for i in range(0, 16):
             Game.randomToken()
@@ -171,11 +153,12 @@ class Game:
         Game.entities[2].setsprite(subspr)
         Game.entities[3].setsprite(subspr)
         Game.entities[4].setsprite(subspr)
+        BasicGame.autoredraw = False
         
     @staticmethod
     def randomExplosion(baseclass):
-        x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
-        y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
+        x = int(Game.width>>2)  + int(random()*(Game.width>>1))-16
+        y = int(Game.height>>2) + int(random()*(Game.height>>1))-16
         s = baseclass(x,y)
         s.time += int(random()*30)
         s.alive = False
@@ -183,16 +166,16 @@ class Game:
     
     @staticmethod
     def randomFoe(baseclass):
-        x = int(random() * Game.dims[1][0] ) - 16
-        y = int(random() * Game.dims[1][1] ) - 16
+        x = int(random() * Game.width  ) - 16
+        y = int(random() * Game.height ) - 16
         foe_type = int(random()*(Foe.TYPE_MAX))
         s = baseclass(x,y,foe_type)
         Game.foes.append(s)
     
     @staticmethod
     def randomToken():
-        x = int(Game.dims[1][0]/4) + int(random()*(Game.dims[1][0]/2))-16
-        y = int(Game.dims[1][1]/4) + int(random()*(Game.dims[1][1]/2))-16
+        x = int(Game.width  >> 2) + int(random()*(Game.width  >> 1))-16
+        y = int(Game.height >> 2) + int(random()*(Game.height >> 1))-16
         token_type = int(random()*(Token.TYPE_MAX))
         t = Token(x, y, token_type)
         t.alive = False
@@ -200,8 +183,8 @@ class Game:
 
     @staticmethod
     def spawn():
-        w = int(Game.dims[1][0]/2)-16
-        h = int(Game.dims[1][1]/2)
+        w = int(Game.width>>1)-16
+        h = int(Game.height>>1)
         Game.ship = Ship(w, h, Ship.TYPE_A)
 
     @staticmethod
@@ -222,6 +205,7 @@ class Game:
         Ship.destroy()
         Foe.destroy()
         BigFoe.destroy()
+        #BasicGame.destroy()
         
     @staticmethod
     def loop():
@@ -231,11 +215,7 @@ class Game:
         while Game.running:
             Game.timer+=1        
             Game.draw()
-            Game.update(delta)
-            if blackbox.ctrlc():
-                print("Control+C pressed.")
-                Game.destroy()
-                Game.running = False        
+            Game.update(delta)            
             
     @staticmethod
     def animate():
@@ -258,9 +238,8 @@ class Game:
         for projectile in Game.projectiles:
             if projectile.alive: projectile.update(delta)
         Game.ship.update(delta)
-        if joypad.menu():
-            from scripts.main import menu
-            menu()
+        # required BasicGame stuff
+        BasicGame.update(delta)
         
     @staticmethod
     def draw():
@@ -286,14 +265,3 @@ class Game:
         # raster screen and update input
         
         vpu.update()
-
-
-def setup():
-    return Game.setup()
-
-def loop():
-    return Game.loop()
-
-def destroy():
-    quit()
-    return Game.destroy()

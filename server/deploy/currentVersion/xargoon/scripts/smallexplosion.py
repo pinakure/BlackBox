@@ -1,5 +1,6 @@
-from vpu import *
-from random import random
+from vpu            import *
+from debug          import debug, panic, error
+from random         import random
 
 class SmallExplosion:
     TYPE_A = 0x00
@@ -12,7 +13,7 @@ class SmallExplosion:
     @staticmethod
     def initialize(game):
         SmallExplosion.game = game
-        print("Initializing SmallExplosion...")
+        debug("SmallExplo", "Initializing")
         SmallExplosion.tileset = createsprite("explosion_small")
         SmallExplosion.initialized = True
 

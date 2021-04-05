@@ -26,7 +26,8 @@ from debug                      import debug, error, panic
 from math                       import cos, sin
 import                          vpu
 import                          joypad
-        
+from pixel import Pixel
+
 class Terrain:
     game            = None
     width           = 40
@@ -37,15 +38,54 @@ class Terrain:
     seed            = 0x1337DEAD
     scale_factor    = 2.0
     octave          = 7
+    flag            = Pixel(0,0)
+    hole            = Pixel(0,0)
+    pole            = Pixel(0,0)
+    flag_frame      = 0
+
+    BARRIER_U   = 0x01
+    BARRIER_R   = 0x02
+    BARRIER_UR  = 0x03
+    BARRIER_D   = 0x04
+    BARRIER_DR  = 0x06
+    BARRIER_L   = 0x08
+    BARRIER_UL  = 0x09
+    BARRIER_DL  = 0x0C
+    BARRIER_ROUND_OFFSET = 0x04
+    BARRIER_DIAGONAL_UP_LEFT_A    = 0xA0
+    BARRIER_DIAGONAL_UP_LEFT_B    = 0xC0
+    BARRIER_DIAGONAL_UP_RIGHT_A   = 0xA1
+    BARRIER_DIAGONAL_UP_RIGHT_B   = 0xC1
+    BARRIER_DIAGONAL_DOWN_LEFT_A  = 0xE0
+    BARRIER_DIAGONAL_DOWN_LEFT_B  = 0x110
+    BARRIER_DIAGONAL_DOWN_RIGHT_A = 0xE1
+    BARRIER_DIAGONAL_DOWN_RIGHT_B = 0x111
+    
+    FLAG            = 0xB4
+    HOLE            = 0xD4
+    BASE            = 0xF4
+    POLE            = [ 0xF5, 0xD5, 0xB5 ]
+    FLAG_RED        = 0xB6
+    FLAG_GREEN      = 0xBA
+    FLAG_BLUE       = 0xD6
+    FLAG_PURPLE     = 0xDA
+    FLAG_BLACK      = 0xF6
+    FLAG_BROWN      = 0xFA
 
     @staticmethod
     def initialize(game):
-        Terrain.data = vpu.createsurf(Terrain.width, Terrain.height)            
+        Terrain.data = vpu.createsurf(Terrain.width, Terrain.height)
         Terrain.game = game
         x, y = Terrain.randomize()
         Terrain.sethole(x, y)
         Terrain.setpole(x, y)
         Terrain.setflag(x, y)
+
+    @staticmethod 
+    def update(delta=1.0):
+        Terrain.flag_frame += 0.125
+        Terrain.game.map.set(Terrain.flag.x, Terrain.flag.y, int(Terrain.FLAG_RED+Terrain.flag_frame),2)
+        if Terrain.flag_frame >= 4: Terrain.flag_frame = 0
 
     @staticmethod
     def randomize():
@@ -71,19 +111,25 @@ class Terrain:
     @staticmethod
     def setpole(x,y):
         if y<2:y=2
-        Terrain.game.map.set(x,y-2, 0x4F, 2)
-        Terrain.game.map.set(x,y-1, 0x6F, 2)
-        Terrain.game.map.set(x,  y, 0x8F, 2)
+        Terrain.pole.x = x
+        Terrain.pole.y = y
+        Terrain.game.map.set(x,y-2, Terrain.POLE[2], 2)
+        Terrain.game.map.set(x,y-1, Terrain.POLE[1], 2)
+        Terrain.game.map.set(x,  y, Terrain.POLE[0], 2)
     
     @staticmethod
     def setflag(x,y):
         if y<2:y=2
-        Terrain.game.map.set(x,y-2, 0x4E, 2)
+        Terrain.flag.x = x
+        Terrain.flag.y = y-2
+        Terrain.game.map.set(x,y-2, Terrain.FLAG, 2)
     
     @staticmethod
     def sethole(x,y):
         if y<2:y=2
-        Terrain.game.map.set(x, y, 0x4D, 1)
+        Terrain.hole.x = x
+        Terrain.hole.y = y
+        Terrain.game.map.set(x, y, Terrain.HOLE, 1)
         
 
 from pixel import Pixel
@@ -256,6 +302,8 @@ class Game(BasicGame):
 
         Game.ball.update(delta)
 
+        Terrain.update(delta)
+            
         # required stuff
         BasicGame.update(delta)
         
@@ -295,7 +343,7 @@ class Game(BasicGame):
             # draw editor
             Editor.draw()
             Editor.update()
-            
+
             vpu.select(0)
             left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
             top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)

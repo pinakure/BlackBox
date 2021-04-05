@@ -1,7 +1,11 @@
-from vpu import *
+from vpu        import * #deprecate import
+from Vpu        import Vpu
+from debug      import debug, error, panic
 
 class HudIcon:
     game = None
+    width  = 0
+    height = 0
     TYPE_A = 0x00
     TYPE_B = 0x01
     TYPE_C = 0x02
@@ -19,14 +23,17 @@ class HudIcon:
     x = 0
     y = 0
     layer_index = 2
+
     @staticmethod
     def initialize(game):
         HudIcon.game = game
-        print("Initializing HudIcon...")
+        debug("HudIcon", "Initializing")
         HudIcon.footer = createsprite("hud_low")
+        if not HudIcon.footer:
+            panic("HudIcon", "Cannot load hud component 'hud_low.png'!")
         HudIcon.tileset = createsprite("hud",16)
         if not HudIcon.tileset:
-            print("Cannot load HudIcon tileset!")
+            panic("HudIcon", "Cannot load hud component 'hud.png'!")
         else:
             HudIcon.gfx[HudIcon.TYPE_A] = {}
             HudIcon.gfx[HudIcon.TYPE_B] = {}
@@ -49,8 +56,12 @@ class HudIcon:
             HudIcon.gfx[HudIcon.TYPE_D][2] = createanim(16,16, HudIcon.tileset, 3, 1, 3, 1, False)
             HudIcon.gfx[HudIcon.TYPE_D][3] = createanim(16,16, HudIcon.tileset, 7, 1, 7, 1, False)
         HudIcon.weapon_type = HudIcon.TYPE_A
-        HudIcon.x = int( HudIcon.game.dims[HudIcon.layer_index ][0] / 2 )-(16 + 8)
-        HudIcon.y = int( HudIcon.game.dims[HudIcon.layer_index ][1] / 2 )-(16 + 8)
+
+        Vpu.select(Vpu.overlay)
+        HudIcon.width, HudIcon.height = Vpu.dimensions()
+
+        HudIcon.x = ( HudIcon.width  >> 1 )-(16 + 8)
+        HudIcon.y = ( HudIcon.height >> 1 )-(16 + 8)
 
     @staticmethod
     def destroy():
@@ -86,8 +97,8 @@ class HudIcon:
         fill(0,0,0,0)
 
         # Draw Shield energy Bar
-        left = int(HudIcon.game.dims[HudIcon.layer_index][0]/4)
-        top  = 0#int(HudIcon.game.dims[HudIcon.layer_index][1]/2)
+        left = HudIcon.width >> 2
+        top  = 0 # HudIcon.height >> 1
         energy_bar_width = 64
         setcolor(0,0,0, 32)
         fillrect(left+7, top + 7, energy_bar_width+4, 8)
@@ -99,8 +110,8 @@ class HudIcon:
         fillrect(left+9, top + 9, w, 4)
         
         # draw powerup selection bar selection rectangle
-        fx = int(HudIcon.game.dims[HudIcon.layer_index][0]/2)
-        fy = int(HudIcon.game.dims[HudIcon.layer_index][1]/2)-8
+        fx = HudIcon.width   >> 1
+        fy = (HudIcon.height >> 1)-8
         o = 5
         if HudIcon.timer % 20 < 10:
             setcolor(32,32,0,8)

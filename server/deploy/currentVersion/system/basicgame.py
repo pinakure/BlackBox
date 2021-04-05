@@ -1,5 +1,6 @@
 from random         import random
 from scripts.main   import menu
+from debug          import debug, error, panic, deprecate
 import blackbox
 import vpu
 import joypad
@@ -32,6 +33,15 @@ class BasicGame:
     rumble_x_time = 0
     rumble_y_time = 0
     scroll = Pixel(0,0)
+
+    @staticmethod
+    def restorebuffers():
+        #TBC when video restarts. 
+        # Each game should reinitialize every graphic component if video restart event is produced,
+        # so maybe a initialize -> reinitialize code writing strategy is better in the video resize scenarios, 
+        # if lastly needed....
+        for b in BasicGame.buffer:
+            b = Surface(320, 240)
 
     @staticmethod
     def getdimensions():
@@ -67,22 +77,15 @@ class BasicGame:
 
     @staticmethod
     def loadmap(data=[], layer=0):
+        deprecate("BasicGame.loadmap", "TiledMap.load")
         BasicGame.map.load(data,layer)
-        """
-        #BasicGame.map.fill(0x00)
-        #load map...
-        i=0
-        try:
-            for y in range(0, BasicGame.map.height):
-                for x in range(0,  BasicGame.map.width):
-                    BasicGame.map.setvalue(x,y, data[i], layer)
-                    i+=1
-        except:
-            debug('BasicGame', "WARNING: Insufficient data provided to fill map!")
-        """
 
     @staticmethod
     def prepare():
+        # prepare transition
+        vpu.transition() 
+        while not vpu.update():pass
+        
         BasicGame.autoredraw = True
         Vpu.initialize()
         BasicGame.running = True        
@@ -124,7 +127,8 @@ class BasicGame:
         if joypad.menu():
             menu()
 
-        if BasicGame.time % 4==0 and BasicGame.autoredraw:
+        if BasicGame.time % 4==0 and BasicGame.autoredraw and BasicGame.map is not None:
+            #if hasattr(BasicGame, 'map'):
             BasicGame.map.redraw()
 
         BasicGame.rumble_x_time = BasicGame.rumble_x_time -1 if BasicGame.rumble_x_time > 0 else BasicGame.rumble_x_time
@@ -133,6 +137,11 @@ class BasicGame:
         BasicGame.rumble_y = (int(random()*3)-1) if BasicGame.rumble_y_time > 0 else 0
             
         BasicGame.time += 1
+
+    @staticmethod
+    def loop():
+        debug('Basicgame', 'Loop')
+        BasicGame.update(1.0)
 
     @staticmethod
     def destroy():
@@ -145,7 +154,7 @@ class BasicGame:
         vpu.select(0)
         vpu.perlin(255,0,128)
         
-        if BasicGame.map is not None:
+        if hasattr(BasicGame, 'map') and BasicGame.map is not None:
             debug("BasicGame", "Destroying Map")
             BasicGame.map.setactive(True)
             BasicGame.map.setsurface(-1)

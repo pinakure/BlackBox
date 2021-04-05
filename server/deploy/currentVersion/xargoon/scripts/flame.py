@@ -1,4 +1,4 @@
-
+from debug                      import debug, panic, error
 from vpu import * 
 
 class Flame:
@@ -15,7 +15,7 @@ class Flame:
     @staticmethod
     def initialize(game):
         Flame.game = game
-        print("Initializing Flames...")
+        debug("Flame", "Initializing")
         Flame.tileset = createsprite("particles",10)
         Flame.gfx[ Flame.TYPE_A ] = createanim(8,16, Flame.tileset, 0, 0, 3, 0, False,0.1)
         Flame.gfx[ Flame.TYPE_B ] = createanim(8,16, Flame.tileset, 4, 0, 7, 0, False,0.25)

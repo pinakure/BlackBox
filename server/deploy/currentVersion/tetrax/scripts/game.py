@@ -21,6 +21,8 @@ from random                 import random
 from basicgame              import BasicGame
 from tiledmap               import TiledMap
 
+from debug                  import debug, panic, error
+
 import console
 import blackbox
 import vpu
@@ -38,17 +40,15 @@ class Game(BasicGame):
     @staticmethod
     def setup():
         try:
-            print("GAME: Setup...")
+            debug("Game", "Setting up")
             BasicGame.prepare()
-
             #allocate custom video buffers
             Game.buffer[0] = vpu.createsurf(320, 240) 
             Game.buffer[1] = vpu.createsurf(320, 240) 
             # create display map
             Game.setmap(TiledMap(Game, 40, 30, 3))
             if not Game.map.load_tileset("blocks"):
-                print("\n---------------------------------------------------------\nERROR: Cannot load 'tilesets/blocks.png'\n\tGame could run perfectly, but we think it's better to\n\tabort current execution, as you wouldn't be\n\table to see anything on the screen and\n\tthat would be definitely bad.\n---------------------------------------------------------\n")
-                quit()
+                panic("Game", "Cannot load 'tilesets/blocks.png'", "Game could run perfectly, but we think it's better to abort current execution, as you wouldn't be able to see anything on the screen and that would be definitely bad.")
             Game.map.fill(0x7E, 0)
             Game.map.load(data)
             Game.map.redraw()
@@ -58,8 +58,8 @@ class Game(BasicGame):
             Game.triste = [ Triste(Game), Triste(Game, True) ]
             
         except Exception as E:
-            print("\n---------------------------------------------------------\nERROR: Setup Failed\n\tGame cannot run.\n---------------------------------------------------------\n")
             console.echo(f'ERROR: {str(E)}')                        
+            panic("Game", "Setup Failed. Game cannot run.", str(E))
         
     @staticmethod
     def clear():
@@ -142,12 +142,3 @@ class Game(BasicGame):
         
         # required stuff
         BasicGame.draw()
-    
-def setup():
-    return Game.setup()
-
-def loop():
-    return Game.loop()
-
-def destroy():
-    return Game.destroy()

@@ -1,5 +1,6 @@
 
 from vpu import *
+from debug      import debug, error, panic
 from random import random
 
 class BigExplosion:
@@ -10,9 +11,10 @@ class BigExplosion:
     @staticmethod
     def initialize(game):
         BigExplosion.game = game
-        print("Initializing BigExplosion...")
+        debug("BigExplosi", "Initializing")
         BigExplosion.tileset = createsprite("explosion_big",13)
-        if not BigExplosion.tileset: print("ERROR: Cannot load BigExplosion tileset!")
+        if not BigExplosion.tileset: 
+            panic("BigExplosi", "Cannot load BigExplosion tileset!")
         else: BigExplosion.initialized = True
     
     @staticmethod

@@ -19,7 +19,7 @@ import joypad
 from tiledmap   import TiledMap
 from basicgame  import BasicGame
 from animation  import Animation
-from debug      import debug, error
+from debug      import debug, error, panic, exception
 
 class TileStatus:
     NORMAL_VALUE = 0x00
@@ -338,8 +338,6 @@ class Game(BasicGame):
         try:
             debug("Game", "Setting up")
             BasicGame.prepare()
-            vpu.transition() 
-            while not vpu.update():pass
             # change screen content here
             Game.buffer = [ vpu.createsurf(320, 240), vpu.createsurf(320, 240) ]
             # create display map
@@ -361,7 +359,8 @@ class Game(BasicGame):
             vpu.setscale(0, 2.0, 2.0)
             vpu.setscale(1, 2.0, 2.0)
         except Exception as E:
-            panic(str(E))
+            exception(E)
+            Game.running = False
 
     @staticmethod
     def destroy():

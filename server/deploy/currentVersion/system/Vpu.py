@@ -69,5 +69,16 @@ class Vpu:
             error("Vpu", "Called destroy before initialize()")
 
     @staticmethod
+    def dimensions():
+        dims = vpu.dimensions()
+        return int(dims[0]), int(dims[1])
+
+    @staticmethod
+    def select(surface): 
+        target = surface
+        if surface is not None:
+            vpu.select(surface.handle)
+
+    @staticmethod
     def update():
         vpu.update()

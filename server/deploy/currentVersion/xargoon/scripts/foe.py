@@ -1,6 +1,7 @@
 from vpu import *
 from math import atan2
 from random import random
+from debug      import debug, error, panic
 from data.scripts.projectile import Projectile
 
 class RandomPoint:
@@ -31,6 +32,7 @@ class Foe:
     
     @staticmethod
     def initialize(game):
+        debug("Foe", "Initializing")        
         Foe.game = game
         sprite = createsprite("foe0",10)
         for i in range(0x00, 0x08):
@@ -104,9 +106,9 @@ class Foe:
             elif y <= bottom and y >= ship.y: y -=self.game.ship.height*3
             
             if x < 0: x+=64
-            elif x > self.game.dims[1][0]: x-=64
+            elif x > self.game.width: x-=64
             if y < 0: y+=64
-            elif y > self.game.dims[1][1]: y-=64
+            elif y > self.game.height: y-=64
             self.path.append([int(x), int(y)])
         
     def draw_path(self):
@@ -150,8 +152,8 @@ class Foe:
             #self.flee()
             
     def spawn(self):
-        self.x = int(random() * Foe.game.dims[1][0] ) - 16
-        self.y = int(random() * Foe.game.dims[1][1] ) - 16
+        self.x = int(random() * Foe.game.width  ) - 16
+        self.y = int(random() * Foe.game.height ) - 16
         self.foe_type = int(random()*(Foe.TYPE_MAX))
         self.weapon_type      = self.foe_type%3
         self.projectile_speed = Foe.weapon_speed[ self.weapon_type ]

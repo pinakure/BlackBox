@@ -100,11 +100,11 @@ PyMethodDef Vpu::methods[] = {
 };
 
 void prepareTests() {
-	Vpu::foreground.enabled = false;
 	Vpu::background.enabled = true;		
 	Vpu::select(Vpu::background);
 	Vpu::subdivide(40, 40, 50, 255);
-	//Vpu::randomize();
+	/*Vpu::foreground.enabled = false;
+	//Vpu::randomize();*/
 }
 
 void Vpu::subdivide(int r, int g, int b, int alpha) {

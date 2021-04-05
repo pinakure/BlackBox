@@ -1,6 +1,7 @@
-from vpu import *
-from random import random
-from math import atan2
+from vpu        import *
+from debug      import debug, error, panic
+from random     import random
+from math       import atan2
 
 class Projectile:
     TYPE_A   = 0x00
@@ -16,7 +17,7 @@ class Projectile:
     @staticmethod
     def initialize(game):
         Projectile.game = game
-        print("Initializing Particles...")
+        debug("Projectile", "Initializing")
         sprite = createsprite("particles",10)
         tileset = subsprite(sprite,0, 16, 128, 32)
         deletesprite(sprite)
@@ -90,8 +91,8 @@ class Projectile:
         self.y += self.delta_y
         if self.x <= 0: self.alive = False
         elif self.y <= 0: self.alive = False
-        elif self.x > int(Projectile.game.dims[1][0]): self.alive = False
-        elif self.y > int(Projectile.game.dims[1][1]): self.alive = False
+        elif self.x > int(Projectile.game.width ): self.alive = False
+        elif self.y > int(Projectile.game.height): self.alive = False
         self.angle = atan2(-self.delta_x, -self.delta_y)*-1
         if self.delta_x > -.1 and self.delta_x < .1 and self.delta_y > -.1 and self.delta_y < .1: self.alive = False
         if self.owner == Foe: target = self.check_ship_collision()

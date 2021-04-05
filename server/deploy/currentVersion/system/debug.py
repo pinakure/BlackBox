@@ -32,3 +32,20 @@ def panic(message, help=""):
 
 def error(classname, message):
     printpadded(message, f"ERROR @ {classname}: ")
+
+def deprecate(oldfunc, newfunc):
+    _print(f"\n{'-'*80}\n")
+    _print(f"{oldfunc} IS DECLARED DEPRECATED, please use {newfunc} instead")
+    _print(f"\n{'-'*80}\n")
+    
+def exception(E):
+    _print(f"\n{'-'*80}\n")
+    import traceback 
+    import console
+    parts = traceback.format_exc().split('\n')
+    _print(f"Exception: {str(E)}")
+    for p in parts:
+        console.echo(p)
+        printpadded("           ", p)
+    _print(f"\n{'-'*80}\n")
+    

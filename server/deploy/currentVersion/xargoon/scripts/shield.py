@@ -1,4 +1,5 @@
 from vpu import *
+from debug      import debug, error, panic
 from random import random
 
 class Shield:
@@ -29,15 +30,14 @@ class Shield:
     @staticmethod
     def initialize(game):
         Shield.game = game
-        print("Initializing Shield...")
+        debug("Shield", "Initializing")
         Shield.tileset = createsprite("shield")
         if Shield.tileset:
             for i in range(0,8):
                 Shield.gfx[ i ] =  createanim(Shield.width, Shield.height, Shield.tileset, 0, 0, 7, 0, False,1/1.5,False)
             Shield.initialized = True
         else:
-            print("ERROR: Cannot load Shield tileset!")        
-        
+            panic("Shield", "Cannot load tileset!")
 
     @staticmethod
     def destroy():

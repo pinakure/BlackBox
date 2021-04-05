@@ -1,5 +1,6 @@
-from vpu import *
-from random import random
+from vpu        import *
+from debug      import debug, error, panic
+from random     import random
 
 original_colors = [
     [0, 0, 0],
@@ -114,11 +115,11 @@ class Token:
     @staticmethod
     def initialize(game):
         Token.game = game
-        print("Initializing Tokens...")
+        debug("Token", "Initializing")
         sprite = createsprite("tokens",15)
         if not sprite:
-            print("ERROR: Cannot load Token tileset!")        
-        print(f"Creating subsprites...")        
+            panic("Token", "Cannot load Token tileset!")
+        debug("Token", "Creating subsprites")
         Token.tileset[ Token.TYPE_A      ] = subsprite(sprite, 0,  0, 128, 16)
         Token.tileset[ Token.TYPE_B      ] = subsprite(sprite, 0,  0, 128, 16)
         Token.tileset[ Token.TYPE_C      ] = subsprite(sprite, 0,  0, 128, 16)
@@ -173,8 +174,8 @@ class Token:
         self.y += self.delta_y
         if self.x < -Token.width: self.alive = False
         elif self.y < -Token.height: self.alive = False
-        elif self.x > int(Token.game.dims[1][0]): self.alive = False
-        elif self.y > int(Token.game.dims[1][1]): self.alive = False
+        elif self.x > int(Token.game.width): self.alive = False
+        elif self.y > int(Token.game.height): self.alive = False
         #check collision with ship
         left  = int(self.game.ship.x) - (self.game.ship.width>>1)
         top   = int(self.game.ship.y) - (self.game.ship.height>>1)

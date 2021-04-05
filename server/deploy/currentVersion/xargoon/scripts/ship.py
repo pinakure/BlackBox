@@ -2,6 +2,7 @@ from vpu import *
 from data.scripts.flame         import Flame
 from data.scripts.projectile    import Projectile
 from data.scripts.shield        import Shield
+from debug                      import debug, panic, error
 from random import random
 import joypad
 
@@ -19,9 +20,9 @@ class Ship:
 
     @staticmethod
     def initialize(game):
+        debug("Ship", "Initializing")
         Ship.game = game
         Ship.shield = Shield
-        print("Initializing Ship...")
         Ship.tileset = createsprite("ship01",10)
         Ship.initialized = True
         Ship.timer = 0        
