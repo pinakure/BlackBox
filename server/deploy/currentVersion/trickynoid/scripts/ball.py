@@ -35,7 +35,7 @@ class Ball:
         self.max_speed    = 2.00
         self.trail_timer  = 0
         self.stick_offset = 0
-        self.trail        = Ball.clearTrail(32)
+        self.trail        = Ball.initializeTrail(32)
         self.status       = status
         
     def getStickOffset(self):

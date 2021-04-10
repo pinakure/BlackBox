@@ -18,6 +18,8 @@ from random                         import random
 from basicgame                      import BasicGame
 from data.scripts.ball              import Ball
 from data.scripts.paddle            import Paddle
+from data.scripts.ballsystem        import BallSystem
+from data.scripts.explosion         import Explosion
 from data.scripts.hitreaction       import HitReaction
 from Vpu                            import Vpu
         
@@ -26,7 +28,9 @@ class Game(BasicGame):
     @staticmethod
     def setup():
         BasicGame.prepare()
-        
+        BallSystem.initialize(Game)
+        Explosion.initialize(Game)
+        Paddle.initialize(Game)
         
     @staticmethod
     def loop():

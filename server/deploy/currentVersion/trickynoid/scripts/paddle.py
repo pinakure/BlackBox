@@ -1,6 +1,7 @@
 from data.scripts.ball  import Ball, BallStatus
 from data.scripts.token import Token
 from animation          import Animation, AnimationLoop, AnimationAutoUpdate
+import vpu
 
 class PaddleStatus:
     DEAD    = 0
@@ -18,8 +19,8 @@ class Paddle:
     
     @staticmethod
     def initialize(game):
-        Paddle.game = Game
-        Paddle.sprite = vpu.createsprite('paddle')
+        Paddle.game = game
+        Paddle.sprite = vpu.createsprite('pad')
         Paddle.gfx = {}
         Paddle.gfx[PaddleStatus.DEAD      ] = Animation(20,4, Paddle.sprite, 0, 0, 0, 0, False,  0.0, AnimationAutoUpdate.NO)
         Paddle.gfx[PaddleStatus.PLAYING   ] = Animation(20,4, Paddle.sprite, 0, 1, 0, 5, False, 16.0, AnimationAutoUpdate.YES, AnimationLoop.PINGPONG)
