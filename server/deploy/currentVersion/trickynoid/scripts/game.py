@@ -18,6 +18,7 @@ from random                         import random
 from basicgame                      import BasicGame
 from data.scripts.ball              import Ball
 from data.scripts.paddle            import Paddle
+from data.scripts.HitReaction       import HitReaction
 from Vpu                            import Vpu
         
 class Game(BasicGame):
