@@ -193,10 +193,15 @@ class Ball:
             self.delta.r = abs(self.delta.r)* 0.5            
         self.ground = self.position.r == 0
         if not self.ground:
-            self.delta.r = self.delta.r - 0.00097 if self.delta.r > -1.0 else -1.0        
-        self.delta.x *= 0.987 if self.ground else 0.996
-        self.delta.y *= 0.987 if self.ground else 0.996
+            self.delta.r = self.delta.r - 0.00095 if self.delta.r > -1.0 else -1.0        
+        self.delta.x *= 0.8 if self.ground else 0.996
+        self.delta.y *= 0.8 if self.ground else 0.996
         
+        if int(self.position.x)>>3 == int(Terrain.hole.x):
+            if int(self.position.y)>>3 == int(Terrain.hole.y):
+                print("HOLE!")
+                win()
+                
         if (abs(self.delta.x) + abs(self.delta.y)) <0.015: 
             self.delta.x = 0
             self.delta.y = 0
