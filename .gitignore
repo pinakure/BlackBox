@@ -82,3 +82,9 @@ alpha/scripts/games/
 alpha/scripts/stress.py
 
 data/
+
+server/deploy/currentVersion/build.db
+
+server/deploy/currentVersion/trickynoid/legacydata/
+
+*.java
