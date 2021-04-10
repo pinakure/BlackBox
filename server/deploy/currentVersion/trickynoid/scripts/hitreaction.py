@@ -8,7 +8,7 @@ class  HitReaction:
     # causeFall;                 //If true, hit brick begins to fall
     # causeSelectiveDestruction; //If true, bricks with same id as hit brick dissappear
     
-    def __init__(self){
+    def __init__(self):
         self.causeBounce    = False
         self.invertDeltas   = False
         self.causeExplosion = False
