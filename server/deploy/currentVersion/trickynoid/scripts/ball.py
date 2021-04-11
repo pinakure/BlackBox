@@ -1,3 +1,4 @@
+from pixel import Pixel
 from debug import deprecate
 
 class BallStatus:
@@ -10,8 +11,6 @@ class BallStatus:
     MAGIC     = 5 #Commodin ball
     STICKED   = 13
     
-from pixel import Pixel
-
 class Ball:
 
     trail = {}

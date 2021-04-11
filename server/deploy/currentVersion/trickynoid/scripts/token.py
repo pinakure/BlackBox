@@ -44,30 +44,23 @@ class TokenType:
     }
 
 class Token:
-
+    sprite = None
     gfx    = None
     game   = None
     width  = 11
     height = 7
     
-    
     @staticmethod
     def initialize(game):
         Token.game = game
-        Token.gfx  = {}
-        """
-        try {
-            SpriteSheet tokenSheet = new SpriteSheet("data/gfx/tokens.png", TOKEN_WIDTH, TOKEN_HEIGHT, new Color(255,0,255));
-            gfx = new Animation[0x10];
-            for(int i=0; i < 0x10; i++) {
-                gfx[i] = new Animation(tokenSheet, 0, i, 5, i,false, 60, false);            
-            }
-        } catch (SlickException ex) {
-            gfx = null;
-            Logger.getLogger(Token.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        """
-
+        try:
+            Token.sprite = vpu.createsprite('tokens')
+            Token.gfx  = {}
+            for i in range(0, 0x10):
+                Token.gfx[i] = Animation(Token.width, Token.height, Token.sprite, 0, i, 5, i, False, 60, False)
+        except Exception as E:
+            exception(E)
+    
     def __init__(self, x, y, token_type):
         self.x     = x+6 # Current position, in pixels
         self.y     = y

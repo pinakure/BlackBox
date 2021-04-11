@@ -1,59 +1,48 @@
-from data.scripts.ball import Ball
-
+from debug                  import debug, exception, error, deprecate, panic
+from data.scripts.ball      import Ball, BallStatus
+from data.scripts.paddle    import PaddleStatus
+from animation              import Animation
+import vpu
 
 class BallSystem:
-    game = None
-    gfx  = None
+    game    = None
+    gfx     = None
+    sprite  = None
     
     @staticmethod
     def initialize(game):
-        BallSystem.game = game
-        BallSystem.gfx  = {}
-        """
-        try {
-            ballGfx = new Animation[6];
-            
-            SpriteSheet ballSheet = new SpriteSheet("data/gfx/balls.png", 4, 4, new Color(255,0,255));
-            for(int i=0; i<BALL_MAGIC; i++){
-                ballGfx[i] = new Animation(ballSheet, i, 0, i, 0, false, 1, false);        
-            }
-            ballGfx[BALL_MAGIC] = new Animation(ballSheet, BALL_MAGIC, 0, BALL_MAGIC+3, 0, true, 1, false);
-        } catch (SlickException ex) {
-            ballGfx = null;
-            Logger.getLogger(BrickSystem.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        """
-    
-    def BallSystem(self):
-        self.balls = {}
+        try:
+            BallSystem.game = game
+            BallSystem.sprite  = vpu.createsprite('balls')
+            BallSystem.gfx  = {}
+            for i in range(0, BallStatus.MAGIC):
+                BallSystem.gfx[i]  = Animation(4,4, BallSystem.sprite, i, 0, i, 0, False, 1, False);        
+            BallSystem.gfx[BallStatus.MAGIC] = Animation(4,4, BallSystem.sprite, BallStatus.MAGIC, 0, BallStatus.MAGIC+3, 0, False, 1, True)
+        except Exception as E:
+            exception(E)
+
+    def __init__(self):
+        self.balls = []
         self.gfx   = {}
-        self.balls.add(Ball(0))
-        self.theBall = self.balls.get(0)
-        
+        self.balls.append(Ball(0))
+        self.theBall = self.balls[0]
         self.theBall.setStatus(BallStatus.READY)
         self.drawTrail = False
-        
         self.timeScale = 1.0
+        self.paddle    = None
     
-    def setTimeScale(self, timeScale):
-        self.timeScale = timeScale
-
-    def getBalls(self):
-        return self.balls
-
-    def getTheBall(self):
-        return self.theBall
+    def setPaddle(self, paddle):        self.paddle = paddle
+    def setTimeScale(self, timeScale):  self.timeScale = timeScale
+    def getBalls(self):                 return self.balls
+    def getTheBall(self):               return self.theBall
+    def size(self):                     return len(self.balls)
+    def get(self, index):               return self.balls[index]
     
-    def alter(self, x, y):
+    def alter(self, x, y):      
         for b in self.balls:
             if b.getStatus() > 0:
                 b.addDelta(x/2, y/2)
             
-    def size(self):
-        return self.balls.size()
-    
-    def get(self, index):
-        return self.balls.get(index)
     
     def multiply(self):
         newBall = Ball(self.theBall.getStatus())
@@ -61,26 +50,26 @@ class BallSystem:
         newBall.setY(self.theBall.getY())
         newBall.setDeltaX(-self.theBall.getDeltaX())
         newBall.setDeltaY( self.theBall.getDeltaY())
-        self.balls.add(newBall)
+        self.balls.append(newBall)
     
     def divide(self):
-        oldBalls = {}
-        newBalls = {}   
+        oldBalls = []
+        newBalls = []   
         ballCount = 0        
         oldBalls = self.balls
         
         if oldBalls.size() > 1:
             ballCount = oldBalls.size() / 2
-            newBalls = {}
+            newBalls = []
             for i in range(0, ballCount):
-                newBalls.add(oldBalls.get(i))
+                newBalls.append(oldBalls[i])
             self.balls = newBalls
     
     def subdivide(self):
         newBalls = {}
         lastBall = self.theBall
         for b in self.balls:
-            newBalls.add(b)
+            newBalls.append(b)
         for b in newBalls:
             self.theBall = b
             if balls.size()<512: multiply()            
@@ -135,30 +124,33 @@ class BallSystem:
         map     = BallSystem.game.getMap()
         bricks  = BallSystem.game.getBricks()
         
-        stillAlive = false
-        for i in range(0, self.balls.size()):
-            if self.balls.get(i).getStatus() == -1:
-                self.balls.remove(i)
-
-        bx = 0;     # Ball X position
-        by = 0;     # Ball Y position
-        
-        dx = 0;     # Ball delta X
-        dy = 0;     # Ball delta Y
-        
-        idx = 0;    # Int converted delta X
-        idy = 0;    # Int converted delta Y
-                
-        testY = 0;  # X Point to be tested
-        testX = 0;  # Y Point to be tested
-                
+        stillAlive = False
+        # remove dead balls 
+        balls = []
         for b in self.balls:
+            if b.getStatus() == -1: continue                
+            balls.append(b)
+        self.balls = balls
+
+        bx = 0      # Ball X position
+        by = 0      # Ball Y position
+        
+        dx = 0      # Ball delta X
+        dy = 0      # Ball delta Y
+        
+        idx = 0     # Int converted delta X
+        idy = 0     # Int converted delta Y
+                
+        testY = 0   # X Point to be tested
+        testX = 0   # Y Point to be tested
+                
+        for b in self.balls: 
             # Apply timescale
-            if timeScale > 1.0:
-                b.setTimeScale(timeScale)
+            if self.timeScale > 1.0:
+                b.setTimeScale(self.timeScale)
                 b.setTrailStart(b.getX(), b.getY())
             else:
-                b.setTimeScale(timeScale)
+                b.setTimeScale(self.timeScale)
             
             ballStatus = b.getStatus()
             

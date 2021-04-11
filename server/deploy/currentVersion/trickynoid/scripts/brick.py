@@ -32,12 +32,12 @@ class Brick:
     def isInverter(self):       return Brick.types[self.brick_type].isInverter    
     def getType(self):          return self.brick_type
     def getGraph(self):         return Brick.types[self.brick_type].graphic + self.variation
-    def getScore(self):     return Brick.types[self.brick_type].score
-    def getDamage(self):    return self.damage
-    def getHealth(self):    return Brick.types[self.brick_type].health
-    def getTokenType(self): return self.token
-    def isAlive(self):      return self.brick_type != BrickType.NONE
-    def hasToken(self):     return self.token > 0x00
+    def getScore(self):         return Brick.types[self.brick_type].score
+    def getDamage(self):        return self.damage
+    def getHealth(self):        return Brick.types[self.brick_type].health
+    def getTokenType(self):     return self.token
+    def isAlive(self):          return self.brick_type != BrickType.NONE
+    def hasToken(self):         return self.token > 0x00
     
     def applyDamage(self, appliedDamage):
         self.damage += appliedDamage
