@@ -27,6 +27,7 @@ from data.scripts.bricktype         import BrickType
 from data.scripts.brick             import Brick
 from data.scripts.backdrop          import Backdrop
 from data.scripts.hud               import Hud
+from data.scripts.inventory         import Inventory
 from Vpu                            import Vpu
         
 class Game(BasicGame):
@@ -35,6 +36,7 @@ class Game(BasicGame):
     balls       = None
     hud         = None
     backdrop    = None
+    inventory   = None
     
     @staticmethod
     def setup():
@@ -46,10 +48,12 @@ class Game(BasicGame):
         BrickType.initialize(Game)
         Hud.initialize(Game)
         Backdrop.initialize(Game)
+        Inventory.initialize(Game)
         Game.particles  = ParticleSystem()
         Game.balls      = BallSystem()
         Game.hud        = Hud
         Game.backdrop   = Backdrop(140)
+        Game.inventory  = Inventory()
         
     @staticmethod
     def loop():
