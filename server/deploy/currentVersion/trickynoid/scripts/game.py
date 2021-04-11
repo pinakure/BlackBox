@@ -23,12 +23,18 @@ from data.scripts.explosion         import Explosion
 from data.scripts.hitreaction       import HitReaction
 from data.scripts.particle          import Particle
 from data.scripts.particlesystem    import ParticleSystem
+from data.scripts.bricktype         import BrickType
+from data.scripts.brick             import Brick
+from data.scripts.backdrop          import Backdrop
+from data.scripts.hud               import Hud
 from Vpu                            import Vpu
         
 class Game(BasicGame):
 
     particles   = None
     balls       = None
+    hud         = None
+    backdrop    = None
     
     @staticmethod
     def setup():
@@ -37,8 +43,13 @@ class Game(BasicGame):
         Explosion.initialize(Game)
         Paddle.initialize(Game)
         ParticleSystem.initialize(Game)
+        BrickType.initialize(Game)
+        Hud.initialize(Game)
+        Backdrop.initialize(Game)
         Game.particles  = ParticleSystem()
         Game.balls      = BallSystem()
+        Game.hud        = Hud
+        Game.backdrop   = Backdrop(140)
         
     @staticmethod
     def loop():
