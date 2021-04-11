@@ -41,7 +41,7 @@ class Paddle:
         self.lastPosition = 0.0
         self.status       = PaddleStatus.READY  # 3 waiting for ball active
         self.warmUp       = 1  #Prevents accidental initial fire 
-        Paddle.game.getBalls().getTheBall().setStatus(BallStatus.READY)
+        Paddle.game.getBalls().getTheBall().status=BallStatus.READY
         
     def getWidth(self):
         return self.width
@@ -137,11 +137,11 @@ class Paddle:
             if b.getStatus() == BallStatus.STICKED:
                 b.setDeltaX(-self.delta)
                 b.setDeltaY(-1.0)
-                b.setStatus(BallStatus.STICKY)
+                b.status = BallStatus.STICKY
             elif b.getStatus() == BallStatus.READY:
                 b.setDeltaX(-self.delta)                
                 b.setDeltaY(-1.0)
-                b.setStatus(BallSatus.NORMAL)
+                b.status = BallSatus.NORMAL
         # self.status = PADDLE_PLAYING
     
     def test(self, x, y):

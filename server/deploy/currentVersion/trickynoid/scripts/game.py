@@ -217,6 +217,7 @@ class Game(BasicGame):
 
     @staticmethod
     def update(delta):
+        BasicGame.update(delta)
         Game.delta = delta
         Paddle.gfx[Game.paddle.getStatus()].update(int(delta * Game.timeScale))
         Game.updateMap()
@@ -301,7 +302,7 @@ class Game(BasicGame):
             //if(paddle.getStatus() == PADDLE_STICKY | paddle.getStatus() == PADDLE_READY ){
             if(ballsReady) {
                paddle.trigger(false);
-               if(paddle.getStatus() != PADDLE_STICKY) paddle.setStatus(PADDLE_PLAYING);
+               if(paddle.getStatus() != PADDLE_STICKY) paddle.status = PADDLE_PLAYING
                 
             } else if(paddle.getStatus() != PADDLE_READY){
                 
@@ -399,6 +400,14 @@ class Game(BasicGame):
         
         renderInventary(g);
         """
+        if Game.map.need_redraw:
+            #rasterize layers
+            vpu.select(0)
+            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+            for buffer in Game.buffer:
+                if buffer:
+                    vpu.drawsurf(buffer, left, top)
 
 
         # ...
@@ -561,7 +570,7 @@ class Game(BasicGame):
     @staticmethod
     def newPaddle():
         Game.paddle = Paddle(Game.balls.getTheBall(), Game)
-        Game.paddle.setStatus(PaddleStatus.READY)                 
+        Game.paddle.status = PaddleStatus.READY
         Game.balls.setPaddle(Game.paddle)   # Update ballSystem paddle reference 
     
     @staticmethod
@@ -626,7 +635,7 @@ class Game(BasicGame):
     @staticmethod
     def applyEffect(effectIndex):
         Game.balls.setStatus(BallStatus.NORMAL)
-        Game.paddle.setStatus(PaddleStatus.PLAYING)        
+        Game.paddle.status = PaddleStatus.PLAYING
         if   effectIndex == TokenType.SUBDIVIDE:   Game.balls.subdivide()
         elif effectIndex == TokenType.DIVIDE:      Game.balls.divide()
         elif effectIndex == TokenType.SHOOT:       Game.paddle.shoot()
@@ -635,7 +644,7 @@ class Game(BasicGame):
         elif effectIndex == TokenType.ONEUP:       Game.oneUp(1)
         elif effectIndex == TokenType.ONEDOWN:     Game.oneDown(1)
         elif effectIndex == TokenType.ULTRABALL:   Game.balls.setStatus(BallStatus.ULTRA)
-        elif effectIndex == TokenType.STICKBALL:   Game.balls.setStatus(BallStatus.STICKY); Game.paddle.setStatus(PaddleStatus.STICKY)
+        elif effectIndex == TokenType.STICKBALL:   Game.balls.setStatus(BallStatus.STICKY); Game.paddle.status = PaddleStatus.STICKY
         elif effectIndex == TokenType.COMMODIN:    Game.balls.setStatus(BallStatus.MAGIC)
         elif effectIndex == TokenType.SHIELD:      Game.enableShield()
         elif effectIndex == TokenType.HALFSCORE:   Game.halfScore()

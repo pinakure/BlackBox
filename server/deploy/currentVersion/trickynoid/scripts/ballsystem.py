@@ -26,7 +26,7 @@ class BallSystem:
         self.gfx   = {}
         self.balls.append(Ball(0))
         self.theBall = self.balls[0]
-        self.theBall.setStatus(BallStatus.READY)
+        self.theBall.status = BallStatus.READY
         self.drawTrail = False
         self.timeScale = 1.0
         self.paddle    = None
@@ -77,7 +77,7 @@ class BallSystem:
     
     def setStatus(self, status):
         for b in self.balls:
-            b.setStatus(status)
+            b.status = status
     
     def render(self):
         if self.drawTrail:
@@ -237,7 +237,7 @@ class BallSystem:
                         switch(ballStatus) {
                             case BALL_STICKY:
                                 // Stop ball at paddle                        
-                                b.setStatus(BALL_STICKED);
+                                b.status = BALL_STICKED
                                 b.setDeltaX(0.0f);
                                 b.setDeltaY(0.0f);
                                 b.setStickOffset(b.getX() - paddle.getX());
@@ -259,7 +259,7 @@ class BallSystem:
 
         # Check if balSystem is fully dead
         if not stillAlive:
-            self.game.paddle.setStatus(PaddleStatus.DEAD)
+            self.game.paddle.status = PaddleStatus.DEAD
             self.game.oneDown(1)
             self.game.ready()
     
