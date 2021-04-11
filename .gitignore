@@ -88,3 +88,5 @@ server/deploy/currentVersion/build.db
 server/deploy/currentVersion/trickynoid/legacydata/
 
 *.java
+
+server/deploy/currentVersion/trickynoid_legacydata/
