@@ -1,21 +1,16 @@
-from animation import Animation
+from debug      import debug, deprecate, error, exception, panic
+from animation  import Animation, AnimationLoop
+import vpu 
 
 class Explosion:
-    
+    sprite  = None
     gfx     = None    
     game    = None
 
     def initialize(game):
         Explosion.game = game
-        Explosion.gfx = {}
-        """
-        try {
-            // Load explosion graphics
-            SpriteSheet explosionSheet = new SpriteSheet("data/gfx/explosion.png", 48, 24, new Color(255,0,255));
-            gfx = new Animation(explosionSheet, 0, 0, 7, 0, true, 25, false);
-            gfx.setLooping(false);
-        } catch (SlickException ex) {
-            gfx = null;
-            Logger.getLogger(Explosion.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        """
+        try:
+            Explosion.sprite = vpu.createsprite('explosion')
+            Explosion.gfx = Animation(48,24, Explosion.sprite, 0, 0, 7, 0, False, .25, True, AnimationLoop.NONE)
+        except Exception as E:
+            exception(E)

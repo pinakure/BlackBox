@@ -14,6 +14,7 @@ import blackbox
 import vpu
 import joypad
 from scripts.main                   import menu
+from debug                          import debug, deprecate, error, exception, panic
 from random                         import random
 from basicgame                      import BasicGame
 from data.scripts.ball              import Ball, BallStatus
@@ -106,7 +107,7 @@ class Game(BasicGame):
     inventory           = None
     name                = None
     reaction            = None
-    timeScale           = 1.0            
+    time_scale          = 1.0
     scoreMultiplier     = 1
     accel               = 0.0
     maxAccel            = 1.5
@@ -114,6 +115,7 @@ class Game(BasicGame):
     musicplayer         = None
     map                 = None
     powerupType         = 0x00
+    game_over           = False
 
     @staticmethod
     def setup(name="TrickyNoid"):
@@ -132,6 +134,7 @@ class Game(BasicGame):
         BrickSystem.initialize(Game)
         Game.bricks     = BrickSystem() 
         Game.particles  = ParticleSystem()
+        Game.paddle     = None
         Game.balls      = BallSystem()
         Game.hud        = Hud
         Game.musicplayer= MusicPlayer(Game.hud)
@@ -139,43 +142,19 @@ class Game(BasicGame):
         Game.backdrop   = Backdrop(140)
         Game.inventory  = Inventory()
         Game.reaction   = HitReaction()
-        Game.map        = TiledMap(Game, 20, 30, 3)
+        Game.map        = TiledMap(Game, 20, 30, 4, 16, 8)
+        Game.explosion  = Explosion
         Game.tokens     = {}
+        Game.map.load_tileset('tileset')
         Game.map.fill(0x9F)
         Game.map.setactive()
         Game.map.setposition(0,0)
+        # Game.map.setposition(
+        #     ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160,
+        #     ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
+        # )
         Game.map.setsurface(Game.buffer)
-        """
-        loadGraphics();
-        Brick.initProperties();
-        
-        /* Create game instance */
-        game = new Game("Smiker");
-        
-        initInput(gc);
-        
-        /* Create hud object, passing tokenGfx to be able to show active powerup */
-        hud = new Hud(Token.gfx, game);
-                
-        /* Give game a reference to which hud is monitoring the game */
-        game.setHud(hud);
-        
-        /* Create music player */
-        musicplayer = new MusicPlayer(hud.getMap());
-
-        /* Give game a reference to which object holds the map which is loaded */
-        game.setMusicplayer(musicplayer);
-        
-        /* Create backdrop object, which manages the background tiles */
-        backdrop = new Backdrop(musicplayer.getTempo());
-        
-        /* Give game a reference to which object manages the backdrop, 
-           to be able to alter color depending on which block is stroke */        
-        game.setBackdrop(backdrop);
-        
-        /* New game */
-        game.New();
-        """
+        Game.New()
 
     @staticmethod
     def loop():
@@ -217,9 +196,8 @@ class Game(BasicGame):
 
     @staticmethod
     def update(delta):
-        BasicGame.update(delta)
         Game.delta = delta
-        Paddle.gfx[Game.paddle.getStatus()].update(int(delta * Game.timeScale))
+        Paddle.gfx[Game.paddle.getStatus()].update(int(delta * Game.time_scale))
         Game.updateMap()
         Game.updateTokens()
         Game.updatePaddle(input)
@@ -227,147 +205,105 @@ class Game(BasicGame):
         Game.particles.update(delta)
         Game.bricks.update(delta)
         if Game.powerupType < 0x10:
-            Token.gfx[Game.powerupType].update(int(delta*Game.timeScale))
-        """
-        inputManager.setInput(gc.getInput());
+            Token.gfx[Game.powerupType].update(int(delta*Game.time_scale))
         
-        Paddle paddle = game.getPaddle();
-        Ball theBall = game.getTheBall();
-        BallSystem balls = game.getBalls();
+        paddle  = Game.getPaddle()
+        theBall = Game.getTheBall()
+        balls   = Game.getBalls()
         
-        resetInput();
+        Game.resetInput()
         
-        readKeyboard();
+        Game.readKeyboard()
         
-        // Move paddle or brake it
-        if(ACTION_MOVE_LEFT) game.moveLeft();
-        else if(ACTION_MOVE_RIGHT) game.moveRight();
-        else if(!ACTION_MOVE_LEFT) game.brake();
+        # Move paddle or brake it
+        if Game.action.MOVE_LEFT:           Game.moveLeft()
+        elif Game.action.MOVE_RIGHT:        Game.moveRight()
+        elif not Game.action.MOVE_LEFT:     Game.brake()
         
-        //readJoystick();
+        # readJoystick();
         
-        if(ACTION_NEXT_POWERUP) {
-            game.setPowerupType(nextPowerup[game.getPowerupType()]);
-            ACTION_NEXT_POWERUP=false;
-        } else if(ACTION_PREV_POWERUP) {
-            game.setPowerupType(prevPowerup[game.getPowerupType()]);
-            ACTION_PREV_POWERUP=false;
-        }
+        if Game.action.NEXT_POWERUP:
+            Game.setPowerupType( Game.nextPowerup[ Game.getPowerupType() ] )
+            Game.action.NEXT_POWERUP = False
+        elif Game.action.PREV_POWERUP:
+            Game.setPowerupType( Game.prevPowerup[ Game.getPowerupType() ] )
+            Game.action.PREV_POWERUP = False
         
+        if Game.action.debug.GROW:          Game.paddle.grow()        
+        if Game.action.debug.SHRINK:        Game.paddle.shrink()        
+        if Game.action.debug.HIGLIGHT_BALL: Game.getParticles().generate(0x01, Game.theBall.x+2, Game.theBall.y+2)        
+        if Game.action.debug.MULTIPLY:      Game.balls.subdivide()
         
-        if(ACTION_DEBUG_GROW) {
-            paddle.grow();
-        }
+        # Handle Music player
+        if Game.action.debug.NEXT_SONG:
+            Game.musicplayer.nextSong()
+            Game.backdrop.setSpeed(Game.musicplayer.getTempo())
+        else: 
+            if Game.action.debug.ERASE_SONG:
+                Game.musicplayer.deleteSong()
+        Game.musicplayer.update(delta)
         
-        if(ACTION_DEBUG_SHRINK) {
-            paddle.shrink();            
-        }
+        if Game.action.debug.ABORT:
+            raise Exception("Aborted by User")
         
-        if(ACTION_DEBUG_HIGLIGHT_BALL) {
-            game.getParticles().generate(0x01, theBall.getX()+2, theBall.getY()+2);
-        }
+        if Game.action.debug.FULLSCREEN:
+            gc.setFullscreen(not gc.isFullscreen())
         
-        if(ACTION_DEBUG_MULTIPLY) {
-            balls.subdivide();
-        }
-        
-        // Handle Music player
-        if(ACTION_DEBUG_NEXT_SONG) {
-            musicplayer.nextSong();
-            backdrop.setSpeed(musicplayer.getTempo());
-        } else if(ACTION_DEBUG_ERASE_SONG) {
-            musicplayer.deleteSong();
-        } 
-        musicplayer.update(Delta);
-        
-        if(ACTION_DEBUG_ABORT) {
-            throw new SlickException("Aborted by User");
-        }
-        
-        if(ACTION_DEBUG_FULLSCREEN) {
-            gc.setFullscreen(!gc.isFullscreen());
-        }
-        
-        if(ACTION_ACTIVATE) {
-            boolean ballsReady = false;
-            for(Ball b : game.getBalls().getBalls()) {
-                if((b.getStatus() == BALL_STICKED) || (b.getStatus() == BALL_READY)) {
-                    ballsReady = true;
-                    break;
-                } else {
-                    
-                }
-            }
+        if Game.action.ACTIVATE:
+            ballsReady = False
+            for b in game.getBalls().getBalls():
+                if b.getStatus() in [BallStatus.STICKED, BallStatus.READY]:
+                    ballsReady = True
             
-            //if(paddle.getStatus() == PADDLE_STICKY | paddle.getStatus() == PADDLE_READY ){
-            if(ballsReady) {
-               paddle.trigger(false);
-               if(paddle.getStatus() != PADDLE_STICKY) paddle.status = PADDLE_PLAYING
-                
-            } else if(paddle.getStatus() != PADDLE_READY){
-                
-                paddle.shoot();
-            }  
+            #if paddle.getStatus() in [PaddleStatus.STICKY, PaddleStatus.READY]:
+            if ballsReady:
+               paddle.trigger(False)
+               if paddle.getStatus() != PaddleStatus.STICKY:
+                   paddle.status = PaddleStatus.PLAYING
+            elif paddle.getStatus() != PaddleStatus.READY:                
+                paddle.shoot()
             
-            // Switch off
-            ACTION_ACTIVATE = false;
-        }
+            # Switch off
+            Game.action.ACTIVATE = False
         
-        // Handle timescale
-        if(ACTION_DEBUG_TIMESCALE_DOUBLE) {
-            game.setTimeScale(2.0f);
-        } else {
-            // Handle bullet time
-            
-            if((ACTION_BALLTIME)&&(game.getBulletTime() > 0.0000f)) {
-                game.setTimeScale(0.125f);
-                game.setBulletTime(game.getBulletTime()-0.0125f);
-            
-                float bulletTime = game.getBulletTime();            
-                
-                if(bulletTime > 0.02f) {
-                    if(ACTION_TILT_LEFT) {                        
-                        balls.alter(-bulletTime, 0);
-                    } else if(ACTION_TILT_RIGHT) {
-                        balls.alter(bulletTime, 0);
-                    }
+        # Handle timescale
+        if Game.action.debug.TIMESCALE_DOUBLE:  
+            Game.time_scale = 2.0
+        else: 
+            # Handle bullet time
+            if (Game.action.BALLTIME) and (Game.getBulletTime() > 0.0000):
+                Game.time_scale = 0.125
+                Game.setBulletTime(Game.getBulletTime()-0.0125)
+                bulletTime = Game.getBulletTime()
+                if bulletTime > 0.02:
+                    if Game.action.TILT_LEFT:
+                        balls.alter(-bulletTime, 0)
+                    elif Game.action.TILT_RIGHT:
+                        balls.alter(bulletTime, 0)
+                    if Game.action.TILT_UP:
+                        balls.alter(0, -bulletTime)
+                    elif Game.action.TILT_DOWN:
+                        balls.alter(0, bulletTime)
+            else:
+                Game.time_scale = 1.0
+                # Regenerate bullet Time
+                bulletTime = Game.getBulletTime()
+                if Game.getBulletTime() < 1.000: bulletTime += 0.0012
+                else: bulletTime = 1.0000
+                Game.setBulletTime(bulletTime)
+        
+        Game.backdrop.update(delta, Game.musicplayer, Game.time_scale)        
+        #Game.update(delta, inputManager.input)        
+        Game.hud.updateLcd(Game.getBulletTime())        
+        Game.explosion.gfx.update(int(delta*Game.time_scale))
 
-                    if(ACTION_TILT_UP) {
-                        balls.alter(0, -bulletTime);
-                    } else if(ACTION_TILT_DOWN) {
-                        balls.alter(0, bulletTime);
-                    }
-                }
-                
-            } else {                 
-                game.setTimeScale(1.0f);
-                
-                // Regenerate bullet Time
-                float bulletTime = game.getBulletTime();
-                
-                if(game.getBulletTime() < 1.000f)bulletTime += 0.0012f;
-                else bulletTime = 1.0000f;
-                
-                game.setBulletTime(bulletTime);
-            }
-        }
         
-        backdrop.update(Delta, musicplayer, game.getTimeScale());
-        
-        game.update(Delta, inputManager.input);
-        
-        hud.updateLcd(game.getBulletTime());
-        
-        Explosion.gfx.update((int)(Delta*game.getTimeScale()));
-        
-        
-        if(game.isGameOver()){
-            /* Call Gameover process */
-            game.Over();
-            /* Restart game */ 
-            game.New();
-        }    
-        """
+        if Game.isGameOver():
+            # Call Gameover process 
+            Game.Over()
+            # Restart game 
+            Game.New()
+
         #required stuff
         BasicGame.update(delta)
 
@@ -378,12 +314,17 @@ class Game(BasicGame):
         vpu.fill(0,0,0,0)
         
         #draw stuff
+        #Game.hud.draw()
+        for x in range(0, 20):
+            for y in range(0, 30):
+                Game.map.set(x,y, Hud.data[y][x], 3)
+        
         """
         g.scale(screenScale, screenScale);
         g.translate(0, 0);        
         
         backdrop.render(g);
-        game.getMap().render(g);
+        Game.getMap().render(g);
         game.getBricks().render(g);
         
         drawTokens();
@@ -402,28 +343,27 @@ class Game(BasicGame):
         """
         if Game.map.need_redraw:
             #rasterize layers
-            vpu.select(0)
-            left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
-            top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
-            for buffer in Game.buffer:
-                if buffer:
-                    vpu.drawsurf(buffer, left, top)
-
+            pass
+        
+        vpu.select(0)
+        left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+        top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+        vpu.drawsurf(Game.buffer, left, top)
 
         # ...
         BasicGame.draw()
-    
+        
     @staticmethod
     def setHud(hud):                
         Game.hud = hud   
 
     @staticmethod
     def isGameOver():               
-        return Game.gameOver
+        return Game.game_over
 
     @staticmethod   
-    def setGameOver(gameOver):      
-        Game.gameOver = gameOver
+    def setGameOver(game_over):      
+        Game.game_over = game_over
 
     @staticmethod
     def getScore():                 
@@ -459,12 +399,12 @@ class Game(BasicGame):
 
     @staticmethod
     def getTimeScale():             
-        return Game.timeScale    
+        return Game.time_scale    
 
     @staticmethod
-    def setTimeScale(timeScale):
-        Game.timeScale = timeScale
-        Game.balls.setTimeScale(timeScale)    
+    def setTimeScale(time_scale):
+        Game.time_scale = time_scale
+        Game.balls.setTimeScale(time_scale)    
 
     @staticmethod
     def getBulletTime():            
@@ -548,11 +488,10 @@ class Game(BasicGame):
             return        
         Game.score          = 0
         Game.lives          = 5
-        Game.gameOver       = False
+        Game.game_over      = False
         Game.level          = 0
         Game.lives          = 3
-        Game.gameOver       = False
-        Game.timeScale      = 1.0       
+        Game.time_scale     = 1.0       
         Game.powerupType    = 0x00
         Game.level          = 0
         Game.score          = 0
@@ -560,12 +499,11 @@ class Game(BasicGame):
         Game.balls          = BallSystem()  # Create balls 
         Game.newPaddle()                        # Create paddle
         Game.tokens         = {}                # Create token list 
-        Game.particles      = ParticleSystem(Game)
-        Game.particles.init()
+        Game.particles      = ParticleSystem()
         Game.bricks         = BrickSystem() # Create brick system 
-        Game.map = Map("sample", Game)          # Load map (must be done after creating bricksystem 
         Game.musicplayer.nextSong()
-        
+        Game.loadMap("sample") # Load map (must be done after creating bricksystem 
+        debug("Game", "Game setup finished")
     
     @staticmethod
     def newPaddle():
@@ -576,7 +514,7 @@ class Game(BasicGame):
     @staticmethod
     def Over():
         # Game over process 
-        pass
+        Game.game_over = False
     
     @staticmethod
     def oneUp(lives):
@@ -586,7 +524,8 @@ class Game(BasicGame):
     def oneDown(lives):
         Game.lives -= lives
         if Game.lives <= 0: 
-            Game.gameOver = True
+            Game.game_over = True
+        debug("Game", f"OneDown : lives = {Game.lives}")
     
     @staticmethod
     def ready():
@@ -695,8 +634,10 @@ class Game(BasicGame):
     @staticmethod 
     def loadMap(filename):        
         try:
-            Game.map = TiledMap("data/map/"+ filename + ".tmx", "data/gfx")
-            Game.getBricks().loadBricks(map)
+            #Game.map = TiledMap(Game, 20, 30, 3)
+            #Game.map.loadtmx(filename)
+            Game.bricks.load(Game.map)
+            debug("Game", "loadMap : Map loaded")
         except Exception as E:
             exception(E)
 
@@ -711,7 +652,7 @@ class Game(BasicGame):
     @staticmethod
     def updateTokens():
         for t in Game.tokens:
-            t.update(Game.timeScale)
+            t.update(Game.time_scale)
             if t.collides(Game.paddle):
                 #Execute token effect and unlink it from list
                 #TODO: Do something
@@ -720,7 +661,7 @@ class Game(BasicGame):
                 Game.inventory.inheritToken(t.getType())
                 Game.tokens.remove(t)
                 continue
-            if t.getY() >= 240:
+            if t.y >= 240:
                 Game.tokens.remove(t)
 
     @staticmethod
@@ -729,7 +670,7 @@ class Game(BasicGame):
             tokentype = t.getType()
             tok = Token.gfx[tokentype]
             tok.setframe(t.getFrame())
-            tok.draw(3 + t.getX(), 3 + t.getY())
+            tok.draw(3 + t.x, 3 + t.y)
 
     @staticmethod
     def drawToken(x, y, tokentype):

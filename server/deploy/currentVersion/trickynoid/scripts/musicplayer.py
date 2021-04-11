@@ -1,10 +1,35 @@
-from debug import debug, deprecate, error, exception, panic
-from random import random
-from data.scripts.song import Song
+from debug              import debug, deprecate, error, exception, panic
+from random             import random
+from data.scripts.song  import Song
 
 class Music:
+    def __init__(self, filename="music.xm"):
+        self.is_playing = False
+        self.filename   = filename
+        self.author     = "NOAUTHOR"
+        self.title      = "NOTITLE"
+        self.speed      = 140
+        self.volume     = 0
+        self.fading     = 0
+        self.open()
+
+    def open(self):
+        # get author, title, tempo from filename
+        self.author     = "NOAUTHOR"
+        self.title      = "NOTITLE"
+        self.speed      = 140
+        
     def fade(self, start, end, unknown):
         pass
+
+    def loop(self, a, b):
+        pass
+
+    def playing(self):      return self.is_playing
+    def getSpeed(self):     return self.speed
+    def getTitle(self):     return self.title
+    def getAuthor(self):    return self.author
+    def getFilename(self):  return self.filename
 
 
 class MusicPlayer:
@@ -21,13 +46,13 @@ class MusicPlayer:
         self.songTitleOffset = 0.0
         self.songTitleDelta  = 0.015
         self.maxSongs        = 0
-        self.nextSong        = None
+        self.next_song       = 0
 
     def getSongAuthor(self): 
         return self.author
     
     def getSongList(self):
-        songlist = {}
+        songlist = [ Music() ]
         self.maxSongs = 0
         
         try:                 
@@ -54,7 +79,7 @@ class MusicPlayer:
                 else:
                     # Not a valid module, dont load it.
                     continue;
-                songlist.add(new Song(file, songName, "Unauthed", songTempo));
+                songlist.append(Song(file, songName, "Unauthed", songTempo));
                 self.maxSongs++;
             """      
         except Exception as E:
@@ -64,9 +89,9 @@ class MusicPlayer:
     def deleteSong(self):
         self.music.stop()        
         # Take song reference 
-        s = self.songList.get(self.nextSong)        
+        s = self.songList[self.next_song]
         # Unlink from songList
-        self.songList.remove(self.nextSong)
+        self.songList.remove(self.next_song)
         self.maxSongs -= 1
         """
         File file =new File("data/music/" + s.getFilename());
@@ -142,23 +167,23 @@ class MusicPlayer:
         return "NONAME"
     
     def songTitleUpdate(self):
-        name = self.songList.get(self.nextSong).getTitle()
+        name = self.songList[self.next_song].getTitle()
         for i in range(0, 14):            
             """
             # 1ST Line : Song Title
             code = name.codePointAt(i + (int)songTitleOffset);
             if((code > 31)&&(code < 0xff)){
-                hud.setTileId(48+i, 1, 1, code - 31);
+                self.hud.setTileId(48+i, 1, 1, code - 31);
             } else {
-                hud.setTileId(48+i, 1, 1, 0x01);
+                self.hud.setTileId(48+i, 1, 1, 0x01);
             }
             
             # 2ND Line : Song Author
             code = author.codePointAt(i + (int)songTitleOffset);
             if((code > 31)&&(code < 0xff)){
-                hud.setTileId(48+i, 2, 1, code - 31);
+                self.hud.setTileId(48+i, 2, 1, code - 31);
             } else {
-                hud.setTileId(48+i, 2, 1, 0x01);
+                self.hud.setTileId(48+i, 2, 1, 0x01);
             }
             
             # 3RD Line : Song timer
@@ -181,9 +206,11 @@ class MusicPlayer:
                             hours % 10};
             """
             if i<10:
-                hud.setTileId(61-i, 3, 1, 0x11 + value[i] )
+                pass
+                #self.hud.map.set(61-i, 3, 1, 0x11 + value[i] )
             else:
-                hud.setTileId(61-i, 3, 1, 0x1)
+                pass
+                #self.hud.map.set(61-i, 3, 1, 0x1)
     
     def quiet(self): 
         self.music.fade(300, 0.50, False)
@@ -192,14 +219,14 @@ class MusicPlayer:
         self.music.fade(300, 1.0, False)
     
     def musicEnded(self, music):
-        nextSong()
+        self.nextSong()
     
     def musicSwapped(self, music,  newMusic):
         pass
     
     def getTempo(self):
-        speed = int(self.songList.get(self.nextSong).getSpeed())
-        print(f"TITLE {self.songList.get(self.nextSong).getTitle() } : - : Song speed: {speed}")
+        speed = int(self.songList[self.next_song].getSpeed())
+        print(f"TITLE {self.songList[self.next_song].getTitle() } : - : Song speed: {speed}")
         return speed
     
     def update(self, delta):        
@@ -221,9 +248,9 @@ class MusicPlayer:
             #music.removeListener(self)
             pass
         
-        self.nextSong = int(random() * maxSongs-1)
+        self.next_song = int(random() * self.maxSongs-1)
         try:
-            self.music = Music("data/music/" + songList.get(nextSong).getFilename())
+            self.music = Music(self.songList[self.next_song].getFilename())
         except Exception as E:
             exception(E)
         
@@ -231,7 +258,6 @@ class MusicPlayer:
         self.songTitleDelta     = 0.0015
         self.playbackTime       = 0
         
-        self.music.addListener(self)
         self.music.loop(1.0, 0.0)
         self.music.fade(1000, 1.0, False)
         self.songTitleUpdate()

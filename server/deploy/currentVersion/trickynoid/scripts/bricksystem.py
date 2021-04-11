@@ -68,12 +68,11 @@ class BrickSystem:
         self.load(map, width, height)
 
     def load(self, map, width=14, height=26):
+        from data.scripts.brick import Brick
         self.bricks = []
-        brickIndex = 0
         for y in range(0, height):
             for x in range(0, width):
-                self.bricks[brickIndex] = Brick(x, y, map.getTileId(x, y, 0), map.getTileId(x, y, 2) -  0x81)
-                self.brickIndex+=1
+                self.bricks.append( Brick(x, y, map.get(x, y, 0), map.get(x, y, 2) -  0x81))
     
     def test(self, x, y):
         #x/=16;

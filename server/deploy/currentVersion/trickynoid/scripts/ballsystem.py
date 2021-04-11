@@ -22,17 +22,18 @@ class BallSystem:
             exception(E)
 
     def __init__(self):
-        self.balls = []
-        self.gfx   = {}
+        self.balls          = []
+        self.gfx            = {}
         self.balls.append(Ball(0))
-        self.theBall = self.balls[0]
+        self.theBall        = self.balls[0]
         self.theBall.status = BallStatus.READY
-        self.drawTrail = False
-        self.timeScale = 1.0
-        self.paddle    = None
+        self.drawTrail      = False
+        self.time_scale     = 1.0
+        self.paddle         = BallSystem.game.paddle
+        self.stillAlive     = True
     
     def setPaddle(self, paddle):        self.paddle = paddle
-    def setTimeScale(self, timeScale):  self.timeScale = timeScale
+    def setTimeScale(self, time_scale): self.time_scale = time_scale
     def getBalls(self):                 return self.balls
     def getTheBall(self):               return self.theBall
     def size(self):                     return len(self.balls)
@@ -40,14 +41,14 @@ class BallSystem:
     
     def alter(self, x, y):      
         for b in self.balls:
-            if b.getStatus() > 0:
+            if b.status > 0:
                 b.addDelta(x/2, y/2)
             
     
     def multiply(self):
-        newBall = Ball(self.theBall.getStatus())
-        newBall.setX(self.theBall.getX())
-        newBall.setY(self.theBall.getY())
+        newBall = Ball(self.theBall.status)
+        newBall.x = self.theBall.x
+        newBall.y = self.theBall.y
         newBall.setDeltaX(-self.theBall.getDeltaX())
         newBall.setDeltaY( self.theBall.getDeltaY())
         self.balls.append(newBall)
@@ -85,14 +86,14 @@ class BallSystem:
                 for i in range(0, b.getTrailLength()):
                     BallSystem.gfx[BallStatus.ULTRA].draw(2 + b.getTrailX(i), 2+ b.getTrailY(i))
         
-        if (BallSystem.game.getTimeScale() < 1.0) and (BallSystem.game.getBulletTime() > 0.1):            
+        if (BallSystem.game.time_scale < 1.0) and (BallSystem.game.getBulletTime() > 0.1):            
             self.drawTrail = not self.drawTrail
         else:
             self.drawTrail = False
         
         for b in self.balls:
-            if b.getStatus() >= 0:
-                BallSystem.gfx[b.getStatus()%10].draw(2 + b.getX(), 2 + b.getY() )
+            if b.status >= 0:
+                BallSystem.gfx[b.status%10].draw(2 + b.x, 2 + b.y )
     
     def swapDeltas(self, ball):
         up          = ball.getDeltaY() < 0.00
@@ -124,11 +125,11 @@ class BallSystem:
         map     = BallSystem.game.getMap()
         bricks  = BallSystem.game.getBricks()
         
-        stillAlive = False
+        self.stillAlive = False
         # remove dead balls 
         balls = []
         for b in self.balls:
-            if b.getStatus() == -1: continue                
+            if b.status == -1: continue                
             balls.append(b)
         self.balls = balls
 
@@ -146,119 +147,99 @@ class BallSystem:
                 
         for b in self.balls: 
             # Apply timescale
-            if self.timeScale > 1.0:
-                b.setTimeScale(self.timeScale)
-                b.setTrailStart(b.getX(), b.getY())
+            if self.time_scale > 1.0:
+                b.time_scale = self.time_scale
+                b.setTrailStart(b.x, b.y)
             else:
-                b.setTimeScale(self.timeScale)
+                b.time_scale = self.time_scale
             
-            ballStatus = b.getStatus()
+            ballStatus = b.status
             
             # Operate balls
-            """
-            switch(ballStatus) {
-                case BALL_DEAD:
-                    break;
-                 
-                case BALL_STICKED:
-                    stillAlive = true;// If at least one ball is alive, the player is still alive
-                    theBall = b;// Select one of them as the ultimate ball, or next to be spawn
-                    
-                    b.setX(paddle.getX() + b.getStickOffset());                    
-                    b.setY(219);
-                    break;
-                    
-                case BALL_READY:
-                    stillAlive = true;// If at least one ball is alive, the player is still alive
-                    theBall = b;// Select one of them as the ultimate ball, or next to be spawn
-                    
-                    b.setX((int)paddle.getX()-3);
-                    b.setY(219);
-                    break;
-                    
-                default: //Moving balls
-                    stillAlive = true;// If at least one ball is alive, the player is still alive
-                    theBall = b;// Select one of them as the ultimate ball, or next to be spawn
-                    
-                    
-                    if(b.isStopped()){
-                        b.launch(1.0f, -1.0f);
-                    };
-                    /* UPDATE HORIZONTAL MOVEMENT ------------------------------- */
+            if b.status == BallStatus.DEAD: 
+                continue
+            elif b.status == BallStatus.STICKED:
+                self.stillAlive = True      # If at least one ball is alive, the player is still alive
+                self.theBall = b            # Select one of them as the ultimate ball, or next to be spawn
+                b.x = int(self.paddle.position) + b.getStickOffset()
+                b.y = 219
+            elif b.status == BallStatus.READY:
+                self.stillAlive = True      # If at least one ball is alive, the player is still alive
+                self.theBall = b            # Select one of them as the ultimate ball, or next to be spawn
+                b.x = int(self.paddle.position) - 3
+                b.y = 219
+            else:                           # Moving balls
+                self.stillAlive = True      # If at least one ball is alive, the player is still alive
+                self.theBall = b            # Select one of them as the ultimate ball, or next to be spawn
+                if b.isStopped():
+                    b.launch(1.0, -1.0)
+                # UPDATE HORIZONTAL MOVEMENT ------------------------------- 
 
-                    // Move ball horizontally and get updated position
-                    b.update(Delta, false);
-                    bx = b.getX(); 
-                    by = b.getY();
+                # Move ball horizontally and get updated position
+                b.update(delta, False)
+                bx = b.x
+                by = b.y
 
-                    dx = b.getDeltaX(); 
-                    idx = (int)dx;
+                dx = b.getDeltaX(); 
+                idx = int(dx)
 
-                    // Set test points for horizontal bounce
-                    testY = by;
+                # Set test points for horizontal bounce
+                testY = by
 
-                    if(dx < 0.0f) 
-                        testX = bx - 2 + idx;
-                    else 
-                        testX = bx + 2 + idx;
+                if dx < 0.0:
+                    testX = bx - 2 + idx
+                else: 
+                    testX = bx + 2 + idx
 
-                    // Check if ball bounces with something
-                    if( bricks.test(testX, testY) ) {
-                        game.reaction.target = b;
-                        if( bricks.hit(testX, testY) ) b.bounceX();
-                    }
-                    /* UPDATE VERTICAL MOVEMENT --------------------------------- */
+                # Check if ball bounces with something
+                if self.bricks.test(testX, testY):
+                    self.game.reaction.target = b
+                    if self.bricks.hit(testX, testY):
+                        b.bounceX()
+                
+                # UPDATE VERTICAL MOVEMENT --------------------------------- 
 
-                    // Move ball vertically and get updated position
-                    b.update(Delta, true);
-                    //bx = b.getX(); 
-                    by = b.getY();
+                # Move ball vertically and get updated position
+                b.update(delta, True)
+                #bx = b.x
+                by = b.y
 
-                    // Update delta (
-                    dy = b.getDeltaY();
-                    idy = (int)dy;
+                # Update delta 
+                dy = b.getDeltaY()
+                idy = int(dy)
 
-                    // Set test point for vertical check
-                    testX = bx;
+                # Set test point for vertical check
+                testX = bx
 
-                    // Check vertical ball bounce
-                    if(dy < 0.0f) 
-                        testY = by - 1 + idy;
-                    else 
-                        testY = by + 2 + idy;
+                # Check vertical ball bounce
+                if dy < 0.0:
+                    testY = by - 1 + idy
+                else: 
+                    testY = by + 2 + idy
 
-                    // Check if ball bounces with something vertically, or if the paddle hits the ball
-                    if( bricks.test(testX, testY) ) {
-                        game.reaction.target = b; 
-                        if( bricks.hit(testX, testY) ){ b.bounceY();}
-                    }
-                    else if(paddle.test(testX, testY+2) & dy > 0.0f) {
-                        // Paddle bounce
-                        switch(ballStatus) {
-                            case BALL_STICKY:
-                                // Stop ball at paddle                        
-                                b.status = BALL_STICKED
-                                b.setDeltaX(0.0f);
-                                b.setDeltaY(0.0f);
-                                b.setStickOffset(b.getX() - paddle.getX());
-                                break;
-                                
-                            default:
-                                float pd = paddle.getDelta() * -0.25f;   // Paddle delta, to add on bounce 
-                                b.bounceY();                        
-                                b.addDelta(pd, 0.0f);
-                                break;
-                        }
-                    }
+                # Check if ball bounces with something vertically, or if the paddle hits the ball
+                if self.bricks.test(testX, testY):
+                    self.game.reaction.target = b
+                    if self.bricks.hit(testX, testY):
+                        b.bounceY()
+                elif (self.paddle.test(testX, testY+2)) and (dy > 0.0):
+                    # Paddle bounce
+                    if ballStatus == BallStatus.STICKY:
+                        # Stop ball at paddle                        
+                        b.status = BallStatus.STICKED
+                        b.setDeltaX(0.0)
+                        b.setDeltaY(0.0)
+                        b.setStickOffset(b.x() - self.paddle.position)
+                    else:
+                        pd = self.paddle.getDelta() * -0.25 # Paddle delta, to add on bounce 
+                        b.bounceY();                        
+                        b.addDelta(pd, 0.0)
 
-                    if(game.reaction.invertDeltas)swapDeltas(b);
-                 // End Of if(paddle.getStatus() == PADDLE_READY) ...
-                    break;
-            } // EndSwitch
-            """
-
+                if self.game.reaction.invertDeltas: 
+                    self.swapDeltas(b)
+                
         # Check if balSystem is fully dead
-        if not stillAlive:
+        if not self.stillAlive:
             self.game.paddle.status = PaddleStatus.DEAD
             self.game.oneDown(1)
             self.game.ready()

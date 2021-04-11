@@ -57,9 +57,9 @@ class Ball:
         deprecate("getTrailY", "Use direct access to trail instead")
         return self.trail[index].y
     
-    def setTimeScale(self, timeScale):
+    def setTimeScale(self, time_scale):
         deprecate("setTimeScale", "Use direct access to time_scale instead")
-        self.time_scale = timeScale
+        self.time_scale = time_scale
 
     def getDeltaX(self):
         deprecate("getDeltaX", "Use direct access to delta_x instead")

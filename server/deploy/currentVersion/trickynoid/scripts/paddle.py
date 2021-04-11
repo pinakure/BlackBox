@@ -134,11 +134,11 @@ class Paddle:
     def trigger(self, left=True):
         self.warmUp = 100        
         for b in Paddle.game.getBalls().getBalls():
-            if b.getStatus() == BallStatus.STICKED:
+            if b.status == BallStatus.STICKED:
                 b.setDeltaX(-self.delta)
                 b.setDeltaY(-1.0)
                 b.status = BallStatus.STICKY
-            elif b.getStatus() == BallStatus.READY:
+            elif b.status == BallStatus.READY:
                 b.setDeltaX(-self.delta)                
                 b.setDeltaY(-1.0)
                 b.status = BallSatus.NORMAL
