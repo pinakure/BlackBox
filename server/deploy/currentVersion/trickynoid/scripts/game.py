@@ -21,9 +21,14 @@ from data.scripts.paddle            import Paddle
 from data.scripts.ballsystem        import BallSystem
 from data.scripts.explosion         import Explosion
 from data.scripts.hitreaction       import HitReaction
+from data.scripts.particle          import Particle
+from data.scripts.particlesystem    import ParticleSystem
 from Vpu                            import Vpu
         
 class Game(BasicGame):
+
+    particles   = None
+    balls       = None
     
     @staticmethod
     def setup():
@@ -31,6 +36,9 @@ class Game(BasicGame):
         BallSystem.initialize(Game)
         Explosion.initialize(Game)
         Paddle.initialize(Game)
+        ParticleSystem.initialize(Game)
+        Game.particles  = ParticleSystem()
+        Game.balls      = BallSystem()
         
     @staticmethod
     def loop():
