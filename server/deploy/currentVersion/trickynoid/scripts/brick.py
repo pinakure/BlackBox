@@ -17,7 +17,7 @@ class Brick:
         self.y = y
         self.token = token
         self.offset = 0
-        self.setType(brick_type)
+        #self.setType(brick_type)
         self.variation = 0
         self.isFalling = False
        
@@ -31,7 +31,7 @@ class Brick:
     def isSticked(self):        return Brick.types[self.brick_type].isSticked
     def isInverter(self):       return Brick.types[self.brick_type].isInverter    
     def getType(self):          return self.brick_type
-    def getGraph(self):         return Brick.types[self.brick_type].graphic + self.variation
+    def getGraph(self):         return self.brick_type<<4#].graphic + self.variation
     def getScore(self):         return Brick.types[self.brick_type].score
     def getDamage(self):        return self.damage
     def getHealth(self):        return Brick.types[self.brick_type].health

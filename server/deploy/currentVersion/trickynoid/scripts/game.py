@@ -111,16 +111,16 @@ class Game(BasicGame):
     scoreMultiplier     = 1
     accel               = 0.0
     maxAccel            = 1.5
-    buffer              = None
     musicplayer         = None
     map                 = None
     powerupType         = 0x00
     game_over           = False
+    left                = 0
+    top                 = 0
 
     @staticmethod
     def setup(name="TrickyNoid"):
         Game.name       = name
-        Game.buffer     = vpu.createsurf(320,240)
         BasicGame.prepare()
         BallSystem.initialize(Game)
         Token.initialize(Game)
@@ -149,17 +149,34 @@ class Game(BasicGame):
         Game.map.fill(0x9F)
         Game.map.setactive()
         Game.map.setposition(0,0)
-        # Game.map.setposition(
-        #     ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 )+160,
-        #     ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )+120
-        # )
-        Game.map.setsurface(Game.buffer)
+        Game.map.setposition(
+            ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 ),
+            ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
+        )
+        Game.map.setsurface(0)
         Game.New()
+        #draw stuff
+        #Game.hud.draw()
+        for x in range(0, 20):
+            for y in range(0, 30):
+                Game.map.set(x,y, Hud.data[y][x], 3)
+        Game.map.setoffset(3,3,0)
+        Game.map.setoffset(3,3,1)
+        Game.left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
+        Game.top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+        
 
     @staticmethod
     def loop():
+        Game.map.need_redraw = 2
+        vpu.select(0)
+        Game.backdrop.render(Game.left+11,Game.top+2)
+        
         delta = 1.0
+        BasicGame.autoredraw = True
+        Game.autoredraw = True
         while Game.running:
+            #Game.map.need_redraw = 1 if Game.map.need_redraw == 2 else 0
             Game.draw()
             Game.update(delta)
 
@@ -214,6 +231,7 @@ class Game(BasicGame):
         Game.resetInput()
         
         Game.readKeyboard()
+
         
         # Move paddle or brake it
         if Game.action.MOVE_LEFT:           Game.moveLeft()
@@ -309,29 +327,17 @@ class Game(BasicGame):
 
     @staticmethod
     def draw():
-        # clear buffer
-        vpu.select(1)
-        vpu.fill(0,0,0,0)
-        
-        #draw stuff
-        #Game.hud.draw()
-        for x in range(0, 20):
-            for y in range(0, 30):
-                Game.map.set(x,y, Hud.data[y][x], 3)
         
         """
         g.scale(screenScale, screenScale);
         g.translate(0, 0);        
         
-        backdrop.render(g);
         Game.getMap().render(g);
         game.getBricks().render(g);
         
         drawTokens();
         
-        game.getPaddle().render();
         
-        game.getBalls().render(g);
         
         game.getParticles().render(g);
                 
@@ -342,16 +348,14 @@ class Game(BasicGame):
         renderInventary(g);
         """
         if Game.map.need_redraw:
-            #rasterize layers
-            pass
-        
-        vpu.select(0)
-        left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
-        top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
-        vpu.drawsurf(Game.buffer, left, top)
-
-        # ...
+            vpu.select(1)
+            vpu.fill(0,0,0,0)
+            Game.getBricks().render()
+            Game.getBalls().render(Game.left, Game.top)
+            Game.getPaddle().render(Game.left, Game.top)
+            Game.map.need_redraw = False
         BasicGame.draw()
+        # ...
         
     @staticmethod
     def setHud(hud):                
@@ -602,6 +606,7 @@ class Game(BasicGame):
     @staticmethod
     def updateMap():
         i=0        
+        """
         for y in range(0, 26):
             for x in range(0, 14):
                 b = Game.bricks.get(i)
@@ -620,6 +625,7 @@ class Game(BasicGame):
                     Game.map.set(x, y, 1, 0x00) #Remove damage picture
                 Game.map.set(x, y, 0, b.getGraph())
                 i+=1
+        """
     
     @staticmethod
     def updatePaddle(input):

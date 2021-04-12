@@ -87,20 +87,22 @@ class Backdrop:
             self.timer = 0
         Backdrop.gfx[self.active].update(int(delta*time_scale))
     
-    def render(self):
+    def render(self, ix, iy):
         b1 = Backdrop.gfx[self.active]
         b2 = Backdrop.gfx[self.alternate]
-        self.lastFrame = Backdrop.gfx[self.active].getFrame()
+        self.lastFrame = 0 #Backdrop.gfx[self.active].getFrame()
         i=0
-        for y in (0, 15):
+        ox = ix
+        for y in range(0, 15):
             i+=1
-            for x in (0, 14):
-                if i%2 == 0: b = b1
-                else: b=b2
-                frame = (b.getFrame()+self.alteration)%8
-                b.setCurrentFrame(frame)
-                b.draw(3+(x*16), 3+(y*16))
+            ix = ox
+            for x in range(0, 14):
+                b = b1 if i&1 else b2
+                b.setframe(0)
+                b.draw(ix, iy)
+                ix+=16
                 i+=1
+            iy+=16
         #g.setDrawMode(Graphics.MODE_COLOR_MULTIPLY);
         #g.setColor(backdropColor);
         #g.fillRect(3, 3, 224, 240);
@@ -110,5 +112,5 @@ class Backdrop:
         #    }
         #g.setDrawMode(Graphics.MODE_NORMAL);        
         
-        b1.setCurrentFrame(self.lastFrame)
-        b2.setCurrentFrame(self.lastFrame)
+        b1.setframe(self.lastFrame)
+        b2.setframe(self.lastFrame)

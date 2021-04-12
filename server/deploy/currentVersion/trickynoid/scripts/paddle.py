@@ -1,6 +1,6 @@
-from data.scripts.ball  import Ball, BallStatus
-from data.scripts.token import Token
-from animation          import Animation, AnimationLoop, AnimationAutoUpdate
+from data.scripts.ball          import Ball, BallStatus
+from data.scripts.token         import Token
+from animation                  import Animation, AnimationLoop, AnimationAutoUpdate
 import vpu
 
 class PaddleStatus:
@@ -159,11 +159,14 @@ class Paddle:
 
         return False
     
-    def render(self):
-        halfwidth = self.width / 2
-        Ball.gfx[BallStatus.NORMAL].draw( 1 + self.position - (self.halfwidth + 2), 224)
-        Ball.gfx[BallStatus.NORMAL].draw( 1 + self.position + (self.halfwidth - 2), 224)
-        Paddle.gfx[self.status].draw( 1 + self.position - self.halfwidth , 224, self.width, 4)
+    def render(self, ix, iy):
+        from data.scripts.ballsystem    import BallSystem
+        halfwidth = self.width >> 1
+        ix += 6+halfwidth
+        iy += 224
+        BallSystem.gfx[BallStatus.NORMAL].draw( ix + (self.position - (halfwidth)), iy)
+        BallSystem.gfx[BallStatus.NORMAL].draw( ix + (self.position + (halfwidth)), iy)
+        Paddle.gfx[self.status].draw(ix + self.position, iy) # - halfwidth , iy, self.width, 4) #draw extended
     
     def update(self):
         if self.delta < -0.01:

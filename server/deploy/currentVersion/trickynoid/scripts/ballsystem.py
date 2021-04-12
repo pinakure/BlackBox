@@ -80,11 +80,13 @@ class BallSystem:
         for b in self.balls:
             b.status = status
     
-    def render(self):
+    def render(self, ix, iy):
+        ix += 5
+        iy += 2
         if self.drawTrail:
             for b in self.balls:
                 for i in range(0, b.getTrailLength()):
-                    BallSystem.gfx[BallStatus.ULTRA].draw(2 + b.getTrailX(i), 2+ b.getTrailY(i))
+                    BallSystem.gfx[BallStatus.ULTRA].draw(ix + b.getTrailX(i), iy + b.getTrailY(i))
         
         if (BallSystem.game.time_scale < 1.0) and (BallSystem.game.getBulletTime() > 0.1):            
             self.drawTrail = not self.drawTrail
@@ -93,7 +95,7 @@ class BallSystem:
         
         for b in self.balls:
             if b.status >= 0:
-                BallSystem.gfx[b.status%10].draw(2 + b.x, 2 + b.y )
+                BallSystem.gfx[b.status%10].draw(ix + b.x, iy + b.y )
     
     def swapDeltas(self, ball):
         up          = ball.getDeltaY() < 0.00

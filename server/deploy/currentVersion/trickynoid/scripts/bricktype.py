@@ -45,7 +45,7 @@ class BrickType:
     BOOM_STICKED    = 0x19
     INVERTER        = 0x1A
     DIAMOND         = 0x1B
-    DIAMOND_STICKED =0x1C
+    DIAMOND_STICKED = 0x1C
     CHANNEL_H       = 0x1D
     CHANNEL_V       = 0x1E
     CHANNEL_HV      = 0x1F
@@ -54,7 +54,7 @@ class BrickType:
     INVERTER_C      = 0x22
     INVERTER_D      = 0x23
 
-    def __init__(self, index, bounce=True, explosive=False, invert=False, stick=False, blowable=False, shootable=False, shootangle=False, missile=False, noise=False, score=False, graphic=False, health=False, destructable=False):
+    def __init__(self, index, bounce=True, explosive=False, invert=False, stick=False, blowable=False, shootable=False, shootangle=False, missile=False, noise=False, score=False, health=1, destructable=False):
        self.index         = index
        self.isExplosive   = explosive
        self.isInverter    = invert
@@ -66,7 +66,7 @@ class BrickType:
        self.shootsMissile = missile
        self.noise         = noise
        self.score         = score
-       self.graphic       = graphic
+       self.graphic       = 0
        self.health        = health
        self.destructable  = destructable
 

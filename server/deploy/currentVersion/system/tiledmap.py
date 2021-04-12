@@ -12,6 +12,7 @@ class TiledMap:
         TiledMap.game = game
         self.x           = ( game.width   >> 1 ) - (( width  * tile_width  ) >> 1 )
         self.y           = ( game.height  >> 1 ) - (( height * tile_height ) >> 1 )
+        self.offset      = [ Pixel(0,0) for i in range(0,layer_count) ]
         self.width       = width        
         self.height      = height
         self.layer_count = layer_count
@@ -82,3 +83,13 @@ class TiledMap:
     def scroll_right(self, delta=1):            tm.scroll(self.handle, delta, Direction.RIGHT)
     def load_tileset(self, tileset_filename):   return tm.loadtileset(self.handle, tileset_filename)
     def update(self, delta):                    tm.update(self.handle, delta)
+    def setoffset(self, x , y, layer=-1):
+        if layer == -1: 
+            for layer in self.layer_count:
+                self.offset[layer].x = x
+                self.offset[layer].y = y
+                tm.setoffset(self.handle, x, y, layer)
+        else:
+            self.offset[layer].x = x
+            self.offset[layer].y = y
+            tm.setoffset(self.handle, x, y, layer)
