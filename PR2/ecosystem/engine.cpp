@@ -17,6 +17,7 @@ int Engine::height					= 480;
 bool Engine::run					= true;
 int Engine::cycles					= 0;
 long int Engine::epoch				= 0;
+MusicPlayer Engine::music			= MusicPlayer();
 ALLEGRO_TIMER *Engine::timer		= NULL;
 ALLEGRO_TIMER *Engine::clock		= NULL;
 ALLEGRO_EVENT_QUEUE *Engine::queue	= NULL;
@@ -80,6 +81,9 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		Hud::initialize();
+		if(Engine::music.load("breakthis.tfd")){
+			Engine::music.play();
+		}
 		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();

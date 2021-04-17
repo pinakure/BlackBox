@@ -10,6 +10,8 @@ public:
 	int						h;
 	int*					*data;
 	bool					redraw;
+	int						offset_x = 0;
+	int						offset_y = 0;
 
 	TiledLayer(int w = 8, int h = 8);
 	~TiledLayer();
@@ -100,6 +102,7 @@ public:
 	static PyObject* pySetPosition	(PyObject* self, PyObject* args);
 	static PyObject* pyGetScroll	(PyObject* self, PyObject* args);
 	static PyObject* pySetScroll	(PyObject* self, PyObject* args);
+	static PyObject* pySetOffset	(PyObject* self, PyObject* args);
 	static PyObject* pySetSurface	(PyObject* self, PyObject* args);
 	static PyObject* pyScroll		(PyObject* self, PyObject* args);
 	static PyObject* pySetTarget	(PyObject* self, PyObject* args);

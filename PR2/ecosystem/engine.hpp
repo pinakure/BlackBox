@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits>
 #include "entity.hpp"
+#include "music.hpp"
 
 class Engine {
 private:
@@ -18,6 +19,7 @@ public:
 	static ALLEGRO_EVENT event;
 	static std::vector<Sprite> sprites;
 	static Surface* target;
+	static MusicPlayer music;
 	static int  cycles;
 	static long int epoch;
 	static int	width;
@@ -38,7 +40,6 @@ public:
 	static void destroyEntities();
 
 	static void download(const char *file);
-
 
 	static void scale(float, float, float);
 	static void rotate(float);

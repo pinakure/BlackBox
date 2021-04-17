@@ -19,6 +19,7 @@ PyMethodDef TiledMap::methods[] = {
 	{"setdata"		, TiledMap::pySetData		, METH_VARARGS, "setdata(handle,value,layer_index=0) : " },
 	{"setactive"	, TiledMap::pySetActive		, METH_VARARGS, "setactive(handle, disable) : " },
 	{"setsurface"	, TiledMap::pySetSurface	, METH_VARARGS, "setsurface(tiledmap_handle,surface_handle) : " },
+	{"setoffset"	, TiledMap::pySetOffset		, METH_VARARGS, "setoffset(tiledmap_handle,x, y, layer) : " },
 	{"settarget"	, TiledMap::pySetTarget		, METH_VARARGS, "settarget(tiledmap_handle,surface_handle) : " },
 	{"setboundaries", TiledMap::pySetBoundaries , METH_VARARGS, "setboundaries(tiledmap_handle,left, top, right, bottom) : " },
 	{"setscroll"	, TiledMap::pySetScroll		, METH_VARARGS, "setscroll(tiledmap_handle,x, y) : " },
@@ -67,10 +68,10 @@ void TiledMap::draw(int ix, int iy) {
 	int tileset_height = ts->height / this->tile_height;
 	int tileset_size = tileset_width * tileset_height;
 	while (layer != this->layers.end()) {
-		dy = iy;
+		dy = iy + layer->offset_y;
 		if(layer->redraw)
 			for (int y = 0; y < this->h; y++) {
-			dx = ix;
+			dx = ix + layer->offset_x;
 			int* p = layer->data[y];
 			for (int x = 0; x < this->w; x++) {
 				if (!ts){
@@ -335,6 +336,20 @@ PyObject* TiledMap::pySetSurface(PyObject* self, PyObject* args) {
 	return False;
 }
 
+PyObject* TiledMap::pySetOffset(PyObject* self, PyObject* args) {
+	int handle;
+	int x, y, layer;
+	if (!PyArg_ParseTuple(args, "iiii", &handle, &x, &y, &layer)) return NULL;
+	if (Vpu::tiledmaps.find(handle) != Vpu::tiledmaps.end()) {
+		TiledMap* tm = &Vpu::tiledmaps.at(handle);
+		tm->layers[layer].offset_x = x;
+		tm->layers[layer].offset_y = y;
+		return True;
+	}
+	printf("ERROR @ pySet : tiledmap_handle out of range\n");
+	return False;
+}
+
 PyObject* TiledMap::pySetBoundaries(PyObject* self, PyObject* args) {
 	int handle;
 	int left;
@@ -441,8 +456,10 @@ PyObject* TiledMap::pyGetScroll(PyObject* self, PyObject* args) {
 		TiledMap* tm = &Vpu::tiledmaps.at(handle);
 		PyObject* list = PyList_New(2);
 		if (!list) throw("Unable to allocate memory for Python list");
+		Py_INCREF(list);
 		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)tm->scroll.x));
 		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)tm->scroll.y));
+		Py_DECREF(list);
 		return list;
 	}
 	printf("ERROR @ pyGet : tiledmap_handle out of range\n");

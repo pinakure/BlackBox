@@ -1009,7 +1009,10 @@ PyObject* Vpu::pyDimensions(PyObject* self, PyObject* args) {
 			Py_DECREF(list);
 			throw("Unable to allocate memory for Python list");
 		}
+		Py_INCREF(list);
 		PyList_SET_ITEM(list, i, num);
+		Py_DECREF(list);
+
 	}
 	return list;
 }
@@ -1135,7 +1138,9 @@ PyObject* Vpu::pyGetSurfaceData(PyObject* self, PyObject* args) {
 							((int(p.b*255.0f)  & 0xFF) << 16) |
 							((int(p.g*255.0f)  & 0xFF) << 8) |
 							(int(p.r * 255.0f) & 0xFF);
+				Py_INCREF(list);
 				PyList_SET_ITEM(list, i, PyLong_FromLong(color));
+				Py_DECREF(list);
 				i++;
 			}
 		}

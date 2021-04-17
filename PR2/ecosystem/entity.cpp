@@ -284,9 +284,11 @@ PyObject* Entity::pyGetPosition(PyObject* self, PyObject* args) {
 	Entity* ent = Engine::entities[entity_handle];
 	if (ent) {
 		PyObject* list = PyList_New(2);
+		Py_INCREF(list);
 		if (!list) throw("Unable to allocate memory for Python list");
 		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)ent->x));
 		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)ent->y));
+		Py_DECREF(list);
 		return list;
 	}
 	return PyBool_FromLong(0);
@@ -299,8 +301,10 @@ PyObject* Entity::pyGetDelta(PyObject* self, PyObject* args) {
 	if (ent) {
 		PyObject* list = PyList_New(2);
 		if (!list) throw("Unable to allocate memory for Python list");
+		Py_INCREF(list);
 		PyList_SET_ITEM(list, 0, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_x));
 		PyList_SET_ITEM(list, 1, PyFloat_FromDouble((double)((EntityMoveController*)(ent->controllers[EntityController::CONTROLLER_MOVE]))->delta_y));
+		Py_DECREF(list);
 		return list;
 	}
 	return PyBool_FromLong(0);
