@@ -49,8 +49,8 @@ class BallSystem:
         newBall = Ball(self.theBall.status)
         newBall.x = self.theBall.x
         newBall.y = self.theBall.y
-        newBall.setDeltaX(-self.theBall.getDeltaX())
-        newBall.setDeltaY( self.theBall.getDeltaY())
+        newBall.setDeltaX(-self.theBall.delta_x)
+        newBall.setDeltaY( self.theBall.delta_y)
         self.balls.append(newBall)
     
     def divide(self):
@@ -85,8 +85,8 @@ class BallSystem:
         iy += 2
         if self.drawTrail:
             for b in self.balls:
-                for i in range(0, b.getTrailLength()):
-                    BallSystem.gfx[BallStatus.ULTRA].draw(ix + b.getTrailX(i), iy + b.getTrailY(i))
+                for i in range(0, len(b.trail)):
+                    BallSystem.gfx[BallStatus.ULTRA].draw(ix + b.trail[i].x, iy + b.trail[i].y)
         
         if (BallSystem.game.time_scale < 1.0) and (BallSystem.game.getBulletTime() > 0.1):            
             self.drawTrail = not self.drawTrail
@@ -98,25 +98,25 @@ class BallSystem:
                 BallSystem.gfx[b.status%10].draw(ix + b.x, iy + b.y )
     
     def swapDeltas(self, ball):
-        up          = ball.getDeltaY() < 0.00
-        left        = ball.getDeltaX() < 0.00
+        up          = ball.delta_y < 0.00
+        left        = ball.delta_x < 0.00
         tempDeltaY  = 0
         tempDeltaX  = 0
 
         if up: # Y < 0
             if left: # X < 0
-                tempDeltaY =  ball.getDeltaX(); # -1 = -1 
-                tempDeltaX =  ball.getDeltaY(); # -1 = -1
+                tempDeltaY =  ball.delta_x # -1 = -1 
+                tempDeltaX =  ball.delta_y # -1 = -1
             else: # X > 0
-                tempDeltaY = -ball.getDeltaX();# -1 = -(1)
-                tempDeltaX = -ball.getDeltaY();#  1 = -(-1)
+                tempDeltaY = -ball.delta_x # -1 = -(1)
+                tempDeltaX = -ball.delta_y #  1 = -(-1)
         else: # Y > 0
             if left: # X < 0
-                tempDeltaY = -ball.getDeltaX();#  1 = -(-1)
-                tempDeltaX = -ball.getDeltaY();# -1 = -(1)
+                tempDeltaY = -ball.delta_x #  1 = -(-1)
+                tempDeltaX = -ball.delta_y # -1 = -(1)
             else: # X > 0
-                tempDeltaY =  ball.getDeltaX(); #  1 = 1
-                tempDeltaX =  ball.getDeltaY(); #  1 = 1
+                tempDeltaY =  ball.delta_x #  1 = 1
+                tempDeltaX =  ball.delta_y #  1 = 1
 
         ball.setDeltaX(tempDeltaX)
         ball.setDeltaY(tempDeltaY)
@@ -146,8 +146,8 @@ class BallSystem:
                 
         testY = 0   # X Point to be tested
         testX = 0   # Y Point to be tested
-                
         for b in self.balls: 
+            msg = None
             # Apply timescale
             if self.time_scale > 1.0:
                 b.time_scale = self.time_scale
@@ -161,11 +161,13 @@ class BallSystem:
             if b.status == BallStatus.DEAD: 
                 continue
             elif b.status == BallStatus.STICKED:
+                msg = "Sticked"
                 self.stillAlive = True      # If at least one ball is alive, the player is still alive
                 self.theBall = b            # Select one of them as the ultimate ball, or next to be spawn
                 b.x = int(self.paddle.position) + b.getStickOffset()
                 b.y = 219
             elif b.status == BallStatus.READY:
+                msg = "Ready"
                 self.stillAlive = True      # If at least one ball is alive, the player is still alive
                 self.theBall = b            # Select one of them as the ultimate ball, or next to be spawn
                 b.x = int(self.paddle.position) - 3
@@ -182,7 +184,7 @@ class BallSystem:
                 bx = b.x
                 by = b.y
 
-                dx = b.getDeltaX(); 
+                dx = b.delta_x; 
                 idx = int(dx)
 
                 # Set test points for horizontal bounce
@@ -194,9 +196,9 @@ class BallSystem:
                     testX = bx + 2 + idx
 
                 # Check if ball bounces with something
-                if self.bricks.test(testX, testY):
+                if bricks.test(testX, testY):
                     self.game.reaction.target = b
-                    if self.bricks.hit(testX, testY):
+                    if bricks.hit(testX, testY):
                         b.bounceX()
                 
                 # UPDATE VERTICAL MOVEMENT --------------------------------- 
@@ -207,7 +209,7 @@ class BallSystem:
                 by = b.y
 
                 # Update delta 
-                dy = b.getDeltaY()
+                dy = b.delta_y
                 idy = int(dy)
 
                 # Set test point for vertical check
@@ -220,25 +222,30 @@ class BallSystem:
                     testY = by + 2 + idy
 
                 # Check if ball bounces with something vertically, or if the paddle hits the ball
-                if self.bricks.test(testX, testY):
+                if bricks.test(testX, testY):
                     self.game.reaction.target = b
-                    if self.bricks.hit(testX, testY):
+                    if bricks.hit(testX, testY):
                         b.bounceY()
                 elif (self.paddle.test(testX, testY+2)) and (dy > 0.0):
                     # Paddle bounce
                     if ballStatus == BallStatus.STICKY:
+                        msg = "Sticky ball @paddle "
                         # Stop ball at paddle                        
                         b.status = BallStatus.STICKED
                         b.setDeltaX(0.0)
                         b.setDeltaY(0.0)
                         b.setStickOffset(b.x() - self.paddle.position)
                     else:
+                        msg = "Bouncing @paddle "
                         pd = self.paddle.getDelta() * -0.25 # Paddle delta, to add on bounce 
                         b.bounceY();                        
                         b.addDelta(pd, 0.0)
 
                 if self.game.reaction.invertDeltas: 
                     self.swapDeltas(b)
+                self.game.map.need_redraw = True
+            #if msg is not None:
+            #    print(msg)
                 
         # Check if balSystem is fully dead
         if not self.stillAlive:

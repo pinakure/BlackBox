@@ -22,26 +22,26 @@ class Brick:
         self.isFalling = False
        
     def getOffset(self):        return self.offset
-    def causesBounce(self):     return Brick.types[self.brick_type].causesBounce
-    def isDestructable(self):   return Brick.types[self.brick_type].destructable
+    def causesBounce(self):     return Brick.types[int(self.brick_type/16)].causesBounce
+    def isDestructable(self):   return Brick.types[int(self.brick_type/16)].destructable
     def getX(self):             return self.x
     def getY(self):             return self.y
     def setX(self, x):          self.x = x
     def setY(self, y):          self.y = y
-    def isSticked(self):        return Brick.types[self.brick_type].isSticked
-    def isInverter(self):       return Brick.types[self.brick_type].isInverter    
+    def isSticked(self):        return Brick.types[int(self.brick_type/16)].isSticked
+    def isInverter(self):       return Brick.types[int(self.brick_type/16)].isInverter    
     def getType(self):          return self.brick_type
     def getGraph(self):         return self.brick_type<<4#].graphic + self.variation
-    def getScore(self):         return Brick.types[self.brick_type].score
+    def getScore(self):         return Brick.types[int(self.brick_type/16)].score
     def getDamage(self):        return self.damage
-    def getHealth(self):        return Brick.types[self.brick_type].health
+    def getHealth(self):        return Brick.types[int(self.brick_type/16)].health
     def getTokenType(self):     return self.token
     def isAlive(self):          return self.brick_type != BrickType.NONE
     def hasToken(self):         return self.token > 0x00
     
     def applyDamage(self, appliedDamage):
         self.damage += appliedDamage
-        if self.damage > Brick.types[self.brick_type].health: self.damage = 9
+        if self.damage > Brick.types[int(self.brick_type/16)].health: self.damage = 9
     
     def kill(self):
         self.variation = 0
@@ -61,7 +61,7 @@ class Brick:
     def test(self, x, y):
         bx = (self.x * Brick.width)
         by = (self.y * Brick.height) + self.offset
-        return (self.x >= bx) and (self.x <  bx + Brick.width ) and (self.y >= by) and (self.y <  by + Brick.height)
+        return (x >= bx) and (x <  bx + Brick.width ) and (y >= by) and (y <  by + Brick.height)
     
     def setType(self, brick_type):
         # Note: the type sent by here is the GRAPHIC representation used, so real type must be deduced from there 

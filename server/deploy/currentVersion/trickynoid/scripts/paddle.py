@@ -34,6 +34,7 @@ class Paddle:
         self.sensitivity = 1.2
         self.width        = 20
         self.position     = 0.0
+        self.y            = 224
         self.delta        = 0.0
         self.sensitivity  = 1.0
         self.growSteps    = 0
@@ -69,7 +70,7 @@ class Paddle:
         return int(self.position)
     
     def getY(self):
-        return 224
+        return self.y
     
     def setStatus(self, status):
         self.status = status
@@ -133,7 +134,7 @@ class Paddle:
     
     def trigger(self, left=True):
         self.warmUp = 100        
-        for b in Paddle.game.getBalls().getBalls():
+        for b in Paddle.game.balls.getBalls():
             if b.status == BallStatus.STICKED:
                 b.setDeltaX(-self.delta)
                 b.setDeltaY(-1.0)
@@ -141,11 +142,11 @@ class Paddle:
             elif b.status == BallStatus.READY:
                 b.setDeltaX(-self.delta)                
                 b.setDeltaY(-1.0)
-                b.status = BallSatus.NORMAL
+                b.status = BallStatus.NORMAL
         # self.status = PADDLE_PLAYING
     
     def test(self, x, y):
-        if (self.y >= 224) and (self.y <= 227):
+        if (y >= 224) and (y <= 227):
             
             # left  = paddle.getX() - 4;
             # right = paddle.getX()+16 + 4;
@@ -162,7 +163,7 @@ class Paddle:
     def render(self, ix, iy):
         from data.scripts.ballsystem    import BallSystem
         halfwidth = self.width >> 1
-        ix += 6+halfwidth
+        ix += 1
         iy += 224
         BallSystem.gfx[BallStatus.NORMAL].draw( ix + (self.position - (halfwidth)), iy)
         BallSystem.gfx[BallStatus.NORMAL].draw( ix + (self.position + (halfwidth)), iy)

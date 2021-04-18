@@ -1,4 +1,6 @@
+from data.scripts.particle import Particle
 from animation import Animation
+from random import random
 import vpu
 
 class ParticleSystem:
@@ -22,7 +24,7 @@ class ParticleSystem:
             exception(E)
 
     def __init__(self):
-        self.debris  = {}
+        self.debris  = []
         
     def getParticleGfx(self):
         return ParticleSystem.gfx
@@ -30,26 +32,26 @@ class ParticleSystem:
     def getParticleSheet(self):
         return ParticleSystem.sprite
     
-    def render(self):
-        for p in debris:
-            p.draw(p.getX(), p.getY())
+    def render(self, x, y):
+        for p in self.debris:
+            p.draw(x+p.getX(), y+p.getY())
     
     def update(self, delta):
         timeScale = ParticleSystem.game.getTimeScale()
         for p in self.debris:
-            p = debris.get(i)
             p.setTimeScale(timeScale)
             p.setAngle(p.getAngle()+1)
             p.update()
-            if not p.isAlive():
+            if not p.isAlive:
                 self.debris.remove(p)
     
     def generate(self, particle_type, x, y):
         for i in range(0, 8):
-            self.debris.add(self.newParticle(particle_type, x, y))
+            self.debris.append(ParticleSystem.newParticle(particle_type, x, y))
     
+    @staticmethod
     def newParticle(particle_type, x, y):
         p = Particle(2, 2, ParticleSystem.sprite)
-        p.initialize(x, y, ParticleSystem.game.randInt(-20, 20), particle_type)
+        p.initialize(x, y, int(random()*40)-20, particle_type)
         p.setSpeed(1.4)
         return p

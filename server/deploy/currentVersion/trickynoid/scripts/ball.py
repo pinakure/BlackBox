@@ -104,7 +104,7 @@ class Ball:
             i.x, i.y = x, y
     
     def addTrailStep(self, x,  y):
-        for i in range(1, len(self, trail)):
+        for i in range(1, len(self.trail)):
             self.trail[i].x, self.trail[i].y = self.trail[i-1].x, self.trail[i-1].y
         self.trail[0].x,self.trail[0].y = x, y
     
@@ -120,7 +120,7 @@ class Ball:
             self.trail_timer += delta
         else:
             self.trail_timer = 0
-            self.addTrailStep(int(x),int(y))
+            self.addTrailStep(int(self.x),int(self.y))
     
     def moveY(self, delta):
         self.y = self.nextY()
@@ -128,7 +128,7 @@ class Ball:
             self.trail_timer += delta
         else:
             self.trail_timer = 0
-            self.addTrailStep(int(x),int(y))
+            self.addTrailStep(int(self.x),int(self.y))
     
     def addDelta(self, deltaX, deltaY):
         self.delta_y += deltaY

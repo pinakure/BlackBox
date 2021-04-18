@@ -112,7 +112,6 @@ class Game(BasicGame):
     accel               = 0.0
     maxAccel            = 1.5
     musicplayer         = None
-    map                 = None
     powerupType         = 0x00
     game_over           = False
     left                = 0
@@ -138,6 +137,7 @@ class Game(BasicGame):
         Game.balls      = BallSystem()
         Game.hud        = Hud
         Game.musicplayer= MusicPlayer(Game.hud)
+        Game.buffer     = [ vpu.createsurf(Game.width, Game.height), vpu.createsurf(Game.width, Game.height)]
         Game.paddle     = Paddle(Game.balls.getTheBall(), Game)
         Game.backdrop   = Backdrop(140)
         Game.inventory  = Inventory()
@@ -153,25 +153,31 @@ class Game(BasicGame):
             ( Game.width   >> 1 ) - (( Game.map.width  * Game.map.tile_width  ) >> 1 ),
             ( Game.height  >> 1 ) - (( Game.map.height * Game.map.tile_height ) >> 1 )
         )
-        Game.map.setsurface(0)
-        Game.New()
+        Game.map.setsurface(Game.buffer[1])
         #draw stuff
         #Game.hud.draw()
         for x in range(0, 20):
             for y in range(0, 30):
                 Game.map.set(x,y, Hud.data[y][x], 3)
         Game.map.setoffset(3,3,0)
-        Game.map.setoffset(3,3,1)
+        Game.map.setoffset(3,3,1)        
         Game.left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>1)
         Game.top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>1)
+        Game.New()
+        Game.draw()
+        Game.bricks.update(1.0)
+        Game.map.redraw()
+        Game.draw()
+        
         
 
     @staticmethod
     def loop():
-        Game.map.need_redraw = 2
-        vpu.select(0)
+        Game.map.need_redraw = True
+        vpu.select(Game.buffer[0])
+        vpu.fill(0,0,0,0)
         Game.backdrop.render(Game.left+11,Game.top+2)
-        
+
         delta = 1.0
         BasicGame.autoredraw = True
         Game.autoredraw = True
@@ -186,30 +192,26 @@ class Game(BasicGame):
 
     @staticmethod
     def readKeyboard():
-        pass
-        """
-        Input input = inputManager.input;
-        if(input.isKeyDown(Input.KEY_F1)) ACTION_DEBUG_SHRINK = true;
-        if(input.isKeyDown(Input.KEY_F2)) ACTION_DEBUG_GROW = true;
-        if(input.isKeyDown(Input.KEY_F3)) ACTION_DEBUG_HIGLIGHT_BALL = true;
-        if(input.isKeyPressed(Input.KEY_F4)) ACTION_DEBUG_MULTIPLY = true;
-        if(input.isKeyPressed(Input.KEY_DELETE)) ACTION_DEBUG_ERASE_SONG = true;
-        if(input.isKeyDown(Input.KEY_ESCAPE)) ACTION_DEBUG_ABORT = true;
-        if(input.isKeyPressed(Input.KEY_F11)) ACTION_DEBUG_FULLSCREEN = true;
-        if(input.isKeyPressed(Input.KEY_F12)) ACTION_DEBUG_NEXT_SONG = true;
-        if(input.isKeyDown(Input.KEY_ADD)) ACTION_DEBUG_TIMESCALE_DOUBLE = true;
-        //if(input.isMouseButtonDown(1)) ACTION_BALLTIME = true;
-            if(input.isKeyDown(Input.KEY_RIGHT)) ACTION_TILT_RIGHT = true;
-        else if(input.isKeyDown(Input.KEY_LEFT)) ACTION_TILT_LEFT = true;
-           if(input.isKeyDown(Input.KEY_DOWN)) ACTION_TILT_DOWN = true;
-        else if(input.isKeyDown(Input.KEY_UP)) ACTION_TILT_UP = true;
-        if(input.isKeyPressed(Input.KEY_Q)) ACTION_PREV_POWERUP = true;
-        if(input.isKeyPressed(Input.KEY_E)) ACTION_NEXT_POWERUP = true;
-        if(input.isKeyPressed(Input.KEY_SPACE)) ACTION_ACTIVATE = true;
-        // Handle movement
-        if(input.isKeyDown(Input.KEY_A)) game.moveLeft();
-        else if(input.isKeyDown(Input.KEY_D)) game.moveRight();
-        """
+        #Game.action.debug.SHRINK           = (keyboard.f1() == 1)
+        #Game.action.debug.GROW             = (keyboard.f2() == 1)
+        #Game.action.debug.HIGLIGHT_BALL    = (keyboard.f3() == 1)
+        #Game.action.debug.MULTIPLY         = (keyboard.f4() == 1)
+        #Game.action.debug.ERASE_SONG       = (keyboard.delete() == 1)
+        #Game.action.debug.ABORT            = (keyboard.escape() == 1)
+        #Game.action.debug.FULLSCREEN       = (keyboard.f11() == 1)
+        #Game.action.debug.NEXT_SONG        = (keyboard.f12() == 1)
+        #Game.action.debug.TIMESCALE_DOUBLE = (keyboard.plus() == 1)
+        Game.action.ACTIVATE      = (joypad.b() == 1)
+        Game.action.BALLTIME      = joypad.a()
+        #Game.action.TILT_LEFT     = joypad.l1()
+        #Game.action.TILT_RIGHT    = joypad.r1()
+        #Game.action.TILT_UP       = joypad.l2()
+        #Game.action.TILT_DOWN     = joypad.r2()
+        Game.action.NEXT_POWERUP  = (joypad.x() == 1)
+        Game.action.PREV_POWERUP  = (joypad.y() == 1)
+        # Handle movement
+        if   joypad.left() : Game.moveLeft()
+        elif joypad.right(): Game.moveRight()
 
     @staticmethod
     def update(delta):
@@ -269,8 +271,8 @@ class Game(BasicGame):
         
         if Game.action.ACTIVATE:
             ballsReady = False
-            for b in game.getBalls().getBalls():
-                if b.getStatus() in [BallStatus.STICKED, BallStatus.READY]:
+            for b in Game.balls.getBalls():
+                if b.status in [BallStatus.STICKED, BallStatus.READY]:
                     ballsReady = True
             
             #if paddle.getStatus() in [PaddleStatus.STICKY, PaddleStatus.READY]:
@@ -327,32 +329,26 @@ class Game(BasicGame):
 
     @staticmethod
     def draw():
-        
+        Game.map.need_redraw = True  # remove this as you rewrite the whole fucking redraw system. >:(
         """
-        g.scale(screenScale, screenScale);
-        g.translate(0, 0);        
-        
-        Game.getMap().render(g);
-        game.getBricks().render(g);
-        
-        drawTokens();
-        
-        
-        
-        game.getParticles().render(g);
                 
         //Explosion.gfx.draw(32, 32); 
         
         hud.render(game);
         
-        renderInventary(g);
         """
         if Game.map.need_redraw:
+            vpu.select(0)
+            vpu.drawsurf(Game.buffer[0], 0, 0)
+            vpu.drawsurf(Game.buffer[1], 0, 0)
             vpu.select(1)
             vpu.fill(0,0,0,0)
             Game.getBricks().render()
             Game.getBalls().render(Game.left, Game.top)
             Game.getPaddle().render(Game.left, Game.top)
+            Game.drawTokens(Game.left, Game.top)
+            Game.getParticles().render(Game.left, Game.top)
+            Game.renderInventary(Game.left, Game.top)
             Game.map.need_redraw = False
         BasicGame.draw()
         # ...
@@ -542,9 +538,12 @@ class Game(BasicGame):
     @staticmethod
     def brake():
         Game.paddle.setDelta(Game.accel)
+        t = Game.accel
         if Game.accel < 0.0: Game.accel += 0.6
         if Game.accel > 0.0: Game.accel -= 0.6
         if Game.accel < 0.7 and Game.accel > -0.7: Game.accel = 0.0
+        if Game.accel != t:
+            Game.map.need_redraw = True
     
     @staticmethod
     def moveLeft():
@@ -552,6 +551,7 @@ class Game(BasicGame):
         Game.paddle.setDelta(Game.accel + 1.0)
         Game.accel += 0.2
         if Game.accel > Game.maxAccel: Game.accel = Game.accel * 0.75
+        Game.map.need_redraw = True
     
     @staticmethod
     def moveRight():
@@ -559,6 +559,7 @@ class Game(BasicGame):
         Game.paddle.setDelta( Game.accel - 1.0 )
         Game.accel -= 0.2
         if Game.accel < -Game.maxAccel: Game.accel = Game.accel * 0.5
+        Game.map.need_redraw = True
     
     @staticmethod
     def doubleScore():
@@ -605,28 +606,8 @@ class Game(BasicGame):
     
     @staticmethod
     def updateMap():
-        i=0        
-        """
-        for y in range(0, 26):
-            for x in range(0, 14):
-                b = Game.bricks.get(i)
-                if b.getType() != BrickType.NONE:
-                    # Put shadow
-                    Game.map.set(x, y, 3, 0x91)
-                    
-                    if b.getDamage() > 8:
-                        Game.bricks.hit(x*16, y*8)
-                        Game.map.set(x, y, 1, 0x00) #Remove damage picture
-                    else:
-                        #Set damage graphic
-                        Game.map.set(x, y, 1, 0x91 + (b.getDamage()*4))
-                else:
-                    Game.map.set(x, y, 3, 0x00)
-                    Game.map.set(x, y, 1, 0x00) #Remove damage picture
-                Game.map.set(x, y, 0, b.getGraph())
-                i+=1
-        """
-    
+        return
+        
     @staticmethod
     def updatePaddle(input):
         if Game.paddle.getStatus() != PaddleStatus.DEAD:
@@ -671,33 +652,35 @@ class Game(BasicGame):
                 Game.tokens.remove(t)
 
     @staticmethod
-    def drawTokens():
+    def drawTokens(left, top):
         for t in Game.getTokens():
             tokentype = t.getType()
             tok = Token.gfx[tokentype]
             tok.setframe(t.getFrame())
-            tok.draw(3 + t.x, 3 + t.y)
+            tok.draw(left+3 + t.x, top+3 + t.y)
 
     @staticmethod
     def drawToken(x, y, tokentype):
-        last = Token.gfx[tokentype].getFrame()
-        Token.gfx[tokentype].setCurrentFrame(0)
+        #last = Token.gfx[tokentype].getFrame()
+        Token.gfx[tokentype].setframe(0)
         Token.gfx[tokentype].draw(x, y)
-        Token.gfx[tokentype].setCurrentFrame(last)
+        #Token.gfx[tokentype].setCurrentFrame(last)
     
     @staticmethod
-    def renderInventary():
-        Game.drawToken(241,  50, TokenType.GROW)
-        Game.drawToken(241,  58, TokenType.SHRINK)
-        Game.drawToken(241,  66, TokenType.SUBDIVIDE)
-        Game.drawToken(241,  74, TokenType.SHOOT)
-        Game.drawToken(241,  82, TokenType.MISSILE)        
-        Game.drawToken(281,  50, TokenType.EXPLOSIVE)
-        Game.drawToken(281,  58, TokenType.ULTRABALL)
-        Game.drawToken(281,  66, TokenType.STICKBALL)
-        Game.drawToken(281,  74, TokenType.SHIELD)
-        Game.drawToken(281,  82, TokenType.COMMODIN)        
-        Token.gfx[Game.getPowerupType()].draw(269, 90)
+    def renderInventary(x, y):
+        x+=6
+        y+=8
+        Game.drawToken(x+241,  y+50, TokenType.GROW)
+        Game.drawToken(x+241,  y+58, TokenType.SHRINK)
+        Game.drawToken(x+241,  y+66, TokenType.SUBDIVIDE)
+        Game.drawToken(x+241,  y+74, TokenType.SHOOT)
+        Game.drawToken(x+241,  y+82, TokenType.MISSILE)        
+        Game.drawToken(x+281,  y+50, TokenType.EXPLOSIVE)
+        Game.drawToken(x+281,  y+58, TokenType.ULTRABALL)
+        Game.drawToken(x+281,  y+66, TokenType.STICKBALL)
+        Game.drawToken(x+281,  y+74, TokenType.SHIELD)
+        Game.drawToken(x+281,  y+82, TokenType.COMMODIN)        
+        Token.gfx[Game.getPowerupType()].draw(x+268, y+112)
     
     @staticmethod
     def resetInput():

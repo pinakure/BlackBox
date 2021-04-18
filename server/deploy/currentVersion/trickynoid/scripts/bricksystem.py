@@ -55,9 +55,7 @@ class BrickSystem:
         for y in range(0, 26):
             for x in range(0, 14):
                 self.bricks.append(Brick(x,y, data[y][x], 0))
-                print(hex(data[y][x])+" ", end="")
-            print("")
-    
+
     def update(self, delta):
         for b in self.bricks:
             # Check fall
@@ -82,8 +80,8 @@ class BrickSystem:
         return False
     
     def hit(self, x, y):
-        brickX = x/16
-        brickY = y/8
+        brickX = int(x/16)
+        brickY = int(y/8)
         brickId = (brickY * 14) + brickX
         
         causesBounce = False
@@ -93,30 +91,40 @@ class BrickSystem:
         if brickY > 25: return True
         if brickY < 0 : return True
         
-        b = bricks[brickId]
+        b = self.bricks[brickId]
         
         if b.isAlive():
             causesBounce = b.causesBounce()
             if not b.isSticked():
                 b.fall()
-            
+
             if b.isInverter():
                 Brick.game.reaction.invertDeltas = True;#swapDeltas(game.reaction.target)
             
-            if b.isDestructable():
-                damage = Brick.game.reaction.target.getDamage()
+            if 1:#b.isDestructable():
+                damage = self.game.reaction.target.getDamage()
                 if damage == 9: causesBounce = False
                 b.applyDamage(damage)
                 print(f'Generate particle: {b.getGraph()}')
-                Brick.game.getParticles().generate(b.getGraph(), x+2, y+2)
-                Brick.game.getBackdrop().setColor(b.getGraph()-1)
-
-            if b.getDamage() >= 9:
-                Brick.game.addScore(b.getScore())                
+                #self.game.getParticles().generate(b.getGraph(), x+2, y+2)
+                #self.game.getBackdrop().setColor(b.getGraph()-1)
+            damage = b.getDamage()
+            if damage >= 9:
+                self.game.addScore(b.getScore())                
                 if b.getTokenType() > 0x00:
-                    Brick.game.addToken(b.generateToken())
+                    self.game.addToken(b.generateToken())
                 b.kill()
-        return self.causesBounce
+                #self.game.map.set(brickX, brickY  , 0x00, 0)
+                #self.game.map.set(brickX, brickY+1, 0x9F, 1)
+                self.render()
+                vpu.select(self.game.buffer[1])
+                vpu.fill(0,0,0,0)
+                self.game.map.redraw()
+                self.game.map.draw()
+            
+                
+                
+        return causesBounce
     
     def getBricks(self):  
         return self.bricks    
@@ -146,5 +154,5 @@ class BrickSystem:
                     if (c < 0x9C) and (y < 25):
                         # Draw Shadow
                         BrickSystem.game.map.set(x,y+1, 0xAF, 0)
-                    BrickSystem.game.map.set(x,y, c, 1)                    
+                    BrickSystem.game.map.set(x,y, c, 1)
                 i+=1

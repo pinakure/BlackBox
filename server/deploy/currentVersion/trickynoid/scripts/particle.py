@@ -80,7 +80,7 @@ class Particle:
     
     def draw(self, px, py):
         #g.rotate(x + centerX - px, y + centerY - py, angle);
-        self.gfx.draw(self.rotation.x + self.x - px, self.rotation-y + self.y -py, self.angle)
+        self.gfx.draw(self.rotation.x + self.x - px, self.rotation.y + self.y -py, self.angle)
         #g.rotate(x + centerX - px, y + centerY - py, -angle);    
 
     def isAlive(self):          return self.isAlive
