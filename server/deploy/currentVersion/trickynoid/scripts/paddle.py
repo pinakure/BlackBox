@@ -1,5 +1,5 @@
 from data.scripts.ball          import Ball, BallStatus
-from data.scripts.token         import Token
+from data.scripts.token         import Token, TokenType
 from animation                  import Animation, AnimationLoop, AnimationAutoUpdate
 import vpu
 
@@ -87,51 +87,30 @@ class Paddle:
     
     def shoot(self):
         #TODO
-        pass
-        """
-        Inventory inv = game.getInventory();
+        inv = self.game.getInventory()
+        pup = self.game.getPowerupType()
         
-        switch(game.getPowerupType()){
-            case TOKEN_GROW:
-                if(inv.grow > 0){
-                    growSteps+=8;
-                    inv.grow--;
-                } 
-                break;
-            
-            case TOKEN_SHRINK:
-                if(inv.shrink > 0){
-                    shrinkSteps+=8;
-                    inv.shrink--;
-                }
-                break;
-         
-            case TOKEN_SUBDIVIDE:
-                if(inv.subdivide > 0){
-                    game.applyEffect(TOKEN_SUBDIVIDE);
-                    inv.subdivide--;
-                } 
-                break;
-            
-            case TOKEN_ULTRABALL:
-                if(inv.ultraball > 0) {
-                    game.applyEffect(TOKEN_ULTRABALL);
-                    inv.ultraball--;
-                }
-                break;
-            
-            case TOKEN_STICKBALL:
-                if(inv.stickyball > 0) {
-                    game.applyEffect(TOKEN_STICKBALL);
-                    inv.stickyball--;
-                }
-                break;
-            
-            default:
-                break;
-        }  
-        """
-    
+        if pup == TokenType.GROW:
+            if inv.grow > 0:
+                self.growSteps  += 8
+                inv.grow        -= 1
+        elif pup == TokenType.SHRINK:
+            if inv.shrink > 0:
+                self.shrinkSteps +=8
+                inv.shrink  -=1
+        elif pup == TokenType.SUBDIVIDE:
+            if inv.subdivide > 0:
+                self.game.applyEffect(TokenType.SUBDIVIDE)
+                inv.subdivide -=1            
+        elif pup == TokenType.ULTRABALL:
+            if inv.ultraball > 0:
+                self.game.applyEffect(TokenType.ULTRABALL)
+                inv.ultraball -= 1
+        elif pup == TokenType.STICKBALL:
+            if inv.stickyball > 0:
+                self.game.applyEffect(TokenType.STICKBALL)
+                inv.stickyball -= 1
+        
     def trigger(self, left=True):
         self.warmUp = 100        
         for b in Paddle.game.balls.getBalls():
