@@ -63,6 +63,7 @@ Showcase *showcase =
 */
 
 
+
 bool Engine::initialize() {
 	try{
 		al_init();
@@ -81,9 +82,12 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		Hud::initialize();
-		if(Engine::music.load("breakthis.tfd")){
-			Engine::music.play();
-		}
+		
+		srand(time(0));
+
+		Engine::music.loadMenuMusic();
+		Engine::music.randomMenuMusic();
+
 		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();

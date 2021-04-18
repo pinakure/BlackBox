@@ -45,17 +45,24 @@ public:
 	static const int clock	= 3500000;
 };
 
+#include <vector>
+#include <string>
+
 class MusicPlayer {
 private:
 	Music			*track = 0;
 	bool			active_track = 0;
 public:
+	std::vector<std::string> menu_songs;
+	Music menu_music;
 	MusicPlayer();
 	bool load(const char* name);
 	void stop();
 	void play();
 	void pause();
 	void setPosition(int position);
+	void loadMenuMusic();
+	void randomMenuMusic();
 };
 
 #endif 

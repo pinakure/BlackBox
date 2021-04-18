@@ -390,6 +390,7 @@ void DashboardTitle::execute() {
 		s.execute("Game = 1");		
 		Engine::destroyEntities();
 		Dashboard::enabled = true;
+		Engine::music.randomMenuMusic();
 	} else {
 		printf("ERROR: Cannot call game.main\n");
 	}

@@ -83,26 +83,25 @@ inline void tfm_player_render(short int* buf, int size)
 	}
 }
 
-
+#include <allegro5\allegro.h>
 
 bool tfm_open(const char* filename, int clock, int rate)
 {
-	FILE* file;
+	ALLEGRO_FILE *file;
+	file = al_fopen(filename, "rb");
+	if (!file)return false;
+	//FILE* file;
+	//if (fopen_s(&file, filename, "rb")) return false;
 
-	/*file=fopen(filename,"rb");
-	if(!file) return false;*/
 
-	if (fopen_s(&file, filename, "rb")) return false;
-
-
-	fseek(file, 0, SEEK_END);
-	TFM.size = ftell(file);
-	fseek(file, 0, SEEK_SET);
+	al_fseek(file, 0, SEEK_END);
+	TFM.size = al_ftell(file);
+	al_fseek(file, 0, SEEK_SET);
 	TFM.data = NULL;
 	TFM.data = (unsigned char*)malloc(TFM.size);
 	if(TFM.data != NULL){
-		fread(TFM.data, TFM.size, 1, file);
-		fclose(file);
+		al_fread(file, TFM.data, TFM.size);
+		al_fclose(file);
 
 		TFM.rate = rate;
 		TFM.scount = 0;

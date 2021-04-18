@@ -162,3 +162,33 @@ bool MusicPlayer::load(const char* name) {
 	printf("ERROR: Trying to load music '%s' : Filename must have a valid extension. \n", name);
 	return(false);
 }
+
+std::vector<std::string> explode(std::string const& s, char delim);
+
+void MusicPlayer::loadMenuMusic() {
+	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("music/dashboard/");
+	if (al_open_directory(e)) {
+		ALLEGRO_FS_ENTRY* file;
+		while (file = al_read_directory(e)) {
+			std::string name = al_get_fs_entry_name(file);
+			std::vector<std::string> temp = explode(name, '\\');
+			if (temp.size() > 0)
+				name = temp[temp.size() - 1];
+			// Remove slashes
+			std::vector<std::string> parts = explode(name, '/');
+			if (parts.size() > 0) {
+				name = parts[parts.size() - 1];
+			}
+			menu_songs.push_back("music/dashboard/"+name);
+		}
+	}	
+}
+
+void MusicPlayer::randomMenuMusic() {
+	stop();
+	int song_index = rand() % menu_songs.size();
+	if (load(menu_songs[song_index].c_str())) {
+		play();
+	}
+}
+
