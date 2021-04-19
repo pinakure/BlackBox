@@ -72,6 +72,7 @@ PyMethodDef Vpu::methods[] = {
 	{"fadein"		, Vpu::pyFadeIn			, METH_VARARGS, "fadein() : Fade screen from black"},
 	{"fadeout"		, Vpu::pyFadeOut		, METH_VARARGS, "fadeout() : Fade screen to black"},
 	{"fading"		, Vpu::pyFading			, METH_VARARGS, "fading() : Return True is fade in / fade out is activated" },
+	{"gradient"		, Vpu::pyGradient		, METH_VARARGS, "gradient(src_r, src_g, src_b, src_a, dst_r, dst_g, dst_b, dst_a) : "},
 	{"fill"			, Vpu::pyFill			, METH_VARARGS, "fill(r, g, b, a) : Fill selected bitmap with given color or default color"},
 	{"fillrect"		, Vpu::pyFillRectangle	, METH_VARARGS, "filrect(x, y, dx, dy) : Draw a filled rectangle onto selected surface from x,y to dx,dy" },
 	{"frames"		, Vpu::pyFrames			, METH_VARARGS, "frames() : Return actual frame count"},
@@ -644,6 +645,35 @@ void Vpu::drawAnimationRotated(Animation& animation, float dx, float dy, float a
 		);
 }
 
+void Vpu::gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2) {
+	al_lock_bitmap(Vpu::target->bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
+	float r = r1;
+	float g = g1; 
+	float b = b1;
+	float a = a1;
+	int len = Vpu::target->height * Vpu::target->width;
+	int range_r = (r2 - r1);
+	int range_g = (g2 - g1);
+	int range_b = (b2 - b1);
+	int range_a = (a2 - a1);
+	int t	 = 0;
+	float dr = (float(range_r) / float(len)) * float(t);
+	float dg = (float(range_g) / float(len)) * float(t);
+	float db = (float(range_b) / float(len)) * float(t);
+	float da = (float(range_a) / float(len)) * float(t);
+	for (int y = 0; y < Vpu::target->height; y++) {
+		for (int x = 0; x < Vpu::target->width; x++) {
+			r = r1+((float(range_r) / float(len)) * float(t));
+			g = g1+((float(range_g) / float(len)) * float(t));
+			b = b1+((float(range_b) / float(len)) * float(t));
+			a = a1+((float(range_a) / float(len)) * float(t));
+			al_put_pixel(x, y, al_map_rgba(r, g, b, a));
+			t++;
+		}
+	}
+	al_unlock_bitmap(Vpu::target->bitmap);
+}
+
 Surface Vpu::createSurface(int width, int height) {
 	Surface s;
 	s.bitmap = al_create_bitmap(width, height);
@@ -1109,6 +1139,19 @@ PyObject* Vpu::pyFill(PyObject* self, PyObject* args) {
 PyObject* Vpu::pyFrames(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "")) return NULL;
 	return PyLong_FromLong(Vpu::total_frames);
+}
+PyObject* Vpu::pyGradient(PyObject* self, PyObject* args) {
+	float r1;
+	float g1;
+	float b1;
+	float a1;
+	float r2;
+	float g2;
+	float b2;
+	float a2;
+	if (!PyArg_ParseTuple(args, "ffffffff", &r1, &g1, &b1, &a1, &r2, &g2, &b2, &a2)) return NULL;
+	Vpu::gradient(r1, g1, b1, a1, r2, g2, b2, a2);
+	return PyBool_FromLong(true);
 }
 PyObject* Vpu::pyGetPixel(PyObject* self, PyObject* args) {
 	float x;

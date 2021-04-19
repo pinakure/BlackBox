@@ -176,6 +176,7 @@ class Game(BasicGame):
         Game.map.need_redraw = True
         vpu.select(Game.buffer[0])
         vpu.fill(0,0,0,0)
+        vpu.gradient(64,0,0,255,192,192,1,255)
         Game.backdrop.render(Game.left+11,Game.top+2)
 
         delta = 1.0

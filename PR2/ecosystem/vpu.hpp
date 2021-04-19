@@ -83,6 +83,7 @@ public:
 	// Primitives
 	static void rectangle(int x, int y, int width, int height);
 	static void qfillRectangle(int x, int y, int width, int height);
+	static void gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2);
 	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillCircle(int x, int y, float radius, int r, int g, int b, int alpha=255);
@@ -178,6 +179,7 @@ public:
 	static PyObject* pyFillRectangle(PyObject* self, PyObject* args);
 	static PyObject* pyFrames(PyObject* self, PyObject* args);
 	static PyObject* pyFullScreen(PyObject* self, PyObject* args);
+	static PyObject* pyGradient(PyObject* self, PyObject* args);
 	static PyObject* pySelectSprite(PyObject* self, PyObject* args);
 	static PyObject* pyRectangle(PyObject* self, PyObject* args);
 	static PyObject* pyLine(PyObject* self, PyObject* args);
