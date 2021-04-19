@@ -185,6 +185,7 @@ void MusicPlayer::loadMenuMusic() {
 }
 
 void MusicPlayer::randomMenuMusic() {
+	if (menu_songs.size() == 0)return;
 	stop();
 	int song_index = rand() % menu_songs.size();
 	if (load(menu_songs[song_index].c_str())) {
