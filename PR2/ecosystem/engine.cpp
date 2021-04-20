@@ -5,6 +5,7 @@
 #include "world.hpp"
 #include "camera.hpp"
 #include "dashboard.hpp"
+#include "windowmgr.hpp"
 #include <iostream>
 #include<Windows.h>
 #pragma comment(lib, "urlmon.lib")
@@ -82,6 +83,8 @@ bool Engine::initialize() {
 		al_start_timer(timer);
 		al_start_timer(clock);
 		Hud::initialize();
+
+		WindowManager::initialize();
 		
 		srand(time(0));
 
@@ -168,6 +171,7 @@ void Engine::render() {
 		Hud::draw();
 		InputDevice::draw(2);
 		Console::draw(16);
+		WindowManager::render();
 		Vpu::render();		
 		Vpu::select(Vpu::overlay);
 		Vpu::paint(0, 0, 0, 16);
@@ -214,6 +218,7 @@ void Engine::update() {
 	showcase->update(fElapsedTime);
 	Camera::update(fElapsedTime);
 	Hud::update(fElapsedTime);
+	WindowManager::update();
 	Dashboard::update(fElapsedTime);
 	InputDevice::update(fElapsedTime);
 	updateEntities(fElapsedTime);
