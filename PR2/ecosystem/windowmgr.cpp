@@ -1,11 +1,16 @@
 #include "windowmgr.hpp"
 #include "vpu.hpp"
 #include "script.hpp"
+#include "input.hpp"
 
 int Button::button_id = 0;
 
 std::map<int, Window> WindowManager::windows;
-int WindowManager::window_handle = 0;
+int		WindowManager::window_handle = 0;
+int		WindowManager::mouse_x = 0;
+int		WindowManager::mouse_y = 0;
+bool	WindowManager::redraw = true;
+Window *WindowManager::hover = nullptr;
 
 Window::Window(int handle, int x, int y, int width, int height, std::string caption, int wndflags) {
 	this->handle = handle;
@@ -21,6 +26,10 @@ Button::Button(int id, int x, int y, int width, int height, std::string caption,
 	this->setPosition(x, y);
 	this->setSize(width, height);
 	this->setCaption(caption.c_str());
+}
+
+void Widget::sendMessage(Widget* w, MessageType msg, unsigned short int parameter) {
+	w->messages.push_back((parameter << 16) | ((unsigned short int) msg));
 }
 
 void Widget::setCaption(const char *caption_){
@@ -146,11 +155,19 @@ void Window::draw() {
 	Vpu::fillRectangle(x  , y  , w  , h  , colors[2].r, colors[2].g, colors[2].b, colors[2].a);
 	Vpu::fillRectangle(x+1, y+1, w-2, h-2, colors[0].r, colors[0].g, colors[0].b, colors[0].a);
 	Vpu::fillRectangle(x+1, y+2, w-3, h-3, colors[1].r, colors[1].g, colors[1].b, colors[1].a);
-	Vpu::setColor(colors[3].r, colors[3].g, colors[3].b, colors[3].a);
+	Vpu::gradientRectangle(
+		x+1  , y+2,
+		w-3  , h-3, 
+		colors[1].r, colors[1].g, colors[1].b, colors[1].a, 
+		colors[2].r, colors[2].g, colors[2].b, colors[2].a
+	);
+	if(this!=WindowManager::hover) 
+		Vpu::setColor(colors[3].r, colors[3].g, colors[3].b, colors[3].a);
+	else 
+		Vpu::setColor(128,0,128,255);
 	Vpu::rectangle(this->x, this->y, this->width, this->height);
 	this->drawChildren();
 	Vpu::popFont();	
-
 }
 
 void Button::draw() {
@@ -160,6 +177,13 @@ void Button::draw() {
 	int h = this->height;
 	// Draw plate
 	Vpu::fillRectangle(x  , y  , w  , h  , colors[2].r, colors[2].g, colors[2].b, colors[2].a);
+	Vpu::fillRectangle(x+1, y+1, w-2, h-2, colors[0].r, colors[0].g, colors[0].b, colors[0].a);
+	Vpu::fillRectangle(x+1, y+2, w-3, h-3, colors[1].r, colors[1].g, colors[1].b, colors[1].a);
+	Vpu::gradientRectangle(
+		x+1  , y+2,
+		w-3  , h-3, 
+		colors[2].r, colors[2].g, colors[2].b, colors[2].a, 
+		colors[1].r, colors[1].g, colors[1].b, colors[1].a);
 	// Draw text
 	Vpu::setColor(al_map_rgba(255,255,255,255));
 	Vpu::pushFont();
@@ -171,14 +195,16 @@ void Button::draw() {
 
 void Button::handleMessages() {
 	while(this->messages.size()){
-		unsigned long int v = this->messages[0];
-		this->messages.pop_front();
-		switch (v & 0x00FF) {
-			case 0x00: 
+		unsigned long int msg = this->messages[0];
+		this->messages.pop_front(); // dispose message asap
+		unsigned short int parameter = (msg & 0xffff0000)>>16;
+		MessageType type = MessageType(msg & 0x0000ffff);
+		switch (type) {
+			case MSG_MOUSE_DOWN: 
 				break;
-			case 0x10: 
+			case MSG_MOUSE_HOLD: 
 				break;
-			case 0x20: 
+			case MSG_MOUSE_UP: 
 				break;
 			default: 
 				break;
@@ -210,14 +236,19 @@ void Window::addComponent(WidgetType type, int x, int y, int w, int h, std::stri
 
 void Window::handleMessages() {
 	while(this->messages.size()){
-		unsigned long int v = this->messages[0];
-		this->messages.pop_front();
-		switch (v & 0x00FF) {
-			case 0x00: 
+		unsigned long int msg = this->messages[0];
+		this->messages.pop_front(); // dispose message asap
+		unsigned short int parameter = (msg & 0xffff0000)>>16;
+		MessageType type = MessageType(msg & 0x0000ffff);
+		switch (type) {
+			case MSG_MOUSE_DOWN: 
+				printf("MouseDown: %d, %d\n", 0,0);
 				break;
-			case 0x10: 
+			case MSG_MOUSE_HOLD: 
+				printf("MouseHold: %d, %d\n", 0,0);
 				break;
-			case 0x20: 
+			case MSG_MOUSE_UP: 
+				printf("MouseUp: %d, %d\n", 0,0);
 				break;
 			default: 
 				break;
@@ -228,6 +259,7 @@ void Window::handleMessages() {
 
 void Window::update() {
 	if(this->hidden)return;//should receive show message...
+	this->hover = this == WindowManager::hover;					
 	this->handleMessages();
 	this->updateChildren();
 }
@@ -238,6 +270,7 @@ void WindowManager::initialize() {
 }
 
 void WindowManager::render() {
+	if(!WindowManager::redraw)return;
 	std::map<int, Window>::iterator it = WindowManager::windows.begin();
 	Vpu::select(Vpu::windows);
 	Vpu::clear();
@@ -247,15 +280,54 @@ void WindowManager::render() {
 		if( w->isHidden() )continue;
 		w->draw();
 	}
+	WindowManager::redraw = false;
 }
 
+#include <windows.h>
+
 void WindowManager::update() {
-	std::map<int, Window>::iterator it = WindowManager::windows.begin();
+	al_get_mouse_cursor_position(&WindowManager::mouse_x, &WindowManager::mouse_y);
+	int offset_x=0, offset_y=0;
+	al_get_window_position(Vpu::display, &offset_x, &offset_y);
+	offset_y += GetSystemMetrics(SM_CYFRAME) + (GetSystemMetrics(SM_CYCURSOR))-2/*tempfix*/;//+GetSystemMetrics(SM_CYSIZE)
+	offset_x += 11;/*tempfix*/
+	WindowManager::mouse_x-=offset_x;
+	WindowManager::mouse_y-=offset_y;
+	int wx=WindowManager::hover?WindowManager::hover->getX():0;
+	int wy=WindowManager::hover?WindowManager::hover->getY():0;
+	printf("W: (%d,%d) - M: (%d,%d)   B: [%d,%d,%d]                \r", wx, wy, WindowManager::mouse_x, WindowManager::mouse_y, InputDevice::mouse_button[0], InputDevice::mouse_button[1], InputDevice::mouse_button[2]);
 	Window *w;
-	for (; it != WindowManager::windows.end(); it++) {
+	Window *_hover = nullptr;
+	std::reverse_iterator<std::map<int, Window>::iterator> it = WindowManager::windows.rbegin();
+	for (; it != WindowManager::windows.rend(); it++) {
 		w = &((*it).second);
+		// Find out which window is the first being below the mouse cursor (must use reverse update ordering method)
+		int x		= w->getX();
+		int y		= w->getY();
+		int width	= w->getWidth();
+		int height	= w->getHeight();
+
+		if((!_hover)
+		   &&( (WindowManager::mouse_x >= x) 
+		      &(WindowManager::mouse_y >= y) 
+		      &(WindowManager::mouse_x <= x + width) 
+		      &(WindowManager::mouse_y <= y + height)
+		     )
+		  ){
+			if     (InputDevice::mouse_button[0]== 1) Widget::sendMessage(w, MSG_MOUSE_DOWN);
+			else if(InputDevice::mouse_button[0]== 2) Widget::sendMessage(w, MSG_MOUSE_HOLD);
+			else if(InputDevice::mouse_button[0]==-1) Widget::sendMessage(w, MSG_MOUSE_UP);
+			_hover = w;
+			
+		}
+		// and ultimately, update the window...
 		w->update();
 	}
+	// Update window_hover reference
+	if (WindowManager::hover != _hover) {
+		WindowManager::hover = _hover;
+		WindowManager::redraw = true;
+	}	
 }
 
 Window* WindowManager::createWindow(int x, int y, int width, int height, std::string caption, int wndflags){

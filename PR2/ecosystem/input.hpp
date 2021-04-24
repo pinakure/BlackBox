@@ -78,6 +78,7 @@ class InputDevice {
 		static int				mouse_w;
 		static int				mouse_x;
 		static int				mouse_y;
+		static int				mouse_button[16];
 
 		static float			aim_x;
 		static float			aim_y;

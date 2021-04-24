@@ -19,6 +19,7 @@ std::forward_list<Trigger> InputDevice::trigger;
 int						InputDevice::mouse_w;
 int						InputDevice::mouse_x;
 int						InputDevice::mouse_y;
+int						InputDevice::mouse_button[16];
 
 float					InputDevice::aim_x;
 float					InputDevice::aim_y;
@@ -262,7 +263,7 @@ static bool initializeBitmapKeys(void) {
 
 void InputDevice::restart() {
 	
-	if (in_mouse->integer()) {
+	if (1){//in_mouse->integer()) {
 		al_install_mouse();
 		al_register_event_source(Engine::queue, al_get_mouse_event_source());
 		//al_disable_hardware_cursor();
@@ -456,11 +457,12 @@ void InputDevice::updateController(void){
 
 
 void InputDevice::updateJoystick(void){
-	// =)
+	// Unified KeyDown, KeyPress & KeyUp mechanism =)
 	for (int i = 0; i < INPUT_MAX; i++) {
 		if (controller[i] == -1)controller[i] = 0;
 		else if (controller[i] == 1) controller[i] = 2;
 		else if (controller[i] > 1) {
+			// ButtonRepeat. Not needed i guess
 			controller[i] += 1;
 			if (controller[i] > InputDevice::typematic_rate)controller[i] = 1;
 		}
@@ -469,9 +471,15 @@ void InputDevice::updateJoystick(void){
 		if (key[i] == -1)key[i] = 0;
 		else if (key[i] == 1) key[i] = 2;
 		else if (key[i] > 1) {
+			// KeyRepeat
 			key[i] += 1;
 			if (key[i] > InputDevice::typematic_rate)key[i] = 1;
 		}
+	}
+	// Just ignore value for first item
+	for (int i = 1; i < 16; i++) {
+		if (mouse_button[i-1] == -1)mouse_button[i-1] = 0;
+		else if (mouse_button[i-1] == 1) mouse_button[i-1] = 2;
 	}
 }
 

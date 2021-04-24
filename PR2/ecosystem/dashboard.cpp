@@ -190,7 +190,7 @@ void Dashboard::update(double delta) {
 	if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || InputDevice::controller[INPUT_START]==1) {
 		if (selected) selected->load();
 	}
-	printf("Updating Dashboard %f                    \r", delta);
+	//printf("Updating Dashboard %f                    \r", delta);
 }
 
 

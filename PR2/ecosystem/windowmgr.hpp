@@ -6,6 +6,13 @@
 #include <string>
 #include "vpu.hpp"
 
+typedef enum t_MessageType {
+	MSG_MOUSE_DOWN,
+	MSG_MOUSE_HOLD,
+	MSG_MOUSE_UP,
+	MSG_MAX
+}MessageType;
+
 typedef enum t_WidgetType {
 	WIDGET_BUTTON,
 	WIDGET_LABEL,
@@ -64,6 +71,7 @@ public:
 	Widget *parent	 = nullptr;
 	Callback *callback= nullptr;
 	std::vector<Widget*> children;
+	static void sendMessage(Widget *w, MessageType msg, unsigned short int parameter=0);
 	const	char *getCaption(){ return this->caption.c_str();	}
 	virtual void draw()			= 0;
 	virtual void update()		= 0;
@@ -98,6 +106,7 @@ private:
 	int content_width = 0;
 	int content_x = 0;
 	int content_y = 0;
+	bool hover = false;
 public:
 	int  getHandle	 (){ return this->handle;	}
 	Window(int handle=0, int x = 0, int y = 0, int width = 64, int height = 64, std::string caption="", int wndflags=0);
@@ -124,7 +133,11 @@ public:
 class WindowManager {
 private:
 	static int window_handle;
+	static int mouse_x;
+	static int mouse_y;
 	friend class Window;
+	static bool redraw;
+	static Window *hover;
 public:
 	static std::map<int, Window> windows;
 	static void initialize();

@@ -156,6 +156,14 @@ void Engine::handleEvents() {
 		case ALLEGRO_EVENT_KEY_UP:
 			if(InputDevice::in_keyboard) InputDevice::handleEvent(event);
 			break;
+
+		case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+			InputDevice::mouse_button[event.mouse.button-1] = 1;
+			break;
+		
+		case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+			InputDevice::mouse_button[event.mouse.button-1] = -1;
+			break;
 			
 		default:
 			break;
