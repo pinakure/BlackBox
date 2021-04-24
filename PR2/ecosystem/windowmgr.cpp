@@ -243,12 +243,15 @@ void Window::handleMessages() {
 		switch (type) {
 			case MSG_MOUSE_DOWN: 
 				printf("MouseDown: %d, %d\n", 0,0);
+				WindowManager::redraw = true;
 				break;
 			case MSG_MOUSE_HOLD: 
 				printf("MouseHold: %d, %d\n", 0,0);
+				WindowManager::redraw = true;
 				break;
 			case MSG_MOUSE_UP: 
 				printf("MouseUp: %d, %d\n", 0,0);
+				WindowManager::redraw = true;
 				break;
 			default: 
 				break;
