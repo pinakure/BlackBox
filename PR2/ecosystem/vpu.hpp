@@ -51,6 +51,7 @@ public:
 	static Surface						overlay;
 	static Surface						background;
 	static Surface						foreground;
+	static Surface						windows;
 	static Surface						console;
 	static int							pixel_format;
 	static int							scroll[2];
@@ -84,6 +85,7 @@ public:
 	static void rectangle(int x, int y, int width, int height);
 	static void qfillRectangle(int x, int y, int width, int height);
 	static void gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2);
+	static void gradientRectangle(int x, int y, int width, int height, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2);
 	static void fillRectangle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillSquircle(int x, int y, int width, int height, int r, int g, int b, int alpha = 255);
 	static void fillCircle(int x, int y, float radius, int r, int g, int b, int alpha=255);

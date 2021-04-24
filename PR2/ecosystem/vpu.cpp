@@ -26,6 +26,7 @@ Surface Vpu::console;
 Surface Vpu::overlay;
 Surface Vpu::background;
 Surface Vpu::foreground;
+Surface Vpu::windows;
 
 std::vector<ALLEGRO_COLOR> Vpu::color_stack;
 std::vector<Font*> Vpu::font_stack;
@@ -142,6 +143,8 @@ void Vpu::clearAll() {
 	paint(0, 0, 0, 0);
 	select(overlay);
 	paint(0, 0, 0, 0);
+	select(windows);
+	paint(0, 0, 0, 0);
 }
 
 bool Vpu::start() {		
@@ -212,6 +215,12 @@ void Vpu::initializeFonts() {
 
 bool Vpu::restart() {
 	is_initialized = false;
+
+	// windows
+	windows= createSurface(width, height);
+	if(!windows.enabled) return false;
+	select(windows);
+	clear();
 
 	// overlay 
 	overlay = createSurface(width, height);
@@ -313,6 +322,7 @@ void Vpu::deinitialize() {
 	for (int i = 0; i < 4; i++) {
 		destroySurface(overlay);
 		destroySurface(foreground);
+		destroySurface(windows);
 		destroySurface(background);		
 	}
 	if (buffer) {
@@ -527,6 +537,7 @@ void Vpu::render() {
 	
 	
 	al_set_target_bitmap(buffer);
+	al_draw_bitmap(windows.bitmap, 0,0,0);
 	al_draw_filled_rectangle(0, 0, width, height, al_map_rgba(fade_color[0], fade_color[1], fade_color[2], 255*fade_level));
 	
 	if (console.enabled)
@@ -644,14 +655,13 @@ void Vpu::drawAnimationRotated(Animation& animation, float dx, float dy, float a
 			0
 		);
 }
-
-void Vpu::gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2) {
+void Vpu::gradientRectangle(int _x, int _y, int w, int h, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2) {
 	al_lock_bitmap(Vpu::target->bitmap, Vpu::pixel_format, ALLEGRO_LOCK_READWRITE);
 	float r = r1;
 	float g = g1; 
 	float b = b1;
 	float a = a1;
-	int len = Vpu::target->height * Vpu::target->width;
+	int len = w * h;
 	int range_r = (r2 - r1);
 	int range_g = (g2 - g1);
 	int range_b = (b2 - b1);
@@ -661,17 +671,21 @@ void Vpu::gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a
 	float dg = (float(range_g) / float(len)) * float(t);
 	float db = (float(range_b) / float(len)) * float(t);
 	float da = (float(range_a) / float(len)) * float(t);
-	for (int y = 0; y < Vpu::target->height; y++) {
-		for (int x = 0; x < Vpu::target->width; x++) {
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
 			r = r1+((float(range_r) / float(len)) * float(t));
 			g = g1+((float(range_g) / float(len)) * float(t));
 			b = b1+((float(range_b) / float(len)) * float(t));
 			a = a1+((float(range_a) / float(len)) * float(t));
-			al_put_pixel(x, y, al_map_rgba(r, g, b, a));
+			al_put_pixel(_x+x, _y+y, al_map_rgba(r, g, b, a));
 			t++;
 		}
 	}
 	al_unlock_bitmap(Vpu::target->bitmap);
+}
+
+void Vpu::gradient(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2) {
+	Vpu::gradientRectangle(0,0,Vpu::target->width, Vpu::target->height, r1,g1,b1,a1,r2,g2,b2,a2);
 }
 
 Surface Vpu::createSurface(int width, int height) {
