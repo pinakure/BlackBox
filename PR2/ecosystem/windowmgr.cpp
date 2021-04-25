@@ -1,9 +1,5 @@
 #include "windowmgr.hpp"
-#include "vpu.hpp"
-#include "script.hpp"
 #include "input.hpp"
-
-int Button::button_id = 0;
 
 std::map<int, Window> WindowManager::windows;
 int		WindowManager::window_handle = 0;
@@ -11,265 +7,31 @@ int		WindowManager::mouse_x = 0;
 int		WindowManager::mouse_y = 0;
 bool	WindowManager::redraw = true;
 Window *WindowManager::hover = nullptr;
+DragNDrop WindowManager::dnd;
 
-Window::Window(int handle, int x, int y, int width, int height, std::string caption, int wndflags) {
-	this->handle = handle;
-	this->flags = wndflags;
-	this->setPosition(x, y);
-	this->setSize(width, height);
-	this->setCaption(caption.c_str());	
+void Callback::trigger(int argument) {
+	if (this->type != CALLBACK_INTEGER) return Callback::typeError(this);
+	this->integer_callback(argument);
+}
+void Callback::trigger(std::string argument) {
+	if (this->type != CALLBACK_STRING) return Callback::typeError(this);
+	this->string_callback(argument);
+}
+void Callback::trigger(void) {
+	if (this->type != CALLBACK_STATEMENT) return Callback::typeError(this);
+	std::string code = this->statement;
+	Script::execute(code);
 }
 
-Button::Button(int id, int x, int y, int width, int height, std::string caption, Callback *callback) {
-	this->id= id;
-	this->callback = callback;
-	this->setPosition(x, y);
-	this->setSize(width, height);
-	this->setCaption(caption.c_str());
-}
-
-void Widget::sendMessage(Widget* w, MessageType msg, unsigned short int parameter) {
-	w->messages.push_back((parameter << 16) | ((unsigned short int) msg));
-}
-
-void Widget::setCaption(const char *caption_){
-	this->caption = caption_; 
-	if(this->width < al_get_text_width(Vpu::smallest_font->data, this->caption.c_str())+8)
-		this->width = al_get_text_width(Vpu::smallest_font->data, this->caption.c_str())+8;
-}
-
-void Widget::setPosition(int x, int y) {
-	this->x = x;
-	this->y = y;
-	this->left = x;
-	this->top  = y;
-	this->right  = this->left + this->width;
-	this->bottom = this->top  + this->height;
-	if (parent) {
-		this->x		 += parent->x;
-		this->left	 += parent->x;
-		this->right	 += parent->x;
-		this->y		 += parent->y;
-		this->top	 += parent->y;
-		this->bottom += parent->y;
-	}
-}
-
-void Widget::setSize(int width, int height) {
-	this->width  = width;
-	this->height = height;
-	this->right = this->left + this->width;
-	this->bottom = this->top + this->height;
-}
-
-void Widget::setLeft(int left) {
-	this->x		= left;
-	this->width = (this->right - this->x >= this->min_width) 
-				? this->right - this->x
-				: this->min_width;
-	this->left  = this->x + this->width;
-}
-
-void Widget::setTop(int top) {
-	this->y		= top;
-	this->height= (this->bottom - this->y >= this->min_height) 
-				? this->bottom - this->y 
-				: this->min_height;
-	this->top	= this->y + this->height;
-}
-
-void Widget::setRight(int right) {
-	this->width = (right - this->left >= this->min_width) 
-				? right - this->left
-				: this->min_width;
-	this->right  = this->left + this->width;
-}
-
-void Widget::setBottom(int bottom) {
-	this->height= (bottom - this->top >= this->min_height) 
-				? bottom - this->top 
-				: this->min_height;
-	this->bottom = this->top + this->height;
-}
-
-int Window::drawCaption() {
-	int h = Vpu::font->height+2;
-	int w = this->width - 2;
-	int x = this->x + 1;
-	int y = this->y + 1;
-	//Vpu::fillRectangle(x+4, y+4, w  , h, colors[4].r, colors[4].g, colors[4].b, 255);
-	Vpu::fillRectangle(x  , y+1  , w , h-1,colors[2].r, 
-												colors[2].g/2, 
-												colors[2].b/2, 
-												255);
-	Vpu::fillRectangle(x  , y    , w , h-1,colors[0].r, 
-												colors[0].g/2, 
-												colors[0].b/2, 
-												255);
-	Vpu::fillRectangle(x  , y+1  , w -1 , h-2,colors[1].r, 
-												colors[1].g/2, 
-												colors[1].b/2, 
-												255);
-	Vpu::setColor(al_map_rgba(255,255,255,255));
-	Vpu::print(this->caption.c_str(), x+(w>>1), y+1, ALLEGRO_ALIGN_CENTER);
-	return h + 1;
-}
-
-void Widget::drawChildren() {
-	std::vector<Widget*>::iterator it = this->children.begin();
-	for (; it != this->children.end(); it++) {
-		(*it)->draw();
-	}
-}
-
-void Widget::updateChildren() {
-	std::vector<Widget*>::iterator it = this->children.begin();
-	for (; it != this->children.end(); it++) {
-		(*it)->update();
-	}
-}
-
-void Widget::addChildren(int type, int x, int y, int width, int height, std::string caption, Callback *callback) {
-	Widget *w = nullptr;
-	switch (type) {
-		case WIDGET_BUTTON:
-			w = new Button(Button::newId(), x, y, width, height, caption, callback);
-			w->parent = this;
-			this->children.push_back(w);
-			break;
-		default:
-			break;
-	}
-	w->setPosition(x,y);
-}
-
-void Window::draw() {
-	Vpu::pushFont();
-	Vpu::font = Vpu::smallest_font;
-	int caption_height = this->drawCaption();
-	int x = this->x;
-	int y = this->y + caption_height;
-	int w = this->width;
-	int h = this->height - caption_height;
-	Vpu::fillRectangle(x+4, y+4, w  , h  , colors[4].r, colors[4].g, colors[4].b, colors[4].a);
-	Vpu::fillRectangle(x  , y  , w  , h  , colors[2].r, colors[2].g, colors[2].b, colors[2].a);
-	Vpu::fillRectangle(x+1, y+1, w-2, h-2, colors[0].r, colors[0].g, colors[0].b, colors[0].a);
-	Vpu::fillRectangle(x+1, y+2, w-3, h-3, colors[1].r, colors[1].g, colors[1].b, colors[1].a);
-	Vpu::gradientRectangle(
-		x+1  , y+2,
-		w-3  , h-3, 
-		colors[1].r, colors[1].g, colors[1].b, colors[1].a, 
-		colors[2].r, colors[2].g, colors[2].b, colors[2].a
-	);
-	if(this!=WindowManager::hover) 
-		Vpu::setColor(colors[3].r, colors[3].g, colors[3].b, colors[3].a);
-	else 
-		Vpu::setColor(128,0,128,255);
-	Vpu::rectangle(this->x, this->y, this->width, this->height);
-	this->drawChildren();
-	Vpu::popFont();	
-}
-
-void Button::draw() {
-	int x = this->x;
-	int y = this->y;
-	int w = this->width;
-	int h = this->height;
-	// Draw plate
-	Vpu::fillRectangle(x  , y  , w  , h  , colors[2].r, colors[2].g, colors[2].b, colors[2].a);
-	Vpu::fillRectangle(x+1, y+1, w-2, h-2, colors[0].r, colors[0].g, colors[0].b, colors[0].a);
-	Vpu::fillRectangle(x+1, y+2, w-3, h-3, colors[1].r, colors[1].g, colors[1].b, colors[1].a);
-	Vpu::gradientRectangle(
-		x+1  , y+2,
-		w-3  , h-3, 
-		colors[2].r, colors[2].g, colors[2].b, colors[2].a, 
-		colors[1].r, colors[1].g, colors[1].b, colors[1].a);
-	// Draw text
-	Vpu::setColor(al_map_rgba(255,255,255,255));
-	Vpu::pushFont();
-	Vpu::font = Vpu::smallest_font;
-	Vpu::print(this->caption.c_str(), x+(w>>1), y+1, ALLEGRO_ALIGN_CENTER);
-	Vpu::popFont();	
-	this->drawChildren();
-}
-
-void Button::handleMessages() {
-	while(this->messages.size()){
-		unsigned long int msg = this->messages[0];
-		this->messages.pop_front(); // dispose message asap
-		unsigned short int parameter = (msg & 0xffff0000)>>16;
-		MessageType type = MessageType(msg & 0x0000ffff);
-		switch (type) {
-			case MSG_MOUSE_DOWN: 
-				break;
-			case MSG_MOUSE_HOLD: 
-				break;
-			case MSG_MOUSE_UP: 
-				break;
-			default: 
-				break;
-		}
-	}
-	this->messages.clear();
-}
-
-void Button::update() {
-	if(this->hidden)return;//should receive show message...
-	this->handleMessages();
-	this->updateChildren();
-}
-
-void Window::addComponent(WidgetType type, int x, int y, int w, int h, std::string caption, Callback *callback) {
-	this->content_x = 3;
-	this->content_y = Vpu::smallest_font->height+6;
-	this->content_width  = this->width  - (this->content_x<<1);
-	this->content_height = this->height - (this->content_y+3);
-	this->addChildren(type, 
-		x + this->content_x, 
-		y + this->content_y, 
-		this->content_width <  w ? this->content_width  : w,
-		this->content_height < h ? this->content_height : h,
-		caption,
-		callback
-	);
-}
-
-void Window::handleMessages() {
-	while(this->messages.size()){
-		unsigned long int msg = this->messages[0];
-		this->messages.pop_front(); // dispose message asap
-		unsigned short int parameter = (msg & 0xffff0000)>>16;
-		MessageType type = MessageType(msg & 0x0000ffff);
-		switch (type) {
-			case MSG_MOUSE_DOWN: 
-				printf("MouseDown: %d, %d\n", 0,0);
-				WindowManager::redraw = true;
-				break;
-			case MSG_MOUSE_HOLD: 
-				printf("MouseHold: %d, %d\n", 0,0);
-				WindowManager::redraw = true;
-				break;
-			case MSG_MOUSE_UP: 
-				printf("MouseUp: %d, %d\n", 0,0);
-				WindowManager::redraw = true;
-				break;
-			default: 
-				break;
-		}
-	}
-	this->messages.clear();
-}
-
-void Window::update() {
-	if(this->hidden)return;//should receive show message...
-	this->hover = this == WindowManager::hover;					
-	this->handleMessages();
-	this->updateChildren();
+void Callback::typeError(Callback* victim) {
+	printf("ERROR: Unexpected type for callback 0x%p, type = %d\n", victim, victim->type);
 }
 
 void WindowManager::initialize() {
+	dnd.clear();
 	Window *w = WindowManager::createWindow( 320-32, 120-32, 64, 64, "Test Window");
-	w->addComponent(WIDGET_BUTTON, 0,0,128,128,"");
+	Callback *bcb = new Callback("import console; console.echo('hello');");
+	w->addComponent(WIDGET_BUTTON, 0,0,128,128,"Button",bcb);
 }
 
 void WindowManager::render() {
@@ -298,7 +60,7 @@ void WindowManager::update() {
 	WindowManager::mouse_y-=offset_y;
 	int wx=WindowManager::hover?WindowManager::hover->getX():0;
 	int wy=WindowManager::hover?WindowManager::hover->getY():0;
-	printf("W: (%d,%d) - M: (%d,%d)   B: [%d,%d,%d]                \r", wx, wy, WindowManager::mouse_x, WindowManager::mouse_y, InputDevice::mouse_button[0], InputDevice::mouse_button[1], InputDevice::mouse_button[2]);
+	//printf("W: (%d,%d) - M: (%d,%d)   B: [%d,%d,%d]                \r", wx, wy, WindowManager::mouse_x, WindowManager::mouse_y, InputDevice::mouse_button[0], InputDevice::mouse_button[1], InputDevice::mouse_button[2]);
 	Window *w;
 	Window *_hover = nullptr;
 	std::reverse_iterator<std::map<int, Window>::iterator> it = WindowManager::windows.rbegin();
@@ -317,12 +79,41 @@ void WindowManager::update() {
 		      &(WindowManager::mouse_y <= y + height)
 		     )
 		  ){
-			if     (InputDevice::mouse_button[0]== 1) Widget::sendMessage(w, MSG_MOUSE_DOWN);
-			else if(InputDevice::mouse_button[0]== 2) Widget::sendMessage(w, MSG_MOUSE_HOLD);
-			else if(InputDevice::mouse_button[0]==-1) Widget::sendMessage(w, MSG_MOUSE_UP);
+			if (InputDevice::mouse_button[0]== 1) {
+				dnd.start(w, mouse_x, mouse_y, DRAGNDROP_MOVE);
+				Widget::sendMessage(w, MSG_MOUSE_DOWN, (mouse_y << 16) | mouse_x);
+			}
+			else if(InputDevice::mouse_button[0]== 2) {
+				dnd.update(mouse_x, mouse_y);
+				Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);				
+			}
+			else if(InputDevice::mouse_button[0]==-1) {
+				dnd.finalize(mouse_x, mouse_y);
+				Widget::sendMessage(w, MSG_MOUSE_UP  , (mouse_y << 16) | mouse_x);
+			}
 			_hover = w;
 			
+		} else if(dnd.action != DRAGNDROP_NONE) {
+			if(InputDevice::mouse_button[0]== 2) {
+				dnd.update(mouse_x, mouse_y);
+				Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);				
+			} else if(InputDevice::mouse_button[0]==-1) {
+				dnd.finalize(mouse_x, mouse_y);
+				Widget::sendMessage(w, MSG_MOUSE_UP  , (mouse_y << 16) | mouse_x);
+			}
 		}
+
+		// Generate mouse_in & mouse_out events
+		if(w->contains(mouse_x, mouse_y)) {
+			if (!w->mouse_in) {
+				Widget::sendMessage(w, MSG_MOUSE_IN, (mouse_y << 16) | mouse_x);				
+			}
+		} else {
+			if (!w->mouse_out) {
+				Widget::sendMessage(w, MSG_MOUSE_OUT, (mouse_y << 16) | mouse_x);				
+			}
+		}
+
 		// and ultimately, update the window...
 		w->update();
 	}
@@ -343,19 +134,3 @@ int WindowManager::newHandle() {
 	return WindowManager::window_handle++;
 }
 
-void Callback::trigger(int argument) {
-	if (this->type != CALLBACK_INTEGER) return Callback::typeError(this);
-	this->integer_callback(argument);
-}
-void Callback::trigger(std::string argument) {
-	if (this->type != CALLBACK_STRING) return Callback::typeError(this);
-	this->string_callback(argument);
-}
-void Callback::trigger(void) {
-	if (this->type != CALLBACK_STATEMENT) return Callback::typeError(this);
-	Script::execute(this->statement);
-}
-
-void Callback::typeError(Callback* victim) {
-	printf("ERROR: Unexpected type for callback 0x%p, type = %d\n", victim, victim->type);
-}

@@ -146,15 +146,6 @@ void InputDevice::describeJoystick(int index){
 @param &keyBuf Reference to a char[0x80] containing a string which maximum length can be 0x7F, and each one of the chars until a zero is found represents the keycodes being pressed.
 @bug When pressing simultaneously two or more keys, there is no keyrepeat. I dont know if this is really a bug or a cool feature. 
 **/
-typedef struct s_Point {
-	int x;
-	int y;
-}Point;
-
-typedef struct s_KeyInfo {
-	Point position;
-	Point size;
-}KeyInfo;
 
 #include <map>
 float bitmap_keys_size =4.0f;

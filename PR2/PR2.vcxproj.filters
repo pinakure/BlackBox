@@ -19,6 +19,9 @@
     <Filter Include="Archivos de origen\Scripts">
       <UniqueIdentifier>{2df214a1-1d0b-4853-88d6-9300081ff897}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\ecosystem\gui">
+      <UniqueIdentifier>{3a698757-411d-4608-a3ac-5c333d474442}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -141,7 +144,16 @@
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
     <ClCompile Include="ecosystem\windowmgr.cpp">
-      <Filter>Archivos de origen\ecosystem</Filter>
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\button.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\widget.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\window.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

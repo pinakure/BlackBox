@@ -9,6 +9,15 @@
 /*! @brief
  * Module which manages user input, and responds with input events, callbacks
  */
+typedef struct s_Point {
+	int x;
+	int y;
+}Point;
+
+typedef struct s_KeyInfo {
+	Point position;
+	Point size;
+}KeyInfo;
 
 enum E_InputButton {
 	INPUT_CROSS,    // >< - button0
