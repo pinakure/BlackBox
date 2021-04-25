@@ -20,16 +20,29 @@ void Button::draw() {
 	Vpu::fillRectangle(x  , y  , w  , h  , colors[2].r, colors[2].g, colors[2].b, colors[2].a);
 	Vpu::fillRectangle(x+1, y+1, w-2, h-2, colors[0].r, colors[0].g, colors[0].b, colors[0].a);
 	Vpu::fillRectangle(x+1, y+2, w-3, h-3, colors[1].r, colors[1].g, colors[1].b, colors[1].a);
-	Vpu::gradientRectangle(
-		x+1  , y+2,
-		w-3  , h-3, 
-		colors[2].r, colors[2].g, colors[2].b, colors[2].a, 
-		colors[1].r, colors[1].g, colors[1].b, colors[1].a);
+		
+	if (this->mouse_hold) {
+		Vpu::gradientRectangle(
+			x+1  , y+2,
+			w-3  , h-3, 
+			float(colors[2].r)*1, float(colors[2].g)*.75f, float(colors[2].b)*1, float(colors[2].a),
+			float(colors[1].r)*1, float(colors[1].g)*.75f, float(colors[1].b)*1, float(colors[1].a) 
+		);		
+		Vpu::setColor(al_map_rgba(255,255,64,255));	
+	} else {
+		Vpu::gradientRectangle(
+			x+1  , y+2,
+			w-3  , h-3, 
+			colors[1].r, colors[1].g, colors[1].b, colors[1].a,
+			colors[2].r, colors[2].g, colors[2].b, colors[2].a 
+		);
+		Vpu::setColor(al_map_rgba(255,255,255,255));	
+	}
+	
 	// Draw text
-	Vpu::setColor(al_map_rgba(255,255,255,255));
 	Vpu::pushFont();
 	Vpu::font = Vpu::smallest_font;
-	Vpu::print(this->caption.c_str(), x+(w>>1), y+1, ALLEGRO_ALIGN_CENTER);
+	Vpu::print(this->caption.c_str(), x+(w>>1), y+(h>>1)-(Vpu::font->height>>1), ALLEGRO_ALIGN_CENTER);
 	Vpu::popFont();	
 	this->drawChildren();
 }
@@ -44,8 +57,5 @@ void Button::update() {
 			else this->callback->trigger();
 		}
 	}
-	this->mouse_down = false;
-	this->mouse_up	 = false;
-	this->mouse_hold = false;
 	this->updateChildren();
 }

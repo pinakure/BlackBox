@@ -11,6 +11,8 @@ void Widget::setCaption(const char *caption_){
 }
 
 void Widget::move(int x, int y) {
+	if(this->x+x < 0) x = 0;
+	if(this->y+y < 0) y = 0;
 	this->x		 += x;
 	this->y      += y;
 	this->left   += x;
@@ -20,7 +22,7 @@ void Widget::move(int x, int y) {
 	std::vector<Widget*>::iterator it=children.begin();
 	for(;it!=children.end(); it++){
 		(*it)->move(x, y);
-	}
+	}	
 }
 
 void Widget::setPosition(int x, int y) {

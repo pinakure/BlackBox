@@ -53,7 +53,7 @@ void Window::addComponent(WidgetType type, int x, int y, int w, int h, std::stri
 int Window::drawCaption() {
 	int h = Vpu::font->height+2;
 	int w = this->width - 2;
-	int x = this->x + 1;
+	int x = this->x;
 	int y = this->y + 1;
 	//Vpu::fillRectangle(x+4, y+4, w  , h, colors[4].r, colors[4].g, colors[4].b, 255);
 	Vpu::fillRectangle(x  , y+1  , w , h-1,colors[2].r, 
