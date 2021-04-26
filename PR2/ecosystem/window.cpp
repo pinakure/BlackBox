@@ -6,6 +6,14 @@ Window::Window(int handle, int x, int y, int width, int height, std::string capt
 	this->setPosition(x, y);
 	this->setSize(width, height);
 	this->setCaption(caption.c_str());	
+	this->anchor_nw = Anchor(x, y, 8, 8);
+	this->anchor_n = Anchor(x + 8, y, width - 16, 8);
+	this->anchor_ne = Anchor(x + width - 8, y, 8, 8);
+	this->anchor_w = Anchor(x, y + 8, 8, height - 16);
+	this->anchor_e = Anchor(x+width-8, y + 8, 8, height - 16);
+	this->anchor_sw = Anchor(x, y + height - 8, 8, 8);
+	this->anchor_s = Anchor(x + 8, y + height - 8, width - 16, 8);
+	this->anchor_se = Anchor(x + width - 8, y + height - 8, 8, 8);
 }
 
 void Window::draw() {

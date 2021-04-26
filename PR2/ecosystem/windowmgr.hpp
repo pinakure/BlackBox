@@ -130,6 +130,34 @@ public:
 	}
 };
 
+class Anchor {
+private:
+	int x = 0;
+	int y = 0;
+	int w = 0;
+	int h = 0;
+public:
+	Anchor(int x = 0, int y = 0, int w = 0, int h = 0) {
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
+	}
+	bool contains(int x, int y) {
+		return ((x >= this->x) && (y >= this->y) && (x <= this->x + this->w) && (y <= this->y + this->h));
+	}
+	void move(int x, int y) {
+		if (this->x + x < 0) x = 0;
+		if (this->y + y < 0) y = 0;
+		this->x += x;
+		this->y += y;
+	}
+	void resize(int width, int height) {
+		this->w = width;
+		this->h = height;
+	}
+};
+
 class Window : public Widget {
 private:
 	int handle  = -1;	
@@ -139,6 +167,14 @@ private:
 	int content_y = 0;
 	bool hover = false;
 public:
+	Anchor anchor_nw;
+	Anchor anchor_n;
+	Anchor anchor_ne;
+	Anchor anchor_sw;
+	Anchor anchor_s;
+	Anchor anchor_se;
+	Anchor anchor_e;
+	Anchor anchor_w;
 	int  getHandle	 (){ return this->handle;	}
 	Window(int handle=0, int x = 0, int y = 0, int width = 64, int height = 64, std::string caption="", int wndflags=0);
 	void draw();
@@ -195,7 +231,30 @@ public:
 		switch (action) {
 			case DRAGNDROP_MOVE:
 				target->move(delta.x, delta.y);
+				target->anchor_nw.move(delta.x, delta.y);
+				target->anchor_n.move(delta.x, delta.y);
+				target->anchor_ne.move(delta.x, delta.y);
+				target->anchor_sw.move(delta.x, delta.y);
+				target->anchor_s.move(delta.x, delta.y);
+				target->anchor_se.move(delta.x, delta.y);
+				target->anchor_w.move(delta.x, delta.y);
+				target->anchor_e.move(delta.x, delta.y);
 				printf("target->move(%d, %d);\n", delta.x, delta.y);
+				break;
+			case DRAGNDROP_RESIZE_NW:
+				target->setLeft(target->getLeft() + delta.x);
+				target->setTop(target->getTop() + delta.x);
+				target->anchor_nw.move(delta.x, delta.y);
+				target->anchor_n.move(0, delta.y);
+				target->anchor_n.resize(target->getWidth() - 16, 8);
+				target->anchor_ne.move(0,  delta.y);
+				target->anchor_w.move(delta.x, delta.y);
+				target->anchor_w.resize(8, target->getHeight() - 16);
+				target->anchor_e.move(0, delta.y);
+				target->anchor_e.resize(8, target->getHeight() - 16);
+				target->anchor_sw.move(delta.x, 0);
+				target->anchor_s.resize(target->getWidth() - 16, 8);
+				printf("target->resize(%d, %d);\n", delta.x, delta.y);
 				break;
 		}
 		begin.x = x;

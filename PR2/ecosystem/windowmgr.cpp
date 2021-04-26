@@ -80,27 +80,37 @@ void WindowManager::update() {
 		     )
 		  ){
 			if (InputDevice::mouse_button[0]== 1) {
-				dnd.start(w, mouse_x, mouse_y, DRAGNDROP_MOVE);
+				if (w->anchor_nw.contains(mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_NW);
+				else if (w->anchor_n.contains( mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_N);
+				else if (w->anchor_ne.contains(mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_NE);
+				else if (w->anchor_w.contains( mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_W);
+				else if (w->anchor_e.contains( mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_E);
+				else if (w->anchor_sw.contains(mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_SW);
+				else if (w->anchor_s.contains( mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_S);
+				else if (w->anchor_se.contains(mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_SE);
+				else if (mouse_y < y + Vpu::font->height + 2) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_MOVE);
 				Widget::sendMessage(w, MSG_MOUSE_DOWN, (mouse_y << 16) | mouse_x);
-			}
-			else if(InputDevice::mouse_button[0]== 2) {
-				dnd.update(mouse_x, mouse_y);
-				Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);				
-			}
-			else if(InputDevice::mouse_button[0]==-1) {
-				dnd.finalize(mouse_x, mouse_y);
-				Widget::sendMessage(w, MSG_MOUSE_UP  , (mouse_y << 16) | mouse_x);
-			}
-			_hover = w;
-			
-		} else if(dnd.action != DRAGNDROP_NONE) {
-			if(InputDevice::mouse_button[0]== 2) {
+			} else if(InputDevice::mouse_button[0]== 2) {
 				dnd.update(mouse_x, mouse_y);
 				Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);				
 			} else if(InputDevice::mouse_button[0]==-1) {
 				dnd.finalize(mouse_x, mouse_y);
 				Widget::sendMessage(w, MSG_MOUSE_UP  , (mouse_y << 16) | mouse_x);
 			}
+			_hover = w;
+			
+		} else switch(dnd.action){
+			case DRAGNDROP_NONE: 
+				break;
+			default:
+				if (InputDevice::mouse_button[0] == 2) {
+					dnd.update(mouse_x, mouse_y);
+					Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);
+				} else if (InputDevice::mouse_button[0] == -1) {
+					dnd.finalize(mouse_x, mouse_y);
+					Widget::sendMessage(w, MSG_MOUSE_UP, (mouse_y << 16) | mouse_x);
+				}
+				break;
 		}
 
 		// Generate mouse_in & mouse_out events
