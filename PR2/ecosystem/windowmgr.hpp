@@ -144,7 +144,7 @@ public:
 		this->h = h;
 	}
 	bool contains(int x, int y) {
-		return ((x >= this->x) && (y >= this->y) && (x <= this->x + this->w) && (y <= this->y + this->h));
+		return ((x >= this->x) && (y >= this->y) && (x <= (this->x + this->w)) && (y <= (this->y + this->h)));
 	}
 	void move(int x, int y) {
 		if (this->x + x < 0) x = 0;
@@ -243,7 +243,7 @@ public:
 				break;
 			case DRAGNDROP_RESIZE_NW:
 				target->setLeft(target->getLeft() + delta.x);
-				target->setTop(target->getTop() + delta.x);
+				target->setTop(target->getTop() + delta.y);
 				target->anchor_nw.move(delta.x, delta.y);
 				target->anchor_n.move(0, delta.y);
 				target->anchor_n.resize(target->getWidth() - 16, 8);

@@ -17,8 +17,8 @@ void Widget::move(int x, int y) {
 	this->y      += y;
 	this->left   += x;
 	this->top    += y;
-	this->right  += x;
-	this->bottom += y;
+	this->right  += this->left+this->width;
+	this->bottom += this->top+this->height;
 	std::vector<Widget*>::iterator it=children.begin();
 	for(;it!=children.end(); it++){
 		(*it)->move(x, y);
@@ -60,7 +60,7 @@ void Widget::setLeft(int left) {
 	this->width = (this->right - this->x >= this->min_width) 
 				? this->right - this->x
 				: this->min_width;
-	this->left  = this->x + this->width;
+	this->left  = this->x;
 }
 
 void Widget::setTop(int top) {
@@ -68,7 +68,7 @@ void Widget::setTop(int top) {
 	this->height= (this->bottom - this->y >= this->min_height) 
 				? this->bottom - this->y 
 				: this->min_height;
-	this->top	= this->y + this->height;
+	this->top	= this->y;
 }
 
 void Widget::setRight(int right) {

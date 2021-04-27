@@ -1,8 +1,9 @@
 #include "windowmgr.hpp"
 
-Window::Window(int handle, int x, int y, int width, int height, std::string caption, int wndflags) {
+Window::Window(int handle, int x, int y, int width, int height, std::string caption, int wndflags) : Widget() {
 	this->handle = handle;
 	this->flags = wndflags;
+	this->setSize(width, height);
 	this->setPosition(x, y);
 	this->setSize(width, height);
 	this->setCaption(caption.c_str());	
