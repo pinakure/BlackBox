@@ -74,8 +74,6 @@ protected:
 	int			right   = 0;
 	int			bottom  = 0;
 	int			flags  = 0x00;
-	int			min_height = 32;
-	int			min_width  = 32;
 	int alpha = 255;
 	Pixel colors[5] = {
 		{ 250,250,255, 255   }, // highlight
@@ -90,6 +88,8 @@ protected:
 
 	std::deque<unsigned long long> messages;
 public:
+	int			min_height = 32;
+	int			min_width  = 32;
 	bool mouse_in	 = false; // Changes to true on MSG_MOUSE_IN  if mouse_in = false
 	bool mouse_out	 = false; // Changes to true on MSG_MOUSE_OUT if mouse_out = false
 	bool mouse_up	 = false; // Changes to true on MSG_MOUSE_IN  if mouse_in = false
@@ -242,6 +242,8 @@ public:
 				printf("target->move(%d, %d);\n", delta.x, delta.y);
 				break;
 			case DRAGNDROP_RESIZE_NW:
+				if((delta.x > 0)&&(target->getWidth()<=target->min_width))delta.x = 0;
+				if((delta.y > 0)&&(target->getHeight()<=target->min_height))delta.y = 0;
 				target->setLeft(target->getLeft() + delta.x);
 				target->setTop(target->getTop() + delta.y);
 				target->anchor_nw.move(delta.x, delta.y);

@@ -6,8 +6,9 @@ void Widget::sendMessage(Widget* w, MessageType msg, long long parameter) {
 
 void Widget::setCaption(const char *caption_){
 	this->caption = caption_; 
-	if(this->width < al_get_text_width(Vpu::smallest_font->data, this->caption.c_str())+8)
-		this->width = al_get_text_width(Vpu::smallest_font->data, this->caption.c_str())+8;
+	this->min_width = al_get_text_width(Vpu::smallest_font->data, this->caption.c_str())+8;
+	if(this->width < min_width)
+		this->width = min_width;
 }
 
 void Widget::move(int x, int y) {
@@ -49,25 +50,27 @@ void Widget::setPosition(int x, int y) {
 }
 
 void Widget::setSize(int width, int height) {
-	this->width  = width;
-	this->height = height;
+	this->width  = width < min_width ? min_width : width;
+	this->height = height < min_height ? min_height : height;
 	this->right = this->left + this->width;
 	this->bottom = this->top + this->height;
 }
 
 void Widget::setLeft(int left) {
 	this->x		= left;
-	this->width = (this->right - this->x >= this->min_width) 
+	this->setSize((this->right - this->x >= this->min_width) 
 				? this->right - this->x
-				: this->min_width;
+				: this->min_width,
+				this->height);
 	this->left  = this->x;
 }
 
 void Widget::setTop(int top) {
 	this->y		= top;
-	this->height= (this->bottom - this->y >= this->min_height) 
+	this->setSize(this->width,
+				(this->bottom - this->y >= this->min_height) 
 				? this->bottom - this->y 
-				: this->min_height;
+				: this->min_height);
 	this->top	= this->y;
 }
 
