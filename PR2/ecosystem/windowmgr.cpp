@@ -1,6 +1,6 @@
 #include "windowmgr.hpp"
 #include "input.hpp"
-int		Anchor::size = 4;
+int		Anchor::size = 3;
 std::map<int, Window> WindowManager::windows;
 int		WindowManager::window_handle = 0;
 int		WindowManager::mouse_x = 0;
@@ -8,6 +8,76 @@ int		WindowManager::mouse_y = 0;
 bool	WindowManager::redraw = true;
 Window *WindowManager::hover = nullptr;
 DragNDrop WindowManager::dnd;
+
+PyMethodDef WindowManager::methods[] = {
+	{"createwindow" , WindowManager::pyCreateWindow , METH_VARARGS, "createwindow(x, y, width, height, caption, wndflags) : "},
+	{"setposition"	, WindowManager::pySetPosition  , METH_VARARGS, "setposition(handle, x, y) : "},
+	{"setsize"		, WindowManager::pySetSize		, METH_VARARGS, "setsize(handle, width, height) : "},
+	{"setcaption"	, WindowManager::pySetCaption	, METH_VARARGS, "setcaption(handle, caption) : "},
+	{NULL, NULL, 0, NULL}
+};
+
+PyObject* WindowManager::pyCreateWindow(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	float w;
+	float h;
+	char* caption = nullptr;
+	int flags = 0;
+	if (!PyArg_ParseTuple(args, "ffff|si", &x, &y, &w, &h, &caption, &flags)) return NULL;
+	Window *win = WindowManager::createWindow(x,y,w,h,caption?caption:"UnnamedWindow", flags);
+	return PyLong_FromLong(win->getHandle());
+}
+
+PyObject* WindowManager::pySetPosition(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	int handle;
+	if (!PyArg_ParseTuple(args, "iff", &handle, &x, &y)) return NULL;
+	
+	Window *win = WindowManager::getWindow(handle);
+	if(win){
+		win->setPosition(x,y);
+		win->resetAnchors();
+		// Must return list => [ x, y ], because they can be corrected in setposition
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+PyObject* WindowManager::pySetSize(PyObject* self, PyObject* args) {
+	float x;
+	float y;
+	int handle;
+	if (!PyArg_ParseTuple(args, "iff", &handle, &x, &y)) return NULL;	
+	Window *win = WindowManager::getWindow(handle);
+	if(win){
+		win->setSize(x,y);
+		win->resetAnchors();
+		// Must return list => [ width, height ], because they can be corrected at setsize
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+PyObject* WindowManager::pySetCaption(PyObject* self, PyObject* args) {
+	char *caption;
+	int handle;
+	if (!PyArg_ParseTuple(args, "is", &handle, &caption)) return NULL;	
+	Window *win = WindowManager::getWindow(handle);
+	if(win){
+		win->setCaption(caption);
+		win->resetAnchors();
+		return PyBool_FromLong(true);
+	}
+	return PyBool_FromLong(false);
+}
+
+Window* WindowManager::getWindow(int handle) {
+	if (windows.find(handle) != windows.end()) {
+		return &(windows.at(handle));
+	}
+	return nullptr;
+}
 
 void Callback::trigger(int argument) {
 	if (this->type != CALLBACK_INTEGER) return Callback::typeError(this);
@@ -60,7 +130,6 @@ void WindowManager::update() {
 	WindowManager::mouse_y-=offset_y;
 	int wx=WindowManager::hover?WindowManager::hover->getX():0;
 	int wy=WindowManager::hover?WindowManager::hover->getY():0;
-	//printf("W: (%d,%d) - M: (%d,%d)   B: [%d,%d,%d]                \r", wx, wy, WindowManager::mouse_x, WindowManager::mouse_y, InputDevice::mouse_button[0], InputDevice::mouse_button[1], InputDevice::mouse_button[2]);
 	Window *w;
 	Window *_hover = nullptr;
 	std::reverse_iterator<std::map<int, Window>::iterator> it = WindowManager::windows.rbegin();
@@ -139,6 +208,7 @@ void WindowManager::update() {
 Window* WindowManager::createWindow(int x, int y, int width, int height, std::string caption, int wndflags){
 	int handle = WindowManager::newHandle();
 	WindowManager::windows[handle] = Window(handle, x, y, width, height, caption, wndflags);
+	WindowManager::redraw = true;
 	return &WindowManager::windows[handle];
 }
 

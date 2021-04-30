@@ -6,6 +6,7 @@
 #include <string>
 #include "vpu.hpp"
 #include "input.hpp"
+#include "script.hpp"
 
 typedef enum t_MessageType {
 	MSG_MOUSE_DOWN,
@@ -139,6 +140,9 @@ private:
 public:
 	static int size;
 	Anchor(int x = 0, int y = 0, int w = 0, int h = 0) {
+		this->reset(x,y,w,h);
+	}
+	void reset(int x = 0, int y = 0, int w = 0, int h = 0) {
 		this->x = x;
 		this->y = y;
 		this->w = w;
@@ -181,6 +185,7 @@ public:
 	Window(int handle=0, int x = 0, int y = 0, int width = 64, int height = 64, std::string caption="", int wndflags=0);
 	void draw();
 	void drawAnchors();
+	void resetAnchors();
 	int drawCaption();
 	void update();
 	void addComponent(WidgetType type, int x, int y, int w, int h, std::string caption="", Callback *callback=nullptr);
@@ -320,7 +325,7 @@ public:
 		target->anchor_se.move(delta.x, delta.y);
 		target->anchor_w.move(delta.x, delta.y);
 		target->anchor_e.move(delta.x, delta.y);
-		printf("target->move(%d, %d) - (L:%d, T:%d, R:%d, B:%d, W:%d, H:%d)\n", delta.x, delta.y, target->getLeft(), target->getTop(), target->getRight(), target->getBottom(), target->getWidth(), target->getHeight());		
+		//printf("target->move(%d, %d) - (L:%d, T:%d, R:%d, B:%d, W:%d, H:%d)\n", delta.x, delta.y, target->getLeft(), target->getTop(), target->getRight(), target->getBottom(), target->getWidth(), target->getHeight());		
 	}
 
 	void update(int x, int y) {
@@ -368,6 +373,7 @@ private:
 	static Window *hover;
 	static DragNDrop dnd;
 public:
+	static PyMethodDef methods[];
 	static bool redraw;
 	static std::map<int, Window> windows;
 	static void initialize();
@@ -375,6 +381,14 @@ public:
 	static int newHandle();
 	static void render();
 	static void update();
+	static Window *getWindow(int handle);
+	/*-----------------------------------------------------------------------*/
+	static PyObject* pyCreateWindow(PyObject* self, PyObject* args);
+	static PyObject* pySetCaption(PyObject* self, PyObject* args);
+	static PyObject* pySetSize(PyObject* self, PyObject* args);
+	static PyObject* pySetPosition(PyObject* self, PyObject* args);
+
+
 };
 
 #endif

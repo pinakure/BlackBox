@@ -20,6 +20,22 @@ Window::Window(int handle, int x, int y, int width, int height, std::string capt
 	this->anchor_se = Anchor(	x + width - size , y + height - size , size				 , size				    );
 }
 
+void Window::resetAnchors() {
+	int x		= this->x;
+	int y		= this->y;
+	int size	= Anchor::size;
+	int width   = this->width;
+	int height  = this->height;	
+	this->anchor_nw.reset(	x				 , y				 , size				 , size					);
+	this->anchor_n.reset(	x + size		 , y				 , width - (size<<1) , size 				);
+	this->anchor_ne.reset(	x + width - size , y				 , size				 , size 				);
+	this->anchor_w.reset(	x				 , y + size			 , size				 , height - (size<<1)	);
+	this->anchor_e.reset(	x + width - size , y + size			 , size				 , height - (size<<1)   );
+	this->anchor_sw.reset(	x				 , y + height - size , size				 , size				    );
+	this->anchor_s.reset(	x + size		 , y + height - size , width - (size<<1) , size				    );
+	this->anchor_se.reset(	x + width - size , y + height - size , size				 , size				    );
+}
+
 void Anchor::draw(int ox, int oy) {	
 	Vpu::fillRectangle(ox+this->x, oy+this->y, this->w, this->h, 128, 0, 128, 128);
 }
@@ -53,13 +69,15 @@ void Window::draw() {
 		colors[1].r, colors[1].g, colors[1].b, colors[1].a, 
 		colors[2].r, colors[2].g, colors[2].b, colors[2].a
 	);
-	if(this!=WindowManager::hover) 
+	if(this!=WindowManager::hover) {
 		Vpu::setColor(colors[3].r, colors[3].g, colors[3].b, colors[3].a);
-	else 
+		Vpu::rectangle(this->x, this->y, this->width, this->height);		
+	}else{
 		Vpu::setColor(128,0,128,255);
-	Vpu::rectangle(this->x, this->y, this->width, this->height);
+		Vpu::rectangle(this->x, this->y, this->width, this->height);
+		this->drawAnchors();
+	}
 	this->drawChildren();
-	this->drawAnchors();
 	Vpu::popFont();	
 }
 
