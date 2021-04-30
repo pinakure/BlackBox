@@ -44,4 +44,7 @@ class Script {
 		static void deinitialize();
 };
 
+PyObject* FloatList(int size=2, ...);
+PyObject* IntegerList(int size=2, ...);
+
 #endif 

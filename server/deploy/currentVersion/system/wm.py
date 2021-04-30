@@ -35,6 +35,8 @@ class WindowManager:
         w = WindowManager.createwindow(30,60,64,64,"Hello",0x0F)
         WindowManager.list()
         w.setcaption("Modified Caption")
+        w.setposition(600, 400)
+        w.setsize(10, 200)
 
     @staticmethod
     def list():

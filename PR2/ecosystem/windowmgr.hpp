@@ -382,6 +382,7 @@ public:
 	static void render();
 	static void update();
 	static Window *getWindow(int handle);
+	static void bringToTop(Window* window);
 	/*-----------------------------------------------------------------------*/
 	static PyObject* pyCreateWindow(PyObject* self, PyObject* args);
 	static PyObject* pySetCaption(PyObject* self, PyObject* args);

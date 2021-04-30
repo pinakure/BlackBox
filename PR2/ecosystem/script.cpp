@@ -129,3 +129,43 @@ bool Script::execute(std::string &python_code) {
 		return false;
 	}
 }
+
+PyObject* IntegerList(int size, ...) {
+	PyObject* list = PyList_New(size);
+	if (!list) throw("Unable to allocate memory for Python list");
+	va_list ap;
+	va_start(ap, size);
+	for (unsigned int i = 0; i < 2; i++) {
+		int val = va_arg(ap, int);
+		PyObject* num = PyLong_FromLong((long)val);
+		if (!num) {
+			Py_DECREF(list);
+			throw("Unable to allocate memory for Python list");
+		}
+		Py_INCREF(list);
+		PyList_SET_ITEM(list, i, num);
+		Py_DECREF(list);
+	}
+	va_end(ap);
+	return list;
+}
+
+PyObject* FloatList(int size, ...) {
+	PyObject* list = PyList_New(size);
+	if (!list) throw("Unable to allocate memory for Python list");
+	va_list ap;
+	va_start(ap, size);
+	for (unsigned int i = 0; i < 2; i++) {
+		float val = va_arg(ap, float);
+		PyObject* num = PyFloat_FromDouble((double)val);
+		if (!num) {
+			Py_DECREF(list);
+			throw("Unable to allocate memory for Python list");
+		}
+		Py_INCREF(list);
+		PyList_SET_ITEM(list, i, num);
+		Py_DECREF(list);
+	}
+	va_end(ap);
+	return list;
+}

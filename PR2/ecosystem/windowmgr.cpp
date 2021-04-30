@@ -29,6 +29,7 @@ PyObject* WindowManager::pyCreateWindow(PyObject* self, PyObject* args) {
 	return PyLong_FromLong(win->getHandle());
 }
 
+
 PyObject* WindowManager::pySetPosition(PyObject* self, PyObject* args) {
 	float x;
 	float y;
@@ -39,8 +40,7 @@ PyObject* WindowManager::pySetPosition(PyObject* self, PyObject* args) {
 	if(win){
 		win->setPosition(x,y);
 		win->resetAnchors();
-		// Must return list => [ x, y ], because they can be corrected in setposition
-		return PyBool_FromLong(true);
+		return IntegerList(2, win->getX(), win->getY());// Must return [ x, y ], because they can be corrected in setposition
 	}
 	return PyBool_FromLong(false);
 }
@@ -53,8 +53,7 @@ PyObject* WindowManager::pySetSize(PyObject* self, PyObject* args) {
 	if(win){
 		win->setSize(x,y);
 		win->resetAnchors();
-		// Must return list => [ width, height ], because they can be corrected at setsize
-		return PyBool_FromLong(true);
+		return IntegerList(2, win->getWidth(), win->getHeight());// Must return list => [ width, height ], because they can be corrected at setsize		
 	}
 	return PyBool_FromLong(false);
 }
@@ -99,7 +98,10 @@ void Callback::typeError(Callback* victim) {
 
 void WindowManager::initialize() {
 	dnd.clear();
-	Window *w = WindowManager::createWindow( 320-32, 120-32, 64, 64, "Test Window");
+	Window*
+	w = WindowManager::createWindow( 120-32, 100-32, 64, 64, "Test Window 2");
+	w = WindowManager::createWindow( 220-32, 110-32, 64, 64, "Test Window 1");
+	w = WindowManager::createWindow( 320-32, 120-32, 64, 64, "Test Window 3");
 	Callback *bcb = new Callback("import console; console.echo('hello');");
 	w->addComponent(WIDGET_BUTTON, 0,0,128,128,"Button",bcb);
 }
@@ -161,6 +163,7 @@ void WindowManager::update() {
 				else if (w->anchor_se.contains(mouse_x, mouse_y)) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_RESIZE_SE);
 				else if (mouse_y < y + Vpu::font->height + 2) dnd.start(w, mouse_x, mouse_y, DRAGNDROP_MOVE);
 				Widget::sendMessage(w, MSG_MOUSE_DOWN, (mouse_y << 16) | mouse_x);
+				//WindowManager::bringToTop(_hover);		
 			} else if(InputDevice::mouse_button[0]== 2) {
 				dnd.update(mouse_x, mouse_y);
 				Widget::sendMessage(w, MSG_MOUSE_HOLD, (mouse_y << 16) | mouse_x);				
@@ -203,6 +206,20 @@ void WindowManager::update() {
 		WindowManager::hover = _hover;
 		WindowManager::redraw = true;
 	}	
+}
+
+void WindowManager::bringToTop(Window* window) {
+	if(!window) return;
+	int handle = window->getHandle();
+	std::map<int, Window> new_windows;
+	std::map<int, Window>::iterator it=windows.begin();
+	for (; it != windows.end(); it++) {
+		if (it->second.getHandle() != handle) {
+			new_windows[it->first] = it->second;
+		} 
+	}
+	new_windows[handle] = *window;
+	windows = new_windows;	
 }
 
 Window* WindowManager::createWindow(int x, int y, int width, int height, std::string caption, int wndflags){
