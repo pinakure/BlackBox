@@ -137,6 +137,7 @@ private:
 	int w = 0;
 	int h = 0;
 public:
+	static int size;
 	Anchor(int x = 0, int y = 0, int w = 0, int h = 0) {
 		this->x = x;
 		this->y = y;
@@ -156,6 +157,7 @@ public:
 		this->w = width;
 		this->h = height;
 	}
+	void draw(int ox=0, int iy=0);
 };
 
 class Window : public Widget {
@@ -178,6 +180,7 @@ public:
 	int  getHandle	 (){ return this->handle;	}
 	Window(int handle=0, int x = 0, int y = 0, int width = 64, int height = 64, std::string caption="", int wndflags=0);
 	void draw();
+	void drawAnchors();
 	int drawCaption();
 	void update();
 	void addComponent(WidgetType type, int x, int y, int w, int h, std::string caption="", Callback *callback=nullptr);
@@ -222,6 +225,103 @@ public:
 		begin.y = y;
 		update(x,y);
 	}
+	
+	void drag_n(int x, int y) {
+		Point delta = { x, y };
+		if((delta.y > 0)&&(target->getHeight()-delta.y<=target->min_height))delta.y = target->getHeight()-target->min_height;
+		if((delta.y < 0)&&(target->getY()+delta.y<=0))delta.y = -target->getY();
+		target->setLeft(target->getLeft());
+		target->setTop(target->getTop() + delta.y);
+		target->anchor_nw.move(0,  delta.y);
+		target->anchor_n.move(0, delta.y);
+		target->anchor_ne.move(0,  delta.y);
+		target->anchor_w.move(0, delta.y);
+		target->anchor_w.resize(Anchor::size, target->getHeight() - (Anchor::size<<1));
+		target->anchor_e.move(0, delta.y);
+		target->anchor_e.resize(Anchor::size, target->getHeight() - (Anchor::size<<1));
+		std::vector<Widget*>::iterator it=target->children.begin();
+		for(;it!=target->children.end(); it++){
+			(*it)->move(0, delta.y);
+		}
+	}
+	
+	void drag_w(int x, int y) {
+		Point delta = { x, y };
+		if((delta.x > 0)&&(target->getWidth()-delta.x<=target->min_width))delta.x = target->getWidth()-target->min_width;
+		if((delta.x < 0)&&(target->getX()+delta.x<=0))delta.x = -target->getX();
+		target->setLeft(target->getLeft() + delta.x);
+		target->setTop(target->getTop());
+		target->anchor_nw.move(delta.x, 0);
+		target->anchor_w.move(delta.x, 0);
+		target->anchor_sw.move(delta.x, 0);
+		target->anchor_n.move(delta.x, 0);
+		target->anchor_n.resize(target->getWidth() - (Anchor::size<<1), Anchor::size);
+		target->anchor_s.move(delta.x, 0);	
+		target->anchor_s.resize(target->getWidth() - (Anchor::size<<1), Anchor::size);
+		std::vector<Widget*>::iterator it=target->children.begin();
+		for(;it!=target->children.end(); it++){
+			(*it)->move(delta.x, 0);
+		}
+	}		
+	
+	void drag_s(int x, int y) {
+		Point delta = { x, y };
+		if((delta.y < 0)&&(target->getHeight()+delta.y<=target->min_height))delta.y = -(target->getHeight()-target->min_height);
+		if((delta.y < 0)&&(target->getY()+delta.y<=0))delta.y = -target->getY();
+		target->setBottom(target->getBottom() + delta.y);
+		target->anchor_s.move(0, delta.y);		
+		target->anchor_se.move(0, delta.y);
+		target->anchor_sw.move(0, delta.y);
+		target->anchor_w.resize(Anchor::size, target->getHeight() - (Anchor::size<<1));
+		target->anchor_e.resize(Anchor::size, target->getHeight() - (Anchor::size<<1));
+	}
+
+	void drag_e(int x, int y) {
+		Point delta = { x, y };
+		if((delta.x < 0)&&(target->getWidth()+delta.x<=target->min_width))delta.x = -(target->getWidth()-target->min_width);
+		if((delta.y > 0)&&(target->getHeight()-delta.y<=target->min_height))delta.y = -(target->getHeight()-target->min_height);
+		if((delta.y < 0)&&(target->getY()+delta.y<=0))delta.y = -target->getY();
+		target->setRight(target->getRight() + delta.x);
+		target->anchor_n.resize(target->getWidth() - (Anchor::size<<1), Anchor::size);
+		target->anchor_ne.move(delta.x,  0);
+		target->anchor_e.move(delta.x, 0);
+		target->anchor_se.move(delta.x, 0);
+		target->anchor_s.resize(target->getWidth() - (Anchor::size<<1), Anchor::size);
+	}
+	
+	void drag_ne(int x, int y) {
+		drag_n(x,y);
+		drag_e(x,y);
+	}
+	void drag_nw(int x, int y) {
+		drag_n(x,y);
+		drag_w(x,y);		
+	}
+	void drag_se(int x, int y) {
+		drag_s(x,y);
+		drag_e(x,y);
+		return;
+	}
+	void drag_sw(int x, int y) {
+		drag_s(x,y);
+		drag_w(x,y);
+	}
+
+	void move(int x, int y) {
+		Point delta = { x, y };
+		if((delta.x < 0)&&(target->getX()+delta.x<=0))delta.x = -target->getX();
+		if((delta.y < 0)&&(target->getY()+delta.y<=0))delta.y = -target->getY();
+		target->move(delta.x, delta.y);
+		target->anchor_nw.move(delta.x, delta.y);
+		target->anchor_n.move(delta.x, delta.y);
+		target->anchor_ne.move(delta.x, delta.y);
+		target->anchor_sw.move(delta.x, delta.y);
+		target->anchor_s.move(delta.x, delta.y);
+		target->anchor_se.move(delta.x, delta.y);
+		target->anchor_w.move(delta.x, delta.y);
+		target->anchor_e.move(delta.x, delta.y);
+		printf("target->move(%d, %d) - (L:%d, T:%d, R:%d, B:%d, W:%d, H:%d)\n", delta.x, delta.y, target->getLeft(), target->getTop(), target->getRight(), target->getBottom(), target->getWidth(), target->getHeight());		
+	}
 
 	void update(int x, int y) {
 		end.x = x;
@@ -229,35 +329,15 @@ public:
 		delta.x = end.x - begin.x;
 		delta.y = end.y - begin.y;
 		switch (action) {
-			case DRAGNDROP_MOVE:
-				target->move(delta.x, delta.y);
-				target->anchor_nw.move(delta.x, delta.y);
-				target->anchor_n.move(delta.x, delta.y);
-				target->anchor_ne.move(delta.x, delta.y);
-				target->anchor_sw.move(delta.x, delta.y);
-				target->anchor_s.move(delta.x, delta.y);
-				target->anchor_se.move(delta.x, delta.y);
-				target->anchor_w.move(delta.x, delta.y);
-				target->anchor_e.move(delta.x, delta.y);
-				printf("target->move(%d, %d);\n", delta.x, delta.y);
-				break;
-			case DRAGNDROP_RESIZE_NW:
-				if((delta.x > 0)&&(target->getWidth()<=target->min_width))delta.x = 0;
-				if((delta.y > 0)&&(target->getHeight()<=target->min_height))delta.y = 0;
-				target->setLeft(target->getLeft() + delta.x);
-				target->setTop(target->getTop() + delta.y);
-				target->anchor_nw.move(delta.x, delta.y);
-				target->anchor_n.move(0, delta.y);
-				target->anchor_n.resize(target->getWidth() - 16, 8);
-				target->anchor_ne.move(0,  delta.y);
-				target->anchor_w.move(delta.x, delta.y);
-				target->anchor_w.resize(8, target->getHeight() - 16);
-				target->anchor_e.move(0, delta.y);
-				target->anchor_e.resize(8, target->getHeight() - 16);
-				target->anchor_sw.move(delta.x, 0);
-				target->anchor_s.resize(target->getWidth() - 16, 8);
-				printf("target->resize(%d, %d);\n", delta.x, delta.y);
-				break;
+			case DRAGNDROP_MOVE: move(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_NW: drag_nw(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_N : drag_n(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_NE: drag_ne(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_E: drag_e(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_W: drag_w(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_SE: drag_se(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_S: drag_s(delta.x, delta.y); break;
+			case DRAGNDROP_RESIZE_SW: drag_sw(delta.x, delta.y); break;
 		}
 		begin.x = x;
 		begin.y = y;

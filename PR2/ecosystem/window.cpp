@@ -7,14 +7,32 @@ Window::Window(int handle, int x, int y, int width, int height, std::string capt
 	this->setPosition(x, y);
 	this->setSize(width, height);
 	this->setCaption(caption.c_str());	
-	this->anchor_nw = Anchor(x, y, 8, 8);
-	this->anchor_n = Anchor(x + 8, y, width - 16, 8);
-	this->anchor_ne = Anchor(x + width - 8, y, 8, 8);
-	this->anchor_w = Anchor(x, y + 8, 8, height - 16);
-	this->anchor_e = Anchor(x+width-8, y + 8, 8, height - 16);
-	this->anchor_sw = Anchor(x, y + height - 8, 8, 8);
-	this->anchor_s = Anchor(x + 8, y + height - 8, width - 16, 8);
-	this->anchor_se = Anchor(x + width - 8, y + height - 8, 8, 8);
+	width  = this->width;
+	height = this->height;
+	int size = Anchor::size;
+	this->anchor_nw = Anchor(	x				 , y				 , size				 , size					);
+	this->anchor_n  = Anchor(	x + size		 , y				 , width - (size<<1) , size 				);
+	this->anchor_ne = Anchor(	x + width - size , y				 , size				 , size 				);
+	this->anchor_w  = Anchor(	x				 , y + size			 , size				 , height - (size<<1)	);
+	this->anchor_e  = Anchor(	x + width - size , y + size			 , size				 , height - (size<<1)   );
+	this->anchor_sw = Anchor(	x				 , y + height - size , size				 , size				    );
+	this->anchor_s  = Anchor(	x + size		 , y + height - size , width - (size<<1) , size				    );
+	this->anchor_se = Anchor(	x + width - size , y + height - size , size				 , size				    );
+}
+
+void Anchor::draw(int ox, int oy) {	
+	Vpu::fillRectangle(ox+this->x, oy+this->y, this->w, this->h, 128, 0, 128, 128);
+}
+
+void Window::drawAnchors() {
+	this->anchor_nw.draw();
+	this->anchor_n.draw();
+	this->anchor_ne.draw();
+	this->anchor_w.draw();
+	this->anchor_e.draw();
+	this->anchor_sw.draw();
+	this->anchor_s.draw();
+	this->anchor_se.draw();	
 }
 
 void Window::draw() {
@@ -41,6 +59,7 @@ void Window::draw() {
 		Vpu::setColor(128,0,128,255);
 	Vpu::rectangle(this->x, this->y, this->width, this->height);
 	this->drawChildren();
+	this->drawAnchors();
 	Vpu::popFont();	
 }
 
@@ -56,7 +75,7 @@ void Window::addComponent(WidgetType type, int x, int y, int w, int h, std::stri
 		this->content_height < h ? this->content_height : h,
 		caption,
 		callback
-	);
+	);	
 }
 
 int Window::drawCaption() {
