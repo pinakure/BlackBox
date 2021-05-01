@@ -8,9 +8,10 @@ int		WindowManager::mouse_y = 0;
 bool	WindowManager::redraw = true;
 Window *WindowManager::hover = nullptr;
 DragNDrop WindowManager::dnd;
-
+int		WindowManager::widget_handle = 0;
 PyMethodDef WindowManager::methods[] = {
 	{"createwindow" , WindowManager::pyCreateWindow , METH_VARARGS, "createwindow(x, y, width, height, caption, wndflags) : "},
+	{"addcomponent"	, WindowManager::pyAddComponent	, METH_VARARGS, "addcomponent(handle, type, x, y, width, height, caption, callback, flags) : "},
 	{"setposition"	, WindowManager::pySetPosition  , METH_VARARGS, "setposition(handle, x, y) : "},
 	{"setsize"		, WindowManager::pySetSize		, METH_VARARGS, "setsize(handle, width, height) : "},
 	{"setcaption"	, WindowManager::pySetCaption	, METH_VARARGS, "setcaption(handle, caption) : "},
@@ -29,6 +30,25 @@ PyObject* WindowManager::pyCreateWindow(PyObject* self, PyObject* args) {
 	return PyLong_FromLong(win->getHandle());
 }
 
+PyObject* WindowManager::pyAddComponent(PyObject* self, PyObject* args) {
+	int handle;
+	WidgetType wtype;
+	float x;
+	float y;
+	float w;
+	float h;
+	int flags;
+	char *caption = nullptr;
+	char *callback = nullptr;
+	if (!PyArg_ParseTuple(args, "iiffff|ssi", &handle, &wtype, &x, &y, &w, &h, &caption, &callback, &flags)) return NULL;
+	Window *win = WindowManager::getWindow(handle);
+	if(win){
+		Widget *widget = win->addComponent(wtype, x, y, w, h, caption?caption:"UnnamedWidget", new Callback(callback?callback:""), flags);
+		win->resetAnchors();
+		return PyLong_FromLong(widget->handle);
+	}
+	return PyBool_FromLong(false);
+}
 
 PyObject* WindowManager::pySetPosition(PyObject* self, PyObject* args) {
 	float x;
@@ -98,12 +118,13 @@ void Callback::typeError(Callback* victim) {
 
 void WindowManager::initialize() {
 	dnd.clear();
-	Window*
+	/*Window*
 	w = WindowManager::createWindow( 120-32, 100-32, 64, 64, "Test Window 2");
 	w = WindowManager::createWindow( 220-32, 110-32, 64, 64, "Test Window 1");
 	w = WindowManager::createWindow( 320-32, 120-32, 64, 64, "Test Window 3");
 	Callback *bcb = new Callback("import console; console.echo('hello');");
 	w->addComponent(WIDGET_BUTTON, 0,0,128,128,"Button",bcb);
+	*/
 }
 
 void WindowManager::render() {

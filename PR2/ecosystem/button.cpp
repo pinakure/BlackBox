@@ -3,8 +3,9 @@
 
 int Button::button_id = 0;
 
-Button::Button(int id, int x, int y, int width, int height, std::string caption, Callback *callback) {
+Button::Button(int id, int x, int y, int width, int height, std::string caption, Callback *callback, int flags) {
 	this->id= id;
+	this->flags = flags;
 	this->callback = callback;
 	this->setPosition(x, y);
 	this->setSize(width, height);

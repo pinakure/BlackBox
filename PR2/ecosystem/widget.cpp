@@ -103,11 +103,12 @@ void Widget::updateChildren() {
 	}
 }
 
-void Widget::addChildren(int type, int x, int y, int width, int height, std::string caption, Callback *callback) {
+Widget *Widget::addChildren(int type, int x, int y, int width, int height, std::string caption, Callback *callback, int flags) {
 	Widget *w = nullptr;
 	switch (type) {
 		case WIDGET_BUTTON:
-			w = new Button(Button::newId(), x, y, width, height, caption, callback);
+			w = new Button(Button::newId(), x, y, width, height, caption, callback, flags);
+			w->handle = WindowManager::widget_handle++;
 			w->parent = this;
 			this->children.push_back(w);
 			break;
@@ -115,6 +116,7 @@ void Widget::addChildren(int type, int x, int y, int width, int height, std::str
 			break;
 	}
 	w->setPosition(x,y);
+	return w;
 }
 
 void Widget::handleMessages() {

@@ -81,19 +81,22 @@ void Window::draw() {
 	Vpu::popFont();	
 }
 
-void Window::addComponent(WidgetType type, int x, int y, int w, int h, std::string caption, Callback *callback) {
+Widget *Window::addComponent(WidgetType type, int x, int y, int w, int h, std::string caption, Callback *callback, int flags) {
 	this->content_x = 3;
 	this->content_y = Vpu::smallest_font->height+6;
 	this->content_width  = this->width  - (this->content_x<<1);
 	this->content_height = this->height - (this->content_y+3);
-	this->addChildren(type, 
+	Widget *widget = this->addChildren(
+		type, 
 		x + this->content_x, 
 		y + this->content_y, 
 		this->content_width <  w ? this->content_width  : w,
 		this->content_height < h ? this->content_height : h,
 		caption,
-		callback
+		callback,
+		flags
 	);	
+	return widget;
 }
 
 int Window::drawCaption() {

@@ -87,8 +87,9 @@ protected:
 	bool hidden		 = false;
 
 
-	std::deque<unsigned long long> messages;
+	std::deque<unsigned long long> messages;	
 public:
+	int			handle = -1;
 	int			min_height = 32;
 	int			min_width  = 32;
 	bool mouse_in	 = false; // Changes to true on MSG_MOUSE_IN  if mouse_in = false
@@ -125,7 +126,7 @@ public:
 	void setBottom	 (int bottom);
 	void updateChildren();
 	void drawChildren();
-	void addChildren(int type=WIDGET_BUTTON, int x=0, int y=0, int width=64, int height=64, std::string caption="", Callback *callback=nullptr);
+	Widget *addChildren(int type=WIDGET_BUTTON, int x=0, int y=0, int width=64, int height=64, std::string caption="", Callback *callback=nullptr, int flags=0x00);
 	bool contains(int cx, int cy){ 
 		return (cx >= x) && (cx <= x + width) && (cy >= y) && (cy <= y + height);
 	}
@@ -166,7 +167,7 @@ public:
 
 class Window : public Widget {
 private:
-	int handle  = -1;	
+	//int handle  = -1;	
 	int content_height = 0;
 	int content_width = 0;
 	int content_x = 0;
@@ -188,14 +189,14 @@ public:
 	void resetAnchors();
 	int drawCaption();
 	void update();
-	void addComponent(WidgetType type, int x, int y, int w, int h, std::string caption="", Callback *callback=nullptr);
+	Widget *addComponent(WidgetType type, int x, int y, int w, int h, std::string caption="", Callback *callback=nullptr, int flags=0x00);
 };
 
 class Button : public Widget {
 private:
 	int id = -1;
 public:
-	Button(int id=0, int x=0, int y=0, int width = 64, int height=64, std::string caption="", Callback *callback=nullptr);
+	Button(int id=0, int x=0, int y=0, int width = 64, int height=64, std::string caption="", Callback *callback=nullptr, int flags=0x00);
 	void draw();
 	void update();
 	static int newId() { return Button::button_id++; }
@@ -373,6 +374,7 @@ private:
 	static Window *hover;
 	static DragNDrop dnd;
 public:
+	static int widget_handle;
 	static PyMethodDef methods[];
 	static bool redraw;
 	static std::map<int, Window> windows;
@@ -388,6 +390,7 @@ public:
 	static PyObject* pySetCaption(PyObject* self, PyObject* args);
 	static PyObject* pySetSize(PyObject* self, PyObject* args);
 	static PyObject* pySetPosition(PyObject* self, PyObject* args);
+	static PyObject* pyAddComponent(PyObject *self, PyObject *args);
 
 
 };
