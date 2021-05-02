@@ -60,6 +60,9 @@ class Space:
                 dx += sx
             dy += sy
         Snake.redraw = False
+        vpu.setfont('smk')
+        vpu.setcolor(255,255,0,128)
+        vpu.textout(f'{Snake.game.score}', dx-160, dy-220)
     
     @staticmethod
     def destroy():
