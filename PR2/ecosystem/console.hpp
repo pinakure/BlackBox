@@ -237,6 +237,7 @@ class Console{
 		static std::string				stripColors(const char *colored);
 
 		static PyObject* pyCls(PyObject* self, PyObject* args);
+		static PyObject* pyToggle(PyObject* self, PyObject* args);
 		static PyObject* pyPrint(PyObject* self, PyObject* args);
 		static PyObject* pyExec(PyObject* self, PyObject* args);
 };

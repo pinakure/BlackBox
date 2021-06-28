@@ -72,6 +72,7 @@ int							Console::palette[16];
 
 
 PyMethodDef Console::methods[] = {
+	{"toggle"		, Console::pyToggle		, METH_VARARGS, "toggle(status) : Changes console visibility status"},
 	{"echo"			, Console::pyPrint		, METH_VARARGS, "echo(text) : Dump given text over console"},
 	{"exec"			, Console::pyExec		, METH_VARARGS, "exec(command) : Run given command on console"},
 	{"cls"			, Console::pyCls		, METH_VARARGS, "cls() : Clean console buffer"},
@@ -1793,7 +1794,12 @@ void Console::addHelp(std::string name, std::string hlp) {
 
 
 /* ------------------------------------------------------------------------------------ */
-
+PyObject* Console::pyToggle(PyObject* self, PyObject* args) {
+	bool status = !Console::enabled;
+	if (!PyArg_ParseTuple(args, "|b", &status)) return NULL;
+	ToggleConsole(status);
+	return PyLong_FromLong(status);
+}
 PyObject* Console::pyPrint(PyObject* self, PyObject* args) {
 	char* buffer;
 	if (!PyArg_ParseTuple(args, "s", &buffer)) return NULL;

@@ -126,7 +126,7 @@ static void findChoicesGeometry(int& width, int& height, std::map<std::string, s
 	height = 0;
 	std::map<std::string, std::string>::iterator it;
 	for (it = choices.begin(); it != choices.end(); it++) {
-		int w = al_get_text_width(Vpu::font->data, it->first.c_str());
+		int w = al_get_text_width(Vpu::font->data, it->second.c_str());
 		width = w > width ? w : width;
 		height += TypeWriter::line_height;
 	}
@@ -290,8 +290,8 @@ void TypeWriter::drawChoices() {
 			);
 		}
 		Vpu::print(
-			it->first,
-			cx - al_get_text_width(Vpu::font->data, it->first.c_str()) / 2,
+			it->second,
+			cx - al_get_text_width(Vpu::font->data, it->second.c_str()) / 2,
 			(cy - (max_height / 2)) + (line * line_height) 
 		);
 	}		
@@ -449,7 +449,7 @@ void TypeWriter::selectChoice(){
 	int i;
 	for (i = 0, it = choices.begin(); it != choices.end(); it++,i++) {
 		if (i == active_choice) {
-			answer = std::string(it->second);
+			answer = std::string(it->first);
 			break;
 		}
 	}
