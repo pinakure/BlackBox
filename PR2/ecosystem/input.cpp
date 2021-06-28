@@ -254,7 +254,7 @@ static bool initializeBitmapKeys(void) {
 
 void InputDevice::restart() {
 	
-	if (1){//in_mouse->integer()) {
+	if (in_mouse->integer()) {
 		al_install_mouse();
 		al_register_event_source(Engine::queue, al_get_mouse_event_source());
 		//al_disable_hardware_cursor();
