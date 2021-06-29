@@ -955,7 +955,7 @@ std::string Console::translateVariables(std::string cmd){
 			if(foundVar.length() == 0){
 				newCommand.append("$");
 			} else {			
-				// test against var names
+				// check against var name
 				if(!foundVar.substr(0,1).compare("$")){
 					CVar *cv;				
 					foundVar = foundVar.substr(1, foundVar.length()-1);

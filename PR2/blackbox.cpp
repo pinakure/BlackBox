@@ -43,26 +43,41 @@ bool initialize() {
 		std::printf("ERROR: Engine cannot run.\n\tCritical Modules could not be loaded.\n\tIt may be some files missing.\n");
 		return false;
 	}
-	
-	// Update TOC.py
-	if (!fileExists("toc.py")) {
-		checkupdate();
-	}
-	// Build dashboard titles described on TOC file data/toc.py (if present also)
-	Dashboard::enabled = false;
-	if(fileExists("toc.py")) {
-		Script t("toc", "data");
-		if (t.isLoaded()) t.call("load");
-		else printf("Error parsing TOC File; Dashboard will be disabled.\n");
-	} else printf("Cannot load TOC File. Dashboard will be disabled.\n");
-	
-	// Run default scripts
+	return true;
+}
+
+static void postinit_dependencies() {
 	Script::execute("from blackbox import *");
 	Script::execute("import blackbox");
 	Script::execute("import typewriter");
 	Script::execute("print(f'Welcome to BlackBox v.{blackbox.version()}')");
-	if (s.isLoaded()) if(!Dashboard::enabled) s.call("main");
-	return true;
+}
+
+static void postinit_dashboard() {
+	// Update TOC.py
+	if (!fileExists("toc.py"))
+		checkupdate();
+
+	// Build dashboard titles described on TOC file data/toc.py (if present also)
+	Dashboard::enabled = false;
+	if(fileExists("toc.py")) {
+		Script t("toc", "data");
+		if (t.isLoaded()) 
+			t.call("load");
+		else 
+			printf("Error parsing TOC File; Dashboard will be disabled.\n");
+	} else 
+		printf("Cannot load TOC File. Dashboard will be disabled.\n");
+	postinit_dependencies();
+}
+
+static void postinit_module(const char *script) {
+	// Run default scripts
+	Script s("main");
+	postinit_dependencies();
+	printf("Calling Script %s()...\n");
+	if (s.isLoaded()) s.call(script);	
+	else printf("Cannot exec Script %s()\n", script);
 }
 
 static int waitForEnter(int return_code) {
@@ -73,7 +88,6 @@ static int waitForEnter(int return_code) {
 }
 
 int main(int argc, char **argv){
-	
 	PHYSFS_init(argv[0]);
 	ALLEGRO_FILE *f = al_fopen("data/system.zip", "r");
 	if (!f) {
@@ -88,6 +102,12 @@ int main(int argc, char **argv){
 
 	if(! Script::initialize()	) return waitForEnter(100);	
 	if(! initialize()			) return waitForEnter(200);
+	if (argc == 2) {
+		const char *script   = argv[1];
+		postinit_module(script);
+	} else {
+		postinit_dashboard();
+	}
 	Engine::loop();
 
 	Engine::deinitialize();

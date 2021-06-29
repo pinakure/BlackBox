@@ -22,5 +22,4 @@ def wait(seconds = 1, callback = None):
         vpu.update()
         now = blackbox.epoch()
 
-console.echo('Write down "test.menu()" to discover available tests / benchmarks ')
 console.echo('Use F1 to toggle console')

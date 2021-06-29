@@ -91,7 +91,6 @@ bool Engine::initialize() {
 		Engine::music.loadMenuMusic();
 		Engine::music.randomMenuMusic();
 
-		Script::execute("from scripts.main import test");
 		Script::execute("from scripts.main import menu");
 		return showcase->initialize();
 	} catch (int e) {
@@ -300,7 +299,7 @@ void Engine::download(const char* file) {
 	Vpu::foreground.enabled = false;
 	Vpu::background.enabled = false;
 	Vpu::overlay.enabled = true;
-
+	printf("Downloading '%s'...\n", file);
 	std::string filename = file;
 	std::string src = Download::getServerUrl() + filename;
 	std::string dst = "data\\" + filename;
