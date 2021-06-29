@@ -1,5 +1,5 @@
-from console    import echo as cout
-from scripts.mainmenu   import MainMenu
+from   scripts.mainmenu import MainMenu
+import console             
 import blackbox
 import vpu
 
@@ -12,7 +12,7 @@ def menu():
     MainMenu.open()
 
 def main():
-    menu()
+    pass
 
 def wait(seconds = 1, callback = None):
     now = then = blackbox.epoch()
@@ -22,5 +22,5 @@ def wait(seconds = 1, callback = None):
         vpu.update()
         now = blackbox.epoch()
 
-cout('Write down "test.menu()" to discover available tests / benchmarks ')
-cout('Use F1 to toggle console')
+console.echo('Write down "test.menu()" to discover available tests / benchmarks ')
+console.echo('Use F1 to toggle console')

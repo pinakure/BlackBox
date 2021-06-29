@@ -90,3 +90,5 @@ server/deploy/currentVersion/trickynoid/legacydata/
 *.java
 
 server/deploy/currentVersion/trickynoid_legacydata/
+
+scripts/menus/__pycache__/
