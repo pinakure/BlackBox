@@ -8,13 +8,13 @@ class Menu:
     def execute(choices, caption, show_back=True):
         choice = ''
         for k in choices:
-            typewriter.addchoice(k, f' {choices[k]} ')
+            typewriter.addchoice(str(k), f' {choices[k]} ')
         if show_back:
-            typewriter.addchoice('< back '   , '<')
+            typewriter.addchoice('None', 'Back' )
         while choice=='':
             vpu.update()
             choice = typewriter.getchoice( caption )
-        return choice
+        return choice if choice != 'None' else None
 
     def __init__(self, caption):
         self.parent     = None
