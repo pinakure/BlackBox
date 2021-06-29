@@ -1,5 +1,0 @@
-=====cls====
-Clean console buffer
-----
-==Usage==
-''cls''

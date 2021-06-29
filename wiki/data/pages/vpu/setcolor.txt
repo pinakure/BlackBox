@@ -1,8 +1,0 @@
-=====setcolor=====
-Sets current painting color
-
-^  Argument  ^  Default  ^Description^
-|  r  |  -1  |Red channel for selected color|
-|  g  |  -1  |Green channel for selected color|
-|  b  |  -1  |Blue channel for selected color|
-|  a  |  -1  |Alpha channel for selected color|

@@ -1,8 +1,0 @@
-=====update=====
-Allow blackbox engine to perform its rendering based input and output operations
-
-----
-====Example====
-<Code>
-vpu.update()
-</Code>

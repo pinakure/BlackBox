@@ -1,9 +1,0 @@
-=====restart=====
-Restart Video Processing Unit.\\ Delayed video settings will apply when this is called.
-
-----
-====Example====
-<Code>
-vpu.fullscreen(1)
-vpu.restart()
-</Code>
