@@ -343,11 +343,11 @@ static void _deleteFolder(std::string path, std::string folder) {
 	int ret = _rmdir(("data/"+dir).c_str());
 }
 
-static void _deleteScripts() {
+void _deleteScripts() {
 	_deleteFolder("", "scripts");
 }
 
-static void _extractScripts() {
+void _extractScripts() {
 	ALLEGRO_FS_ENTRY* e = al_create_fs_entry("scripts/");
 	if (al_open_directory(e)) {
 		ALLEGRO_FS_ENTRY* file;
@@ -375,7 +375,9 @@ static void _extractScripts() {
 
 #include <physfs.h>
 void DashboardTitle::execute() {
-	PHYSFS_addToSearchPath(("data/" + url).c_str(), 1);
+	std::string filename = "data/" + url;
+	printf("Adding to path: %s\n", filename.c_str());
+	PHYSFS_addToSearchPath(filename.c_str(), 1);
 	// Run game.py ( NOTE: It MUST be located at 'data/scripts/game.py' )
 	_extractScripts();
 	Script s = Script("game", "data.scripts");
@@ -387,7 +389,6 @@ void DashboardTitle::execute() {
 		s.execute("Game.loop()");
 		InputDevice::control_c = false;
 		s.execute("Game.destroy()");
-		s.execute("Game = 1");		
 		Engine::destroyEntities();
 		Dashboard::enabled = true;
 		Engine::music.randomMenuMusic();

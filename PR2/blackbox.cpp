@@ -71,6 +71,32 @@ static void postinit_dashboard() {
 	postinit_dependencies();
 }
 
+extern void _extractScripts(), _deleteScripts();
+
+static void postinit_package(const char* package) {
+	std::string filename = "data/" + std::string(package);
+	filename += ".zip";
+	PHYSFS_addToSearchPath(filename.c_str(), 1);
+	// Run game.py ( NOTE: It MUST be located at 'data/scripts/game.py' )
+	_extractScripts();
+	Script s = Script("game", "data.scripts");
+	if (s.isLoaded()) {
+		s.execute("from data.scripts.game import Game");
+		InputDevice::control_c = false;
+		s.execute("Game.setup()");
+		s.execute("Game.loop()");
+		InputDevice::control_c = false;
+		s.execute("Game.destroy()");
+		s.execute("Game = 1");		
+		Engine::destroyEntities();
+		Engine::music.randomMenuMusic();
+	} else {
+		printf("ERROR: Cannot call game.main\n");
+	}
+	PHYSFS_removeFromSearchPath(("data/" + std::string(package)).c_str());
+	_deleteScripts();
+}
+
 static void postinit_module(const char *script) {
 	// Run default scripts
 	Script s("main");
@@ -88,6 +114,9 @@ static int waitForEnter(int return_code) {
 }
 
 int main(int argc, char **argv){
+	/*
+	Initialize Virtual FileSystem Environment
+	*/
 	PHYSFS_init(argv[0]);
 	ALLEGRO_FILE *f = al_fopen("data/system.zip", "r");
 	if (!f) {
@@ -99,17 +128,37 @@ int main(int argc, char **argv){
 		PHYSFS_addToSearchPath("data/system.zip", 1);		
 	}	
 	PHYSFS_addToSearchPath("data/", 1);
-
+	/*
+	Initialize Engine
+	*/
 	if(! Script::initialize()	) return waitForEnter(100);	
 	if(! initialize()			) return waitForEnter(200);
-	if (argc == 2) {
-		const char *script   = argv[1];
-		postinit_module(script);
-	} else {
-		postinit_dashboard();
+	
+	/* 
+	Parse arguments 
+	*/
+	const char *mode;
+	const char *script;
+	switch (argc) {
+		case 2:
+			script = argv[1];
+			postinit_module(script);
+			break;
+		case 3:
+			mode = argv[1];
+			if (!strcmp(argv[1], "-p")) {
+				const char *package = argv[2];
+				postinit_package(package);
+				break;
+			}
+		default:
+			postinit_dashboard();
+			Engine::loop();
+			break;
 	}
-	Engine::loop();
-
+	/*
+	Engine deinitialization
+	*/
 	Engine::deinitialize();
 	Script::deinitialize();
 
