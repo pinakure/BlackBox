@@ -4,12 +4,105 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Python: Archivo actual",
+            "name": "Xargoon",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\codigo\\BlackBox\\server\\deploy\\currentVersion\\build.py",
+            "args":["-p", "xargoon"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Axzle",
             "type": "python",
             "request": "launch",
             "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
-            "console": "externalTerminal"
-        }
+            "args":["-p", "axzle"],
+            "console": "integratedTerminal"
+        },{
+            "name": "BubbleSplitters",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "bubblesplitters"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Mini Golf",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "minigolf"],
+            "console": "integratedTerminal"
+        },{
+            "name": "PookMan",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "pookman"],
+            "console": "integratedTerminal"
+        },{
+            "name": "RePeGe",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "repege"],
+            "console": "integratedTerminal"
+        },{
+            "name": "RocksNCrystals",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "rocksncrystals"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Snake",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "snake"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Tetrax",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "tetrax"],
+            "console": "integratedTerminal"
+        },{
+            "name": "TrickyNoid",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "trickynoid"],
+            "console": "integratedTerminal"
+        },{
+            "name": "TriTriad",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "tritriad"],
+            "console": "integratedTerminal"
+        },{
+            "name": "WetPipes",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["-p", "wetpipes"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Test menu",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "args":["menu"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Dashboard",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/codigo/BlackBox/server/deploy/currentVersion/build.py",
+            "console": "integratedTerminal"
+        },
+        */
     ]
 }

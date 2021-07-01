@@ -5,7 +5,9 @@ from random import random
 import blackbox
 import vpu
 import joypad
-        
+
+from genericgame import GenericGame
+
 class Game:
     running = True
     width = 0

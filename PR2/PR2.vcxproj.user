@@ -14,7 +14,8 @@
     <LocalDebuggerCommand>C:\codigo\Blackbox\blackbox_debug_x64.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>C:\codigo\Blackbox\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerCommandArguments>-p xargoon</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommand>C:\codigo\Blackbox\blackbox_x64.exe</LocalDebuggerCommand>
