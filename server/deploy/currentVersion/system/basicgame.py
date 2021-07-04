@@ -1,6 +1,7 @@
 from random         import random
 from scripts.main   import menu
 from debug          import debug, error, panic, deprecate
+import basicgamelib
 import blackbox
 import vpu
 import joypad
@@ -71,12 +72,14 @@ class BasicGame:
 
     @staticmethod
     def setscale():
+        #basicgamelib.setscale(BasicGame.scale, BasicGame.scale)
         vpu.setscale(Vpu.bground.handle, BasicGame.scale  , BasicGame.scale)
         vpu.setscale(Vpu.fground.handle, BasicGame.scale  , BasicGame.scale)
         vpu.setscale(Vpu.overlay.handle, BasicGame.scale/2, BasicGame.scale/2)
 
     @staticmethod
     def loadmap(data=[], layer=0):
+        #basicgamelib.setscale(BasicGame.scale, BasicGame.scale)
         deprecate("BasicGame.loadmap", "TiledMap.load")
         BasicGame.map.load(data,layer)
 

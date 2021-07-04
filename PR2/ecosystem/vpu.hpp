@@ -6,6 +6,7 @@
 #include <map>
 #include "surface.hpp"
 #include "tiledmap.hpp"
+#include "volumetricmap.hpp"
 #include "sprite.hpp"
 #include "animation.hpp"
 #include "font.hpp"
@@ -28,40 +29,43 @@ private:
 	static std::vector<Font*>			font_stack;
 	static Pixel						__getpixel;
 public:
-	static std::vector<Font*>			fonts;
-	static Font* font;
-	static Font* smallest_font;
-	static Font* biggest_font;
-	static Surface* target;
-	static ALLEGRO_BITMAP* buffer;
-	static ALLEGRO_COLOR				color;
-	static ALLEGRO_DISPLAY* display;
-	static bool							is_initialized;
-	static bool							fullscreen;
-	static bool							ready;
-	static long int						animation_handle;
-	static long int						surface_handle;
-	static long int						tiledmap_handle;
-	static long int						sprite_handle;
-	static std::map<long int, TiledMap>	tiledmaps;
-	static std::map<long int, Surface>	surfaces;
-	static std::map<long int, Animation>animations;
-	static std::map<long int, Sprite>	sprites;
-	static TiledMap						*active_map;
-	static Surface						overlay;
-	static Surface						background;
-	static Surface						foreground;
-	static Surface						windows;
-	static Surface						console;
-	static int							pixel_format;
-	static int							scroll[2];
-	static int							frames;
-	static int							fps;
-	static int							width;
-	static int							height;
-	static bool							redraw;
-	static unsigned long int			total_frames;
-	static PyMethodDef					methods[];
+	static std::vector<Font*>					fonts;
+	static Font*								font;
+	static Font*								smallest_font;
+	static Font*								biggest_font;
+	static Surface*								target;
+	static ALLEGRO_BITMAP*						buffer;
+	static ALLEGRO_COLOR						color;
+	static ALLEGRO_DISPLAY*						display;
+	static bool									is_initialized;
+	static bool									fullscreen;
+	static bool									ready;
+	static long int								animation_handle;
+	static long int								surface_handle;
+	static long int								volumetricmap_handle;
+	static long int								tiledmap_handle;
+	static long int								sprite_handle;
+	static std::map<long int, TiledMap>			tiledmaps;
+	static std::map<long int, VolumetricMap>	volumetricmaps;
+	static std::map<long int, Surface>			surfaces;
+	static std::map<long int, Animation>		animations;
+	static std::map<long int, Sprite>			sprites;
+	static TiledMap								*active_map;
+	static VolumetricMap						*active_volumetric_map;
+	static Surface								overlay;
+	static Surface								background;
+	static Surface								foreground;
+	static Surface								windows;
+	static Surface								console;
+	static int									pixel_format;
+	static int									scroll[2];
+	static int									frames;
+	static int									fps;
+	static int									width;
+	static int									height;
+	static bool									redraw;
+	static unsigned long int					total_frames;
+	static PyMethodDef							methods[];
 
 	// Initialization and base routines
 	static bool initialize();
@@ -139,6 +143,8 @@ public:
 	/* High Level API */
 	static long int allocateTiledMap(int width, int height, int layer_count, int tile_width=8, int tile_height=8);
 	static void deallocateTiledMap(long int handle);
+	static long int allocateVolumetricMap(int width, int height, int tile_width=8, int tile_height=8, std::string tileset="");
+	static void deallocateVolumetricMap(long int handle);
 	static long int allocateSurface(int width, int height);
 	static void deallocateSurface(long int handle);
 	static long int allocateSprite(std::string filename, int priority=0);

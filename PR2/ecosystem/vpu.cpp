@@ -9,12 +9,15 @@ std::map<long int, Surface>			Vpu::surfaces;
 std::map<long int, Animation>		Vpu::animations;
 std::map<long int, Sprite>			Vpu::sprites;
 std::map<long int, TiledMap>		Vpu::tiledmaps;
+std::map<long int, VolumetricMap>	Vpu::volumetricmaps;
 
 TiledMap							*Vpu::active_map = nullptr;
+VolumetricMap						*Vpu::active_volumetric_map = nullptr;
 long int							Vpu::animation_handle=0;
 long int							Vpu::surface_handle = 0;
 long int							Vpu::sprite_handle=0;
 long int							Vpu::tiledmap_handle = 0;
+long int							Vpu::volumetricmap_handle = 0;
 float								Vpu::fade_target_level=0.0f;
 float								Vpu::fade_level=0.0f;
 float								Vpu::fade_delta=1.5f;
@@ -887,6 +890,19 @@ void Vpu::deallocateTiledMap(long int handle) {
 	if (tiledmaps.empty())return;
 	if (tiledmaps.find(handle) != tiledmaps.end()) {
 		tiledmaps.erase(handle);
+	}
+}
+
+long int Vpu::allocateVolumetricMap(int width, int height, int tile_width, int tile_height, std::string tileset) {
+	volumetricmap_handle++;
+	volumetricmaps.insert(std::pair<long int, VolumetricMap>(volumetricmap_handle, VolumetricMap(width, height, tile_width, tile_height, tileset)));
+	return volumetricmap_handle;
+}
+
+void Vpu::deallocateVolumetricMap(long int handle) {
+	if (volumetricmaps.empty())return;
+	if (volumetricmaps.find(handle) != volumetricmaps.end()) {
+		volumetricmaps.erase(handle);
 	}
 }
 

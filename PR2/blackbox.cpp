@@ -101,7 +101,7 @@ static void postinit_module(const char *script) {
 	// Run default scripts
 	Script s("main");
 	postinit_dependencies();
-	printf("Calling Script %s()...\n");
+	printf("Calling Script %s()...\n", script);
 	if (s.isLoaded()) s.call(script);	
 	else printf("Cannot exec Script %s()\n", script);
 }

@@ -52,7 +52,7 @@ class Game(BasicGame):
             #allocate custom video buffers
             Game.buffer = [ vpu.createsurf(320, 240) , vpu.createsurf(320, 240) ]
             # create display map
-            Game.setmap(TiledMap(Game, 40, 30, 4, 16, 16))
+            Game.setmap(TiledMap(Game, 40, 40, 4, 16, 16))
             if not Game.map.load_tileset("chipset"):
                 panic("Game", "Cannot load tileset", "Game could run perfectly, but we think it's better to abort current execution, as you wouldn't be table to see anything on the screen and that would be definitely bad.")
             Game.map.clear()
@@ -103,17 +103,17 @@ class Game(BasicGame):
                 vpu.select(Game.buffer[1])
                 vpu.setcolor(255,0,0)
                 vpu.fill(0,0,0,0)
-                scroll = Game.map.getscroll()
-                vpu.textout(f"{scroll.x},{scroll.y}", 0, 0)
+                #scroll = Game.map.getscroll()
+                #vpu.textout(f"{scroll.x},{scroll.y}", 0, 0)
                 # rasterize buffer onto bg layer
                 vpu.select(0)
-                left = (Game.width  >> 1) - ((Game.map.width * Game.map.tile_width)>>2)
-                top  = (Game.height >> 1) - ((Game.map.height * Game.map.tile_height)>>2)
+                left = (Game.width  >> 1) - ((40 * Game.map.tile_width)>>2)
+                top  = (Game.height >> 1) - ((30 * Game.map.tile_height)>>2)
                 for buffer in Game.buffer:
                     if buffer:
                         vpu.drawsurf(buffer, left, top)
                 # required stuff
-            BasicGame.draw()
+                BasicGame.draw()
                 
             if joypad.left():       Game.map.scroll_left()
             elif joypad.right():    Game.map.scroll_right()

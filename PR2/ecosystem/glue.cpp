@@ -3,6 +3,7 @@ static PyModuleDef ConsoleModule	= {PyModuleDef_HEAD_INIT, "console"		, NULL, -1
 static PyModuleDef EntityLibModule  = {PyModuleDef_HEAD_INIT, "entitylib"	, NULL, -1, Entity::methods			, NULL, NULL, NULL, NULL};
 static PyModuleDef JoypadModule		= {PyModuleDef_HEAD_INIT, "joypad"		, NULL, -1, InputDevice::methods	, NULL, NULL, NULL, NULL};
 static PyModuleDef TiledMapModule	= {PyModuleDef_HEAD_INIT, "tm"			, NULL, -1, TiledMap::methods		, NULL, NULL, NULL, NULL};
+static PyModuleDef BasicGameModule  = {PyModuleDef_HEAD_INIT, "basicgamelib", NULL, -1, BasicGame::methods		, NULL, NULL, NULL, NULL};
 static PyModuleDef WindowMgrModule  = {PyModuleDef_HEAD_INIT, "wm"			, NULL, -1, WindowManager::methods	, NULL, NULL, NULL, NULL};
 static PyModuleDef TypeWriterModule	= {PyModuleDef_HEAD_INIT, "typewriter"	, NULL, -1, TypeWriter::methods		, NULL, NULL, NULL, NULL};
 static PyModuleDef VpuModule		= {PyModuleDef_HEAD_INIT, "vpu"			, NULL, -1, Vpu::methods			, NULL, NULL, NULL, NULL};
@@ -12,6 +13,7 @@ static PyObject *PyInit_entitylib	(void){ return PyModule_Create(&EntityLibModul
 static PyObject *PyInit_console		(void){ return PyModule_Create(&ConsoleModule		);}
 static PyObject *PyInit_joypad		(void){ return PyModule_Create(&JoypadModule		);}
 static PyObject* PyInit_tiledmap	(void){ return PyModule_Create(&TiledMapModule		);}
+static PyObject* PyInit_basicgame	(void){ return PyModule_Create(&BasicGameModule		);}
 static PyObject* PyInit_windowmgr	(void){ return PyModule_Create(&WindowMgrModule		);}
 static PyObject *PyInit_typewriter	(void){ return PyModule_Create(&TypeWriterModule	);}
 static PyObject *PyInit_vpu			(void){ return PyModule_Create(&VpuModule			);}
