@@ -1,7 +1,6 @@
 from random         import random
 from scripts.main   import menu
 from debug          import debug, error, panic, deprecate
-import basicgamelib
 import blackbox
 import vpu
 import joypad

@@ -194,8 +194,8 @@ void VolumetricMap::draw(int ix, int iy) {
 	//al_unlock_bitmap(this->target->bitmap);
 }
 
-void VolumetricMap::update(double delta) {
-
+bool VolumetricMap::update(double delta) {
+	return true;
 }
 
 void VolumetricMap::setScroll(int x, int y) {

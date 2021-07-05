@@ -121,8 +121,8 @@ void TiledMap::draw(int ix, int iy) {
 	//al_unlock_bitmap(this->target->bitmap);
 }
 
-void TiledMap::update(double delta) {
-
+bool TiledMap::update(double delta) {
+	return true;
 }
 
 int TiledMap::loadTileset(std::string filename) {

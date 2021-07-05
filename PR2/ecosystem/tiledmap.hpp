@@ -78,7 +78,7 @@ public:
 	TiledMap(int w, int h, int layer_count, int tile_width, int tile_height);
 	void destroy();
 	void draw(int x, int y);
-	void update(double delta);
+	bool update(double delta);
 	int loadTileset(std::string tileset);
 	void setScroll(int x, int y);
 	void setBoundaries(int left, int top, int right, int bottom);

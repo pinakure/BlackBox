@@ -158,7 +158,7 @@
     <ClCompile Include="ecosystem\volumetricmap.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
-    <ClCompile Include="ecosystem\basicgame.cpp">
+    <ClCompile Include="ecosystem\genericgame.cpp">
       <Filter>Archivos de origen\ecosystem</Filter>
     </ClCompile>
   </ItemGroup>

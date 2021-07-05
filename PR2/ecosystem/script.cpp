@@ -4,7 +4,7 @@
 #include "console.hpp"
 #include "vpu.hpp"
 #include "typewriter.hpp"
-#include "basicgame.hpp"
+#include "genericgame.hpp"
 #include "windowmgr.hpp"
 #include "dashboard.hpp"
 #include "glue.cpp"
@@ -18,7 +18,7 @@ bool Script::initialize() {
 		PyImport_AppendInittab("entitylib"	 , &PyInit_entitylib);
 		PyImport_AppendInittab("joypad"		 , &PyInit_joypad);
 		PyImport_AppendInittab("tm"			 , &PyInit_tiledmap);
-		PyImport_AppendInittab("basicgamelib", &PyInit_basicgame);
+		PyImport_AppendInittab("gglib"		 , &PyInit_genericgame);
 		PyImport_AppendInittab("wmgr"		 , &PyInit_windowmgr);
 		PyImport_AppendInittab("typewriter"	 , &PyInit_typewriter);
 		PyImport_AppendInittab("vpu"		 , &PyInit_vpu);

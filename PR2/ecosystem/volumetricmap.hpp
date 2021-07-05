@@ -29,12 +29,13 @@ public:
 	VolumetricMap(int w, int h, int tile_width, int tile_height, std::string tileset);
 	void destroy();
 	void draw(int x, int y);
-	void update(double delta);
+	bool update(double delta);
 	void setScroll(int x, int y);
 	void setBoundaries(int left, int top, int right, int bottom);
 	void loadData(int width, int height,long int *data);
 	void initialize(int width, int height);
 	void deinitialize();
+	
 	static PyObject* pyLoad(PyObject* self, PyObject* args);
 	/*
 	static PyObject* pyCreate		(PyObject* self, PyObject* args);

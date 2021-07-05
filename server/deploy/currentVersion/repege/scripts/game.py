@@ -46,6 +46,12 @@ class Game(BasicGame):
     @staticmethod
     def setup():
         try:
+            game = GenericGame()
+            def a(): pass
+            def b(): pass
+            def c(): pass
+            GenericGame.setup(a,b,c)
+            GenericGame.init(320, 240, 1)
             debug("Game", "Setting up")
             BasicGame.prepare()
             vpu.setrotation(0,0)
