@@ -1,0 +1,40 @@
+networks:
+  proxy_primary-network:
+    external: true
+  proxy_sql-network:
+    external: true
+
+services:
+  blackbox-service:
+    build: ./src
+    container_name: blackbox
+    volumes:
+      - ./src:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ~/.Xauthority:/root/.Xauthority:ro
+    environment:
+      - DISPLAY=${DISPLAY}
+    network_mode: host
+    stdin_open: true
+    tty: true
+    depends_on: 
+      - blackbox-server-service
+    entrypoint: "/bin/bash -c 'rm -rf /workspace/build/*; cd build; cmake ..; make'"
+
+  blackbox-server-service:
+    image: php:8.3-fpm
+    container_name: blackbox-server
+    hostname: blackbox-server
+    volumes:
+      - /src/blackbox/server:/var/www/html/blackbox
+      - /src/blackbox/www.conf:/usr/local/php-fpm.d/www.conf
+      - /var/log:/var/log
+    networks:
+      - proxy_sql-network
+      - proxy_primary-network
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    restart: unless-stopped

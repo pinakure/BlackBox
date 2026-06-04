@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de origen">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Archivos de origen\ecosystem">
+      <UniqueIdentifier>{0d5bf539-b0f7-402e-932c-801248fdd8e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Scripts">
+      <UniqueIdentifier>{2df214a1-1d0b-4853-88d6-9300081ff897}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\ecosystem\gui">
+      <UniqueIdentifier>{3a698757-411d-4608-a3ac-5c333d474442}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\script.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\engine.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\vpu.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\typewriter.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\hud.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\sprite.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\animation.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\command.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\console.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\cvar.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\integer.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\color.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\input.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\redirect.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\interp.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\terrain.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\biome.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\camera.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\material.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\sector.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\world.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\layer.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\vfx.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\showcase.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\vfx.c">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\glue.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="blackbox.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\curtain.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\font.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\utils.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\download.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\dashboard.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\tiledmap.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\entity.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\music.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="genesis\Mame\Ym2203_Emu.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\windowmgr.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\button.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\widget.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\window.cpp">
+      <Filter>Archivos de origen\ecosystem\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\volumetricmap.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ecosystem\genericgame.cpp">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="..\scripts\__init__.py">
+      <Filter>Archivos de origen\Scripts</Filter>
+    </None>
+    <None Include="..\scripts\main.py">
+      <Filter>Archivos de origen\Scripts</Filter>
+    </None>
+    <None Include="..\server\deploy\currentVersion\toc.py">
+      <Filter>Archivos de origen\ecosystem</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Archivos de recursos</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
