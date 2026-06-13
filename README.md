@@ -1,8 +1,9 @@
 # BlackBox
 ![STATUS: WIP](https://img.shields.io/badge/status-WIP-yellow)
+![C++](https://img.shields.io/badge/C++-brown?logo=cplusplus)
 ![Python](https://img.shields.io/badge/Python-brown?logo=python)
-![CSS](https://img.shields.io/badge/css-brown?logo=css)
 ![javascript](https://img.shields.io/badge/javascript-brown?logo=javascript)
+![CSS](https://img.shields.io/badge/css-brown?logo=css)
 ![Docker](https://img.shields.io/badge/Docker-brown?logo=docker)
 
 ## Project Description
