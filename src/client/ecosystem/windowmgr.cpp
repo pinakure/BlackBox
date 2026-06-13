@@ -141,13 +141,19 @@ void WindowManager::render() {
 	WindowManager::redraw = false;
 }
 
-#include <windows.h>
+#include "linux.hpp"
 
 void WindowManager::update() {
 	al_get_mouse_cursor_position(&WindowManager::mouse_x, &WindowManager::mouse_y);
 	int offset_x=0, offset_y=0;
 	al_get_window_position(Vpu::display, &offset_x, &offset_y);
-	offset_y += GetSystemMetrics(SM_CYFRAME) + (GetSystemMetrics(SM_CYCURSOR))-2/*tempfix*/;//+GetSystemMetrics(SM_CYSIZE)
+	#ifdef _WIN32
+    	offset_y += GetSystemMetrics(SM_CYFRAME) + (GetSystemMetrics(SM_CYCURSOR))-2/*tempfix*/;//+GetSystemMetrics(SM_CYSIZE)
+	#else
+    	// En Linux, las ventanas gestionadas por Allegro no requieren este ajuste Win32 específico.
+    	// Puedes dejarlo en 0 o añadir un offset fijo si notas que el ratón se desfasa.
+    	offset_y += 0; 
+	#endif
 	offset_x += 11;/*tempfix*/
 	WindowManager::mouse_x-=offset_x;
 	WindowManager::mouse_y-=offset_y;

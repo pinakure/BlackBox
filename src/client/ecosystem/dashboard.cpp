@@ -3,6 +3,7 @@
 #include "input.hpp"
 #include "typewriter.hpp"
 #include "console.hpp"
+#include "linux.hpp"
 extern char key[256];
 
 int  Dashboard::active_index = 0;
@@ -65,7 +66,7 @@ void Dashboard::draw(){
 	const int title_height = (title_area_height - (title_area_padding * (title_rows - 1))) / title_rows;
 	Vpu::select(Vpu::overlay);
 	Vpu::clear();
-	
+
 	// Draw title boxes area
 	/*Vpu::fillRectangle(
 		title_area_left	 , title_area_top,
@@ -158,17 +159,17 @@ void Dashboard::update(double delta) {
 	if (KEYDOWN(key[ALLEGRO_KEY_LEFT]) || InputDevice::controller[INPUT_LEFT]==1) {
 		offset = -16.0f;
 		cursor_x--;
-		if (cursor_x < 0)cursor_x = columns - 1;		
+		if (cursor_x < 0)cursor_x = columns - 1;
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_RIGHT]) || InputDevice::controller[INPUT_RIGHT]==1) {
 		offset = -16.0f;
 		cursor_x++;
-		if (cursor_x >= columns)cursor_x = 0;		
+		if (cursor_x >= columns)cursor_x = 0;
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_UP]) || InputDevice::controller[INPUT_UP]==1) {
 		offset = -16.0f;
 		cursor_y--;
-		if (cursor_y < 0)cursor_y = rows - 1;		
+		if (cursor_y < 0)cursor_y = rows - 1;
 	}
 	else if (KEYDOWN(key[ALLEGRO_KEY_DOWN]) || InputDevice::controller[INPUT_DOWN]==1) {
 		offset = -16.0f;
@@ -184,7 +185,7 @@ void Dashboard::update(double delta) {
 		active_index = temp_i;
 		offset = temp_o;
 	}
-	// Update selected 
+	// Update selected
 	if(titles.size()>0)
 		selected = &titles[active_index];
 	if (KEYDOWN(key[ALLEGRO_KEY_ENTER]) || InputDevice::controller[INPUT_START]==1) {
@@ -228,8 +229,8 @@ DashboardTitle::DashboardTitle(string name, string description, string developer
 	if (!this->font)this->font = Vpu::biggest_font;
 
 	// Check if game files are present and set up downloaded attribute
-	downloaded = false; 
-	if (fileExists(this->url)) downloaded = true;	
+	downloaded = false;
+	if (fileExists(this->url)) downloaded = true;
 }
 
 void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
@@ -251,20 +252,20 @@ void DashboardTitle::draw(int x, int y, int width, int height, bool active) {
 	);
 	if(picture.enabled)
 		al_draw_tinted_scaled_bitmap(
-			picture.bitmap, 
+			picture.bitmap,
 			al_map_rgba(
 				downloaded ? 128 : 32,
 				downloaded ? 128 : 32,
 				downloaded ? 128 : 128,
 				downloaded ? 240 : 200
 			),
-			0, 0, 
+			0, 0,
 			picture.width, picture.height,
 			x + 1, y + 1,
 			width - 2, height - 2,
 			0
 		);
-		
+
 }
 
 void DashboardTitle::download() {
@@ -281,13 +282,13 @@ void DashboardTitle::download() {
 
 
 static void _extractScript(std::string name) {
-	int ret = _mkdir("data\\scripts");
+	int ret = mkdir("data/scripts", 0777);
 	ALLEGRO_FILE* f = al_fopen(("scripts/" + name).c_str(), "r");
 	if (!f) {
 		printf("Cannot execute. main function or game.py not present.\n");
 	}
 	else {
-		printf(("Reading " + name + " from datafile...\n").c_str());
+		printf("%s", ("Reading " + name + " from datafile...\n").c_str());
 		al_fseek(f, SEEK_SET, SEEK_END);
 		size_t size = al_ftell(f);
 		al_fseek(f, SEEK_SET, 0);
@@ -299,7 +300,7 @@ static void _extractScript(std::string name) {
 		}
 		al_fclose(f);
 		if (contents) {
-			printf(("Writing data/scripts/" + name+"...\n").c_str());
+			printf("%s", ("Writing data/scripts/" + name+"...\n").c_str());
 			FILE* output = 0;
 			fopen_s(&output, ("data/scripts/" + name).c_str(), "w");
 			if (output) {
@@ -312,7 +313,7 @@ static void _extractScript(std::string name) {
 
 static void _deleteFolder(std::string path, std::string folder) {
 	std::string dir = path + folder + "/";
-	printf(("Deleting folder " + dir + " contents...\n").c_str());
+	printf("%s", ("Deleting folder " + dir + " contents...\n").c_str());
 	ALLEGRO_FS_ENTRY* e = al_create_fs_entry(dir.c_str());
 	if (al_open_directory(e)) {
 		ALLEGRO_FS_ENTRY* file;
@@ -334,13 +335,13 @@ static void _deleteFolder(std::string path, std::string folder) {
 				_deleteFolder(dir, name);
 			}
 			else {
-				printf(("Deleting "+filename+"\n").c_str());
-				_unlink(filename.c_str());
+				printf("%s", ("Deleting "+filename+"\n").c_str());
+				unlink(filename.c_str());
 			}
 		}
 	}
-	printf(("Deleting folder data/" + dir + "\n").c_str());
-	int ret = _rmdir(("data/"+dir).c_str());
+	printf("%s", ("Deleting folder data/" + dir + "\n").c_str());
+	int ret = rmdir(("data/"+dir).c_str());
 }
 
 void _deleteScripts() {
@@ -368,7 +369,7 @@ void _extractScripts() {
 				if (!parts[1].compare("py")) {
 					_extractScript(name);
 				}
-			}			
+			}
 		}
 	}
 }
@@ -406,7 +407,7 @@ void DashboardTitle::load() {
 			execute();
 			return;
 		} else {
-			printf(("Cannot execute " + name + " :Title is not downloaded. ").c_str());
+			printf("%s", ("Cannot execute " + name + " :Title is not downloaded. ").c_str());
 			return;
 		}
 	}

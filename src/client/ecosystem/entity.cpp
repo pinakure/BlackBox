@@ -1,5 +1,5 @@
 #include "entity.hpp"
-#include "entitycontroller.cpp"
+#include "entitycontroller.hpp"
 #include "engine.hpp"
 
 int		Game::width		= 320;

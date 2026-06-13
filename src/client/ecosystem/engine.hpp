@@ -1,6 +1,8 @@
 #ifndef __ENGINE_HPP
 #define __ENGINE_HPP
 
+#define WORLD_SIZE					65535
+
 #include "sprite.hpp"
 #include <string>
 #include <vector>

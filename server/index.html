@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>BlackBox Engine</title>
+    <link rel="stylesheet" href="./webgl.css" type="text/css">
+    <script src="jquery.min.js"></script>
+    <script src="gl-matrix-min.js"></script>
+    <script src="webgl.js" defer></script>
+    <style>
+      html,
+      body {
+        z-index: -100;
+        padding: 0px 0px 0px 0px;
+        margin: 0px 0px 0px 0px;
+        height: 100%;
+        width: 100%;
+        background-image: linear-gradient(#101010, #303030);
+        overflow: hidden;
+      }
+      
+      canvas {
+        position: absolute;
+        z-index: 0;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        filter: sepia(1.0) hue-rotate(45deg) contrast(250%) opacity(0.5);
+      }
+      
+      div.glow {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        box-sizing: border-box;
+        padding-left: 32px;
+        padding-right: 32px;
+        font-size: 16px;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        z-index: 1000 !important;
+        color: #fc48;
+        text-shadow: 0px 0px 1px #fc4;
+        height: 100%;
+        width: 100%;
+      }
+      
+      hr.glow {
+        border: 2px solid #fc4;
+        box-shadow: 0px 0px 1px #fc4;
+      }
+
+      div#content {
+        color: #fef8;
+        width: 100%;
+        height: calc(100% - 95px);
+        box-shadow: 0px 0px 4px #000 inset;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      #wiki,
+      #dlg,
+      #help {
+        display: none;
+      }
+
+      iframe#dlg,
+      iframe#wiki {
+        top: 0px;
+        left: 0px;
+        border-radius: 3px 3px 3px 3px;
+        filter: opacity(0.75);
+        border: none;
+        margin: none;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .butright {
+        float: right;
+      }
+      small {
+        color: #fff;
+        user-select: none;
+      }
+      small:hover {
+        cursor: pointer;
+        color: #c10;
+        text-shadow: 0px 0px 1px #c10;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="glcanvas" width="1280" height="1024"></canvas>
+    <div class="glow">
+      <h1><img src="bb.png" width="32" heght="32" style="vertical-align: bottom;position: absolute;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BlackBox Engine<span class="butright">
+        <small onclick="$('#dlg').show();$('#help').hide();$('#wiki').hide();">DIALOG EDITOR</small>&nbsp;|
+        <small onclick="$('#dlg').hide();$('#help').show();$('#wiki').hide();">HELP</small>&nbsp;|
+        <small onclick="$('#dlg').hide();$('#help').hide();$('#wiki').show();">WIKI</small>&nbsp;|
+        <small onclick="window.open('https://github.com/pinakure/BlackBox')">GITHUB</small>
+        
+      </span></h1><hr class="glow"/>
+      <div id="content">
+        <pre id="help">
+BlackBox Engine Core
+Use F1 to open the console.
+
+This black box has Py powers, being more accurate, version 3.8.5.
+
+  alias                    Set given alias for a command line
+  aliases                  Show list of current aliases
+  addtoggle                Adds a toggle with given id and name
+  concat                   Concatenate given arguments and store the value in $result
+  cd                       Changes active working directory
+  cls                      Clear console buffer   
+  cwd                      Shows active working directory
+  divide                   Divide given operators and store the value in $result
+  dir                      Shows files and folders in current working directory
+  dump                     Dump console buffer into given filename
+  echo                     Dump given text on the console buffer
+  help                     Show help about requested command
+  multiply                 Multiply given operators and store the value in $result
+  memdump                  Dump heap blocks to the filesystem
+  subtract                 Subtract given operators and store the value in $result
+  sum                      Sum given operators and store the value in $result
+  set                      Set or view value of given variable
+  toggle                   Set or toggle given in-game toggle
+  toggleconsole            Open or close the console interface
+  togglelist               Show list of current in-game toggles
+  unalias                  Unset given alias      
+  unset                    Unset given variable   
+  unsetall                 Unsets every variable set
+  vars                     Show list of defined variables
+  view                     Dump given filename over the console
+  writeconfig              Stores variable settings under given filename
+  xor                      Apply XOR over given value and store value in $result
+
+SCRIPTING API . Use help  for details
+
+------------------------------
+blackbox
+------------------------------
+  ctrlc(  ) - Returns TRUE if CTRL+C was pressed"
+  version(  ) - Return current BlackBox engine version"
+  epoch(  ) - Return current engine epoch uptime"
+
+------------------------------
+console 
+------------------------------
+  print( text ) - Dump given text over console"
+  cls(  ) - Clean console buffer"
+
+------------------------------
+vpu
+------------------------------
+  createanim( width, height, sprite_handle ) - Return Handle to new Animation object"
+  createsprite( width, height, filename ) - Returns Handle to Sprite object create upon given filename"
+  createsurf( width, height ) - Returns Handle to Surface object to be drawn arbitrarily to screen"
+  dimensions(  ) - Returns selected bitmap [ width, height ] "
+  disable( layer ) - Toggle off given vpu layer"
+  deleteanim( handle ) - Delete Animation identified by given Handle""
+  deletesprite( handle ) - Delete Sprite identified by given Handle""
+  deletesurf( handle ) - Delete Surface identified by given Handle""
+  drawanim( handle, x, y ) - Draw animation identified by given handle onto given coordinates""
+  drawsprite( handle, x, y ) - Draw Sprite identified by given handle onto given coordinates""
+  drawsurf( handle, x, y ) - Draw surface identified by given handle onto given coordinates""
+  enable( layer ) - Toggle on given vpu layer"
+  fadein(  ) - Fade screen from black"
+  fadeout(  ) - Fade screen to black"
+  fill( r, g, b, a ) - Fill selected bitmap with given color or default color"
+  frames(  ) - Return actual frame count"
+  fullscreen( enabled ) - Toggle fullscreen mode"
+  print( text, x, y ) - Print given text at given coordinates"
+  pset( x, y ) - Draw a pixel onto selected surface onto given coordinates""
+  restart(  ) - Restart Video Processing Unit"
+  rotate( layer, angle ) - Rotate specified layer (0-11) given degrees"
+  scale( layer, scale_x, scale_y ) - Change specified layer [0-11] given horizontal and vertical scale factor"
+  select( layer ) - Select given layer to perform next graphic operations onto it"
+  setcolor( r, g, b, a ) - Sets current painting color"
+  setrotation( layer, angle ) - Sets rotation for specified layer (0-11) at given degrees"
+  setscale( layer, scale_x, scale_y ) - Sets scale for specified layer [0-11] given horizontal and vertical values"
+  update(  ) - Allow blackbox engine to perform its rendering based input and output operations"
+          </pre>
+          <iframe id="dlg"  src="http://www.blackbox.com/dialogeditor/index.html"></iframe>
+          <iframe id="wiki" src="http://www.blackbox.com/wiki/index.php"></iframe>
+      </div>
+    </div>
+  </body>
+</html>

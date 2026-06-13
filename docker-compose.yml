@@ -12,14 +12,18 @@ services:
       - ./src:/workspace
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - ~/.Xauthority:/root/.Xauthority:ro
+      - ./entrypoint.sh:/workspace/entrypoint.sh:ro
     environment:
       - DISPLAY=${DISPLAY}
+      - PYTHONHOME=/usr
+      - LIBGL_ALWAYS_INDIRECT=1  # Obliga a renderizar de forma indirecta por red a Xming
+      - ALLEGRO_VIDEO_DRIVER=X11 # Fuerza a Allegro a usar el driver estándar de red
     network_mode: host
     stdin_open: true
     tty: true
-    depends_on: 
+    depends_on:
       - blackbox-server-service
-    entrypoint: "/bin/bash -c 'rm -rf /workspace/build/*; cd build; cmake ..; make'"
+    entrypoint: "/bin/bash -c 'source /workspace/entrypoint.sh'"
 
   blackbox-server-service:
     image: php:8.3-fpm

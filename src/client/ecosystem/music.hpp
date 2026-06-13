@@ -60,6 +60,7 @@ public:
 	void stop();
 	void play();
 	void pause();
+	void update(float delta=1.0f);
 	void setPosition(int position);
 	void loadMenuMusic();
 	void randomMenuMusic();

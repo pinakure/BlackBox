@@ -4,6 +4,7 @@
 #include "integer.hpp"
 #include "input.hpp"
 #include <assert.h>
+#include "linux.hpp"
 
 std::map<std::string, CVar*> CVar::settings;
 bool CVar::initialized = false;

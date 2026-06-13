@@ -1,0 +1,113 @@
+:root {
+    --skin-fg       : #fa3;
+    --skin-bg       : #333;
+    --skin-shadow   : #0003;
+    --skin-border   : #bbb8;
+    --navname-grad-a: #fffc;
+    --navname-grad-b: #fffa;
+    --content-grad-a: #fff5;
+    --content-grad-b: #fff4;
+    --node-hl-bg    : #fffe; 
+    --node-hl-fg    : #333e; 
+    --node-border   : #0008;
+    --navcard-fg-a  : #ffff;
+    --navcard-fg-b  : #cccf;
+    --navcard-border: #8888;
+    --button-fg     : #3338;
+    --button-bg-a   : #fff8;
+    --button-bg-b   : #bbb8;
+    --button-border : #8888;
+    --button-tint   : #888;
+}
+
+html { 
+    background-color: var(--skin-bg);
+}
+
+body { 
+    color: var(--skin-fg);
+    background-color: var(--skin-bg);
+}
+
+nav  { 
+    box-shadow: 2px 0px 2px var(--skin-shadow);
+}
+
+navname {
+    color: var(--navcard-fg-a);
+    /* background-image:radial-gradient(var(--navname-grad-a),var(--navname-grad-b)); */
+    background: var(--skin-bg);
+        
+}
+
+navcontent {
+    box-shadow: 0px 2px 2px #0006 inset;
+    background-color: var(--node-hl-fg);
+    background-image: url('diagonal.png');
+    /*background-image:linear-gradient(45deg, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5, #fff3, #fff3, #fff5);*/
+}
+
+content  { 
+    background-image: transparent; 
+    background-image:radial-gradient(var(--content-grad-a),var(--content-grad-b));
+}
+
+navcard label {
+    color: var(--skin-bg);
+}
+
+navcard input {
+    border-color: var(--skin-border);
+}
+
+node:hover { 
+    filter: brightness(1.25);
+}
+
+node:active { 
+    filter: brightness(1.5);
+}
+
+node i {
+    text-shadow: 0px 0px 2px #fff8;
+}
+
+node {
+    border-color: var(--node-border);
+    color: var(--node-hl-bg);
+    background-color: var(--node-hl-fg);
+}
+node[selected="selected"] div {
+    color: #000 !important;
+    font-weight: 650;
+}
+node[selected="selected"] { 
+    background-color: var(--node-hl-bg);
+    color: var(--node-hl-fg);
+}
+
+navcard {
+    background-image:radial-gradient(var(--navcard-fg-a), var(--navcard-fg-b));
+    box-shadow: 0px 2px 4px var(--node-border);
+    border-color: var(--navcard-border);    
+}            
+
+button:active {
+    box-shadow: 0px 2px 2px var(--node-border) inset;
+    border-color: var(--node-hl-fg);
+}
+
+
+button {
+    background-color: var(--button-tint);
+    background-image: linear-gradient(-7deg , var(--button-bg-b), var(--button-bg-a), var(--button-bg-b));
+    box-shadow: 0px 2px 2px var(--node-border);
+    border-color: var(--button-border);    
+    color: var(--skin-bg);
+}
+
+input[type='text'],
+input[type='number']{
+    background: #444; 
+    color: #f80;
+}

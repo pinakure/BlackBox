@@ -1,4 +1,8 @@
-﻿#include "cvar.hpp"
+﻿#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+#include "cvar.hpp"
 #include "integer.hpp"
 #include "vpu.hpp"
 #include "color.hpp"
@@ -7,10 +11,13 @@
 #include "input.hpp"
 #include <sstream>
 #include <algorithm>
+#include "linux.hpp"
+namespace fs = std::filesystem;
 
 std::map<std::string, std::string> Console::pyhelp;
 
 #define BUFFERSIZE 1024
+
 
 StdOutRedirect				Console::_stdout;
 char						Console::char_buffer[16536];
@@ -1218,15 +1225,17 @@ std::string Console::stripColors(const char *colored_string) {
 
 #ifdef _WIN32
     #include <windows.h>
+	BOOL DirectoryExists(const char *szPath) {
+		DWORD dwAttrib = GetFileAttributesA(szPath);
+		return	(dwAttrib != INVALID_FILE_ATTRIBUTES &&
+			(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	}
+#else 
+	bool DirectoryExists(const char *szPath) {
+    	return fs::is_directory(szPath);
+	}
 #endif
-
-BOOL DirectoryExists(const char *szPath) {
-	DWORD dwAttrib = GetFileAttributesA(szPath);
-	return	(dwAttrib != INVALID_FILE_ATTRIBUTES &&
-		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-
+	
 COMMAND_CALLBACK(cdCommand) {
 	
 	std::string path = Console::cwd;
@@ -1276,53 +1285,115 @@ COMMAND_CALLBACK(cwdCommand) {
 	return 0;
 }
 
+/*
+// COMMAND_CALLBACK(dirCommand) {
+	// 	std::string v = "Showing files in ";
+	// 	v += Console::cwd;
+// 	Console::print("");
+// 	Console::print(v);
+
+
+// 	HANDLE hFind;
+// 	WIN32_FIND_DATAA data;
+
+// 	v = "";
+// 	v = Console::cwd;
+// 	v += "/";
+
+// 	if (args.size() >0) {
+	// 		v += args[0].c_str();
+	// 	}
+	// 	else {
+		// 		v += "*.*";
+		// 	}
+		// 	std::string w = v.c_str();
+		// 	hFind = FindFirstFileA(w.c_str(), &data);
+		// 	if (hFind != INVALID_HANDLE_VALUE) {
+
+// 		do {
+// 			v = data.cFileName;
+// 			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+// 				v = "~a<" + v + ">";
+// 				Console::print(v.c_str());
+// 			}
+
+// 		} while (FindNextFileA(hFind, &data));
+ 		FindClose(hFind);
+	}
+
+	hFind = FindFirstFileA(w.c_str(), &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		
+	do {
+		if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
+		v = data.cFileName;
+ 			Console::printf("~b%s", v.c_str());
+		} while (FindNextFileA(hFind, &data));
+		FindClose(hFind);
+ 	}
+	 
+ 	return 0;
+ }
+*/
+ 
 COMMAND_CALLBACK(dirCommand) {
-	std::string v = "Showing files in ";
-	v += Console::cwd;
-	Console::print("");
-	Console::print(v);
-	
+    std::string v = "Showing files in ";
+    v += Console::cwd;
+    Console::print("");
+    Console::print(v);
 
-	HANDLE hFind;
-	WIN32_FIND_DATAA data;
+    // Determinar la ruta base a abrir y el filtro de búsqueda
+    std::string base_path = Console::cwd;
+    std::string filter = "*.*";
 
-	v = "";
-	v = Console::cwd;
-	v += "/";
+    if (args.size() > 0) {
+        filter = args[0];
+    }
 
-	if (args.size() >0) {
-		v += args[0].c_str();
-	}
-	else {
-		v += "*.*";
-	}
-	std::string w = v.c_str();
-	hFind = FindFirstFileA(w.c_str(), &data);
-	if (hFind != INVALID_HANDLE_VALUE) {
+    // Si el filtro es un comodín genérico de Windows, abrimos el directorio actual
+    if (filter == "*.*" || filter == "*") {
+        filter = ""; // Sin filtro específico, listar todo
+    }
 
-		do {
-			v = data.cFileName;
-			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				v = "~a<" + v + ">";
-				Console::print(v.c_str());
-			}
+    // Abrir el directorio
+    DIR* dir = opendir(base_path.empty() ? "." : base_path.c_str());
+    if (dir != NULL) {
+        struct dirent* entry;
 
-		} while (FindNextFileA(hFind, &data));
-		FindClose(hFind);
-	}
+        // Primer paso: Mostrar solo directorios (Carpetas)
+        while ((entry = readdir(dir)) != NULL) {
+            std::string name = entry->d_name;
+            
+            // Omitir los directorios relativos . y .. si deseas limpiar la salida
+            if (name == "." || name == "..") continue;
 
-	hFind = FindFirstFileA(w.c_str(), &data);
-	if (hFind != INVALID_HANDLE_VALUE) {
+            if (entry->d_type == DT_DIR) {
+                // Filtro básico por si se busca algo específico en los nombres
+                if (!filter.empty() && name.find(filter) == std::string::npos) continue;
 
-		do {
-			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
-			v = data.cFileName;
-			Console::printf("~b%s", v.c_str());
-		} while (FindNextFileA(hFind, &data));
-		FindClose(hFind);
-	}
-	
-	return 0;
+                v = "~a<" + name + ">";
+                Console::print(v.c_str());
+            }
+        }
+
+        // Segundo paso: Mostrar solo archivos
+        rewinddir(dir); // Reiniciar el puntero del directorio
+        while ((entry = readdir(dir)) != NULL) {
+            std::string name = entry->d_name;
+
+            if (entry->d_type != DT_DIR) {
+                // Filtro básico por si se busca algo específico en los nombres
+                if (!filter.empty() && name.find(filter) == std::string::npos) continue;
+
+                Console::printf("~b%s", name.c_str());
+            }
+        }
+        closedir(dir);
+    } else {
+        Console::print("~rError: Could not open directory.");
+    }
+
+    return 0;
 }
 
 #include <fstream>
@@ -1603,20 +1674,25 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 
 	if (!isCmd) {
 		// Iterate existing filenames, only when using as parameters
-		
-		HANDLE hFind;
-		WIN32_FIND_DATAA data;
-		std::string v = cmd;
-		v.append("*.*");
-		std::string w = v.c_str();
-		hFind = FindFirstFileA(w.c_str(), &data);
-		if (hFind != INVALID_HANDLE_VALUE) {
-			do {
-				v = data.cFileName;
-				if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)continue;
-				candidates.push_back(v.c_str());
-			} while (FindNextFileA(hFind, &data));
-			FindClose(hFind);
+		// Adaptación a Linux usando <dirent.h>
+		DIR* dir = opendir(".");
+		if (dir != NULL) {
+			struct dirent* entry;
+			while ((entry = readdir(dir)) != NULL) {
+				std::string filename = entry->d_name;
+
+				// Omitir directorios relativos
+				if (filename == "." || filename == "..") continue;
+
+				// Saltar si es un directorio (comportamiento idéntico al código original)
+				if (entry->d_type == DT_DIR) continue;
+
+				// Verificar si el nombre del archivo coincide con el autocompletado actual
+				if (autoCompletionCheck(filename, cmd)) {
+					candidates.push_back(filename);
+				}
+			}
+			closedir(dir);
 		}
 	}
 
@@ -1630,7 +1706,6 @@ std::vector<std::string> Console::autoCompletionGetCandidates(std::string cmd, b
 	}
 	return candidatemp;
 }
-
 /* EXTERNAL HELPERS */
 std::vector<std::string> tokenize(std::string set, char split) {
 	std::vector<std::string> list;
@@ -1646,6 +1721,7 @@ std::vector<std::string> tokenize(std::string set, char split) {
 	return list;
 }
 
+#ifdef WIN32 
 std::vector<std::string> findFiles(const char *path, const char *extension) {
 	std::vector<std::string> files;
 	
@@ -1667,7 +1743,38 @@ std::vector<std::string> findFiles(const char *path, const char *extension) {
 	}
 	return files;
 }
+#else
+std::vector<std::string> findFiles(const char *path, const char *extension) {
+	std::vector<std::string> files;
+	
+	// Abrir el directorio especificado (si está vacío, usar el directorio actual ".")
+	DIR* dir = opendir((path && *path != '\0') ? path : ".");
+	if (dir != NULL) {
+		struct dirent* entry;
+		std::string ext = extension ? extension : "";
 
+		while ((entry = readdir(dir)) != NULL) {
+			std::string filename = entry->d_name;
+
+			// Omitir los directorios relativos y carpetas
+			if (filename == "." || filename == "..") continue;
+			if (entry->d_type == DT_DIR) continue;
+
+			// Verificar si el archivo termina con la extensión solicitada
+			if (!ext.empty()) {
+				if (filename.length() >= ext.length() && 
+					filename.substr(filename.length() - ext.length()) == ext) {
+					files.push_back(filename);
+				}
+			} else {
+				files.push_back(filename);
+			}
+		}
+		closedir(dir);
+	}
+	return files;
+}
+#endif 
 void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 	std::string output = "";
 
@@ -1704,7 +1811,7 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 			output.append(str);
 			break;
 		case 'b':
-			boolean = va_arg(ap, bool);
+			boolean = (va_arg(ap, int)!=0);
 			_itoa_s(boolean, number, 16, 2);
 			lack = tabsize - 3;
 			output.append(boolean ? "~7[~f*~7]~f" : "~7[ ]~f");
@@ -1724,7 +1831,11 @@ void tabulate(char *dest, size_t dest_size, int tabsize, const char *fmt, ...) {
 	}
 	va_end(ap);
 
-	strcpy_s(dest, dest_size, output.c_str());
+	//strcpy_s(dest, dest_size, output.c_str()); windows
+	// 2. Corrección de strcpy_s (línea ~1801)
+	// Antes: strcpy_s(dest, dest_size, output.c_str());
+	strncpy(dest, output.c_str(), dest_size - 1);
+	dest[dest_size - 1] = '\0'; // Garantiza el fin de cadena seguro
 }
 
 std::string replace(std::string haystack, std::string needle, std::string replace_for_needle) {

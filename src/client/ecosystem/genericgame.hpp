@@ -1,7 +1,7 @@
 #ifndef __GenericGame_HPP
 #define __GenericGame_HPP
 
-#include "Script.hpp"
+#include "script.hpp"
 #include "volumetricmap.hpp"
 #include "tiledmap.hpp"
 #include "vpu.hpp"

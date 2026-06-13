@@ -1,5 +1,10 @@
+#include "trigger.hpp"
+#include "console.hpp"
+
+extern const char *keyNames[];
+
 char key[256];
-static int lap[256];
+int lap[256];
 
 /** 
 @param keyValue Value of the key to monitor status

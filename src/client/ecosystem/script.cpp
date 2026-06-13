@@ -7,7 +7,28 @@
 #include "genericgame.hpp"
 #include "windowmgr.hpp"
 #include "dashboard.hpp"
-#include "glue.cpp"
+
+extern PyModuleDef BlackBoxModule;
+extern PyModuleDef ConsoleModule;
+extern PyModuleDef EntityLibModule;
+extern PyModuleDef JoypadModule;
+extern PyModuleDef TiledMapModule;
+extern PyModuleDef GenericGameModule;
+extern PyModuleDef WindowMgrModule;
+extern PyModuleDef TypeWriterModule;
+extern PyModuleDef VpuModule;
+extern PyModuleDef MenuModule;
+extern PyObject *PyInit_blackbox(void);
+extern PyObject *PyInit_entitylib(void);
+extern PyObject *PyInit_console(void);
+extern PyObject *PyInit_joypad(void);
+extern PyObject *PyInit_tiledmap(void);
+extern PyObject *PyInit_genericgame(void);
+extern PyObject *PyInit_windowmgr(void);
+extern PyObject *PyInit_typewriter(void);
+extern PyObject *PyInit_vpu(void);
+extern PyObject *PyInit_menu(void);
+extern void Py_LoadCommands();
 
 bool Script::initialize() {
 	try {
@@ -22,8 +43,15 @@ bool Script::initialize() {
 		PyImport_AppendInittab("wmgr"		 , &PyInit_windowmgr);
 		PyImport_AppendInittab("typewriter"	 , &PyInit_typewriter);
 		PyImport_AppendInittab("vpu"		 , &PyInit_vpu);
-		Py_SetPath(L".\\;.\\data\\system.zip");
+		PyImport_AppendInittab("menu"		 , &PyInit_menu);
+		Py_SetPythonHome(L"/usr");
+		// Py_SetPath(L"/usr/lib/python3.10:/usr/lib/python3.10/lib-dynload:./data");
 		Py_Initialize();
+		PyRun_SimpleString(
+			"import sys\n"
+			"sys.path.append('/workspace/build/data/system')\n"
+			"sys.path.append('/workspace/build/data')\n"
+		);
 		Py_LoadCommands();
 	}catch (int e) {
 		std::printf("ERROR: Scripting Machine cannot run.\n\tCritical Modules could not be loaded.\n\tIt may be some files missing.\nException code: 0x%x\n", e);
@@ -158,7 +186,7 @@ PyObject* FloatList(int size, ...) {
 	va_list ap;
 	va_start(ap, size);
 	for (unsigned int i = 0; i < 2; i++) {
-		float val = va_arg(ap, float);
+		float val = (float)va_arg(ap, double);
 		PyObject* num = PyFloat_FromDouble((double)val);
 		if (!num) {
 			Py_DECREF(list);

@@ -4,7 +4,7 @@
 #include "input.hpp"
 #include "console.hpp"
 extern char key[256];
-
+#include <algorithm>
 #define TYPEWRITER_HEIGHT	60
 #define TYPEWRITER_WIDTH	((Vpu::width/2) - (32))
 
@@ -78,7 +78,6 @@ void TypeWriter::initialize() {
 const int max_size = 4;
 static float radius = 0.0f;
 
-
 std::string _sanitizeString(std::string text) {
 	size_t endpos = text.find_last_not_of(" \t");
 	size_t startpos = text.find_first_not_of(" \t");
@@ -86,7 +85,8 @@ std::string _sanitizeString(std::string text) {
 		text = text.substr(0, endpos + 1);
 		text = text.substr(startpos);
 	} else {
-		text.erase(std::remove(std::begin(text), std::end(text), ' '), std::end(text));
+		// --- CAMBIO AQUÍ: Añadido :: antes de std::remove ---
+		text.erase(::std::remove(std::begin(text), std::end(text), ' '), std::end(text));
 	}
 	return text;
 }
@@ -138,10 +138,12 @@ static std::string _repr(CVar* cvar) {
 	switch (cvar->getType()) {
 	case CVAR_BOOLEAN: return cvar->integer() ? " Y " : " N ";
 	case CVAR_INTEGER:
-		sprintf_s(buffer, "%03d", cvar->integer());
+		// --- CAMBIO AQUÍ: Añadido sizeof(buffer) ---
+		sprintf_s(buffer, sizeof(buffer), "%03d", cvar->integer());
 		return buffer;
 	case CVAR_FLOATING:
-		sprintf_s(buffer, "%03.2f", ((Floating*)cvar)->get());
+		// --- CAMBIO AQUÍ: Añadido sizeof(buffer) ---
+		sprintf_s(buffer, sizeof(buffer), "%03.2f", ((Floating*)cvar)->get());
 		return buffer;
 	default:
 	case CVAR_COLOR:
@@ -149,7 +151,6 @@ static std::string _repr(CVar* cvar) {
 		return cvar->toString();
 	}
 }
-
 static void findOptionsGeometry(int& width, int& height, std::vector<CVar *> &options) {
 	width = 0;
 	height = 0;

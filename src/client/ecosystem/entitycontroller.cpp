@@ -1,4 +1,5 @@
 #include "entitycontroller.hpp"
+#include "entity.hpp"
 
 EntityController::EntityController(Entity* parent) {
 	this->parent = parent;

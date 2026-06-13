@@ -1,96 +1,30 @@
 #ifndef _DOWNLOAD_HPP
 #define _DOWNLOAD_HPP
-
-#include <windows.h>
+#pragma once
 #include <string>
 
-class Download : public IBindStatusCallback{
+class Download {
 private:
-    int progress=0, filesize=0;
-    int AbortDownload=false;
+    long long progress = 0;
+    long long filesize = 0;
+    bool AbortDownload = false;
+
+    // Callback interno requerido por libcurl para el progreso
+    static int curlProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+
 public:
     static std::string server;
-    static std::string update_url ;
+    static std::string update_url;
     static std::string toc_file;
     static std::string getServerUrl() { return Download::server + Download::update_url; }
 
-    STDMETHOD(OnStartBinding)(DWORD dwReserved,IBinding __RPC_FAR* pib){
-        AbortDownload = 0;
-        progress = 0;
-        filesize = 0;
-        return E_NOTIMPL;
-    }
+    // Ejecuta la descarga de forma síncrona/hilo pero actualiza la UI
+    bool fetchFile(const std::string& url, const std::string& outputPath);
 
-    STDMETHOD(AbortDownl)() {
-        AbortDownload = 1;
-        return E_NOTIMPL;
-    }
+    void draw(std::string msg = "Downloading");
 
-    void draw(std::string msg="Downloading");
-
-    STDMETHOD(GetProgress)(){ return progress; }
-    
-    STDMETHOD(GetFileSize)(){ return filesize; }
-
-    STDMETHOD(GetPriority)(LONG __RPC_FAR* pnPriority){return E_NOTIMPL;}
-
-    STDMETHOD(OnLowResource)(DWORD reserved){return E_NOTIMPL;}
-    STDMETHOD(OnProgress)(
-        /* [in] */ ULONG ulProgress,
-        /* [in] */ ULONG ulProgressMax,
-        /* [in] */ ULONG ulStatusCode,
-        /* [in] */ LPCWSTR wszStatusText);
-
-    STDMETHOD(OnStopBinding)(
-        /* [in] */ HRESULT hresult,
-        /* [unique][in] */ LPCWSTR szError)
-    {
-        return E_NOTIMPL;
-    }
-
-    STDMETHOD(GetBindInfo)(
-        /* [out] */ DWORD __RPC_FAR* grfBINDF,
-        /* [unique][out][in] */ BINDINFO __RPC_FAR* pbindinfo)
-    {
-        return E_NOTIMPL;
-    }
-
-    STDMETHOD(OnDataAvailable)(
-        /* [in] */ DWORD grfBSCF,
-        /* [in] */ DWORD dwSize,
-        /* [in] */ FORMATETC __RPC_FAR* pformatetc,
-        /* [in] */ STGMEDIUM __RPC_FAR* pstgmed)
-    {
-        return E_NOTIMPL;
-    }
-
-    STDMETHOD(OnObjectAvailable)(
-        /* [in] */ REFIID riid,
-        /* [iid_is][in] */ IUnknown __RPC_FAR* punk)
-    {
-        return E_NOTIMPL;
-    }
-
-    // IUnknown methods.  Note that IE never calls any of these methods, since
-    // the caller owns the IBindStatusCallback interface, so the methods all
-    // return zero/E_NOTIMPL.
-
-    STDMETHOD_(ULONG, AddRef)()
-    {
-        return 0;
-    }
-
-    STDMETHOD_(ULONG, Release)()
-    {
-        return 0;
-    }
-
-    STDMETHOD(QueryInterface)(
-        /* [in] */ REFIID riid,
-        /* [iid_is][out] */ void __RPC_FAR* __RPC_FAR* ppvObject)
-    {
-        return E_NOTIMPL;
-    }
+    long long GetProgress() { return progress; }
+    long long GetFileSize() { return filesize; }
+    void AbortDownl() { AbortDownload = true; }
 };
-
 #endif 

@@ -1,10 +1,25 @@
 #include "redirect.hpp"
-#include <windows.h>
+#include "linux.hpp"
 
 #include <stdio.h>
 #include <fcntl.h>
-#include <io.h>
 #include <iostream>
+
+// --- NUEVO: Compatibilidad multiplataforma para Pipes y File Descriptors ---
+#ifdef _WIN32
+    #include <io.h>
+#else
+    #include <unistd.h>
+    #include <string.h>
+    // Mapear las funciones de Linux/POSIX a los nombres sin guion bajo
+    #define _close  close
+    #define _dup    dup
+    #define _dup2   dup2
+    #define _fileno fileno
+    #define _read   read
+    #define _pipe(fds, size, mode) pipe(fds) // Linux ignora el tamaño y modo en pipe()
+    #define O_TEXT  0                        // No se necesita en Linux
+#endif
 
 #ifndef _USE_OLD_IOSTREAMS
 using namespace std;
@@ -51,6 +66,8 @@ int StdOutRedirect::Stop(){
 int StdOutRedirect::GetBuffer(char *buffer){
 	if (!initialized)return 0;
     int nOutRead = _read(fdStdOutPipe[READ_FD], buffer, 512);
+    // Control de seguridad por si read devuelve un error (-1) en Linux
+    if (nOutRead < 0) nOutRead = 0; 
     buffer[nOutRead] = '\0';
     return nOutRead;
 }

@@ -61,9 +61,14 @@ Boolean					*InputDevice::debug_keyboard;
 Boolean					*InputDevice::aim_backwards;
 Boolean					*InputDevice::debug_crosshair;
 
-#include "codepage.cpp"  // <- codepage enum, value and key string name arrays, keys contained inside codepage array will be caught by console prompt
-#include "trigger.cpp"   //  
-#include "snapshot.cpp"
+extern const char *codepageName[]; 	
+extern const char *keyNames[]; 	
+extern int codepage[];
+extern char key[256];
+extern char lap[256];
+
+#include "trigger.hpp"   //  
+#include "snapshot.hpp"
 
 												// "><", "()", "[]", "/\", "L1", "R1", "L2", "R2", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };
 const char *controller_button_names[INPUT_MAX] = { "B1", "B2", "B3", "B4", "T1", "T2", "T3", "T4", "SL", "ST", "+U", "+D", "+L", "+R", "L3", "R3" };

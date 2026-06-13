@@ -4,6 +4,7 @@
 #include "engine.hpp"
 #include "console.hpp"
 #include "vfx.hpp"
+#include "linux.hpp"
 
 std::map<long int, Surface>			Vpu::surfaces;
 std::map<long int, Animation>		Vpu::animations;
@@ -153,16 +154,33 @@ void Vpu::clearAll() {
 bool Vpu::start() {		
 	width = Engine::width;
 	height = Engine::height;
-	int flags = ALLEGRO_OPENGL | ALLEGRO_RESIZABLE;
-	al_set_new_display_flags(fullscreen ? flags | ALLEGRO_FULLSCREEN : flags);
+
 	if (display) {
 		al_unregister_event_source(Engine::queue, al_get_display_event_source(display));
 		al_destroy_display(display);
 		display = NULL;
 	}
+
+#ifdef _WIN32
+	// --- Código original intacto para Windows ---
+	int flags = ALLEGRO_OPENGL | ALLEGRO_RESIZABLE;
+	al_set_new_display_flags(fullscreen ? flags | ALLEGRO_FULLSCREEN : flags);
+#else
+	// --- CONFIGURACIÓN LIMPIA PARA LINUX REMOTO (SSH/XMING) ---
+	// 1. Limpiamos cualquier opción previa que se haya quedado en memoria
+	al_reset_new_display_options();
+
+	// 2. Definimos estrictamente el modo software por red (sin OpenGL directo)
+	int flags = ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE;
+	al_set_new_display_flags(flags);
+
+	// 3. Le sugerimos a Allegro que use el método de renderizado clásico por software (2)
+	al_set_new_display_option(ALLEGRO_RENDER_METHOD, 2, ALLEGRO_SUGGEST);
+#endif
+
 	display = al_create_display(width, height);
 	if (!display) {
-		Engine::printf("Cannot initialize %s %dx%d display\n", fullscreen?"fullscreen":"",width, height);
+		Engine::printf("Cannot initialize %s %dx%d display\n", fullscreen?"fullscreen":"windowed", width, height);
 		return false;
 	}
 	al_register_event_source(Engine::queue, al_get_display_event_source(display));	
@@ -413,13 +431,13 @@ void Vpu::printf(int  x, int y, int flags, const char *fmt, ...) {
 	vsprintf_s(_buffer, 2048, fmt, ap);
 	va_end(ap);
 
-	al_draw_textf(font->data, shadow, x + 1, y + 1, flags, _buffer);
-	al_draw_textf(font->data, color, x, y, flags, _buffer);
+	al_draw_textf(font->data, shadow, x + 1, y + 1, flags, "%s", _buffer);
+	al_draw_textf(font->data, color, x, y, flags, "%s", _buffer);
 }
 
 void Vpu::print(std::string text, int  x, int y, int flags) {
-	al_draw_textf(font->data, shadow, x+1, y+1, flags, text.c_str());
-	al_draw_textf(font->data, color , x  , y  , flags, text.c_str());
+	al_draw_textf(font->data, shadow, x+1, y+1, flags, "%s", text.c_str());
+	al_draw_textf(font->data, color , x  , y  , flags, "%s", text.c_str());
 }
 void Vpu::printInteger(std::string text, int d, int  x, int y, int flags) {
 	al_draw_textf(font->data, shadow, x+1, y+1, flags, (text + "%d").c_str(), d);

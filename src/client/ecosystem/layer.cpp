@@ -4,6 +4,7 @@
 #include "engine.hpp"
 #include "camera.hpp"
 #include "world.hpp"
+#include "linux.hpp"
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>

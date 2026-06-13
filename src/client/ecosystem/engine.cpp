@@ -6,12 +6,10 @@
 #include "camera.hpp"
 #include "dashboard.hpp"
 #include "windowmgr.hpp"
+#include "linux.hpp"
 #include <iostream>
-#include<Windows.h>
-#pragma comment(lib, "urlmon.lib")
 
 Surface* Engine::target= &Vpu::background;
-#define WORLD_SIZE					65535
 #define NPC_COUNT					128
 int Engine::width					= 640;
 int Engine::height					= 480;
@@ -38,7 +36,7 @@ std::vector<Entity*> Engine::entities = std::vector<Entity*>();
 
 
 */
-#include "showcase.cpp"
+#include "showcase.hpp"
 #include <physfs.h>
 #include <allegro5/allegro_physfs.h>
 
@@ -206,34 +204,36 @@ void updateEntities(float delta) {
 		(*it)->update(delta);
 	}
 }
-
 void Engine::update() {
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsedTime = tp2 - tp1;
-	tp1 = tp2;
+    tp1 = tp2;
     float fElapsedTime = elapsedTime.count();
     // From this line on, every value must be multiplied by fElapsedTime
     
-	if(int(_rotation*100))
-		rotate(_rotation);
-	if(int(_scale[0]*100))
-		scale(
-			_scale[0], 
-			_scale[1],
-			_scale[2]
-		);
-	showcase->update(fElapsedTime);
-	Camera::update(fElapsedTime);
-	Hud::update(fElapsedTime);
-	WindowManager::update();
-	Dashboard::update(fElapsedTime);
-	InputDevice::update(fElapsedTime);
-	updateEntities(fElapsedTime);
-	Console::update();//!!!
-	
-	render();
-	handleEvents();
-	cycles++;
+    if(int(_rotation*100))
+        rotate(_rotation);
+    if(int(_scale[0]*100))
+        scale(
+            _scale[0], 
+            _scale[1],
+            _scale[2]
+        );
+
+    // --- NUEVO: Actualizar el stream de audio de Allegro ---
+    Engine::music.update(fElapsedTime);
+    showcase->update(fElapsedTime);
+    Camera::update(fElapsedTime);
+    Hud::update(fElapsedTime);
+    WindowManager::update();
+    Dashboard::update(fElapsedTime);
+    InputDevice::update(fElapsedTime);
+    updateEntities(fElapsedTime);
+    Console::update();//!!!
+    
+    render();
+    handleEvents();
+    cycles++;
 }
 
 void Engine::loop() {
@@ -292,8 +292,6 @@ void Engine::scale(float x, float y, float z) {
 	std::printf("Vpu::setScale(%f,%f,%f)\n", Vpu::target->scale[0],Vpu::target->scale[1],Vpu::target->scale[2]);
 }
 #include "download.hpp"
-#include <wininet.h>
-#pragma comment(lib, "wininet.lib")
 void Engine::download(const char* file) {
 	Vpu::console.enabled = false;
 	Vpu::foreground.enabled = false;
@@ -302,7 +300,7 @@ void Engine::download(const char* file) {
 	printf("Downloading '%s'...\n", file);
 	std::string filename = file;
 	std::string src = Download::getServerUrl() + filename;
-	std::string dst = "data\\" + filename;
+	std::string dst = "data/" + filename;
 	Download ds;
 	
 	/*
@@ -328,7 +326,15 @@ void Engine::download(const char* file) {
 	}
 	*/
 	ds.draw("Preparing download '"+filename+"'");
-	URLDownloadToFileA(NULL, src.c_str(), dst.c_str(), 0, &ds);
+	// En /workspace/client/ecosystem/engine.cpp, alrededor de la línea 328:
+
+	#ifdef _WIN32
+		// Código original para Windows
+		URLDownloadToFileA(NULL, src.c_str(), dst.c_str(), 0, &ds);
+	#else
+		// Código adaptado para Linux usando tu objeto 'ds' (instancia de Download)
+		ds.fetchFile(src, dst);
+	#endif
 	Vpu::console.enabled = true;
 	Vpu::foreground.enabled = true;
 	Vpu::background.enabled = true;

@@ -1,6 +1,6 @@
 #ifndef TRIGGER_HPP
 #define TRIGGER_HPP
-
+#include <string>
 /*! @brief 
  * Watches a key, deduces its press status, which can be keyDown, keyPress, keyUp or none at all,
  * then calls its defined callback function, when its allowed to call it.

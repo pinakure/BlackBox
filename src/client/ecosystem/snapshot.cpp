@@ -1,3 +1,5 @@
+#include "input.hpp"
+
 InputSnapshot::InputSnapshot(){
 	for(int i=0; i<INPUT_MAX; i++){
 		controller[i] = InputDevice::controller[i];

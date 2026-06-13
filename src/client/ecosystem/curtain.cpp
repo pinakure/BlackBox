@@ -16,10 +16,7 @@ const unsigned long int compressed_curtain_frames[10] = {
 int Curtain::time=0;
 CurtainType Curtain::type = CURTAIN_TYPE_DIAGONAL_NW;
 int* Curtain::grid = NULL;
-Surface Curtain::frames[10] = {
-	NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL
-};
+Surface Curtain::frames[10];
 Surface		   *Curtain::begin_surface = NULL;
 Surface	 	   *Curtain::end_surface = NULL;
 int				Curtain::delay = 25;
